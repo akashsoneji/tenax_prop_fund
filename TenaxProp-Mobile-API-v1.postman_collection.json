@@ -1,0 +1,595 @@
+{
+  "info": {
+    "name": "Tenax Prop — Mobile API v1",
+    "_postman_id": "b7c1e2f0-0000-4000-a000-tenaxpropv1",
+    "description": "Mobile REST API for the Tenax Prop app. Every response uses the envelope { success, message, data, errors, meta } (see api_standard.json). Auth: Laravel Sanctum bearer token.\n\nSetup:\n1. Select an environment (Dev/Prod) with variables: base_url, access_token, challenge_token.\n2. Run 'Auth > Login' — its Test script saves data.access_token into {{access_token}}.\n3. All protected requests inherit Authorization: Bearer {{access_token}} at collection level.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "auth": {
+    "type": "bearer",
+    "bearer": [{ "key": "token", "value": "{{access_token}}", "type": "string" }]
+  },
+  "variable": [
+    { "key": "base_url", "value": "https://api.tenaxprop.com/api/v1" }
+  ],
+  "item": [
+    {
+      "name": "Auth",
+      "item": [
+        {
+          "name": "Register",
+          "request": {
+            "auth": { "type": "noauth" },
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Accept", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"first_name\": \"Rahul\",\n  \"last_name\": \"Sharma\",\n  \"email\": \"rahul@example.com\",\n  \"password\": \"Secret@123\",\n  \"country_code\": \"IN\",\n  \"phone\": \"9876543210\",\n  \"device_name\": \"iphone-15\"\n}"
+            },
+            "url": { "raw": "{{base_url}}/auth/register", "host": ["{{base_url}}"], "path": ["auth", "register"] }
+          },
+          "response": [
+            {
+              "name": "201 Created",
+              "code": 201,
+              "status": "Created",
+              "header": [{ "key": "Content-Type", "value": "application/json" }],
+              "body": "{\n  \"success\": true,\n  \"message\": \"Account created successfully. Please verify your email.\",\n  \"data\": {\n    \"access_token\": \"1|abcdef...\",\n    \"token_type\": \"Bearer\",\n    \"user\": {\n      \"id\": \"100483\",\n      \"name\": \"Rahul Sharma\",\n      \"first_name\": \"Rahul\",\n      \"last_name\": \"Sharma\",\n      \"email\": \"rahul@example.com\",\n      \"phone\": \"+919876543210\",\n      \"country_code\": \"IN\",\n      \"email_verified\": false,\n      \"two_factor_enabled\": false,\n      \"created_at\": \"2026-08-31T10:15:30Z\"\n    }\n  },\n  \"errors\": null,\n  \"meta\": null\n}"
+            },
+            {
+              "name": "422 Validation",
+              "code": 422,
+              "status": "Unprocessable Entity",
+              "header": [{ "key": "Content-Type", "value": "application/json" }],
+              "body": "{\n  \"success\": false,\n  \"message\": \"The email has already been taken.\",\n  \"data\": null,\n  \"errors\": {\n    \"email\": [\"The email has already been taken.\"]\n  },\n  \"meta\": null\n}"
+            }
+          ]
+        },
+        {
+          "name": "Login",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const res = pm.response.json();",
+                  "if (res && res.data && res.data.access_token) {",
+                  "    pm.environment.set('access_token', res.data.access_token);",
+                  "    pm.collectionVariables.set('access_token', res.data.access_token);",
+                  "}",
+                  "if (res && res.data && res.data.challenge_token) {",
+                  "    pm.environment.set('challenge_token', res.data.challenge_token);",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "auth": { "type": "noauth" },
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Accept", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"rahul@example.com\",\n  \"password\": \"Secret@123\",\n  \"device_name\": \"iphone-15\"\n}"
+            },
+            "url": { "raw": "{{base_url}}/auth/login", "host": ["{{base_url}}"], "path": ["auth", "login"] }
+          },
+          "response": [
+            {
+              "name": "200 OK (no 2FA)",
+              "code": 200,
+              "status": "OK",
+              "header": [{ "key": "Content-Type", "value": "application/json" }],
+              "body": "{\n  \"success\": true,\n  \"message\": \"Logged in successfully.\",\n  \"data\": {\n    \"access_token\": \"2|xyz...\",\n    \"token_type\": \"Bearer\",\n    \"user\": {\n      \"id\": \"100482\",\n      \"name\": \"Rahul Sharma\",\n      \"email\": \"rahul@example.com\",\n      \"email_verified\": true,\n      \"two_factor_enabled\": false\n    }\n  },\n  \"errors\": null,\n  \"meta\": null\n}"
+            },
+            {
+              "name": "200 OK (2FA required)",
+              "code": 200,
+              "status": "OK",
+              "header": [{ "key": "Content-Type", "value": "application/json" }],
+              "body": "{\n  \"success\": true,\n  \"message\": \"Two-factor verification required.\",\n  \"data\": {\n    \"two_factor_required\": true,\n    \"challenge_token\": \"3|challenge...\"\n  },\n  \"errors\": null,\n  \"meta\": null\n}"
+            },
+            {
+              "name": "401 Bad credentials",
+              "code": 401,
+              "status": "Unauthorized",
+              "header": [{ "key": "Content-Type", "value": "application/json" }],
+              "body": "{\n  \"success\": false,\n  \"message\": \"These credentials do not match our records.\",\n  \"data\": null,\n  \"errors\": null,\n  \"meta\": null\n}"
+            }
+          ]
+        },
+        {
+          "name": "Two-Factor Verify",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const res = pm.response.json();",
+                  "if (res && res.data && res.data.access_token) {",
+                  "    pm.environment.set('access_token', res.data.access_token);",
+                  "    pm.collectionVariables.set('access_token', res.data.access_token);",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "auth": { "type": "bearer", "bearer": [{ "key": "token", "value": "{{challenge_token}}", "type": "string" }] },
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Accept", "value": "application/json" }
+            ],
+            "body": { "mode": "raw", "raw": "{\n  \"code\": \"123456\"\n}" },
+            "url": { "raw": "{{base_url}}/auth/two-factor", "host": ["{{base_url}}"], "path": ["auth", "two-factor"] }
+          },
+          "response": []
+        },
+        {
+          "name": "Forgot Password",
+          "request": {
+            "auth": { "type": "noauth" },
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Accept", "value": "application/json" }
+            ],
+            "body": { "mode": "raw", "raw": "{\n  \"email\": \"rahul@example.com\"\n}" },
+            "url": { "raw": "{{base_url}}/auth/forgot-password", "host": ["{{base_url}}"], "path": ["auth", "forgot-password"] }
+          },
+          "response": []
+        },
+        {
+          "name": "Logout",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Accept", "value": "application/json" }],
+            "url": { "raw": "{{base_url}}/auth/logout", "host": ["{{base_url}}"], "path": ["auth", "logout"] }
+          },
+          "response": []
+        },
+        {
+          "name": "Get Me",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Accept", "value": "application/json" }],
+            "url": { "raw": "{{base_url}}/me", "host": ["{{base_url}}"], "path": ["me"] }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Profile & KYC",
+      "item": [
+        {
+          "name": "Get Profile",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Accept", "value": "application/json" }],
+            "url": { "raw": "{{base_url}}/profile", "host": ["{{base_url}}"], "path": ["profile"] }
+          },
+          "response": []
+        },
+        {
+          "name": "Update Profile",
+          "request": {
+            "method": "PUT",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Accept", "value": "application/json" }
+            ],
+            "body": { "mode": "raw", "raw": "{\n  \"name\": \"Rahul Sharma\",\n  \"email\": \"rahul@example.com\",\n  \"phone\": \"+919876543210\",\n  \"country_code\": \"IN\",\n  \"city\": \"Mumbai\"\n}" },
+            "url": { "raw": "{{base_url}}/profile", "host": ["{{base_url}}"], "path": ["profile"] }
+          },
+          "response": []
+        },
+        {
+          "name": "Get KYC Status",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Accept", "value": "application/json" }],
+            "url": { "raw": "{{base_url}}/kyc", "host": ["{{base_url}}"], "path": ["kyc"] }
+          },
+          "response": []
+        },
+        {
+          "name": "Upload KYC Documents",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Accept", "value": "application/json" }],
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                { "key": "id_document", "type": "file", "src": [] },
+                { "key": "id_document_back", "type": "file", "src": [] },
+                { "key": "proof_of_address", "type": "file", "src": [] },
+                { "key": "proof_of_address_back", "type": "file", "src": [] }
+              ]
+            },
+            "url": { "raw": "{{base_url}}/kyc/documents", "host": ["{{base_url}}"], "path": ["kyc", "documents"] }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Accounts",
+      "item": [
+        {
+          "name": "Dashboard",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Accept", "value": "application/json" }],
+            "url": { "raw": "{{base_url}}/dashboard", "host": ["{{base_url}}"], "path": ["dashboard"] }
+          },
+          "response": []
+        },
+        {
+          "name": "List Accounts",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Accept", "value": "application/json" }],
+            "url": {
+              "raw": "{{base_url}}/accounts?status=&phase=&page=1&per_page=20",
+              "host": ["{{base_url}}"],
+              "path": ["accounts"],
+              "query": [
+                { "key": "status", "value": "" },
+                { "key": "phase", "value": "" },
+                { "key": "page", "value": "1" },
+                { "key": "per_page", "value": "20" }
+              ]
+            }
+          },
+          "response": [
+            {
+              "name": "200 OK (list + meta)",
+              "code": 200,
+              "status": "OK",
+              "header": [{ "key": "Content-Type", "value": "application/json" }],
+              "body": "{\n  \"success\": true,\n  \"message\": \"Fetched successfully\",\n  \"data\": [\n    {\n      \"id\": \"2001\",\n      \"login\": \"700001\",\n      \"phase\": \"challenge\",\n      \"status\": \"active\",\n      \"balance\": 100000.00,\n      \"equity\": 104280.50,\n      \"currency\": \"USD\"\n    }\n  ],\n  \"errors\": null,\n  \"meta\": {\n    \"current_page\": 1,\n    \"per_page\": 20,\n    \"total\": 3,\n    \"total_pages\": 1,\n    \"has_next\": false\n  }\n}"
+            }
+          ]
+        },
+        {
+          "name": "Account Detail",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Accept", "value": "application/json" }],
+            "url": { "raw": "{{base_url}}/accounts/2001", "host": ["{{base_url}}"], "path": ["accounts", "2001"] }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Challenges",
+      "item": [
+        {
+          "name": "List Plans (catalogue)",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Accept", "value": "application/json" }],
+            "url": {
+              "raw": "{{base_url}}/challenges?currency=USD",
+              "host": ["{{base_url}}"],
+              "path": ["challenges"],
+              "query": [{ "key": "currency", "value": "USD" }]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Quote",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Accept", "value": "application/json" }
+            ],
+            "body": { "mode": "raw", "raw": "{\n  \"plan_version_id\": 12,\n  \"quantity\": 1,\n  \"swap_free\": false,\n  \"platform\": \"mt5\",\n  \"platform_integration_id\": 1,\n  \"addon_ids\": [],\n  \"coupon_code\": null,\n  \"currency\": \"USD\"\n}" },
+            "url": { "raw": "{{base_url}}/challenges/quote", "host": ["{{base_url}}"], "path": ["challenges", "quote"] }
+          },
+          "response": []
+        },
+        {
+          "name": "Apply Coupon",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Accept", "value": "application/json" }
+            ],
+            "body": { "mode": "raw", "raw": "{\n  \"plan_version_id\": 12,\n  \"quantity\": 1,\n  \"coupon_code\": \"WELCOME10\",\n  \"currency\": \"USD\"\n}" },
+            "url": { "raw": "{{base_url}}/challenges/coupon", "host": ["{{base_url}}"], "path": ["challenges", "coupon"] }
+          },
+          "response": []
+        },
+        {
+          "name": "Purchase (checkout)",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Accept", "value": "application/json" }
+            ],
+            "body": { "mode": "raw", "raw": "{\n  \"plan_version_id\": 12,\n  \"quantity\": 1,\n  \"swap_free\": false,\n  \"platform\": \"mt5\",\n  \"platform_integration_id\": 1,\n  \"addon_ids\": [],\n  \"coupon_code\": null,\n  \"currency\": \"USD\",\n  \"payment_method_id\": 3\n}" },
+            "url": { "raw": "{{base_url}}/challenges/purchase", "host": ["{{base_url}}"], "path": ["challenges", "purchase"] }
+          },
+          "response": [
+            {
+              "name": "201 Created (gateway path)",
+              "code": 201,
+              "status": "Created",
+              "header": [{ "key": "Content-Type", "value": "application/json" }],
+              "body": "{\n  \"success\": true,\n  \"message\": \"Order created\",\n  \"data\": {\n    \"order_id\": \"ORD-4821\",\n    \"path\": \"gateway\",\n    \"gateway_url\": \"https://pay.example.com/checkout/abc\"\n  },\n  \"errors\": null,\n  \"meta\": null\n}"
+            }
+          ]
+        },
+        {
+          "name": "Free Trial",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Accept", "value": "application/json" }
+            ],
+            "body": { "mode": "raw", "raw": "{\n  \"platform\": \"mt5\",\n  \"platform_integration_id\": 1\n}" },
+            "url": { "raw": "{{base_url}}/challenges/free-trial", "host": ["{{base_url}}"], "path": ["challenges", "free-trial"] }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Finance",
+      "item": [
+        {
+          "name": "List Transactions",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Accept", "value": "application/json" }],
+            "url": {
+              "raw": "{{base_url}}/finance/transactions?page=1&per_page=20",
+              "host": ["{{base_url}}"],
+              "path": ["finance", "transactions"],
+              "query": [
+                { "key": "page", "value": "1" },
+                { "key": "per_page", "value": "20" }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Rewards / Payout Dashboard",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Accept", "value": "application/json" }],
+            "url": {
+              "raw": "{{base_url}}/finance/rewards?status=",
+              "host": ["{{base_url}}"],
+              "path": ["finance", "rewards"],
+              "query": [{ "key": "status", "value": "" }]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Request Payout",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Accept", "value": "application/json" }
+            ],
+            "body": { "mode": "raw", "raw": "{\n  \"amount\": 500.00,\n  \"currency\": \"USD\",\n  \"payout_method_id\": 7,\n  \"trading_account_id\": 2003,\n  \"notes\": \"Monthly payout\"\n}" },
+            "url": { "raw": "{{base_url}}/finance/payouts", "host": ["{{base_url}}"], "path": ["finance", "payouts"] }
+          },
+          "response": []
+        },
+        {
+          "name": "Cancel Payout",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Accept", "value": "application/json" }],
+            "url": { "raw": "{{base_url}}/finance/payouts/55/cancel", "host": ["{{base_url}}"], "path": ["finance", "payouts", "55", "cancel"] }
+          },
+          "response": []
+        },
+        {
+          "name": "List Payout Methods",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Accept", "value": "application/json" }],
+            "url": { "raw": "{{base_url}}/finance/methods", "host": ["{{base_url}}"], "path": ["finance", "methods"] }
+          },
+          "response": []
+        },
+        {
+          "name": "Create Payout Method",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Accept", "value": "application/json" }
+            ],
+            "body": { "mode": "raw", "raw": "{\n  \"type\": \"bank\",\n  \"label\": \"HDFC Savings\",\n  \"currency\": \"USD\",\n  \"is_default\": true,\n  \"details\": {\n    \"account_number\": \"1234567890\",\n    \"ifsc\": \"HDFC0001234\"\n  }\n}" },
+            "url": { "raw": "{{base_url}}/finance/methods", "host": ["{{base_url}}"], "path": ["finance", "methods"] }
+          },
+          "response": []
+        },
+        {
+          "name": "Update Payout Method",
+          "request": {
+            "method": "PUT",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Accept", "value": "application/json" }
+            ],
+            "body": { "mode": "raw", "raw": "{\n  \"type\": \"bank\",\n  \"label\": \"HDFC Savings\",\n  \"currency\": \"USD\",\n  \"is_default\": true,\n  \"status\": \"active\",\n  \"details\": {\n    \"account_number\": \"1234567890\",\n    \"ifsc\": \"HDFC0001234\"\n  }\n}" },
+            "url": { "raw": "{{base_url}}/finance/methods/7", "host": ["{{base_url}}"], "path": ["finance", "methods", "7"] }
+          },
+          "response": []
+        },
+        {
+          "name": "Delete Payout Method",
+          "request": {
+            "method": "DELETE",
+            "header": [{ "key": "Accept", "value": "application/json" }],
+            "url": { "raw": "{{base_url}}/finance/methods/7", "host": ["{{base_url}}"], "path": ["finance", "methods", "7"] }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Notifications",
+      "item": [
+        {
+          "name": "List Notifications",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Accept", "value": "application/json" }],
+            "url": {
+              "raw": "{{base_url}}/notifications?filter=all&page=1",
+              "host": ["{{base_url}}"],
+              "path": ["notifications"],
+              "query": [
+                { "key": "filter", "value": "all" },
+                { "key": "page", "value": "1" }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Unread Count",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Accept", "value": "application/json" }],
+            "url": { "raw": "{{base_url}}/notifications/unread-count", "host": ["{{base_url}}"], "path": ["notifications", "unread-count"] }
+          },
+          "response": []
+        },
+        {
+          "name": "Mark One Read",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Accept", "value": "application/json" }],
+            "url": { "raw": "{{base_url}}/notifications/42/read", "host": ["{{base_url}}"], "path": ["notifications", "42", "read"] }
+          },
+          "response": []
+        },
+        {
+          "name": "Mark All Read",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Accept", "value": "application/json" }],
+            "url": { "raw": "{{base_url}}/notifications/read-all", "host": ["{{base_url}}"], "path": ["notifications", "read-all"] }
+          },
+          "response": []
+        },
+        {
+          "name": "Get Preferences",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Accept", "value": "application/json" }],
+            "url": { "raw": "{{base_url}}/notifications/preferences", "host": ["{{base_url}}"], "path": ["notifications", "preferences"] }
+          },
+          "response": []
+        },
+        {
+          "name": "Update Preferences",
+          "request": {
+            "method": "PUT",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Accept", "value": "application/json" }
+            ],
+            "body": { "mode": "raw", "raw": "{\n  \"preferences\": {\n    \"account.breach\": { \"email\": true, \"push\": true },\n    \"payout.paid\": { \"email\": true, \"push\": false }\n  }\n}" },
+            "url": { "raw": "{{base_url}}/notifications/preferences", "host": ["{{base_url}}"], "path": ["notifications", "preferences"] }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Growth",
+      "item": [
+        {
+          "name": "Referral Dashboard",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Accept", "value": "application/json" }],
+            "url": { "raw": "{{base_url}}/growth/referrals", "host": ["{{base_url}}"], "path": ["growth", "referrals"] }
+          },
+          "response": []
+        },
+        {
+          "name": "Request Referral Withdrawal",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Accept", "value": "application/json" }
+            ],
+            "body": { "mode": "raw", "raw": "{\n  \"amount\": 50.00\n}" },
+            "url": { "raw": "{{base_url}}/growth/referrals/withdraw", "host": ["{{base_url}}"], "path": ["growth", "referrals", "withdraw"] }
+          },
+          "response": []
+        },
+        {
+          "name": "Offers",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Accept", "value": "application/json" }],
+            "url": { "raw": "{{base_url}}/growth/offers", "host": ["{{base_url}}"], "path": ["growth", "offers"] }
+          },
+          "response": []
+        },
+        {
+          "name": "Competitions",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Accept", "value": "application/json" }],
+            "url": { "raw": "{{base_url}}/growth/competitions", "host": ["{{base_url}}"], "path": ["growth", "competitions"] }
+          },
+          "response": []
+        },
+        {
+          "name": "Register Competition",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Accept", "value": "application/json" }
+            ],
+            "body": { "mode": "raw", "raw": "{\n  \"competition_id\": 5,\n  \"trading_account_id\": 2003\n}" },
+            "url": { "raw": "{{base_url}}/growth/competitions/register", "host": ["{{base_url}}"], "path": ["growth", "competitions", "register"] }
+          },
+          "response": []
+        },
+        {
+          "name": "Certificates",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Accept", "value": "application/json" }],
+            "url": { "raw": "{{base_url}}/growth/certificates", "host": ["{{base_url}}"], "path": ["growth", "certificates"] }
+          },
+          "response": []
+        }
+      ]
+    }
+  ]
+}

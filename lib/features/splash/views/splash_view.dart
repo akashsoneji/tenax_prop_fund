@@ -1,0 +1,103 @@
+import 'package:flutter/material.dart';
+import 'package:get/get.dart';
+import 'package:google_fonts/google_fonts.dart';
+
+import '../../../app/flavor/flavor_config.dart';
+import '../../../app/routes/app_routes.dart';
+import '../../../features/authentication/repositories/auth_repository.dart';
+import '../../../shared/theme/app_colors.dart';
+import '../../../shared/theme/app_theme.dart';
+
+/// Brief branded splash. Checks for a persisted session token: if present the
+/// user skips straight to home, otherwise they land on get-started.
+class SplashView extends StatefulWidget {
+  const SplashView({super.key});
+
+  @override
+  State<SplashView> createState() => _SplashViewState();
+}
+
+class _SplashViewState extends State<SplashView> {
+  @override
+  void initState() {
+    super.initState();
+    _bootstrap();
+  }
+
+  Future<void> _bootstrap() async {
+    final hasSession = await Get.find<AuthRepository>().hasSession();
+    await Future<void>.delayed(const Duration(milliseconds: 1200));
+    if (!mounted) return;
+    Get.offAllNamed(hasSession ? AppRoutes.home : AppRoutes.getStarted);
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final config = Get.find<FlavorConfig>();
+    final primary = config.primaryColor;
+    final primaryHsl = HSLColor.fromColor(primary);
+    // Derive a deep top and even-deeper bottom from the flavor's own primary
+    // so the splash always carries the selected flavor's brand color.
+    final gradient = LinearGradient(
+      begin: Alignment.topLeft,
+      end: Alignment.bottomRight,
+      colors: [
+        primaryHsl.withLightness((primaryHsl.lightness * 0.7).clamp(0.0, 1.0)).toColor(),
+        primary,
+        primaryHsl.withLightness((primaryHsl.lightness * 0.5).clamp(0.0, 1.0)).toColor(),
+      ],
+    );
+    return Scaffold(
+      body: Container(
+        decoration: BoxDecoration(gradient: gradient),
+        child: Center(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Container(
+                width: 120,
+                height: 120,
+                decoration: BoxDecoration(
+                  shape: BoxShape.circle,
+                  color: AppColors.white.withValues(alpha: 0.10),
+                  border: Border.all(
+                    color: AppColors.white.withValues(alpha: 0.25),
+                    width: 1,
+                  ),
+                ),
+                alignment: Alignment.center,
+                child: Text(
+                  'tp',
+                  style: GoogleFonts.beVietnamPro(
+                    fontSize: 48,
+                    fontWeight: FontWeight.w800,
+                    fontStyle: FontStyle.italic,
+                    color: AppTheme.accent,
+                  ),
+                ),
+              ),
+              const SizedBox(height: 20),
+              Text(
+                config.appName,
+                style: GoogleFonts.beVietnamPro(
+                  fontSize: 24,
+                  fontWeight: FontWeight.w700,
+                  color: AppColors.white,
+                  letterSpacing: 0.4,
+                ),
+              ),
+              const SizedBox(height: 8),
+              Text(
+                'splash.loading'.tr,
+                style: GoogleFonts.beVietnamPro(
+                  color: AppColors.white.withValues(alpha: 0.8),
+                  fontSize: 13,
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}

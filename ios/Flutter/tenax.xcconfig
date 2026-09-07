@@ -1,0 +1,3 @@
+#include "Generated.xcconfig"
+FLAVOR_NAME=tenax
+LAUNCH_BG_COLOR=0D47A1

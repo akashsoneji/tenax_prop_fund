@@ -1,0 +1,37 @@
+abstract class AppRoutes {
+  static const splash = '/';
+  static const getStarted = '/get-started';
+  static const login = '/login';
+  static const register = '/register';
+  static const forgotPassword = '/forgot-password';
+  static const terms = '/terms';
+  static const home = '/home';
+  static const settings = '/settings';
+  static const profileKyc = '/profile-kyc';
+  static const editProfile = '/edit-profile';
+  static const rewards = '/rewards';
+  static const tradingRules = '/trading-rules';
+  static const account = '/account';
+  static const billing = '/billing';
+  static const certificates = '/certificates';
+  static const calculators = '/calculators';
+  static const competitions = '/competitions';
+  static const challenge = '/challenge';
+  static const configure = '/configure';
+  static const downloads = '/downloads';
+  static const economicCalendar = '/economic-calendar';
+  static const faq = '/faq';
+  static const verification = '/verification';
+  static const verificationStepper = '/verification/stepper';
+  static const verificationPersonal = '/verification/personal';
+  static const verificationDocuments = '/verification/documents';
+  static const addBank = '/add-bank';
+  static const accounts = '/accounts';
+  static const offers = '/offers';
+  static const notifications = '/notifications';
+  static const payoutMethods = '/payout-methods';
+  static const referral = '/referral';
+  static const support = '/support';
+  static const symbols = '/symbols';
+  static const chart = '/chart';
+}

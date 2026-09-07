@@ -1,0 +1,112 @@
+{
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "type": "sweetpad-lldb",
+            "request": "launch",
+            "name": "Build and Launch (SweetPad)",
+            "preLaunchTask": "sweetpad: launch",
+            "stopAll": true
+        },
+        {
+            "type": "sweetpad-lldb",
+            "request": "attach",
+            "name": "Attach to Running App (SweetPad)",
+            "description": "Use this if the app is already running to avoid rebuild"
+        },
+        {
+            "name": "Tenax Prop — Debug",
+            "request": "launch",
+            "type": "dart",
+            "program": "lib/main.dart",
+            "preLaunchTask": "prepare-ios-tenax",
+            "args": [
+                "--flavor",
+                "tenax",
+                "--dart-define=FLAVOR=tenax",
+                "--dart-define=ENV=development"
+            ]
+        },
+        {
+            "name": "Tenax Prop — Release",
+            "request": "launch",
+            "type": "dart",
+            "program": "lib/main.dart",
+            "flutterMode": "release",
+            "preLaunchTask": "prepare-ios-tenax",
+            "args": [
+                "--flavor",
+                "tenax",
+                "--dart-define=FLAVOR=tenax",
+                "--dart-define=ENV=production"
+            ]
+        },
+        {
+            "name": "Client A — Debug",
+            "request": "launch",
+            "type": "dart",
+            "program": "lib/main.dart",
+            "preLaunchTask": "prepare-ios-client_a",
+            "args": [
+                "--flavor",
+                "client_a",
+                "--dart-define=FLAVOR=client_a",
+                "--dart-define=ENV=development"
+            ]
+        },
+        {
+            "name": "Client B — Debug",
+            "request": "launch",
+            "type": "dart",
+            "program": "lib/main.dart",
+            "preLaunchTask": "prepare-ios-client_b",
+            "args": [
+                "--flavor",
+                "client_b",
+                "--dart-define=FLAVOR=client_b",
+                "--dart-define=ENV=development"
+            ]
+        },
+        {
+            "name": "Client C — Debug",
+            "request": "launch",
+            "type": "dart",
+            "program": "lib/main.dart",
+            "preLaunchTask": "prepare-ios-client_c",
+            "args": [
+                "--flavor",
+                "client_c",
+                "--dart-define=FLAVOR=client_c",
+                "--dart-define=ENV=development"
+            ]
+        },
+        {
+            "name": "Client A — Release",
+            "request": "launch",
+            "type": "dart",
+            "program": "lib/main.dart",
+            "flutterMode": "release",
+            "preLaunchTask": "prepare-ios-client_a",
+            "args": [
+                "--flavor",
+                "client_a",
+                "--dart-define=FLAVOR=client_a",
+                "--dart-define=ENV=production"
+            ]
+        },
+        {
+            "name": "Client B — Release",
+            "request": "launch",
+            "type": "dart",
+            "program": "lib/main.dart",
+            "flutterMode": "release",
+            "preLaunchTask": "prepare-ios-client_b",
+            "args": [
+                "--flavor",
+                "client_b",
+                "--dart-define=FLAVOR=client_b",
+                "--dart-define=ENV=production"
+            ]
+        }
+    ]
+}

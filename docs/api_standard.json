@@ -1,0 +1,274 @@
+{
+  "meta": {
+    "title": "Tenax Prop — REST API Standard (Request / Response Contract)",
+    "version": "1.0.0",
+    "purpose": "Har API ka request aur response ISI standard mein banega. Postman collection bhi isi shape mein share karein taaki Flutter app ka ApiResponse<T> model bina change ke sabhi endpoints ke saath kaam kare.",
+    "audience": "Backend developer",
+    "note": "Flutter client (lib/core/network/api_response.dart) sirf { success, message, data } expect karta hai. Is contract se deviate mat karna."
+  },
+
+  "conventions": {
+    "base_url": "https://api.tenaxprop.com/api/v1",
+    "protocol": "HTTPS only",
+    "format": "JSON (UTF-8)",
+    "naming": "JSON keys snake_case (e.g. first_name, created_at)",
+    "dates": "ISO-8601 UTC string, e.g. 2026-08-31T10:15:30Z",
+    "money": "Numbers as decimal (not string), currency alag field mein (e.g. amount: 104280.50, currency: \"USD\")",
+    "ids": "String UUID/ID (JSON number overflow se bachne ke liye string preferred)",
+    "booleans": "true / false (kabhi 0/1 ya \"yes\" nahi)",
+    "empty_data": "data null ho sakta hai success par bhi (e.g. logout), list empty ho to [] bhejo, null nahi"
+  },
+
+  "request_standard": {
+    "headers": {
+      "Content-Type": "application/json",
+      "Accept": "application/json",
+      "Authorization": "Bearer <access_token>  (sirf protected endpoints par)",
+      "X-Client": "tenax-flutter",
+      "X-App-Version": "1.0.0",
+      "Accept-Language": "en"
+    },
+    "body_rules": [
+      "POST/PUT/PATCH ka body hamesha JSON object hoga (top-level array nahi).",
+      "Sabhi input fields validate honge; failure par 422 + errors object.",
+      "File upload ke liye multipart/form-data use hoga (JSON nahi)."
+    ],
+    "query_params": {
+      "pagination": "?page=1&per_page=20",
+      "sorting": "?sort=created_at&order=desc",
+      "search": "?q=keyword",
+      "filter": "?status=active"
+    },
+    "example_post": {
+      "endpoint": "POST /auth/login",
+      "headers": {
+        "Content-Type": "application/json",
+        "Accept": "application/json"
+      },
+      "body": {
+        "email": "user@example.com",
+        "password": "Secret@123",
+        "device_id": "abc-123-device"
+      }
+    }
+  },
+
+  "response_standard": {
+    "description": "HAR response — success ya error — is envelope mein wrap hoga.",
+    "envelope": {
+      "success": "boolean — true agar request pass hui",
+      "message": "string — user-friendly message (UI mein direct dikhaya ja sakta hai)",
+      "data": "object | array | null — actual payload",
+      "errors": "object | null — sirf validation failure (422) par field-wise errors",
+      "meta": "object | null — pagination / extra info (sirf list responses par)"
+    },
+
+    "success_single_object": {
+      "http_status": 200,
+      "body": {
+        "success": true,
+        "message": "Profile fetched successfully",
+        "data": {
+          "id": "100482",
+          "first_name": "Rahul",
+          "last_name": "Sharma",
+          "email": "rahul@example.com",
+          "created_at": "2026-08-31T10:15:30Z"
+        },
+        "errors": null,
+        "meta": null
+      }
+    },
+
+    "success_created": {
+      "http_status": 201,
+      "body": {
+        "success": true,
+        "message": "Account created successfully",
+        "data": {
+          "id": "100483",
+          "email": "new@example.com"
+        },
+        "errors": null,
+        "meta": null
+      }
+    },
+
+    "success_list_with_pagination": {
+      "http_status": 200,
+      "body": {
+        "success": true,
+        "message": "Transactions fetched successfully",
+        "data": [
+          {
+            "id": "INV-4821",
+            "title": "Challenge Purchase",
+            "amount": 634.00,
+            "currency": "USD",
+            "status": "paid",
+            "created_at": "2026-08-20T09:00:00Z"
+          },
+          {
+            "id": "INV-4822",
+            "title": "Add-on",
+            "amount": -69.00,
+            "currency": "USD",
+            "status": "refunded",
+            "created_at": "2026-08-22T09:00:00Z"
+          }
+        ],
+        "errors": null,
+        "meta": {
+          "current_page": 1,
+          "per_page": 20,
+          "total": 42,
+          "total_pages": 3,
+          "has_next": true
+        }
+      }
+    },
+
+    "success_no_content": {
+      "http_status": 200,
+      "body": {
+        "success": true,
+        "message": "Logged out successfully",
+        "data": null,
+        "errors": null,
+        "meta": null
+      }
+    }
+  },
+
+  "error_standard": {
+    "description": "Error par bhi wahi envelope. success:false, message user ko dikhane layak, errors field-wise (validation ke liye).",
+
+    "validation_error": {
+      "http_status": 422,
+      "body": {
+        "success": false,
+        "message": "Please fix the highlighted fields",
+        "data": null,
+        "errors": {
+          "email": ["The email field is required"],
+          "password": ["Password must be at least 8 characters"]
+        },
+        "meta": null
+      }
+    },
+
+    "unauthorized": {
+      "http_status": 401,
+      "body": {
+        "success": false,
+        "message": "Session expired. Please login again",
+        "data": null,
+        "errors": null,
+        "meta": null
+      }
+    },
+
+    "forbidden": {
+      "http_status": 403,
+      "body": {
+        "success": false,
+        "message": "You do not have permission to perform this action",
+        "data": null,
+        "errors": null,
+        "meta": null
+      }
+    },
+
+    "not_found": {
+      "http_status": 404,
+      "body": {
+        "success": false,
+        "message": "Requested resource not found",
+        "data": null,
+        "errors": null,
+        "meta": null
+      }
+    },
+
+    "server_error": {
+      "http_status": 500,
+      "body": {
+        "success": false,
+        "message": "Something went wrong. Please try again later",
+        "data": null,
+        "errors": null,
+        "meta": null
+      }
+    }
+  },
+
+  "status_codes": {
+    "200": "OK — GET/PUT/PATCH/DELETE success",
+    "201": "Created — POST ne naya resource banaya",
+    "400": "Bad Request — malformed request",
+    "401": "Unauthorized — token missing/invalid/expired",
+    "403": "Forbidden — token valid par permission nahi",
+    "404": "Not Found",
+    "409": "Conflict — e.g. email already exists",
+    "422": "Unprocessable Entity — validation error (errors object bhejo)",
+    "429": "Too Many Requests — rate limit",
+    "500": "Internal Server Error"
+  },
+
+  "authentication": {
+    "type": "Bearer Token (JWT)",
+    "login_response_data": {
+      "access_token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...",
+      "token_type": "Bearer",
+      "expires_in": 3600,
+      "refresh_token": "def50200abc...",
+      "user": {
+        "id": "100482",
+        "first_name": "Rahul",
+        "email": "rahul@example.com"
+      }
+    },
+    "usage": "Login ke response mein access_token do. Client isko secure storage mein rakhega aur har protected request par Authorization: Bearer <token> header bhejega.",
+    "refresh": "POST /auth/refresh with { refresh_token } → naya access_token."
+  },
+
+  "pagination_rule": {
+    "request": "GET /transactions?page=1&per_page=20",
+    "response_meta": {
+      "current_page": 1,
+      "per_page": 20,
+      "total": 42,
+      "total_pages": 3,
+      "has_next": true
+    }
+  },
+
+  "postman_setup_instructions": {
+    "1_collection": "Ek hi Postman Collection banao: 'Tenax Prop API'. Feature-wise folders banao: Auth, Account, Billing, KYC, Verification, Challenge, Competitions, Rewards, Trading Rules, Calculators, Downloads, FAQ, Economic Calendar, Certificates, Settings.",
+    "2_environment": "Do environments banao: 'Dev' aur 'Prod'. Variables: base_url, access_token, refresh_token.",
+    "3_base_url_variable": "Har request mein hardcode URL mat likhna — {{base_url}} use karo.",
+    "4_auth": "Collection level par Authorization = Bearer {{access_token}} set karo. Login request ke Tests tab mein token ko environment mein save karo: pm.environment.set('access_token', pm.response.json().data.access_token);",
+    "5_examples": "Har request par 'Save Response' se success aur error dono examples add karo (200 + 422/401), taaki frontend expected shape dekh sake.",
+    "6_naming": "Request naam action-based: 'Login', 'Register', 'Get Profile', 'Update Profile', 'List Transactions'.",
+    "7_share": "Collection + Environment export karke (ya Postman workspace share link) frontend ko do."
+  },
+
+  "sample_endpoints_reference": [
+    { "method": "POST", "path": "/auth/register", "auth": false, "desc": "Naya user register" },
+    { "method": "POST", "path": "/auth/login", "auth": false, "desc": "Login, returns token" },
+    { "method": "POST", "path": "/auth/refresh", "auth": false, "desc": "Refresh access token" },
+    { "method": "POST", "path": "/auth/logout", "auth": true, "desc": "Logout" },
+    { "method": "POST", "path": "/auth/forgot-password", "auth": false, "desc": "Send reset OTP" },
+    { "method": "GET", "path": "/profile", "auth": true, "desc": "Current user profile" },
+    { "method": "PUT", "path": "/profile", "auth": true, "desc": "Update profile" },
+    { "method": "GET", "path": "/accounts", "auth": true, "desc": "List trading accounts" },
+    { "method": "GET", "path": "/accounts/{id}", "auth": true, "desc": "Account risk/status detail" },
+    { "method": "GET", "path": "/billing/transactions", "auth": true, "desc": "Billing history (paginated)" },
+    { "method": "GET", "path": "/kyc", "auth": true, "desc": "KYC status" },
+    { "method": "POST", "path": "/kyc/documents", "auth": true, "desc": "Upload KYC document (multipart)" },
+    { "method": "GET", "path": "/challenges", "auth": true, "desc": "Available challenge plans" },
+    { "method": "POST", "path": "/challenges/purchase", "auth": true, "desc": "Buy a challenge" },
+    { "method": "GET", "path": "/rewards", "auth": true, "desc": "Rewards / payout data" },
+    { "method": "POST", "path": "/rewards/payout", "auth": true, "desc": "Request payout" }
+  ]
+}
