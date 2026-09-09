@@ -1,11 +1,13 @@
-import 'package:flutter/material.dart';
+ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
 
 import '../../../shared/theme/app_theme.dart';
 import '../../../shared/widgets/app_info_banner.dart';
+import '../../../shared/widgets/app_labeled_dropdown.dart';
 import '../../../shared/widgets/app_segmented_control.dart';
 import '../../../shared/widgets/app_text_field.dart';
+import '../../verification/models/verification_models.dart';
 import '../../../shared/widgets/key_value_row.dart';
 import '../../../shared/widgets/pinned_gradient_app_bar.dart';
 import '../../../shared/widgets/section_header.dart';
@@ -278,11 +280,55 @@ class _CreateAccountCard extends StatelessWidget {
                 ),
               )),
           const SizedBox(height: 12),
-          AppTextField(
-            controller: c.phone,
-            label: 'configure.mobile'.tr,
-            hint: 'configure.mobile_hint'.tr,
-            keyboardType: TextInputType.phone,
+          _DobRow(c: c),
+          const SizedBox(height: 12),
+          Obx(() => AppLabeledDropdown(
+                label: 'configure.country'.tr,
+                value: c.country.value,
+                options: [
+                  for (final country in ConfigureController.countries)
+                    VerificationOption(country, country),
+                ],
+                onChanged: c.setCountry,
+              )),
+          const SizedBox(height: 12),
+          Text(
+            'configure.mobile'.tr,
+            style: GoogleFonts.beVietnamPro(
+              fontSize: 12.5,
+              color: scheme.onSurface.withValues(alpha: 0.6),
+            ),
+          ),
+          const SizedBox(height: 6),
+          Row(
+            crossAxisAlignment: CrossAxisAlignment.center,
+            children: [
+              Container(
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 16, vertical: 15),
+                decoration: BoxDecoration(
+                  color: scheme.onSurface.withValues(alpha: 0.05),
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                child: Text(
+                  '+91',
+                  style: GoogleFonts.beVietnamPro(
+                    fontSize: 15,
+                    fontWeight: FontWeight.w700,
+                    color: scheme.onSurface,
+                  ),
+                ),
+              ),
+              const SizedBox(width: 12),
+              Expanded(
+                child: AppTextField(
+                  controller: c.phone,
+                  label: 'configure.mobile_hint'.tr,
+                  hint: 'configure.mobile_hint'.tr,
+                  keyboardType: TextInputType.phone,
+                ),
+              ),
+            ],
           ),
           const SizedBox(height: 12),
           Obx(() => InkWell(
@@ -317,6 +363,75 @@ class _CreateAccountCard extends StatelessWidget {
               )),
         ],
       ),
+    );
+  }
+}
+
+// ---------------------------------------------------------------------------
+// Date of birth — MM / DD / YYYY dropdown trio
+// ---------------------------------------------------------------------------
+
+class _DobRow extends StatelessWidget {
+  const _DobRow({required this.c});
+  final ConfigureController c;
+
+  @override
+  Widget build(BuildContext context) {
+    final scheme = Theme.of(context).colorScheme;
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          'configure.dob'.tr,
+          style: GoogleFonts.beVietnamPro(
+            fontSize: 12.5,
+            color: scheme.onSurface.withValues(alpha: 0.6),
+          ),
+        ),
+        const SizedBox(height: 6),
+        Row(
+          children: [
+            Expanded(
+              child: Obx(() => AppLabeledDropdown(
+                    label: 'MM',
+                    hint: 'MM',
+                    value: c.dobMonth.value,
+                    options: [
+                      for (final m in ConfigureController.months)
+                        VerificationOption(m, m),
+                    ],
+                    onChanged: c.setDobMonth,
+                  )),
+            ),
+            const SizedBox(width: 10),
+            Expanded(
+              child: Obx(() => AppLabeledDropdown(
+                    label: 'DD',
+                    hint: 'DD',
+                    value: c.dobDay.value,
+                    options: [
+                      for (final d in ConfigureController.days)
+                        VerificationOption(d, d),
+                    ],
+                    onChanged: c.setDobDay,
+                  )),
+            ),
+            const SizedBox(width: 10),
+            Expanded(
+              child: Obx(() => AppLabeledDropdown(
+                    label: 'YYYY',
+                    hint: 'YYYY',
+                    value: c.dobYear.value,
+                    options: [
+                      for (final y in ConfigureController.years)
+                        VerificationOption(y, y),
+                    ],
+                    onChanged: c.setDobYear,
+                  )),
+            ),
+          ],
+        ),
+      ],
     );
   }
 }

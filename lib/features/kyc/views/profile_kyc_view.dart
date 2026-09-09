@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:google_fonts/google_fonts.dart';
 
 import '../../../app/routes/app_routes.dart';
 import '../../../shared/theme/app_colors.dart';
+import '../../../shared/theme/app_text.dart';
 import '../../../shared/theme/app_theme.dart';
 import '../../../shared/widgets/data_state_builder.dart';
 import '../../../shared/widgets/pinned_gradient_app_bar.dart';
@@ -93,20 +93,36 @@ class _ProfileChip extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final scheme = Theme.of(context).colorScheme;
+    final isDark = scheme.brightness == Brightness.dark;
     return Container(
-      padding: const EdgeInsets.all(14),
+      padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: scheme.brightness == Brightness.dark
+        color: isDark
             ? AppColors.white.withValues(alpha: 0.05)
-        : AppColors.track,
-        borderRadius: BorderRadius.circular(18),
+            : AppColors.track,
+        borderRadius: BorderRadius.circular(20),
+        border: Border.all(
+          color: isDark
+              ? AppColors.white.withValues(alpha: 0.06)
+              : scheme.primary.withValues(alpha: 0.08),
+        ),
       ),
       child: Row(
         children: [
-          CircleAvatar(
-            radius: 28,
-            backgroundColor: scheme.primary.withValues(alpha: 0.15),
-            backgroundImage: NetworkImage(profile.avatarUrl),
+          Container(
+            padding: const EdgeInsets.all(2),
+            decoration: BoxDecoration(
+              shape: BoxShape.circle,
+              border: Border.all(
+                color: scheme.primary.withValues(alpha: 0.25),
+                width: 2,
+              ),
+            ),
+            child: CircleAvatar(
+              radius: 28,
+              backgroundColor: scheme.primary.withValues(alpha: 0.15),
+              backgroundImage: NetworkImage(profile.avatarUrl),
+            ),
           ),
           const SizedBox(width: 14),
           Expanded(
@@ -114,13 +130,16 @@ class _ProfileChip extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(profile.name,
-                    style: GoogleFonts.beVietnamPro(
-                        fontSize: 17, fontWeight: FontWeight.w700)),
-                const SizedBox(height: 3),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: AppText.title(color: scheme.onSurface, fontSize: 16)),
+                const SizedBox(height: 4),
                 Text(profile.since,
-                    style: GoogleFonts.beVietnamPro(
-                        fontSize: 13,
-                        color: scheme.onSurface.withValues(alpha: 0.6))),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: AppText.label(
+                        color: scheme.onSurface.withValues(alpha: 0.6),
+                        fontSize: 12)),
               ],
             ),
           ),
@@ -157,17 +176,15 @@ class _WarningBanner extends StatelessWidget {
               const SizedBox(width: 8),
               Expanded(
                 child: Text('kyc.blocks_reward'.tr,
-                    style: GoogleFonts.beVietnamPro(
-                        fontSize: 13,
-                        fontWeight: FontWeight.w700,
-                        color: scheme.onSurface)),
+                    style: AppText.subtitle(
+                        color: scheme.onSurface, fontSize: 14)),
               ),
             ],
           ),
           const SizedBox(height: 6),
           Text('kyc.blocks_reward_body'.tr,
-              style: GoogleFonts.beVietnamPro(
-                  fontSize: 13,
+              style: AppText.body(
+                  fontSize: 12,
                   height: 1.35,
                   color: scheme.onSurface.withValues(alpha: 0.7))),
         ],
@@ -195,13 +212,9 @@ class _VerificationSection extends StatelessWidget {
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               Text('kyc.verification'.tr,
-                  style: GoogleFonts.beVietnamPro(
-                      fontSize: 17, fontWeight: FontWeight.w700)),
+                  style: AppText.title(color: scheme.onSurface, fontSize: 16)),
               Text('${profile.doneCount}/${profile.totalCount} ${'kyc.done'.tr}',
-                  style: GoogleFonts.beVietnamPro(
-                      fontSize: 13,
-                      fontWeight: FontWeight.w700,
-                      color: AppTheme.accent.withValues(alpha: 1))),
+                  style: AppText.subtitle(color: AppTheme.accent, fontSize: 12)),
             ],
           ),
         ),
@@ -251,21 +264,18 @@ class _VerificationRow extends StatelessWidget {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(step.title,
-                        style: GoogleFonts.beVietnamPro(
-                            fontSize: 15, fontWeight: FontWeight.w700)),
+                        style: AppText.title(
+                            color: scheme.onSurface, fontSize: 16)),
                     const SizedBox(height: 3),
                     Text(step.subtitle,
-                        style: GoogleFonts.beVietnamPro(
-                            fontSize: 12.5,
-                            color: scheme.onSurface.withValues(alpha: 0.55))),
+                        style: AppText.label(
+                            color: scheme.onSurface.withValues(alpha: 0.55),
+                            fontSize: 12)),
                   ],
                 ),
               ),
               Text(step.isDone ? 'kyc.status_done'.tr : 'kyc.status_upload'.tr,
-                  style: GoogleFonts.beVietnamPro(
-                      fontSize: 13,
-                      fontWeight: FontWeight.w700,
-                      color: actionColor)),
+                  style: AppText.subtitle(color: actionColor, fontSize: 14)),
               Icon(Icons.chevron_right_rounded, size: 20, color: actionColor),
             ],
           ),
@@ -294,13 +304,9 @@ class _PersonalDetailsSection extends StatelessWidget {
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               Text('kyc.personal_details'.tr,
-                  style: GoogleFonts.beVietnamPro(
-                      fontSize: 17, fontWeight: FontWeight.w700)),
+                  style: AppText.title(color: scheme.onSurface, fontSize: 16)),
               Text('kyc.edit'.tr,
-                  style: GoogleFonts.beVietnamPro(
-                      fontSize: 14,
-                      fontWeight: FontWeight.w700,
-                      color: scheme.primary)),
+                  style: AppText.subtitle(color: scheme.primary, fontSize: 14)),
             ],
           ),
         ),
@@ -351,9 +357,9 @@ class _DetailRow extends StatelessWidget {
           Icon(row.icon, size: 18, color: AppColors.white.withValues(alpha: 0.85)),
           const SizedBox(width: 12),
           Text(row.label,
-              style: GoogleFonts.beVietnamPro(
-                  fontSize: 14,
-                  color: AppColors.white.withValues(alpha: 0.9))),
+              style: AppText.subtitle(
+                  color: AppColors.white.withValues(alpha: 0.9),
+                  fontSize: 14)),
           const SizedBox(width: 8),
           Expanded(
             child: Text(
@@ -361,10 +367,7 @@ class _DetailRow extends StatelessWidget {
               textAlign: TextAlign.end,
               maxLines: 1,
               overflow: TextOverflow.ellipsis,
-              style: GoogleFonts.beVietnamPro(
-                  fontSize: 14,
-                  fontWeight: FontWeight.w700,
-                  color: AppColors.white),
+              style: AppText.subtitle(color: AppColors.white, fontSize: 14),
             ),
           ),
         ],
@@ -397,17 +400,14 @@ class _PayoutNote extends StatelessWidget {
               const SizedBox(width: 8),
               Expanded(
                 child: Text('kyc.payout_note_title'.tr,
-                    style: GoogleFonts.beVietnamPro(
-                        fontSize: 13.5,
-                        fontWeight: FontWeight.w700,
-                        color: scheme.primary)),
+                    style: AppText.subtitle(color: scheme.primary, fontSize: 14)),
               ),
             ],
           ),
           const SizedBox(height: 6),
           Text('kyc.payout_note_body'.tr,
-              style: GoogleFonts.beVietnamPro(
-                  fontSize: 13,
+              style: AppText.body(
+                  fontSize: 12,
                   height: 1.35,
                   color: scheme.onSurface.withValues(alpha: 0.7))),
         ],
@@ -432,8 +432,7 @@ class _NewsAlertsSection extends StatelessWidget {
         Padding(
           padding: const EdgeInsets.only(left: 4, bottom: 10),
           child: Text('kyc.news_alerts'.tr,
-              style: GoogleFonts.beVietnamPro(
-                  fontSize: 17, fontWeight: FontWeight.w700)),
+              style: AppText.title(color: scheme.onSurface, fontSize: 16)),
         ),
         Container(
           decoration: AppTheme.surfaceCard(scheme, radius: 18),
@@ -473,13 +472,13 @@ class _AlertRow extends StatelessWidget {
           child: Row(
             children: [
               Text(row.label,
-                  style: GoogleFonts.beVietnamPro(
-                      fontSize: 14,
-                      color: scheme.onSurface.withValues(alpha: 0.75))),
+                  style: AppText.subtitle(
+                      color: scheme.onSurface.withValues(alpha: 0.75),
+                      fontSize: 14)),
               const Spacer(),
               Text(row.value,
-                  style: GoogleFonts.beVietnamPro(
-                      fontSize: 14, fontWeight: FontWeight.w700)),
+                  style: AppText.subtitle(
+                      color: scheme.onSurface, fontSize: 14)),
               const SizedBox(width: 4),
               Icon(Icons.chevron_right_rounded,
                   size: 20, color: scheme.onSurface.withValues(alpha: 0.4)),

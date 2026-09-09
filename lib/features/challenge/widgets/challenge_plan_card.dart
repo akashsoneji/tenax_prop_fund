@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:google_fonts/google_fonts.dart';
 
 import '../../../shared/theme/app_colors.dart';
+import '../../../shared/theme/app_text.dart';
 import '../../../shared/theme/app_theme.dart';
 import '../models/challenge_models.dart';
 
@@ -50,48 +50,47 @@ class ChallengePlanCard extends StatelessWidget {
               : null,
         ),
         child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
+          mainAxisSize: MainAxisSize.min,
+          mainAxisAlignment: MainAxisAlignment.center,
+          crossAxisAlignment: CrossAxisAlignment.center,
           children: [
             Text(
               plan.discountLabel,
-              style: GoogleFonts.beVietnamPro(
-                fontSize: 11.5,
-                fontWeight: FontWeight.w600,
+              textAlign: TextAlign.center,
+              style: AppText.label(
                 color: scheme.onSurface.withValues(alpha: 0.5),
+                fontSize: 12,
               ),
             ),
             const SizedBox(height: 4),
             Text(
               plan.size,
-              style: GoogleFonts.beVietnamPro(
-                fontSize: 20,
-                fontWeight: FontWeight.w800,
+              textAlign: TextAlign.center,
+              style: AppText.value(
                 color: scheme.onSurface,
+                fontSize: 20,
               ),
             ),
             const SizedBox(height: 6),
             Row(
-              crossAxisAlignment: CrossAxisAlignment.end,
+              mainAxisSize: MainAxisSize.min,
+              mainAxisAlignment: MainAxisAlignment.center,
+              crossAxisAlignment: CrossAxisAlignment.center,
               children: [
                 Text(
                   plan.price,
-                  style: GoogleFonts.beVietnamPro(
-                    fontSize: 16,
-                    fontWeight: FontWeight.w800,
+                  style: AppText.title(
                     color: scheme.primary,
+                    fontSize: 16,
                   ),
                 ),
                 const SizedBox(width: 6),
-                Padding(
-                  padding: const EdgeInsets.only(bottom: 1),
-                  child: Text(
-                    plan.original,
-                    style: GoogleFonts.beVietnamPro(
-                      fontSize: 13,
-                      decoration: TextDecoration.lineThrough,
-                      color: scheme.onSurface.withValues(alpha: 0.4),
-                    ),
-                  ),
+                Text(
+                  plan.original,
+                  style: AppText.label(
+                    color: scheme.onSurface.withValues(alpha: 0.4),
+                    fontSize: 12,
+                  ).copyWith(decoration: TextDecoration.lineThrough),
                 ),
               ],
             ),

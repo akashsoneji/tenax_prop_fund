@@ -6,7 +6,7 @@ plugins {
 
 android {
     namespace = "com.tenax.tenax_prop_flutter"
-    compileSdk = 37
+    compileSdk = 36
     ndkVersion = flutter.ndkVersion
 
     compileOptions {

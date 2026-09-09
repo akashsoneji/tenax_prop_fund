@@ -1,46 +1,46 @@
 # Flutter & Dart Agent Rules (Cursor / Windsurf / Multi-IDE)
 
 ## UI & Layout Architecture
-- **Overflow Prevention**: Always wrap scrollable content with `SingleChildScrollView(physics: BouncingScrollPhysics())` and ensure `resizeToAvoidBottomInset: true` on `Scaffold`.
-- **Text Safety**: In `Row`s, always wrap dynamic text widgets in `Expanded` or `Flexible` with `maxLines` and `overflow: TextOverflow.ellipsis`.
-- **Theme Tokens**: Never hardcode colors or raw hex values directly in widgets. Use `Theme.of(context).colorScheme` or centralized tokens.
-- **Decomposition**: Keep individual widget classes small (under 150 lines). Extract reusable components to `lib/core/widgets/` or feature-level private widgets `_MySubWidget`.
-- **Performance**: Always use `const` constructors for static widgets, insets, and borders. Use `ListView.builder` for dynamic or large lists.
+- *Overflow Prevention*: Always wrap scrollable content with SingleChildScrollView(physics: BouncingScrollPhysics()) and ensure resizeToAvoidBottomInset: true on Scaffold.
+- *Text Safety*: In Row`s, always wrap dynamic text widgets in `Expanded or Flexible with maxLines and overflow: TextOverflow.ellipsis.
+- *Theme Tokens*: Never hardcode colors or raw hex values directly in widgets. Use Theme.of(context).colorScheme or centralized tokens.
+- *Decomposition*: Keep individual widget classes small (under 150 lines). Extract reusable components to lib/core/widgets/ or feature-level private widgets _MySubWidget.
+- *Performance*: Always use const constructors for static widgets, insets, and borders. Use ListView.builder for dynamic or large lists.
 
 ## Architecture
 - Separate pure UI (Views) from Business Logic & Controllers (GetX / Riverpod / Bloc).
 - Never place API calls, Dio requests, or WebSocket management directly inside widgets.
-- Refer to detailed skills in `.agents/skills/` and `.claude/skills/`.
+- Refer to detailed skills in .agents/skills/ and .claude/skills/.
 
 ## MANDATORY DEFAULTS — apply on EVERY new screen / design / controller (no need to ask)
 When building or editing ANY feature (screen, widget, or controller), ALWAYS deliver ALL of the following by default, without being told each time:
 
 ### 1. GetX architecture (non-negotiable)
-- Follow the existing feature layout: `lib/features/<feature>/` split into `bindings/`, `controllers/`, `models/`, `repositories/`, `views/`, `widgets/`.
-- Controllers extend `BaseController<T>` and implement `fetch()`; expose state as `Rx`/`.obs`; never hold UI (`BuildContext`, widgets) in the controller.
-- Views are `GetView<Controller>` / `GetWidget` — pure UI only. NO API calls, Dio, or WebSocket logic in widgets (put them in repositories/services).
-- Dependencies are wired through a `*_binding.dart`; inject shared singletons with `Get.find<...>()` (e.g. `ApiClient`). Register the route + binding in `lib/app/routes/app_pages.dart`.
-- Loading state uses `DataStateBuilder` with a matching skeleton (`app_shimmer.dart` / `skeletons/skeletons.dart`) — never a bare spinner where a skeleton fits.
+- Follow the existing feature layout: lib/features/<feature>/ split into bindings/, controllers/, models/, repositories/, views/, widgets/.
+- Controllers extend BaseController<T> and implement fetch(); expose state as Rx/.obs; never hold UI (BuildContext, widgets) in the controller.
+- Views are GetView<Controller> / GetWidget — pure UI only. NO API calls, Dio, or WebSocket logic in widgets (put them in repositories/services).
+- Dependencies are wired through a *_binding.dart; inject shared singletons with Get.find<...>() (e.g. ApiClient). Register the route + binding in lib/app/routes/app_pages.dart.
+- Loading state uses DataStateBuilder with a matching skeleton (app_shimmer.dart / skeletons/skeletons.dart) — never a bare spinner where a skeleton fits.
 
 ### 2. Dark + Light mode — automatic, always
-- Every color MUST come from `Theme.of(context).colorScheme` OR the central tokens in `lib/shared/theme/app_colors.dart` (`AppColors.*`). NEVER write `Color(0xFF…)` literals in feature code.
-- Design so BOTH themes look correct with zero extra work — pick `scheme.surface`/`onSurface`/`primary` etc. so it adapts. Only branch on `Get.isDarkMode` when a design genuinely differs per theme.
-- Hero/gradient cards use `BorderRadius.circular(20-22)` by default (NOT `heroPillRadius`, unless a design screenshot shows the half-circle bulge).
+- Every color MUST come from Theme.of(context).colorScheme OR the central tokens in lib/shared/theme/app_colors.dart (AppColors.*). NEVER write Color(0xFF…) literals in feature code.
+- Design so BOTH themes look correct with zero extra work — pick scheme.surface/onSurface/primary etc. so it adapts. Only branch on Get.isDarkMode when a design genuinely differs per theme.
+- Hero/gradient cards use BorderRadius.circular(20-22) by default (NOT heroPillRadius, unless a design screenshot shows the half-circle bulge).
 
 ### 3. Localization — always
-- ALL user-facing strings go through `.tr` and are added to BOTH `en` and `hi` maps in `lib/core/localization/app_translations.dart`. Never hardcode display text in a widget.
+- ALL user-facing strings go through .tr and are added to BOTH en and hi maps in lib/core/localization/app_translations.dart. Never hardcode display text in a widget.
 
 ### 4. Reusable widgets + fonts/tokens
-- Reuse existing shared widgets first (`lib/shared/widgets/*`: `AppGradientButton`, `AppTextField`, `AppLabeledField`, `AppToast`, `DataStateBuilder`, etc.). Extract a new reusable widget instead of copy-pasting UI.
-- Primary CTAs use `AppGradientButton` (white text) per brand rule.
-- All text styles come from `Theme.of(context).textTheme.*` or `AppText.*` (`lib/shared/theme/app_text.dart`). NEVER use `GoogleFonts.*` literals or raw `TextStyle` font families in feature code.
+- Reuse existing shared widgets first (lib/shared/widgets/*: AppGradientButton, AppTextField, AppLabeledField, AppToast, DataStateBuilder, etc.). Extract a new reusable widget instead of copy-pasting UI.
+- Primary CTAs use AppGradientButton (white text) per brand rule.
+- All text styles come from Theme.of(context).textTheme.* or AppText.* (lib/shared/theme/app_text.dart). NEVER use GoogleFonts.* literals or raw TextStyle font families in feature code.
 - Keep widget classes under 150 lines; extract `_SubWidget`s or feature-level widgets.
 
 ### 5. Render / layout self-check — ALWAYS re-verify after building a design
 After creating or editing any UI, re-read the design and confirm it has NO render issues before reporting done:
-- Wrap scroll content in `SingleChildScrollView(physics: BouncingScrollPhysics())`; `Scaffold` has `resizeToAvoidBottomInset: true`.
-- Every dynamic text inside a `Row` is wrapped in `Expanded`/`Flexible` with `maxLines` + `overflow: TextOverflow.ellipsis` (prevents "RenderFlex overflowed").
-- No `ListView`/`Column` with unbounded height inside another scrollable — wrap in `Expanded`/`SizedBox`; use `ListView.builder`/`GridView.builder` for lists.
-- No `Expanded`/`Flexible` outside a `Flex`, no `Positioned` outside a `Stack`.
-- Use `const` constructors for static widgets/insets/borders.
-- Run `flutter analyze lib/features/<feature>` and fix everything before saying it's done.
+- Wrap scroll content in SingleChildScrollView(physics: BouncingScrollPhysics()); Scaffold has resizeToAvoidBottomInset: true.
+- Every dynamic text inside a Row is wrapped in Expanded/Flexible with maxLines + overflow: TextOverflow.ellipsis (prevents "RenderFlex overflowed").
+- No ListView/Column with unbounded height inside another scrollable — wrap in Expanded/SizedBox; use ListView.builder/GridView.builder for lists.
+- No Expanded/Flexible outside a Flex, no Positioned outside a Stack.
+- Use const constructors for static widgets/insets/borders.
+- Run flutter analyze lib/features/<feature> and fix everything before saying it's done.

@@ -15,9 +15,9 @@ class RewardsController extends BaseController<RewardsData> {
 
   final RewardsRepository _repository;
 
-  // Sheet state (UI-only).
+  // Sheet state (UI-only). Empty until the sheet resolves the first account.
   final isSheetOpen = false.obs;
-  final selectedAccountId = '100311'.obs;
+  final selectedAccountId = ''.obs;
   final selectedMethod = 'Bank Transfer'.obs;
   final amountController = ''.obs;
 
@@ -32,8 +32,11 @@ class RewardsController extends BaseController<RewardsData> {
       data.requirements.where((r) => r.status == RequirementStatus.fail).length;
 
   /// Returns the currently selected account snapshot for the sheet header.
+  /// Falls back to the first available account so the picker never renders
+  /// empty when the stored id doesn't match the loaded data.
   RewardAccount? selectedAccount(RewardsData data) =>
-      data.accounts.firstWhereOrNull((a) => a.id == selectedAccountId.value);
+      data.accounts.firstWhereOrNull((a) => a.id == selectedAccountId.value) ??
+      (data.accounts.isNotEmpty ? data.accounts.first : null);
 
   // ---------------------------------------------------------------------
   // Actions

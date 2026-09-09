@@ -234,7 +234,7 @@ class _PlanGrid extends StatelessWidget {
         crossAxisCount: 2,
         mainAxisSpacing: 12,
         crossAxisSpacing: 12,
-        childAspectRatio: 1.7,
+        mainAxisExtent: 116,
       ),
       itemBuilder: (context, i) => ChallengePlanCard(
         plan: plans[i],
@@ -353,7 +353,7 @@ class _TrialStatGrid extends StatelessWidget {
         crossAxisCount: 2,
         mainAxisSpacing: 12,
         crossAxisSpacing: 12,
-        childAspectRatio: 2.3,
+        childAspectRatio: 1.9,
       ),
       itemBuilder: (context, i) => _TrialStatTile(rule: rules[i]),
     );
@@ -382,6 +382,8 @@ class _TrialStatTile extends StatelessWidget {
         children: [
           Text(
             rule.label,
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
             style: GoogleFonts.beVietnamPro(
               fontSize: 12.5,
               color: scheme.onSurface.withValues(alpha: 0.55),
@@ -390,6 +392,8 @@ class _TrialStatTile extends StatelessWidget {
           const SizedBox(height: 4),
           Text(
             rule.value,
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
             style: GoogleFonts.beVietnamPro(
               fontSize: 15,
               fontWeight: FontWeight.w800,

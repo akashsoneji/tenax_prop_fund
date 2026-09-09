@@ -102,6 +102,14 @@ class TenaxApp extends StatelessWidget {
       // the 3-button / gesture nav bar stays readable in both light and dark.
       builder: (context, child) {
         final isDark = Theme.of(context).brightness == Brightness.dark;
+        // Clamp the OS font-size so an aggressive device text-scale can't blow
+        // the fixed Figma type scale out of proportion (keeps the design intact
+        // while still honouring modest accessibility bumps up to 1.15x).
+        final media = MediaQuery.of(context);
+        final clampedScale = media.textScaler.clamp(
+          minScaleFactor: 1.0,
+          maxScaleFactor: 1.15,
+        );
         return AnnotatedRegion<SystemUiOverlayStyle>(
           value: SystemUiOverlayStyle(
             statusBarColor: Colors.transparent,
@@ -113,7 +121,10 @@ class TenaxApp extends StatelessWidget {
             systemNavigationBarIconBrightness:
                 isDark ? Brightness.light : Brightness.dark,
           ),
-          child: child ?? const SizedBox.shrink(),
+          child: MediaQuery(
+            data: media.copyWith(textScaler: clampedScale),
+            child: child ?? const SizedBox.shrink(),
+          ),
         );
       },
     );

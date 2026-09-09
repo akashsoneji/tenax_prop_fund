@@ -38,58 +38,42 @@ class _RequestPayoutSheetState extends State<RequestPayoutSheet> {
   Widget build(BuildContext context) {
     final c = Get.find<RewardsController>();
     final scheme = Theme.of(context).colorScheme;
-    final viewInsets = MediaQuery.viewInsetsOf(context);
     final data = c.state.valueOrNull;
     if (data == null) return const SizedBox.shrink();
 
-    return Padding(
-      padding: EdgeInsets.only(bottom: viewInsets.bottom),
-      child: Container(
-        decoration: BoxDecoration(
-          color: scheme.brightness == Brightness.dark
-              ? AppColors.sheetDark
-              : Colors.white,
-          borderRadius: const BorderRadius.vertical(top: Radius.circular(24)),
-        ),
-        padding: const EdgeInsets.fromLTRB(20, 14, 20, 22),
-        child: SingleChildScrollView(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              // Drag handle.
-              Center(
-                child: Container(
-                  width: 38,
-                  height: 4,
-                  margin: const EdgeInsets.only(bottom: 14),
-                  decoration: BoxDecoration(
-                    color: scheme.onSurface.withValues(alpha: 0.15),
-                    borderRadius: BorderRadius.circular(2),
-                  ),
-                ),
-              ),
-              _SheetHeader(onClose: c.closePayoutSheet),
-              const SizedBox(height: 18),
-              _NameMatchBanner(scheme: scheme),
-              const SizedBox(height: 18),
-              _AccountPicker(controller: c, data: data),
-              const SizedBox(height: 14),
-              _AmountField(
-                controller: c,
-                textController: _amountText,
-                focusNode: _amountFocus,
-                scheme: scheme,
-              ),
-              const SizedBox(height: 14),
-              _MethodPicker(controller: c, data: data),
-              const SizedBox(height: 22),
-              _SubmitButton(controller: c, data: data, onSubmitted: () {
-                _amountText.clear();
-                c.setAmount('');
-              }),
-            ],
-          ),
+    return Container(
+      decoration: BoxDecoration(
+        color: scheme.brightness == Brightness.dark
+            ? AppColors.sheetDark
+            : Colors.white,
+        borderRadius: BorderRadius.circular(24),
+      ),
+      padding: const EdgeInsets.fromLTRB(20, 20, 20, 22),
+      child: SingleChildScrollView(
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            _SheetHeader(onClose: () => Navigator.of(context).pop()),
+            const SizedBox(height: 18),
+            _NameMatchBanner(scheme: scheme),
+            const SizedBox(height: 18),
+            _AccountPicker(controller: c, data: data),
+            const SizedBox(height: 14),
+            _AmountField(
+              controller: c,
+              textController: _amountText,
+              focusNode: _amountFocus,
+              scheme: scheme,
+            ),
+            const SizedBox(height: 14),
+            _MethodPicker(controller: c, data: data),
+            const SizedBox(height: 22),
+            _SubmitButton(controller: c, data: data, onSubmitted: () {
+              _amountText.clear();
+              c.setAmount('');
+            }),
+          ],
         ),
       ),
     );
@@ -366,7 +350,7 @@ class _SheetField extends StatelessWidget {
           ),
         ),
         Container(
-          padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+          padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 4),
           decoration: BoxDecoration(
             color: scheme.brightness == Brightness.dark
                 ? Colors.white.withValues(alpha: 0.05)
