@@ -3,7 +3,14 @@
 *.log
 *.pyc
 *.swp
+*.lock.bak
 .DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
 .atom/
 .build/
 .buildlog/
@@ -27,11 +34,25 @@ migrate_working_dir/
 **/doc/api/
 **/ios/Flutter/.last_build_id
 .dart_tool/
+.flutter-plugins
 .flutter-plugins-dependencies
 .pub-cache/
 .pub/
 /build/
 /coverage/
+
+# FVM (Flutter Version Management)
+.fvm/
+.fvmrc
+
+# Local storage / secrets (never commit)
+GetStorage.gs
+*.env
+.env
+.env.*
+!.env.example
+secrets.dart
+**/*.secret.*
 
 # Symbolication related
 app.*.symbols
