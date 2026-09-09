@@ -6,7 +6,7 @@
 
 /// The five status tabs shown above the account list. `completed` maps to the
 /// payload's `passed` count/filter (the web labels it "Completed").
-enum AccountTab { active, funded, completed, breached, all }
+enum AccountTab { all, active, funded, completed, breached }
 
 extension AccountTabKey on AccountTab {
   /// The `counts` key / server `tab` filter value for this tab.
@@ -103,30 +103,48 @@ class AccountsData {
 
   bool get isEmpty => accounts.isEmpty;
 
-  /// Parses the Inertia `props` block into the screen payload.
-  factory AccountsData.fromProps(Map<String, dynamic> props) {
-    final countsJson = props['counts'];
-    final rows = ((props['accounts'] as Map?)?['data'] as List?) ?? const [];
-    final plans = ((props['planOptions'] as List?) ?? const [])
-        .map((e) => e.toString())
-        .toList();
-    final trial = props['trial'];
+  /// Builds the screen payload from the REST `GET /accounts` list. That
+  /// endpoint returns only the flat account array (plus pagination `meta`), so
+  /// the stat cards, tab badge counts and plan filter are all derived here from
+  /// the rows themselves.
+  factory AccountsData.fromList(List<dynamic> rows) {
+    final accounts = [
+      for (final raw in rows)
+        if (raw is Map<String, dynamic>) AccountRow.fromJson(raw),
+    ];
+    var active = 0, funded = 0, passed = 0, breached = 0;
+    for (final a in accounts) {
+      switch (a.tab) {
+        case AccountTab.active:
+          active++;
+        case AccountTab.funded:
+          funded++;
+        case AccountTab.completed:
+          passed++;
+        case AccountTab.breached:
+          breached++;
+        case AccountTab.all:
+          break;
+      }
+    }
+    final plans = <String>{for (final a in accounts) a.planName}.toList()
+      ..sort();
     return AccountsData(
-      ownedTotal: _int(props['ownedTotal']),
-      provisioning: _int(props['settlingCount']),
-      counts: countsJson is Map<String, dynamic>
-          ? AccountCounts.fromJson(countsJson)
-          : AccountCounts.empty,
+      ownedTotal: accounts.length,
+      provisioning: 0,
+      counts: AccountCounts(
+        active: active,
+        funded: funded,
+        passed: passed,
+        breached: breached,
+        all: accounts.length,
+      ),
       planOptions: plans,
-      trialEnabled: trial is Map<String, dynamic>
-          ? (trial['enabled'] as bool? ?? false)
-          : false,
-      accounts: [
-        for (final raw in rows)
-          if (raw is Map<String, dynamic>) AccountRow.fromJson(raw),
-      ],
+      trialEnabled: false,
+      accounts: accounts,
     );
   }
+
 }
 
 /// Lifecycle tone of a row — drives the status pill colour.
@@ -218,6 +236,8 @@ class AccountRow {
       case 'funded':
         return AccountTab.funded;
       case 'passed':
+      case 'closed':
+      case 'completed':
         return AccountTab.completed;
       case 'breached':
         return AccountTab.breached;
