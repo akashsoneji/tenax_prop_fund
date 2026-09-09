@@ -168,6 +168,29 @@ class ApiClient {
   }
 
 
+  /// Resolves a private/presence Pusher channel auth signature.
+  ///
+  /// POSTs `socket_id` + `channel_name` (form-encoded) to `/broadcasting/auth`
+  /// on the WEB host (NOT `/api/v1`). The bearer token is attached by
+  /// [ApiInterceptor], which also logs the request/response in debug builds.
+  /// Returns the `auth` string the client must echo back in `pusher:subscribe`,
+  /// or `null` if the server did not authorise the channel.
+  Future<String?> broadcastingAuth(String socketId, String channel) async {
+    final res = await _web.post<dynamic>(
+      '/api/broadcasting/auth',
+      data: {'socket_id': socketId, 'channel_name': channel},
+      options: Options(
+        contentType: Headers.formUrlEncodedContentType,
+        headers: {'Accept': 'application/json'},
+      ),
+    );
+    final body = res.data is String
+        ? jsonDecode(res.data as String)
+        : res.data;
+    if (body is Map && body['auth'] != null) return body['auth'].toString();
+    return null;
+  }
+
   Future<Response<T>> post<T>(String path, {Object? data}) =>
       _dio.post<T>(path, data: data);
 

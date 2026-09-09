@@ -1,8 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_svg/flutter_svg.dart';
+import 'package:google_fonts/google_fonts.dart';
 
 import '../../../shared/theme/app_colors.dart';
-import '../../../shared/theme/app_text.dart';
 
 /// One of the four
 /// screen (Withdrawable / Pending / Paid out / Your share).
@@ -16,12 +15,14 @@ class StatTile extends StatelessWidget {
     required this.label,
     required this.value,
     required this.tone,
+    this.trailingIcon,
     this.delayMs = 0,
   });
 
   final String label;
   final String value;
   final StatTileTone tone;
+  final IconData? trailingIcon;
   final int delayMs;
 
   @override
@@ -44,10 +45,10 @@ class StatTile extends StatelessWidget {
         );
       },
       child: Container(
-        padding: const EdgeInsets.fromLTRB(16, 16, 16, 18),
+        padding: const EdgeInsets.fromLTRB(14, 12, 12, 14),
         decoration: BoxDecoration(
           color: tintBg,
-          borderRadius: BorderRadius.circular(18),
+          borderRadius: BorderRadius.circular(14),
           border: Border.all(color: tintAccent.withValues(alpha: 0.35)),
         ),
         child: Column(
@@ -59,37 +60,35 @@ class StatTile extends StatelessWidget {
                 Expanded(
                   child: Text(
                     label,
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                    style: AppText.title(
+                    style: GoogleFonts.beVietnamPro(
                       fontSize: 13,
+                      fontWeight: FontWeight.w600,
                       color: scheme.onSurface.withValues(alpha: 0.7),
                     ),
                   ),
                 ),
-                Container(
-                  width: 36,
-                  height: 36,
-                  decoration: BoxDecoration(
-                    shape: BoxShape.circle,
-                    color: tintAccent.withValues(alpha: 0.16),
+                if (trailingIcon != null)
+                  Container(
+                    width: 26,
+                    height: 26,
+                    decoration: BoxDecoration(
+                      shape: BoxShape.circle,
+                      color: tintAccent.withValues(alpha: 0.18),
+                    ),
+                    alignment: Alignment.center,
+                    child: Icon(trailingIcon, size: 14, color: tintAccent),
                   ),
-                  alignment: Alignment.center,
-                  child: SvgPicture.asset(
-                    'assets/icons/adjust.svg',
-                    width: 16,
-                    height: 18,
-                    colorFilter: ColorFilter.mode(tintAccent, BlendMode.srcIn),
-                  ),
-                ),
               ],
             ),
             const SizedBox(height: 14),
             Text(
               value,
-              maxLines: 1,
-              overflow: TextOverflow.ellipsis,
-              style: AppText.value(fontSize: 26, color: tintAccent),
+              style: GoogleFonts.beVietnamPro(
+                fontSize: 26,
+                fontWeight: FontWeight.w800,
+                color: tintAccent,
+                height: 1.0,
+              ),
             ),
           ],
         ),

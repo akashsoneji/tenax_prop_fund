@@ -66,12 +66,10 @@ class ChallengeRepository {
       ChallengeRule('Payout cycle', '14 days'),
     ],
     trialRules: [
-      ChallengeRule('Profit target', '4% · \$400'),
-      ChallengeRule('Daily loss', '5% · \$500'),
-      ChallengeRule('Maximum loss', '10% · \$1,000'),
-      ChallengeRule('Minimum days', '2'),
-      ChallengeRule('Expires after', '7 Days'),
-      ChallengeRule('Reward paid', 'Never'),
+      ChallengeRule('Profit target', 'None'),
+      ChallengeRule('Duration', '7 days'),
+      ChallengeRule('Max daily loss', '5%'),
+      ChallengeRule('Max overall loss', '10%'),
     ],
   );
 }

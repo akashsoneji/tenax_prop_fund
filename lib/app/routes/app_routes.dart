@@ -6,6 +6,7 @@ abstract class AppRoutes {
   static const forgotPassword = '/forgot-password';
   static const terms = '/terms';
   static const home = '/home';
+  static const more = '/more';
   static const settings = '/settings';
   static const profileKyc = '/profile-kyc';
   static const editProfile = '/edit-profile';

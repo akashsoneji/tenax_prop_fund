@@ -42,6 +42,7 @@ import '../../features/authentication/views/terms_view.dart';
 import '../../features/get_started/views/get_started_view.dart';
 import '../../features/home/bindings/home_binding.dart';
 import '../../features/home/views/home_shell_view.dart';
+import '../../features/home/views/tabs/more_tab_view.dart';
 import '../../features/kyc/bindings/edit_profile_binding.dart';
 import '../../features/kyc/bindings/kyc_binding.dart';
 import '../../features/kyc/views/edit_profile_view.dart';
@@ -101,6 +102,10 @@ class AppPages {
       name: AppRoutes.home,
       page: () => const HomeShellView(),
       binding: HomeBinding(),
+    ),
+    GetPage(
+      name: AppRoutes.more,
+      page: () => const MoreTabView(showBack: true),
     ),
     GetPage(
       name: AppRoutes.settings,

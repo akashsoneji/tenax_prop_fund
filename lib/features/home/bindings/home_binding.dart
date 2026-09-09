@@ -1,8 +1,12 @@
 import 'package:get/get.dart';
 
+import '../../../app/flavor/flavor.dart';
 import '../../../app/flavor/flavor_config.dart';
+import '../../../app/flavor/flavor_resolver.dart';
 import '../../../core/network/api_client.dart';
 import '../../../core/websocket/pusher_client.dart';
+import '../../accounts/controllers/accounts_controller.dart';
+import '../../accounts/repositories/accounts_repository.dart';
 import '../../authentication/repositories/auth_repository.dart';
 import '../controllers/home_controller.dart';
 import '../repositories/home_repository.dart';
@@ -12,10 +16,27 @@ class HomeBinding extends Bindings {
   void dependencies() {
     Get.lazyPut<HomeRepository>(() => HomeRepository(Get.find<ApiClient>()));
 
+    // The tenax flavor replaces the "More" bottom-nav tab with an "Accounts"
+    // tab rendered inside the shell, so its controller must be available here.
+    if (FlavorResolver.flavor == Flavor.tenax) {
+      Get.lazyPut<AccountsRepository>(
+        () => AccountsRepository(Get.find<ApiClient>()),
+      );
+      Get.lazyPut<AccountsController>(
+        () => AccountsController(Get.find<AccountsRepository>()),
+      );
+    }
+
     // Dedicated Pusher client for the Home live-equity feed. The URL is fully
-    // flavor-driven (host + app key) via FlavorConfig.pusherWsUrl.
+    // flavor-driven (host + app key) via FlavorConfig.pusherWsUrl. Private
+    // channels are signed via ApiClient.broadcastingAuth (POST /broadcasting/auth
+    // with the bearer token) so `subscription_succeeded` + AccountStateUpdated
+    // frames actually flow.
     Get.lazyPut<PusherClient>(
-      () => PusherClient(Get.find<FlavorConfig>().pusherWsUrl),
+      () => PusherClient(
+        Get.find<FlavorConfig>().pusherWsUrl,
+        authResolver: Get.find<ApiClient>().broadcastingAuth,
+      ),
       fenix: true,
     );
 

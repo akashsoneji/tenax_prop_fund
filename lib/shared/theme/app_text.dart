@@ -34,26 +34,23 @@ class AppText {
       GoogleFonts.beVietnamProTextTheme(base);
 
   // ---------------------------------------------------------------------------
-  // Named roles — Be Vietnam type scale from Figma (Tenax Prop #11:156).
-  // Figma line-height is 100% on every token, so height defaults to 1.0.
-  // Weights: Regular 400 · Medium 500 · SemiBold 600 · Bold 700.
-  // Pass color per call site.
+  // Named roles (size + weight only). Pass color per call site.
   // ---------------------------------------------------------------------------
-  static TextStyle heading({Color? color, double fontSize = 20, double height = 1.0}) =>
-      base(fontSize: fontSize, fontWeight: FontWeight.w700, color: color, height: height);
+  static TextStyle heading({Color? color, double fontSize = 20}) =>
+      base(fontSize: fontSize, fontWeight: FontWeight.w800, color: color);
 
-  static TextStyle title({Color? color, double fontSize = 16, double height = 1.0}) =>
-      base(fontSize: fontSize, fontWeight: FontWeight.w600, color: color, height: height);
+  static TextStyle title({Color? color, double fontSize = 16}) =>
+      base(fontSize: fontSize, fontWeight: FontWeight.w700, color: color);
 
-  static TextStyle subtitle({Color? color, double fontSize = 14, double height = 1.0}) =>
-      base(fontSize: fontSize, fontWeight: FontWeight.w500, color: color, height: height);
+  static TextStyle subtitle({Color? color, double fontSize = 14}) =>
+      base(fontSize: fontSize, fontWeight: FontWeight.w600, color: color);
 
   static TextStyle body({Color? color, double fontSize = 14, double? height}) =>
-      base(fontSize: fontSize, fontWeight: FontWeight.w400, color: color, height: height);
+      base(fontSize: fontSize, fontWeight: FontWeight.w500, color: color, height: height);
 
-  static TextStyle label({Color? color, double fontSize = 12, double height = 1.0}) =>
-      base(fontSize: fontSize, fontWeight: FontWeight.w400, color: color, height: height);
+  static TextStyle label({Color? color, double fontSize = 12}) =>
+      base(fontSize: fontSize, fontWeight: FontWeight.w500, color: color);
 
-  static TextStyle value({Color? color, double fontSize = 22, double height = 1.0}) =>
-      base(fontSize: fontSize, fontWeight: FontWeight.w700, color: color, height: height);
+  static TextStyle value({Color? color, double fontSize = 22}) =>
+      base(fontSize: fontSize, fontWeight: FontWeight.w800, color: color);
 }

@@ -20,23 +20,6 @@ class ConfigureController extends GetxController {
   final acceptedTerms = false.obs;
   final obscurePassword = true.obs;
 
-  // Date of birth + residence (create-account form).
-  final dobMonth = RxnString();
-  final dobDay = RxnString();
-  final dobYear = RxnString();
-  final country = 'India'.obs;
-
-  static const months = [
-    '01', '02', '03', '04', '05', '06',
-    '07', '08', '09', '10', '11', '12',
-  ];
-  static final days = [for (var d = 1; d <= 31; d++) d.toString().padLeft(2, '0')];
-  static final years = [for (var y = 2008; y >= 1940; y--) y.toString()];
-  static const countries = [
-    'India', 'United States', 'United Kingdom', 'United Arab Emirates',
-    'Singapore', 'Australia', 'Canada', 'Germany', 'Nigeria', 'Other',
-  ];
-
   static const platforms = ['MetaTrader 4', 'MetaTrader 5', 'cTrader +\$25'];
 
   // Base plan (demo — the 2-Step $100K from the design).
@@ -117,10 +100,6 @@ class ConfigureController extends GetxController {
 
   void setPlatform(int index) => platform.value = index;
   void setSwap(int index) => swap.value = index;
-  void setDobMonth(String? v) => dobMonth.value = v;
-  void setDobDay(String? v) => dobDay.value = v;
-  void setDobYear(String? v) => dobYear.value = v;
-  void setCountry(String? v) => country.value = v ?? country.value;
   void togglePasswordVisibility() =>
       obscurePassword.value = !obscurePassword.value;
   void setAccepted(bool value) => acceptedTerms.value = value;

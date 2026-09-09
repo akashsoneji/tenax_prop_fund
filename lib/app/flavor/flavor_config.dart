@@ -109,7 +109,7 @@ class FlavorConfig {
           pusherHost: endpoints.pusherHost,
           pusherAppKey: endpoints.pusherAppKey,
           chartBaseUrl: pick(chartBaseUrl, endpoints.chart),
-          primaryColor: const Color(0xFF4A0D55),
+          primaryColor: const Color(0xFF5F259E),
           secondaryColor: const Color(0xFFFDCC29),
           logoAsset: 'assets/flavors/tenax/logo.png',
           splashLogoAsset: 'assets/flavors/tenax/splash.png',

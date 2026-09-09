@@ -17,7 +17,11 @@ import '../../../../shared/widgets/pinned_gradient_app_bar.dart';
 /// screens don't exist yet route to a placeholder toast; wire real routes as
 /// each screen lands.
 class MoreTabView extends StatelessWidget {
-  const MoreTabView({super.key});
+  const MoreTabView({super.key, this.showBack = false});
+
+  /// When opened as a standalone route (e.g. from the Home settings icon on the
+  /// tenax flavor) we show a back button; inside the bottom-nav shell we don't.
+  final bool showBack;
 
   @override
   Widget build(BuildContext context) {
@@ -26,7 +30,7 @@ class MoreTabView extends StatelessWidget {
       backgroundColor: scheme.surface,
       body: CustomScrollView(
         slivers: [
-          PinnedGradientAppBar(title: 'home.tabs.more'.tr, showBack: false),
+          PinnedGradientAppBar(title: 'home.tabs.more'.tr, showBack: showBack),
           SliverToBoxAdapter(
             child: Padding(
               padding: const EdgeInsets.fromLTRB(16, 18, 16, 28),

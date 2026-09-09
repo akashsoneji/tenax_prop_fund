@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:google_fonts/google_fonts.dart';
 
-import '../../../shared/theme/app_text.dart';
 import '../models/reward_models.dart';
 
 /// A single line in the "What stands between you and a payout" card. Renders
@@ -30,9 +30,9 @@ class RequirementRow extends StatelessWidget {
               Expanded(
                 child: Text(
                   requirement.label,
-                  maxLines: 2,
-                  overflow: TextOverflow.ellipsis,
-                  style: AppText.subtitle(
+                  style: GoogleFonts.beVietnamPro(
+                    fontSize: 14,
+                    fontWeight: FontWeight.w500,
                     color: scheme.onSurface.withValues(alpha: 0.78),
                   ),
                 ),
@@ -67,7 +67,11 @@ class _StatusPill extends StatelessWidget {
       ),
       child: Text(
         text,
-        style: AppText.value(fontSize: 12.5, color: color),
+        style: GoogleFonts.beVietnamPro(
+          fontSize: 12.5,
+          fontWeight: FontWeight.w700,
+          color: color,
+        ),
       ),
     );
   }

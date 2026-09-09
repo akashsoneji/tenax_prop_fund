@@ -16,6 +16,7 @@ class DashboardData {
     required this.accountCount,
     required this.liveAccounts,
     required this.liveUserId,
+    this.trades = const [],
   });
 
   final DashboardWelcome welcome;
@@ -28,6 +29,9 @@ class DashboardData {
   final DashboardReferral? referral;
   final int accountCount;
   final List<DashboardAccount> liveAccounts;
+
+  /// Recent trades across the trader's accounts, from `/dashboard` `trades[]`.
+  final List<DashboardTrade> trades;
 
   /// The trader id used to build the per-user Pusher channel
   /// `private-trader.{liveUserId}.accounts`. From `/dashboard` `liveUserId`.
@@ -56,6 +60,7 @@ class DashboardData {
         accountCount: accountCount,
         liveAccounts: liveAccounts ?? this.liveAccounts,
         liveUserId: liveUserId,
+        trades: trades,
       );
 
   factory DashboardData.fromJson(Map<String, dynamic> json) {
@@ -128,6 +133,7 @@ class DashboardData {
       liveUserId: (json['liveUserId'] as num?)?.toInt() ??
           (json['live_user_id'] as num?)?.toInt() ??
           0,
+      trades: _list(json['trades']).map(DashboardTrade.fromJson).toList(),
     );
   }
 
@@ -465,5 +471,42 @@ class DashboardAccount {
         equityMinor: (json['equity_minor'] as num?)?.toInt() ?? 0,
         balanceMinor: (json['balance_minor'] as num?)?.toInt() ?? 0,
         baselineMinor: (json['baseline_minor'] as num?)?.toInt() ?? 0,
+      );
+}
+
+/// A recent-trade row from the dashboard's `trades[]`.
+class DashboardTrade {
+  const DashboardTrade({
+    required this.id,
+    required this.symbol,
+    required this.side,
+    required this.lots,
+    required this.held,
+    required this.net,
+  });
+
+  final int id;
+  final String symbol;
+  final String side;
+  final String lots;
+  final String held;
+
+  /// Formatted net P/L, e.g. `+$0.58` or `−$0.02` (note: server uses the
+  /// U+2212 minus sign for losses).
+  final String net;
+
+  /// True when the net P/L is negative (server prefixes `−` U+2212 or `-`).
+  bool get isLoss => net.startsWith('−') || net.startsWith('-');
+
+  /// True when this is a buy/long trade.
+  bool get isBuy => side.toLowerCase() == 'buy';
+
+  factory DashboardTrade.fromJson(Map<String, dynamic> json) => DashboardTrade(
+        id: (json['id'] as num?)?.toInt() ?? 0,
+        symbol: json['symbol'] as String? ?? '',
+        side: json['side'] as String? ?? '',
+        lots: json['lots']?.toString() ?? '',
+        held: json['held'] as String? ?? '',
+        net: json['net'] as String? ?? '',
       );
 }

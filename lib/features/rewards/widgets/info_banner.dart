@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 
 import '../../../shared/theme/app_colors.dart';
-import '../../../shared/theme/app_text.dart';
 
 /// A tinted callout
 /// and the KYC-name-mismatch reminder. Variants drive background tint and
@@ -42,9 +41,11 @@ class InfoBanner extends StatelessWidget {
               Expanded(
                 child: Text(
                   title,
-                  maxLines: 2,
-                  overflow: TextOverflow.ellipsis,
-                  style: AppText.value(fontSize: 13.5, color: palette.accent),
+                  style: TextStyle(
+                    color: palette.accent,
+                    fontWeight: FontWeight.w700,
+                    fontSize: 13.5,
+                  ),
                 ),
               ),
             ],
@@ -52,10 +53,11 @@ class InfoBanner extends StatelessWidget {
           const SizedBox(height: 8),
           Text(
             body,
-            style: AppText.subtitle(
+            style: TextStyle(
+              color: scheme.onSurface.withValues(alpha: 0.7),
               fontSize: 13,
               height: 1.4,
-              color: scheme.onSurface.withValues(alpha: 0.7),
+              fontWeight: FontWeight.w500,
             ),
           ),
         ],

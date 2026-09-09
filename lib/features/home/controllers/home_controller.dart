@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:flutter/widgets.dart';
 import 'package:get/get.dart';
 
 import '../../../core/base/base_controller.dart';
@@ -18,7 +19,8 @@ import '../repositories/home_repository.dart';
 /// splices live equity ticks into the snapshot so the hero equity, KPI tiles
 /// and account strip update in real time without a refetch. The notification
 /// badge count is its own small Rx polled from REST and bumped by WS.
-class HomeController extends BaseController<DashboardData> {
+class HomeController extends BaseController<DashboardData>
+    with WidgetsBindingObserver {
   HomeController(this._repository, this._pusher, this._auth);
 
   final HomeRepository _repository;
@@ -56,9 +58,28 @@ class HomeController extends BaseController<DashboardData> {
   @override
   void onInit() {
     super.onInit();
+    WidgetsBinding.instance.addObserver(this);
     _loadUserName();
     _loadUnreadCount();
     _bindConnectionState();
+  }
+
+  /// Keeps the live feed healthy across app background/foreground transitions.
+  ///
+  /// Mobile OSes suspend or kill an idle socket within seconds of backgrounding
+  /// (this is an OS behaviour, not a Pusher one). On `resumed` we re-open the
+  /// socket — `connect()` is a no-op if it is already connected — and the
+  /// [PusherClient] auto-resubscribes every active channel with a fresh
+  /// signature. We also refetch the REST snapshot so any equity ticks missed
+  /// while backgrounded are filled in, instead of showing stale numbers until
+  /// the next tick arrives.
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    super.didChangeAppLifecycleState(state);
+    if (isClosed || state != AppLifecycleState.resumed) return;
+    _pusher.connect();
+    if (_channel != null) _pusher.subscribe(_channel!);
+    refreshData();
   }
 
   Future<void> _loadUserName() async {
@@ -191,6 +212,7 @@ class HomeController extends BaseController<DashboardData> {
 
   @override
   void onClose() {
+    WidgetsBinding.instance.removeObserver(this);
     if (_channel != null) _pusher.unsubscribe(_channel!);
     for (final s in _wsSubs) {
       s.cancel();

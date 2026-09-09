@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:google_fonts/google_fonts.dart';
 
 import '../../../shared/theme/app_colors.dart';
-import '../../../shared/theme/app_text.dart';
 import '../../../shared/theme/app_theme.dart';
 import '../../../shared/widgets/app_gradient_button.dart';
 import '../../../shared/widgets/data_state_builder.dart';
@@ -131,21 +131,25 @@ class _StatGrid extends StatelessWidget {
           label: 'rewards.withdrawable'.tr,
           value: w.amountUsd,
           tone: StatTileTone.green,
+          trailingIcon: Icons.tune_rounded,
         ),
         StatTile(
           label: 'rewards.pending'.tr,
           value: p.amountUsd,
           tone: StatTileTone.amber,
+          trailingIcon: Icons.tune_rounded,
         ),
         StatTile(
           label: 'rewards.paid_out'.tr,
           value: paid.amountUsd,
           tone: StatTileTone.purple,
+          trailingIcon: Icons.tune_rounded,
         ),
         StatTile(
           label: 'rewards.your_share'.tr,
           value: '${share.percent}%',
           tone: StatTileTone.blue,
+          trailingIcon: Icons.tune_rounded,
         ),
       ],
     );
@@ -186,7 +190,11 @@ class _RequestsCard extends StatelessWidget {
               padding: const EdgeInsets.only(bottom: 6, top: 2),
               child: Text(
                 'rewards.what_stands'.tr,
-                style: AppText.heading(fontSize: 15.5, color: scheme.onSurface),
+                style: GoogleFonts.beVietnamPro(
+                  fontSize: 15.5,
+                  fontWeight: FontWeight.w800,
+                  color: scheme.onSurface,
+                ),
               ),
             ),
             const SizedBox(height: 4),
@@ -253,14 +261,10 @@ class _RequestPayoutCta extends StatelessWidget {
 // Sheet plumbing
 // ---------------------------------------------------------------------------
 void _showRequestSheet(BuildContext context) {
-  showDialog(
+  showModalBottomSheet(
     context: context,
-    barrierColor: Colors.black.withValues(alpha: 0.55),
-    builder: (_) => const Dialog(
-      backgroundColor: AppColors.transparent,
-      elevation: 0,
-      insetPadding: EdgeInsets.symmetric(horizontal: 20, vertical: 40),
-      child: RequestPayoutSheet(),
-    ),
+    isScrollControlled: true,
+    backgroundColor: AppColors.transparent,
+    builder: (_) => const RequestPayoutSheet(),
   );
 }

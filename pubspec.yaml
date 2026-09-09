@@ -76,7 +76,6 @@ flutter:
   uses-material-design: true
 
   assets:
-    - assets/icons/
     - assets/flavors/clientA/
     - assets/flavors/clientB/
     - assets/flavors/clientC/
