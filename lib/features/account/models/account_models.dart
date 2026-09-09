@@ -58,6 +58,20 @@ class AccountData {
 
   bool get isEmpty => false;
 
+  /// Builds the screen payload from the REST `GET /accounts/{id}` `data` block.
+  /// That endpoint returns the account fields at the root (with `stats`,
+  /// `objectives`, `credentials`, `overview` and `chart` nested), whereas the
+  /// legacy Inertia route nested them under `props.account` etc. Reshaping the
+  /// flat `data` into the `props` shape lets [fromProps] do the actual parsing,
+  /// so there is exactly one mapping to maintain.
+  factory AccountData.fromJson(Map<String, dynamic> data) {
+    return AccountData.fromProps({
+      'account': data,
+      'overview': _map(data['overview']),
+      'credentials': _map(data['credentials']),
+    });
+  }
+
   factory AccountData.fromProps(Map<String, dynamic> props) {
     final account = _map(props['account']);
     final stats = _map(account['stats']);

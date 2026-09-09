@@ -37,7 +37,7 @@ class AccountsView extends StatelessWidget {
             parent: BouncingScrollPhysics(),
           ),
           slivers: [
-            PinnedGradientAppBar(title: 'accounts.app_bar'.tr),
+            PinnedGradientAppBar(title: 'accounts.app_bar'.tr, showBack: false),
             SliverToBoxAdapter(
               child: Padding(
                 padding: const EdgeInsets.fromLTRB(16, 18, 16, 32),
@@ -176,15 +176,17 @@ class _AccountsSkeleton extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: const [
-        HeroSkeleton(height: 280),
+        HeroSkeleton(height: 180),
         SizedBox(height: 18),
         ShimmerBox(height: 40, radius: 22),
         SizedBox(height: 14),
         ShimmerBox(height: 46, radius: 14),
         SizedBox(height: 18),
-        CardSkeleton(lines: 3, height: 170),
+        AccountCardSkeleton(),
         SizedBox(height: 12),
-        CardSkeleton(lines: 3, height: 170),
+        AccountCardSkeleton(),
+        SizedBox(height: 12),
+        AccountCardSkeleton(),
       ],
     );
   }

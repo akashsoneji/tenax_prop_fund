@@ -41,7 +41,7 @@ class AccountView extends StatelessWidget {
                         onChanged: c.selectTab,
                       )),
                   const SizedBox(height: 16),
-                  Obx(() => _TabBody(controller: c)),
+                  _TabBody(controller: c),
                 ],
               ),
             ),
@@ -141,36 +141,38 @@ class _TabBody extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    switch (controller.selectedTab.value) {
-      case AccountDetailTab.overview:
-        return DataStateBuilder<AccountData>(
-          state: controller.state,
-          onRetry: controller.load,
-          skeleton: const _OverviewSkeleton(),
-          builder: (data) => _OverviewTab(controller: controller, data: data),
-        );
-      case AccountDetailTab.trading:
-        return DataStateBuilder<AccountData>(
-          state: controller.state,
-          onRetry: controller.load,
-          skeleton: const _OverviewSkeleton(),
-          builder: (data) => _TradingTab(data: data),
-        );
-      case AccountDetailTab.platform:
-        return DataStateBuilder<PlatformData>(
-          state: controller.platform.value ?? const DataInitial(),
-          onRetry: controller.retryPlatform,
-          skeleton: const _OverviewSkeleton(),
-          builder: (data) => _PlatformTab(controller: controller, data: data),
-        );
-      case AccountDetailTab.reset:
-        return DataStateBuilder<ResetData>(
-          state: controller.reset.value ?? const DataInitial(),
-          onRetry: controller.retryReset,
-          skeleton: const _OverviewSkeleton(),
-          builder: (data) => _ResetTab(data: data),
-        );
-    }
+    return Obx(() {
+      switch (controller.selectedTab.value) {
+        case AccountDetailTab.overview:
+          return DataStateBuilder<AccountData>(
+            state: controller.state,
+            onRetry: controller.load,
+            skeleton: const _OverviewSkeleton(),
+            builder: (data) => _OverviewTab(controller: controller, data: data),
+          );
+        case AccountDetailTab.trading:
+          return DataStateBuilder<AccountData>(
+            state: controller.state,
+            onRetry: controller.load,
+            skeleton: const _OverviewSkeleton(),
+            builder: (data) => _TradingTab(data: data),
+          );
+        case AccountDetailTab.platform:
+          return DataStateBuilder<PlatformData>(
+            state: controller.platform.value ?? const DataInitial(),
+            onRetry: controller.retryPlatform,
+            skeleton: const _OverviewSkeleton(),
+            builder: (data) => _PlatformTab(controller: controller, data: data),
+          );
+        case AccountDetailTab.reset:
+          return DataStateBuilder<ResetData>(
+            state: controller.reset.value ?? const DataInitial(),
+            onRetry: controller.retryReset,
+            skeleton: const _OverviewSkeleton(),
+            builder: (data) => _ResetTab(data: data),
+          );
+      }
+    });
   }
 }
 
@@ -187,22 +189,8 @@ class _OverviewTab extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        Row(
-          children: [
-            Expanded(
-              child: Text(
-                '${'account.login'.tr} ${data.header.login}',
-                style: TextStyle(
-                    fontSize: 16,
-                    fontWeight: FontWeight.w800,
-                    color: Theme.of(context).colorScheme.onSurface),
-              ),
-            ),
-            AccountStatusPill(
-                label: data.header.statusLabel, tone: data.header.tone),
-          ],
-        ),
-        const SizedBox(height: 14),
+        AccountSummaryHero(header: data.header, stats: data.stats),
+        const SizedBox(height: 16),
         Obx(() => AccountHeaderCard(
               header: data.header,
               credentials: data.credentials,
@@ -212,8 +200,6 @@ class _OverviewTab extends StatelessWidget {
               onCopyLogin: () =>
                   controller.copy(data.credentials.login, 'account.copied'),
             )),
-        const SizedBox(height: 16),
-        AccountStatGrid(stats: data.stats),
         const SizedBox(height: 22),
         _SectionLabel('account.trading_objectives'.tr),
         const SizedBox(height: 12),

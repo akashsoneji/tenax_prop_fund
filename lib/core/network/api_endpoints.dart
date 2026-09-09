@@ -24,4 +24,15 @@ abstract class ApiEndpoints {
   /// the one live `/api/v1` data screen; every other portal screen uses the
   /// Inertia `/app/...` routes or static demo data.
   static const dashboard = '/dashboard';
+
+  /// Trading accounts list for the "Account Center" screen. Standard
+  /// `{success, message, data[], meta}` envelope. Query params: `status`
+  /// (all | active | breached | passed | raw-status) and `phase`
+  /// (all | evaluation | verification | funded | breached).
+  static const accounts = '/accounts';
+
+  /// Single trading account overview. Standard `{success, message, data}`
+  /// envelope where `data` carries the account fields plus nested `stats`,
+  /// `objectives`, `credentials`, `overview` and `chart`.
+  static String accountDetail(Object id) => '/accounts/$id';
 }

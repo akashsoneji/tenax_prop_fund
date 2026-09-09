@@ -58,6 +58,86 @@ class HeroSkeleton extends StatelessWidget {
   }
 }
 
+/// A placeholder shaped like the redesigned account card: status rail, header
+/// (title + pill), a P&L band, a 2×2 stat grid and two action buttons. Mirrors
+/// `AccountListCard` so the loading state reads as the real content.
+class AccountCardSkeleton extends StatelessWidget {
+  const AccountCardSkeleton({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    final scheme = Theme.of(context).colorScheme;
+    return Container(
+      clipBehavior: Clip.antiAlias,
+      decoration: BoxDecoration(
+        color: scheme.surface,
+        borderRadius: BorderRadius.circular(20),
+        border: Border.all(color: scheme.onSurface.withValues(alpha: 0.05)),
+      ),
+      child: IntrinsicHeight(
+        child: Row(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            const ShimmerBox(width: 4, radius: 0),
+            Expanded(
+              child: Padding(
+                padding: const EdgeInsets.all(14),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: const [
+                    Row(
+                      children: [
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              ShimmerBox(width: 90, height: 9),
+                              SizedBox(height: 7),
+                              ShimmerBox(width: 150, height: 15),
+                            ],
+                          ),
+                        ),
+                        SizedBox(width: 10),
+                        ShimmerBox(width: 70, height: 22, radius: 8),
+                      ],
+                    ),
+                    SizedBox(height: 14),
+                    ShimmerBox(height: 58, radius: 14),
+                    SizedBox(height: 12),
+                    Row(
+                      children: [
+                        Expanded(child: ShimmerBox(height: 42, radius: 12)),
+                        SizedBox(width: 10),
+                        Expanded(child: ShimmerBox(height: 42, radius: 12)),
+                      ],
+                    ),
+                    SizedBox(height: 10),
+                    Row(
+                      children: [
+                        Expanded(child: ShimmerBox(height: 42, radius: 12)),
+                        SizedBox(width: 10),
+                        Expanded(child: ShimmerBox(height: 42, radius: 12)),
+                      ],
+                    ),
+                    SizedBox(height: 14),
+                    Row(
+                      children: [
+                        Expanded(child: ShimmerBox(height: 42, radius: 12)),
+                        SizedBox(width: 10),
+                        Expanded(child: ShimmerBox(height: 42, radius: 12)),
+                      ],
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
 /// A single list row: leading circle + two text lines + trailing block.
 class ListTileSkeleton extends StatelessWidget {
   const ListTileSkeleton({super.key});
