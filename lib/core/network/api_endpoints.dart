@@ -44,4 +44,31 @@ abstract class ApiEndpoints {
   /// Instruments scoped to a single trading [account].
   static String instrumentsByAccount(String account) =>
       '/instruments/$account';
+
+  // ---------------------------------------------------------------------------
+  // Trade / Positions
+  // ---------------------------------------------------------------------------
+  // Ported from the white_label app (`lib/constants/api_const.dart`), where the
+  // same backend exposes these under a `user/trade/...` prefix on its ajax base.
+  // tenax's REST base already carries `/api/v1`, and every existing path here is
+  // root-relative (`/accounts`, `/dashboard`), so the trade paths follow that
+  // convention below.
+  //
+  // TODO(backend): confirm the real tenax trade paths. white_label calls
+  // `user/trade/new-order`, `user/trade/closePositionByPositionId`, etc. If the
+  // tenax backend actually expects the `user/` prefix (or a different base than
+  // `/api/v1`), adjust these constants accordingly — the request bodies and
+  // socket protocol are already verbatim from white_label.
+  static const placeOrder = '/trade/new-order';
+  static const closePositionByPositionId = '/trade/closePositionByPositionId';
+  static const closePositions = '/trade/closePositions';
+  static const cancelPendingOrder = '/trade/cancel-pending-order';
+  static const closePendingOrder = '/trade/closePendingOrder';
+  static const modifyPendingOrder = '/trade/modify-pending-order';
+  static const updateTPSL = '/trade/update-tp-sl';
+  static const updatePendingOrderTPSL = '/trade/update-pending-order-tp-sl';
+
+  /// Trade history (GET). Standard `{success, message, data, meta}` envelope;
+  /// `data` may be a flat list or `{data, pagination, totals, summary}`.
+  static const tradeHistory = '/trade/tradehistory';
 }

@@ -77,6 +77,19 @@ class FlavorConfig {
     return '$base/marketwatchv2';
   }
 
+  String get _wsBase =>
+      wsUrl.endsWith('/') ? wsUrl.substring(0, wsUrl.length - 1) : wsUrl;
+
+  /// Open-positions socket: `{wsUrl}/op` (mirrors white_label's `/ws/op`).
+  /// For tenax: `wss://pipzefunded.com/trade-engine/ws/op`.
+  String get openPositionsUrl => '$_wsBase/op';
+
+  /// Pending-orders socket: `{wsUrl}/po` (white_label `/ws/po`).
+  String get pendingOrdersUrl => '$_wsBase/po';
+
+  /// Account equity/margin socket: `{wsUrl}/account` (white_label `/ws/account`).
+  String get accountWsUrl => '$_wsBase/account';
+
   /// Builds the config from compile-time [String.fromEnvironment] values
   /// injected via `--dart-define` (see `.vscode/launch.json`). Each flavor has
   /// its own default host so every URL (REST, WebSocket, chart) changes with the

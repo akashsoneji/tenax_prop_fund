@@ -11,7 +11,7 @@ import '../controllers/home_controller.dart';
 import 'tabs/home_tab_view.dart';
 import 'tabs/markets_tab_view.dart';
 import 'tabs/more_tab_view.dart';
-import 'tabs/positions_tab_view.dart';
+import '../../positions/views/positions_view.dart';
 import 'tabs/trade_tab_view.dart';
 
 /// 5-tab shell shown after successful login. Preserves each tab's state with
@@ -45,7 +45,7 @@ class HomeShellView extends StatelessWidget {
     HomeTabView(),
     MarketsTabView(),
     TradeTabView(),
-    PositionsTabView(),
+    PositionsView(),
     MoreTabView(),
   ];
 
@@ -53,7 +53,7 @@ class HomeShellView extends StatelessWidget {
     HomeTabView(),
     MarketsTabView(),
     TradeTabView(),
-    PositionsTabView(),
+    PositionsView(),
     AccountsView(),
   ];
 

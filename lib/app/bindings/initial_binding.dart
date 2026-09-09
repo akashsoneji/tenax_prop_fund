@@ -4,6 +4,8 @@ import 'package:get_storage/get_storage.dart';
 
 import '../../core/network/api_client.dart';
 import '../../core/websocket/websocket_manager.dart';
+import '../../features/positions/services/account_ws_service.dart';
+import '../../features/positions/services/positions_ws_service.dart';
 import '../../features/symbols/services/favorites_service.dart';
 import '../../features/symbols/services/market_watch_v2_service.dart';
 import '../../features/authentication/repositories/auth_repository.dart';
@@ -52,6 +54,18 @@ class InitialBinding extends Bindings {
     // onInit can resubscribe saved favorites from app open.
     Get.put<FavoritesService>(
       FavoritesService(Get.find<GetStorage>(), Get.find<MarketWatchV2Service>()),
+      permanent: true,
+    );
+
+    // Live trade sockets: `/op` (open positions) + `/po` (pending orders) and
+    // `/account` (equity/margin). Permanent + self-connecting so the Positions
+    // summary keeps ticking regardless of which tab is showing.
+    Get.put<PositionsWsService>(
+      PositionsWsService(_config, Get.find<FlutterSecureStorage>()),
+      permanent: true,
+    );
+    Get.put<AccountWsService>(
+      AccountWsService(_config, Get.find<FlutterSecureStorage>()),
       permanent: true,
     );
 
