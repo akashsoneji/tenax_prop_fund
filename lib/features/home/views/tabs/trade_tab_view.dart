@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
+import '../../../../core/network/api_client.dart';
 import '../../../symbols/controllers/symbols_controller.dart';
 import '../../../symbols/repositories/symbols_repository.dart';
 import '../../../symbols/views/symbols_view.dart';
@@ -17,7 +18,10 @@ class TradeTabView extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     if (!Get.isRegistered<SymbolsRepository>()) {
-      Get.lazyPut<SymbolsRepository>(() => SymbolsRepository(), fenix: true);
+      Get.lazyPut<SymbolsRepository>(
+        () => SymbolsRepository(Get.find<ApiClient>()),
+        fenix: true,
+      );
     }
     if (!Get.isRegistered<SymbolsController>()) {
       Get.lazyPut<SymbolsController>(

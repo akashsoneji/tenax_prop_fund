@@ -1,11 +1,41 @@
+import '../../../core/network/api_client.dart';
+import '../../../core/network/api_endpoints.dart';
+import '../../../core/network/api_envelope.dart';
 import '../../../core/network/api_response.dart';
 import '../models/symbol_models.dart';
 
-/// Single source of truth for symbol/spec data. Today it returns demo data
-/// after a short delay to simulate the network; when the instruments API lands,
-/// replace the body of [getSymbols] with an `ApiClient` call + `fromJson`. The
-/// controller and view do not change when that swap happens.
+/// Single source of truth for symbol/spec data. [getSymbols] still returns demo
+/// spec cards for the "Symbols & specs" screen; [getInstruments] hits the live
+/// instruments REST endpoint and parses `data.symbols` into [Instrument]s for
+/// the search sheet + favorites metadata. Networking lives here, never in a
+/// controller.
 class SymbolsRepository {
+  SymbolsRepository(this._api);
+
+  final ApiClient _api;
+
+  /// Live instruments list. Parses the envelope's `data.symbols` array into
+  /// [Instrument]s (code + name + category). Pass [account] to scope to one
+  /// trading account.
+  Future<ApiResponse<List<Instrument>>> getInstruments({String? account}) {
+    final path = account == null || account.isEmpty
+        ? ApiEndpoints.instruments
+        : ApiEndpoints.instrumentsByAccount(account);
+    return ApiEnvelope.guard<List<Instrument>>(
+      () => _api.get<dynamic>(path),
+      (data) {
+        final list = data is Map<String, dynamic> ? data['symbols'] : data;
+        if (list is! List) return const <Instrument>[];
+        return list
+            .whereType<Map<String, dynamic>>()
+            .map(Instrument.fromJson)
+            .where((i) => i.code.isNotEmpty)
+            .toList();
+      },
+      showErrorToast: false,
+    );
+  }
+
   Future<ApiResponse<List<SymbolSpec>>> getSymbols() async {
     try {
       // Simulated network latency so the shimmer is visible during development.

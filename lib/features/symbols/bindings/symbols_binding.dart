@@ -1,5 +1,6 @@
 import 'package:get/get.dart';
 
+import '../../../core/network/api_client.dart';
 import '../controllers/symbols_controller.dart';
 import '../repositories/symbols_repository.dart';
 
@@ -9,7 +10,9 @@ import '../repositories/symbols_repository.dart';
 class SymbolsBinding extends Bindings {
   @override
   void dependencies() {
-    Get.lazyPut<SymbolsRepository>(() => SymbolsRepository());
+    Get.lazyPut<SymbolsRepository>(
+      () => SymbolsRepository(Get.find<ApiClient>()),
+    );
     Get.lazyPut<SymbolsController>(
       () => SymbolsController(Get.find<SymbolsRepository>()),
     );

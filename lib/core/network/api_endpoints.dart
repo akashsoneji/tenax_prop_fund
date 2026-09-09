@@ -35,4 +35,13 @@ abstract class ApiEndpoints {
   /// envelope where `data` carries the account fields plus nested `stats`,
   /// `objectives`, `credentials`, `overview` and `chart`.
   static String accountDetail(Object id) => '/accounts/$id';
+
+
+
+  /// Live tradable instruments list (parsed into `Instrument`s).
+  static const instruments = '/instruments';
+
+  /// Instruments scoped to a single trading [account].
+  static String instrumentsByAccount(String account) =>
+      '/instruments/$account';
 }

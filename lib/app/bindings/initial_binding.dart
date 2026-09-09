@@ -4,6 +4,7 @@ import 'package:get_storage/get_storage.dart';
 
 import '../../core/network/api_client.dart';
 import '../../core/websocket/websocket_manager.dart';
+import '../../features/symbols/services/favorites_service.dart';
 import '../../features/symbols/services/market_watch_v2_service.dart';
 import '../../features/authentication/repositories/auth_repository.dart';
 import '../../features/authentication/services/auth_service.dart';
@@ -44,6 +45,13 @@ class InitialBinding extends Bindings {
     // so ticks are flowing from app open and survive background/foreground.
     Get.put<MarketWatchV2Service>(
       MarketWatchV2Service(_config, Get.find<FlutterSecureStorage>()),
+      permanent: true,
+    );
+    // Favorited instruments store — persists metadata + keeps the socket
+    // subscription in lockstep with the favorite set. Right after the socket so
+    // onInit can resubscribe saved favorites from app open.
+    Get.put<FavoritesService>(
+      FavoritesService(Get.find<GetStorage>(), Get.find<MarketWatchV2Service>()),
       permanent: true,
     );
 
