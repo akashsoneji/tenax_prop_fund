@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
 
 import '../../../shared/theme/app_colors.dart';
@@ -57,19 +58,19 @@ class PasswordStrengthMeter extends StatelessWidget {
             return Expanded(
               child: AnimatedContainer(
                 duration: const Duration(milliseconds: 200),
-                height: 6,
-                margin: EdgeInsets.only(right: i == 3 ? 0 : 6),
+                height: 6.h,
+                margin: EdgeInsets.only(right: i == 3 ? 0 : 6.w),
                 decoration: BoxDecoration(
                   color: filled
                       ? color
                       : scheme.onSurface.withValues(alpha: 0.12),
-                  borderRadius: BorderRadius.circular(3),
+                  borderRadius: BorderRadius.circular(3.r),
                 ),
               ),
             );
           }),
         ),
-        const SizedBox(height: 6),
+        SizedBox(height: 6.h),
         Row(
           children: [
             Expanded(
@@ -82,7 +83,7 @@ class PasswordStrengthMeter extends StatelessWidget {
                     _labelKey.tr,
                     style: TextStyle(
                       color: color,
-                      fontSize: 12,
+                      fontSize: 12.sp,
                       fontWeight: FontWeight.w600,
                     ),
                   ),
@@ -91,7 +92,7 @@ class PasswordStrengthMeter extends StatelessWidget {
             ),
           ],
         ),
-        const SizedBox(height: 12),
+        SizedBox(height: 12.h),
         _Requirement(
           met: password.length >= _minLength,
           label: 'register.req_length'.tr,
@@ -119,7 +120,7 @@ class _Requirement extends StatelessWidget {
   Widget build(BuildContext context) {
     final scheme = Theme.of(context).colorScheme;
     return Padding(
-      padding: const EdgeInsets.only(top: 4),
+      padding: EdgeInsets.only(top: 4.h),
       child: Row(
         children: [
           AnimatedSwitcher(
@@ -129,17 +130,17 @@ class _Requirement extends StatelessWidget {
             child: Icon(
               met ? Icons.check_circle_rounded : Icons.circle_outlined,
               key: ValueKey(met),
-              size: 16,
+              size: 16.w,
               color: met
                   ? Colors.green
                   : scheme.onSurface.withValues(alpha: 0.4),
             ),
           ),
-          const SizedBox(width: 8),
+          SizedBox(width: 8.w),
           Text(
             label,
             style: TextStyle(
-              fontSize: 12,
+              fontSize: 12.sp,
               color: met
                   ? scheme.onSurface
                   : scheme.onSurface.withValues(alpha: 0.6),

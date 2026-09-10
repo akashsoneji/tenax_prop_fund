@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 
 import '../../../shared/theme/app_colors.dart';
 
@@ -25,37 +26,37 @@ class InfoBanner extends StatelessWidget {
     final palette = _paletteFor(variant);
     final iconData = icon ?? palette.icon;
     return Container(
-      padding: const EdgeInsets.fromLTRB(14, 12, 14, 14),
+      padding: EdgeInsets.fromLTRB(14.w, 12.h, 14.w, 14.h),
       decoration: BoxDecoration(
         color: palette.accent.withValues(
             alpha: scheme.brightness == Brightness.dark ? 0.16 : 0.12),
-        borderRadius: BorderRadius.circular(12),
+        borderRadius: BorderRadius.circular(12.r),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Row(
             children: [
-              Icon(iconData, size: 18, color: palette.accent),
-              const SizedBox(width: 8),
+              Icon(iconData, size: 18.w, color: palette.accent),
+              SizedBox(width: 8.w),
               Expanded(
                 child: Text(
                   title,
                   style: TextStyle(
                     color: palette.accent,
                     fontWeight: FontWeight.w700,
-                    fontSize: 13.5,
+                    fontSize: 13.5.sp,
                   ),
                 ),
               ),
             ],
           ),
-          const SizedBox(height: 8),
+          SizedBox(height: 8.h),
           Text(
             body,
             style: TextStyle(
               color: scheme.onSurface.withValues(alpha: 0.7),
-              fontSize: 13,
+              fontSize: 13.sp,
               height: 1.4,
               fontWeight: FontWeight.w500,
             ),

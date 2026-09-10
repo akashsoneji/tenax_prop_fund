@@ -10,6 +10,7 @@ abstract class AppRoutes {
   static const settings = '/settings';
   static const profileKyc = '/profile-kyc';
   static const editProfile = '/edit-profile';
+  static const kycDocuments = '/kyc-documents';
   static const rewards = '/rewards';
   static const tradingRules = '/trading-rules';
   static const account = '/account';
@@ -23,7 +24,6 @@ abstract class AppRoutes {
   static const economicCalendar = '/economic-calendar';
   static const faq = '/faq';
   static const verification = '/verification';
-  static const verificationStepper = '/verification/stepper';
   static const verificationPersonal = '/verification/personal';
   static const verificationDocuments = '/verification/documents';
   static const addBank = '/add-bank';

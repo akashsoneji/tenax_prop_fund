@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
 
 import '../../../shared/widgets/app_info_banner.dart';
@@ -32,7 +33,7 @@ class CompetitionsView extends StatelessWidget {
         slivers: [
           PinnedGradientAppBar(title: 'competitions.title'.tr),
           SliverPadding(
-            padding: const EdgeInsets.fromLTRB(16, 18, 16, 32),
+            padding: EdgeInsets.fromLTRB(16.w, 18.h, 16.w, 32.h),
             sliver: SliverToBoxAdapter(
               child: Obx(
                 () => DataStateBuilder<CompetitionInfo>(
@@ -73,7 +74,7 @@ class _CompetitionsBody extends StatelessWidget {
             ),
           ),
         ),
-        const SizedBox(height: 26),
+        SizedBox(height: 26.h),
         FadeSlideIn(
           order: 1,
           child: SectionHeader('competitions.prizes'.tr),
@@ -91,7 +92,7 @@ class _CompetitionsBody extends StatelessWidget {
             ],
           ),
         ),
-        const SizedBox(height: 26),
+        SizedBox(height: 26.h),
         FadeSlideIn(
           order: 3,
           child: SectionHeader('competitions.rules_differ'.tr),
@@ -109,7 +110,7 @@ class _CompetitionsBody extends StatelessWidget {
             ],
           ),
         ),
-        const SizedBox(height: 22),
+        SizedBox(height: 22.h),
         FadeSlideIn(
           order: 5,
           child: AppInfoBanner(
@@ -133,16 +134,16 @@ class _CompetitionsSkeleton extends StatelessWidget {
   Widget build(BuildContext context) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
-      children: const [
-        HeroSkeleton(height: 300),
-        SizedBox(height: 26),
-        ShimmerBox(width: 140, height: 16),
-        SizedBox(height: 14),
-        CardSkeleton(lines: 5, height: 200),
-        SizedBox(height: 26),
-        ShimmerBox(width: 140, height: 16),
-        SizedBox(height: 14),
-        CardSkeleton(lines: 5, height: 200),
+      children: [
+        HeroSkeleton(height: 300.h),
+        SizedBox(height: 26.h),
+        ShimmerBox(width: 140.w, height: 16.h),
+        SizedBox(height: 14.h),
+        CardSkeleton(lines: 5, height: 200.h),
+        SizedBox(height: 26.h),
+        ShimmerBox(width: 140.w, height: 16.h),
+        SizedBox(height: 14.h),
+        CardSkeleton(lines: 5, height: 200.h),
       ],
     );
   }

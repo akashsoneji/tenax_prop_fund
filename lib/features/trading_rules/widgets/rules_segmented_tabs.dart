@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
 
@@ -26,11 +27,11 @@ class RulesSegmentedTabs extends StatelessWidget {
     return Obx(() {
       final selected = c.selectedTab.value;
       return Container(
-        margin: const EdgeInsets.fromLTRB(16, 12, 16, 4),
-        padding: const EdgeInsets.all(4),
+        margin: EdgeInsets.fromLTRB(16.w, 12.h, 16.w, 4.h),
+        padding: EdgeInsets.all(4.w),
         decoration: BoxDecoration(
           color: AppColors.track, // pale lavender track
-          borderRadius: BorderRadius.circular(14),
+          borderRadius: BorderRadius.circular(14.r),
         ),
         child: SingleChildScrollView(
           scrollDirection: Axis.horizontal,
@@ -71,16 +72,16 @@ class _SegmentChip extends StatelessWidget {
       child: AnimatedContainer(
         duration: AppMotion.base,
         curve: AppMotion.enter,
-        margin: const EdgeInsets.symmetric(horizontal: 2),
-        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+        margin: EdgeInsets.symmetric(horizontal: 2.w),
+        padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 10.h),
         decoration: BoxDecoration(
           color: isSelected ? scheme.primary : Colors.transparent,
-          borderRadius: BorderRadius.circular(10),
+          borderRadius: BorderRadius.circular(10.r),
         ),
         child: Text(
           label,
           style: GoogleFonts.beVietnamPro(
-            fontSize: 13.5,
+            fontSize: 13.5.sp,
             fontWeight: FontWeight.w700,
             color: isSelected ? Colors.white : scheme.onSurface,
           ),

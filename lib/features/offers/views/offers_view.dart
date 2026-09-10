@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
 
@@ -30,7 +31,7 @@ class OffersView extends StatelessWidget {
           PinnedGradientAppBar(title: 'offers.title'.tr),
           SliverToBoxAdapter(
             child: Padding(
-              padding: const EdgeInsets.fromLTRB(16, 18, 16, 32),
+              padding: EdgeInsets.fromLTRB(16.w, 18.h, 16.w, 32.h),
               child: Obx(
                 () => DataStateBuilder<OffersData>(
                   state: c.state,
@@ -41,7 +42,7 @@ class OffersView extends StatelessWidget {
                     children: [
                       const _SectionLabel('Available Now'),
                       for (final o in data.available) OfferCard(offer: o),
-                      const SizedBox(height: 18),
+                      SizedBox(height: 18.h),
                       const _SectionLabel('Locked Rewards'),
                       for (final o in data.locked) OfferCard(offer: o),
                     ],
@@ -73,17 +74,17 @@ class _SectionLabel extends StatelessWidget {
         return Opacity(
           opacity: t.clamp(0, 1),
           child: Transform.translate(
-            offset: Offset(0, (1 - t) * 16),
+            offset: Offset(0, (1 - t) * 16.h),
             child: child,
           ),
         );
       },
       child: Padding(
-        padding: const EdgeInsets.only(left: 2, bottom: 12),
+        padding: EdgeInsets.only(left: 2.w, bottom: 12.h),
         child: Text(
           text,
           style: GoogleFonts.beVietnamPro(
-            fontSize: 18,
+            fontSize: 18.sp,
             fontWeight: FontWeight.w800,
             color: scheme.onSurface,
           ),

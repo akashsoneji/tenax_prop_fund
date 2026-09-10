@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:google_fonts/google_fonts.dart';
 
 import '../theme/app_theme.dart';
@@ -36,14 +37,14 @@ class KeyValueRow extends StatelessWidget {
     return Column(
       children: [
         Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+          padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 14.h),
           child: Row(
             children: [
               Expanded(
                 child: Text(
                   label,
                   style: GoogleFonts.beVietnamPro(
-                    fontSize: 14,
+                    fontSize: 14.sp,
                     color: scheme.onSurface.withValues(alpha: 0.70),
                   ),
                 ),
@@ -53,19 +54,19 @@ class KeyValueRow extends StatelessWidget {
                   value,
                   textAlign: TextAlign.right,
                   style: GoogleFonts.beVietnamPro(
-                    fontSize: 14,
+                    fontSize: 14.sp,
                     fontWeight: emphasize ? FontWeight.w800 : FontWeight.w700,
                     color: valueColor ?? scheme.onSurface,
                   ),
                 ),
               ),
               if (showInfo) ...[
-                const SizedBox(width: 8),
+                SizedBox(width: 8.w),
                 GestureDetector(
                   onTap: onInfo,
                   child: Icon(
                     Icons.info_outline_rounded,
-                    size: 17,
+                    size: 17.w,
                     color: scheme.onSurface.withValues(alpha: 0.35),
                   ),
                 ),
@@ -75,10 +76,10 @@ class KeyValueRow extends StatelessWidget {
         ),
         if (showDivider)
           Divider(
-            height: 1,
+            height: 1.h,
             thickness: 1,
-            indent: 16,
-            endIndent: 16,
+            indent: 16.w,
+            endIndent: 16.w,
             color: scheme.onSurface.withValues(alpha: 0.06),
           ),
       ],
@@ -99,7 +100,7 @@ class RulesCard extends StatelessWidget {
     return Container(
       margin: margin,
       clipBehavior: Clip.antiAlias,
-      decoration: AppTheme.surfaceCard(scheme, radius: 16),
+      decoration: AppTheme.surfaceCard(scheme, radius: 16.r),
       child: Column(children: children),
     );
   }

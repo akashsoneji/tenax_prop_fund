@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:google_fonts/google_fonts.dart';
 
 import '../../../shared/theme/app_colors.dart';
@@ -17,21 +18,21 @@ class NotificationRow extends StatelessWidget {
     final visual = _visualFor(notification.type, scheme);
 
     return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 12),
+      padding: EdgeInsets.symmetric(vertical: 12.h),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Container(
-            width: 38,
-            height: 38,
+            width: 38.w,
+            height: 38.w,
             decoration: BoxDecoration(
               color: visual.color.withValues(alpha: 0.14),
               shape: BoxShape.circle,
             ),
             alignment: Alignment.center,
-            child: Icon(visual.icon, size: 20, color: visual.color),
+            child: Icon(visual.icon, size: 20.w, color: visual.color),
           ),
-          const SizedBox(width: 12),
+          SizedBox(width: 12.w),
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -39,18 +40,18 @@ class NotificationRow extends StatelessWidget {
                 Text(
                   notification.title,
                   style: GoogleFonts.beVietnamPro(
-                    fontSize: 14.5,
+                    fontSize: 14.5.sp,
                     fontWeight: FontWeight.w700,
                     color: scheme.onSurface,
                   ),
                 ),
-                const SizedBox(height: 3),
+                SizedBox(height: 3.h),
                 Text(
                   notification.subtitle,
                   maxLines: 2,
                   overflow: TextOverflow.ellipsis,
                   style: GoogleFonts.beVietnamPro(
-                    fontSize: 13,
+                    fontSize: 13.sp,
                     height: 1.35,
                     color: scheme.onSurfaceVariant,
                   ),
@@ -58,11 +59,11 @@ class NotificationRow extends StatelessWidget {
               ],
             ),
           ),
-          const SizedBox(width: 10),
+          SizedBox(width: 10.w),
           Text(
             notification.time,
             style: GoogleFonts.beVietnamPro(
-              fontSize: 12,
+              fontSize: 12.sp,
               fontWeight: FontWeight.w600,
               color: scheme.onSurfaceVariant,
             ),

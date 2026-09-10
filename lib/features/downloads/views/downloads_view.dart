@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
 
@@ -30,7 +31,7 @@ class DownloadsView extends StatelessWidget {
         slivers: [
           PinnedGradientAppBar(title: 'downloads.title'.tr),
           SliverPadding(
-            padding: const EdgeInsets.fromLTRB(16, 18, 16, 32),
+            padding: EdgeInsets.fromLTRB(16.w, 18.h, 16.w, 32.h),
             sliver: SliverToBoxAdapter(
               child: Obx(
                 () => DataStateBuilder<List<DownloadSection>>(
@@ -41,7 +42,7 @@ class DownloadsView extends StatelessWidget {
                     crossAxisAlignment: CrossAxisAlignment.stretch,
                     children: [
                       for (var s = 0; s < sections.length; s++) ...[
-                        if (s > 0) const SizedBox(height: 26),
+                        if (s > 0) SizedBox(height: 26.h),
                         FadeSlideIn(
                           order: s * 2,
                           child: SectionHeader(sections[s].title),
@@ -97,7 +98,7 @@ class _Meta extends StatelessWidget {
     return Text(
       text,
       style: GoogleFonts.beVietnamPro(
-        fontSize: 13,
+        fontSize: 13.sp,
         fontWeight: FontWeight.w600,
         color: scheme.onSurface.withValues(alpha: 0.55),
       ),

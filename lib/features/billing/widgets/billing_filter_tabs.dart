@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:google_fonts/google_fonts.dart';
 
 import '../../../shared/theme/app_colors.dart';
@@ -24,10 +25,10 @@ class BillingFilterTabs extends StatelessWidget {
         ? AppColors.white.withValues(alpha: 0.06)
         : AppColors.track;
     return Container(
-      padding: const EdgeInsets.all(5),
+      padding: EdgeInsets.all(5.w),
       decoration: BoxDecoration(
         color: trackColor,
-        borderRadius: BorderRadius.circular(14),
+        borderRadius: BorderRadius.circular(14.r),
       ),
       child: Row(
         children: [
@@ -63,18 +64,18 @@ class _Segment extends StatelessWidget {
       child: AnimatedContainer(
         duration: const Duration(milliseconds: 220),
         curve: Curves.easeOut,
-        padding: const EdgeInsets.symmetric(vertical: 10),
+        padding: EdgeInsets.symmetric(vertical: 10.h),
         alignment: Alignment.center,
         decoration: BoxDecoration(
           color: active ? scheme.primary : AppColors.transparent,
-          borderRadius: BorderRadius.circular(10),
+          borderRadius: BorderRadius.circular(10.r),
         ),
         child: Text(
           filter.label,
           maxLines: 1,
           overflow: TextOverflow.ellipsis,
           style: GoogleFonts.beVietnamPro(
-            fontSize: 13.5,
+            fontSize: 13.5.sp,
             fontWeight: FontWeight.w700,
             color: active
                 ? AppColors.white

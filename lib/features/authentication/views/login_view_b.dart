@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
 
 import '../widgets/auth_scaffold.dart';
@@ -18,8 +19,8 @@ class LoginViewB extends StatelessWidget {
       heroTitle: 'login.hero_title'.tr,
       heroSubtitle: 'app.tagline'.tr,
       child: GlassCard(
-        radius: 28,
-        padding: const EdgeInsets.all(24),
+        radius: 28.r,
+        padding: EdgeInsets.all(24.w),
         child: const LoginForm(),
       ),
     );

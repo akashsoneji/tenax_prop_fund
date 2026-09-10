@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_inappwebview/flutter_inappwebview.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
 
 import '../../../shared/widgets/app_loader.dart';
@@ -366,11 +367,11 @@ class _ChartInAppWebViewState extends State<ChartInAppWebView> {
                   mainAxisSize: MainAxisSize.min,
                   children: [
                     Icon(Icons.error_outline,
-                        size: 48, color: scheme.onSurfaceVariant),
-                    const SizedBox(height: 12),
+                        size: 48.w, color: scheme.onSurfaceVariant),
+                    SizedBox(height: 12.h),
                     Text('chart.unavailable'.tr,
                         style: Theme.of(context).textTheme.titleMedium),
-                    const SizedBox(height: 12),
+                    SizedBox(height: 12.h),
                     OutlinedButton(
                       onPressed: _retry,
                       child: Text('state.retry'.tr),

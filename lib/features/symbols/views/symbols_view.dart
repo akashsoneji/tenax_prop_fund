@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
 
 import '../../../shared/theme/app_colors.dart';
@@ -66,7 +67,7 @@ class _FavoritesSection extends StatelessWidget {
       final items = favorites.favorites.toList();
       if (items.isEmpty) return const _EmptyWatchlist();
       return Padding(
-        padding: const EdgeInsets.fromLTRB(16, 18, 16, 24),
+        padding: EdgeInsets.fromLTRB(16.w, 18.h, 16.w, 24.h),
         child: ReorderableListView.builder(
           shrinkWrap: true,
           buildDefaultDragHandles: false,
@@ -78,7 +79,7 @@ class _FavoritesSection extends StatelessWidget {
             final item = items[i];
             return Padding(
               key: ValueKey(item.code),
-              padding: EdgeInsets.only(bottom: i == items.length - 1 ? 0 : 10),
+              padding: EdgeInsets.only(bottom: i == items.length - 1 ? 0 : 10.h),
               child: Dismissible(
                 key: ValueKey('dismiss_${item.code}'),
                 direction: DismissDirection.endToStart,
@@ -102,10 +103,10 @@ class _FavoritesSection extends StatelessWidget {
   Widget _removeBackground(ColorScheme scheme) {
     return Container(
       alignment: Alignment.centerRight,
-      padding: const EdgeInsets.only(right: 20),
+      padding: EdgeInsets.only(right: 20.w),
       decoration: BoxDecoration(
         color: AppColors.danger.withValues(alpha: 0.15),
-        borderRadius: BorderRadius.circular(14),
+        borderRadius: BorderRadius.circular(14.r),
       ),
       child: const Icon(Icons.delete_outline_rounded, color: AppColors.danger),
     );
@@ -121,27 +122,27 @@ class _EmptyWatchlist extends StatelessWidget {
   Widget build(BuildContext context) {
     final scheme = Theme.of(context).colorScheme;
     return Padding(
-      padding: const EdgeInsets.fromLTRB(32, 80, 32, 32),
+      padding: EdgeInsets.fromLTRB(32.w, 80.h, 32.w, 32.h),
       child: Column(
         children: [
           Icon(Icons.star_border_rounded,
-              size: 56, color: scheme.onSurfaceVariant),
-          const SizedBox(height: 16),
+              size: 56.w, color: scheme.onSurfaceVariant),
+          SizedBox(height: 16.h),
           Text(
             'symbols.watchlist_empty_title'.tr,
             textAlign: TextAlign.center,
-            style: AppText.title(color: scheme.onSurface, fontSize: 16),
+            style: AppText.title(color: scheme.onSurface, fontSize: 16.sp),
           ),
-          const SizedBox(height: 8),
+          SizedBox(height: 8.h),
           Text(
             'symbols.watchlist_empty_hint'.tr,
             textAlign: TextAlign.center,
-            style: AppText.base(fontSize: 13, color: scheme.onSurfaceVariant),
+            style: AppText.base(fontSize: 13.sp, color: scheme.onSurfaceVariant),
           ),
-          const SizedBox(height: 20),
+          SizedBox(height: 20.h),
           FilledButton.icon(
             onPressed: InstrumentSearchSheet.open,
-            icon: const Icon(Icons.add_rounded, size: 20),
+            icon: Icon(Icons.add_rounded, size: 20.w),
             label: Text('symbols.add_instrument'.tr),
           ),
         ],

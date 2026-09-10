@@ -2,14 +2,18 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
 import '../models/kyc_profile.dart';
+import '../repositories/kyc_repository.dart';
+import 'kyc_controller.dart';
 
 /// Drives the Edit Profile screen. Seeds its text fields from the current
-/// [KycController] profile (when available) and hands the edited values back on
-/// save. Purely local/demo state — no backend call yet.
+/// [KycController] profile (when available) and persists changes through
+/// `PUT /profile` via [KycRepository]. On success it refreshes the KYC screen
+/// so the updated details show immediately.
 class EditProfileController extends GetxController {
   // ignore: prefer_initializing_formals
-  EditProfileController({KycProfile? seed}) : _seed = seed;
+  EditProfileController(this._repository, {KycProfile? seed}) : _seed = seed;
 
+  final KycRepository _repository;
   final KycProfile? _seed;
 
   late final TextEditingController fullName;
@@ -41,16 +45,24 @@ class EditProfileController extends GetxController {
   Future<void> save() async {
     if (saving.value) return;
     saving.value = true;
-    await Future<void>.delayed(const Duration(milliseconds: 700));
+    // The PROPCRM API expects separate first/last names. Split the single
+    // full-name field on the first space; everything after it is the surname.
+    final parts = fullName.text.trim().split(RegExp(r'\s+'));
+    final firstName = parts.isNotEmpty ? parts.first : '';
+    final lastName = parts.length > 1 ? parts.sublist(1).join(' ') : '';
+    final res = await _repository.updateProfile({
+      'first_name': firstName,
+      'last_name': lastName,
+      'phone': mobile.text.trim(),
+      'country_code': country.text.trim(),
+    });
     saving.value = false;
+    if (!res.success) return;
+
+    if (Get.isRegistered<KycController>()) {
+      await Get.find<KycController>().refreshProfile();
+    }
     Get.back();
-    Get.snackbar(
-      'edit_profile.saved_title'.tr,
-      'edit_profile.saved_body'.tr,
-      snackPosition: SnackPosition.BOTTOM,
-      margin: const EdgeInsets.all(16),
-      borderRadius: 14,
-    );
   }
 
   @override

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
 
@@ -19,20 +20,20 @@ class BillingTransactionList extends StatelessWidget {
     final scheme = Theme.of(context).colorScheme;
     if (transactions.isEmpty) {
       return Container(
-        padding: const EdgeInsets.symmetric(vertical: 32),
+        padding: EdgeInsets.symmetric(vertical: 32.h),
         alignment: Alignment.center,
         decoration: AppTheme.surfaceCard(scheme, radius: 18),
         child: Text(
           'billing.no_transactions'.tr,
           style: GoogleFonts.beVietnamPro(
-            fontSize: 14,
+            fontSize: 14.sp,
             color: scheme.onSurface.withValues(alpha: 0.55),
           ),
         ),
       );
     }
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 14),
+      padding: EdgeInsets.symmetric(horizontal: 14.w),
       decoration: AppTheme.surfaceCard(scheme, radius: 18),
       child: Column(
         children: [
@@ -40,7 +41,7 @@ class BillingTransactionList extends StatelessWidget {
             _TransactionRow(transaction: transactions[i]),
             if (i < transactions.length - 1)
               Divider(
-                height: 1,
+                height: 1.h,
                 thickness: 1,
                 color: scheme.onSurface.withValues(alpha: 0.06),
               ),
@@ -61,21 +62,21 @@ class _TransactionRow extends StatelessWidget {
     final refund = transaction.isRefund;
     final tint = refund ? AppColors.success : scheme.primary;
     return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 14),
+      padding: EdgeInsets.symmetric(vertical: 14.h),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Container(
-            width: 40,
-            height: 40,
+            width: 40.w,
+            height: 40.w,
             decoration: BoxDecoration(
               color: tint.withValues(alpha: 0.10),
-              borderRadius: BorderRadius.circular(11),
+              borderRadius: BorderRadius.circular(11.r),
             ),
             alignment: Alignment.center,
-            child: Icon(transaction.icon, size: 20, color: tint),
+            child: Icon(transaction.icon, size: 20.w, color: tint),
           ),
-          const SizedBox(width: 12),
+          SizedBox(width: 12.w),
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -85,41 +86,41 @@ class _TransactionRow extends StatelessWidget {
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
                   style: GoogleFonts.beVietnamPro(
-                    fontSize: 14.5,
+                    fontSize: 14.5.sp,
                     fontWeight: FontWeight.w700,
                     color: scheme.onSurface,
                   ),
                 ),
-                const SizedBox(height: 3),
+                SizedBox(height: 3.h),
                 Text(
                   transaction.reference,
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
                   style: GoogleFonts.beVietnamPro(
-                    fontSize: 12,
+                    fontSize: 12.sp,
                     color: scheme.onSurface.withValues(alpha: 0.55),
                   ),
                 ),
               ],
             ),
           ),
-          const SizedBox(width: 10),
+          SizedBox(width: 10.w),
           Column(
             crossAxisAlignment: CrossAxisAlignment.end,
             children: [
               Text(
                 transaction.amount,
                 style: GoogleFonts.beVietnamPro(
-                  fontSize: 15,
+                  fontSize: 15.sp,
                   fontWeight: FontWeight.w800,
                   color: refund ? AppColors.success : scheme.onSurface,
                 ),
               ),
-              const SizedBox(height: 3),
+              SizedBox(height: 3.h),
               Text(
                 transaction.status.label,
                 style: GoogleFonts.beVietnamPro(
-                  fontSize: 12,
+                  fontSize: 12.sp,
                   fontWeight: FontWeight.w500,
                   color: refund
                       ? AppColors.success

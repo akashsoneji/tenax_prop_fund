@@ -1,6 +1,7 @@
 import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
 
 import '../../../shared/theme/app_colors.dart';
@@ -138,7 +139,7 @@ class _AuthScaffoldState extends State<AuthScaffold>
                                 ),
                           ),
                           if (widget.heroSubtitle != null) ...[
-                            const SizedBox(height: 8),
+                            SizedBox(height: 8.h),
                             Text(
                               widget.heroSubtitle!,
                               textAlign: TextAlign.center,
@@ -151,7 +152,7 @@ class _AuthScaffoldState extends State<AuthScaffold>
                                   ),
                             ),
                           ],
-                          const SizedBox(height: 28),
+                          SizedBox(height: 28.h),
                         ],
                         widget.child,
                       ],
@@ -160,7 +161,7 @@ class _AuthScaffoldState extends State<AuthScaffold>
                 ),
                 if (widget.bottomBar != null)
                   Padding(
-                    padding: const EdgeInsets.fromLTRB(24, 12, 24, 12),
+                    padding: EdgeInsets.fromLTRB(24.w, 12.h, 24.w, 12.h),
                     child: widget.bottomBar!,
                   ),
               ],
@@ -300,7 +301,7 @@ class _TickerTapeState extends State<_TickerTape>
   @override
   Widget build(BuildContext context) {
     return SizedBox(
-      height: 24,
+      height: 24.h,
       child: AnimatedBuilder(
         animation: _ctrl,
         builder: (context, _) {
@@ -316,7 +317,7 @@ class _TickerTapeState extends State<_TickerTape>
                   children: [
                     for (int i = 0; i < 4; i++)
                       Padding(
-                        padding: const EdgeInsets.symmetric(horizontal: 24),
+                        padding: EdgeInsets.symmetric(horizontal: 24.w),
                         child: Row(
                           mainAxisSize: MainAxisSize.min,
                           children: [
@@ -325,14 +326,14 @@ class _TickerTapeState extends State<_TickerTape>
                                 row,
                                 style: TextStyle(
                                   color: widget.color,
-                                  fontSize: 12,
+                                  fontSize: 12.sp,
                                   fontFeatures: const [
                                     FontFeature.tabularFigures(),
                                   ],
                                   letterSpacing: 0.4,
                                 ),
                               ),
-                              const SizedBox(width: 24),
+                              SizedBox(width: 24.w),
                             ],
                           ],
                         ),
@@ -380,7 +381,7 @@ class MarketingScaffold extends StatelessWidget {
                 ),
                 Expanded(
                   child: SingleChildScrollView(
-                    padding: const EdgeInsets.all(24),
+                    padding: EdgeInsets.all(24.w),
                     child: child,
                   ),
                 ),
@@ -400,7 +401,7 @@ class MarketingScaffold extends StatelessWidget {
               Expanded(
                 flex: 4,
                 child: SingleChildScrollView(
-                  padding: const EdgeInsets.all(32),
+                  padding: EdgeInsets.all(32.w),
                   child: Center(child: child),
                 ),
               ),
@@ -431,36 +432,36 @@ class _MarketingPanel extends StatelessWidget {
       ),
       child: SafeArea(
         child: Padding(
-          padding: const EdgeInsets.all(32),
+          padding: EdgeInsets.all(32.w),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              const Icon(Icons.candlestick_chart_rounded,
-                  size: 56, color: AppColors.white),
-              const SizedBox(height: 24),
+              Icon(Icons.candlestick_chart_rounded,
+                  size: 56.w, color: AppColors.white),
+              SizedBox(height: 24.h),
               Text(
                 heroTitle,
-                style: const TextStyle(
+                style: TextStyle(
                   color: AppColors.white,
-                  fontSize: 36,
+                  fontSize: 36.sp,
                   fontWeight: FontWeight.w700,
                   height: 1.1,
                 ),
               ),
-              const SizedBox(height: 12),
+              SizedBox(height: 12.h),
               Text(
                 heroSubtitle,
                 style: TextStyle(
                   color: AppColors.white.withValues(alpha: 0.85),
-                  fontSize: 16,
+                  fontSize: 16.sp,
                   height: 1.4,
                 ),
               ),
-              const SizedBox(height: 32),
+              SizedBox(height: 32.h),
               Wrap(
-                spacing: 12,
-                runSpacing: 8,
+                spacing: 12.w,
+                runSpacing: 8.h,
                 children: [
                   _Pill(label: 'auth.pill_challenges'.tr),
                   _Pill(label: 'auth.pill_payouts'.tr),
@@ -482,16 +483,16 @@ class _Pill extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
+      padding: EdgeInsets.symmetric(horizontal: 14.w, vertical: 8.h),
       decoration: BoxDecoration(
         color: AppColors.white.withValues(alpha: 0.18),
-        borderRadius: BorderRadius.circular(999),
+        borderRadius: BorderRadius.circular(999.r),
       ),
       child: Text(
         label,
-        style: const TextStyle(
+        style: TextStyle(
           color: AppColors.white,
-          fontSize: 12,
+          fontSize: 12.sp,
           fontWeight: FontWeight.w600,
         ),
       ),

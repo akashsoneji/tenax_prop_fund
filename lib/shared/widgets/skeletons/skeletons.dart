@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 
 import '../app_shimmer.dart';
 
@@ -22,10 +23,10 @@ class CardSkeleton extends StatelessWidget {
       // minHeight (not a fixed height) so the shimmer lines never overflow when
       // a caller passes a height smaller than the composed content.
       constraints: height != null ? BoxConstraints(minHeight: height!) : null,
-      padding: const EdgeInsets.all(16),
+      padding: EdgeInsets.all(16.w),
       decoration: BoxDecoration(
         color: Theme.of(context).colorScheme.surface,
-        borderRadius: BorderRadius.circular(16),
+        borderRadius: BorderRadius.circular(16.r),
         border: Border.all(
           color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.05),
         ),
@@ -34,11 +35,11 @@ class CardSkeleton extends StatelessWidget {
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const ShimmerBox(width: 140, height: 14),
-          const SizedBox(height: 14),
+          ShimmerBox(width: 140.w, height: 14.h),
+          SizedBox(height: 14.h),
           for (var i = 0; i < lines; i++) ...[
-            ShimmerBox(width: i.isEven ? double.infinity : 200, height: 10),
-            if (i != lines - 1) const SizedBox(height: 10),
+            ShimmerBox(width: i.isEven ? double.infinity : 200.w, height: 10.h),
+            if (i != lines - 1) SizedBox(height: 10.h),
           ],
         ],
       ),
@@ -54,7 +55,7 @@ class HeroSkeleton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return ShimmerBox(height: height, radius: 22);
+    return ShimmerBox(height: height, radius: 22.r);
   }
 }
 
@@ -71,60 +72,60 @@ class AccountCardSkeleton extends StatelessWidget {
       clipBehavior: Clip.antiAlias,
       decoration: BoxDecoration(
         color: scheme.surface,
-        borderRadius: BorderRadius.circular(20),
+        borderRadius: BorderRadius.circular(20.r),
         border: Border.all(color: scheme.onSurface.withValues(alpha: 0.05)),
       ),
       child: IntrinsicHeight(
         child: Row(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            const ShimmerBox(width: 4, radius: 0),
+            ShimmerBox(width: 4.w, radius: 0),
             Expanded(
               child: Padding(
-                padding: const EdgeInsets.all(14),
+                padding: EdgeInsets.all(14.w),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
-                  children: const [
+                  children: [
                     Row(
                       children: [
                         Expanded(
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
-                              ShimmerBox(width: 90, height: 9),
-                              SizedBox(height: 7),
-                              ShimmerBox(width: 150, height: 15),
+                              ShimmerBox(width: 90.w, height: 9.h),
+                              SizedBox(height: 7.h),
+                              ShimmerBox(width: 150.w, height: 15.h),
                             ],
                           ),
                         ),
-                        SizedBox(width: 10),
-                        ShimmerBox(width: 70, height: 22, radius: 8),
+                        SizedBox(width: 10.w),
+                        ShimmerBox(width: 70.w, height: 22.h, radius: 8.r),
                       ],
                     ),
-                    SizedBox(height: 14),
-                    ShimmerBox(height: 58, radius: 14),
-                    SizedBox(height: 12),
+                    SizedBox(height: 14.h),
+                    ShimmerBox(height: 58.h, radius: 14.r),
+                    SizedBox(height: 12.h),
                     Row(
                       children: [
-                        Expanded(child: ShimmerBox(height: 42, radius: 12)),
-                        SizedBox(width: 10),
-                        Expanded(child: ShimmerBox(height: 42, radius: 12)),
+                        Expanded(child: ShimmerBox(height: 42.h, radius: 12.r)),
+                        SizedBox(width: 10.w),
+                        Expanded(child: ShimmerBox(height: 42.h, radius: 12.r)),
                       ],
                     ),
-                    SizedBox(height: 10),
+                    SizedBox(height: 10.h),
                     Row(
                       children: [
-                        Expanded(child: ShimmerBox(height: 42, radius: 12)),
-                        SizedBox(width: 10),
-                        Expanded(child: ShimmerBox(height: 42, radius: 12)),
+                        Expanded(child: ShimmerBox(height: 42.h, radius: 12.r)),
+                        SizedBox(width: 10.w),
+                        Expanded(child: ShimmerBox(height: 42.h, radius: 12.r)),
                       ],
                     ),
-                    SizedBox(height: 14),
+                    SizedBox(height: 14.h),
                     Row(
                       children: [
-                        Expanded(child: ShimmerBox(height: 42, radius: 12)),
-                        SizedBox(width: 10),
-                        Expanded(child: ShimmerBox(height: 42, radius: 12)),
+                        Expanded(child: ShimmerBox(height: 42.h, radius: 12.r)),
+                        SizedBox(width: 10.w),
+                        Expanded(child: ShimmerBox(height: 42.h, radius: 12.r)),
                       ],
                     ),
                   ],
@@ -145,23 +146,23 @@ class ListTileSkeleton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 10),
+      padding: EdgeInsets.symmetric(vertical: 10.h),
       child: Row(
         children: [
-          const ShimmerBox(width: 44, height: 44, radius: 12),
-          const SizedBox(width: 12),
+          ShimmerBox(width: 44.w, height: 44.h, radius: 12.r),
+          SizedBox(width: 12.w),
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
-              children: const [
-                ShimmerBox(width: double.infinity, height: 12),
-                SizedBox(height: 8),
-                ShimmerBox(width: 120, height: 10),
+              children: [
+                ShimmerBox(width: double.infinity, height: 12.h),
+                SizedBox(height: 8.h),
+                ShimmerBox(width: 120.w, height: 10.h),
               ],
             ),
           ),
-          const SizedBox(width: 12),
-          const ShimmerBox(width: 56, height: 18, radius: 6),
+          SizedBox(width: 12.w),
+          ShimmerBox(width: 56.w, height: 18.h, radius: 6.r),
         ],
       ),
     );
@@ -194,8 +195,8 @@ class StatGridSkeleton extends StatelessWidget {
       crossAxisCount: 2,
       shrinkWrap: true,
       physics: const NeverScrollableScrollPhysics(),
-      mainAxisSpacing: 12,
-      crossAxisSpacing: 12,
+      mainAxisSpacing: 12.h,
+      crossAxisSpacing: 12.w,
       childAspectRatio: 1.9,
       children: [for (var i = 0; i < tiles; i++) const _StatTileSkeleton()],
     );
@@ -208,10 +209,10 @@ class _StatTileSkeleton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      padding: const EdgeInsets.all(16),
+      padding: EdgeInsets.all(16.w),
       decoration: BoxDecoration(
         color: Theme.of(context).colorScheme.surface,
-        borderRadius: BorderRadius.circular(14),
+        borderRadius: BorderRadius.circular(14.r),
         border: Border.all(
           color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.05),
         ),
@@ -219,10 +220,10 @@ class _StatTileSkeleton extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         mainAxisAlignment: MainAxisAlignment.center,
-        children: const [
-          ShimmerBox(width: 70, height: 10),
-          SizedBox(height: 12),
-          ShimmerBox(width: 100, height: 18),
+        children: [
+          ShimmerBox(width: 70.w, height: 10.h),
+          SizedBox(height: 12.h),
+          ShimmerBox(width: 100.w, height: 18.h),
         ],
       ),
     );

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
 
@@ -32,7 +33,7 @@ class FaqView extends StatelessWidget {
         slivers: [
           PinnedGradientAppBar(title: 'faq.title'.tr),
           SliverPadding(
-            padding: const EdgeInsets.fromLTRB(16, 18, 16, 32),
+            padding: EdgeInsets.fromLTRB(16.w, 18.h, 16.w, 32.h),
             sliver: SliverToBoxAdapter(
               child: Obx(
                 () => DataStateBuilder<List<FaqSection>>(
@@ -64,7 +65,7 @@ class _FaqBody extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
         for (var s = 0; s < sections.length; s++) ...[
-          if (s > 0) const SizedBox(height: 24),
+          if (s > 0) SizedBox(height: 24.h),
           FadeSlideIn(
             order: s * 2,
             child: SectionHeader(sections[s].title),
@@ -85,7 +86,7 @@ class _FaqBody extends StatelessWidget {
             ),
           ),
         ],
-        const SizedBox(height: 22),
+        SizedBox(height: 22.h),
         FadeSlideIn(
           order: 8,
           child: AppInfoBanner(
@@ -125,7 +126,7 @@ class _FaqTile extends StatelessWidget {
           child: InkWell(
             onTap: () => controller.toggle(section, item),
             child: Padding(
-              padding: const EdgeInsets.fromLTRB(16, 15, 16, 15),
+              padding: EdgeInsets.fromLTRB(16.w, 15.h, 16.w, 15.h),
               child: Column(
                 children: [
                   Row(
@@ -135,13 +136,13 @@ class _FaqTile extends StatelessWidget {
                         child: Text(
                           entry.question,
                           style: GoogleFonts.beVietnamPro(
-                            fontSize: 15,
+                            fontSize: 15.sp,
                             fontWeight: FontWeight.w700,
                             color: scheme.onSurface,
                           ),
                         ),
                       ),
-                      const SizedBox(width: 10),
+                      SizedBox(width: 10.w),
                       Obx(() {
                         final open = controller.isExpanded(section, item);
                         return AnimatedRotation(
@@ -160,13 +161,13 @@ class _FaqTile extends StatelessWidget {
                     return AnimatedCrossFade(
                       firstChild: const SizedBox(width: double.infinity),
                       secondChild: Padding(
-                        padding: const EdgeInsets.only(top: 10),
+                        padding: EdgeInsets.only(top: 10.h),
                         child: Align(
                           alignment: Alignment.centerLeft,
                           child: Text(
                             entry.answer,
                             style: GoogleFonts.beVietnamPro(
-                              fontSize: 13.5,
+                              fontSize: 13.5.sp,
                               height: 1.45,
                               color: scheme.onSurface.withValues(alpha: 0.62),
                             ),
@@ -189,8 +190,8 @@ class _FaqTile extends StatelessWidget {
           Divider(
             height: 1,
             thickness: 1,
-            indent: 16,
-            endIndent: 16,
+            indent: 16.w,
+            endIndent: 16.w,
             color: scheme.onSurface.withValues(alpha: 0.06),
           ),
       ],

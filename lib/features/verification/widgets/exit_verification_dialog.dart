@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
 
@@ -18,31 +19,31 @@ class ExitVerificationDialog extends StatelessWidget {
   Widget build(BuildContext context) {
     final scheme = Theme.of(context).colorScheme;
     return Dialog(
-      insetPadding: const EdgeInsets.symmetric(horizontal: 28),
+      insetPadding: EdgeInsets.symmetric(horizontal: 28.w),
       child: Padding(
-        padding: const EdgeInsets.fromLTRB(24, 40, 24, 24),
+        padding: EdgeInsets.fromLTRB(24.w, 40.h, 24.w, 24.h),
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
             Text(
               'verification.exit_title'.tr,
               style: GoogleFonts.beVietnamPro(
-                fontSize: 22,
+                fontSize: 22.sp,
                 fontWeight: FontWeight.w700,
                 color: scheme.onSurface,
               ),
             ),
-            const SizedBox(height: 16),
+            SizedBox(height: 16.h),
             Text(
               'verification.exit_body'.tr,
               textAlign: TextAlign.center,
               style: GoogleFonts.beVietnamPro(
-                fontSize: 14.5,
+                fontSize: 14.5.sp,
                 height: 1.4,
                 color: scheme.onSurface.withValues(alpha: 0.6),
               ),
             ),
-            const SizedBox(height: 28),
+            SizedBox(height: 28.h),
             Row(
               children: [
                 Expanded(
@@ -51,7 +52,7 @@ class ExitVerificationDialog extends StatelessWidget {
                     child: Text('verification.exit'.tr),
                   ),
                 ),
-                const SizedBox(width: 14),
+                SizedBox(width: 14.w),
                 Expanded(
                   child: AppGradientButton(
                     label: 'common.continue_action'.tr,

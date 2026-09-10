@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:google_fonts/google_fonts.dart';
 
-/// The bordered "floating label" container used across the verification forms.
+/// The bordered
 ///
 /// Renders a rounded outline with the [label] notched into the top border
 /// (matching the design's `OutlineInputBorder` look) and lays out [child]
@@ -25,10 +26,10 @@ class LabeledFieldShell extends StatelessWidget {
     final border = scheme.onSurface.withValues(alpha: 0.18);
     return Container(
       constraints: BoxConstraints(minHeight: minHeight),
-      padding: const EdgeInsets.fromLTRB(14, 10, 12, 8),
+      padding: EdgeInsets.fromLTRB(14.w, 10.h, 12.w, 8.h),
       decoration: BoxDecoration(
         color: scheme.surface,
-        borderRadius: BorderRadius.circular(12),
+        borderRadius: BorderRadius.circular(12.r),
         border: Border.all(color: border),
       ),
       child: Column(
@@ -39,11 +40,11 @@ class LabeledFieldShell extends StatelessWidget {
           Text(
             label,
             style: GoogleFonts.beVietnamPro(
-              fontSize: 12.5,
+              fontSize: 12.5.sp,
               color: scheme.onSurface.withValues(alpha: 0.55),
             ),
           ),
-          const SizedBox(height: 2),
+          SizedBox(height: 2.h),
           child,
         ],
       ),
@@ -90,7 +91,7 @@ class AppLabeledField extends StatelessWidget {
       maxLines: maxLines,
       onChanged: onChanged,
       style: GoogleFonts.beVietnamPro(
-        fontSize: 16,
+        fontSize: 16.sp,
         fontWeight: FontWeight.w500,
         color: scheme.onSurface,
       ),
@@ -99,7 +100,7 @@ class AppLabeledField extends StatelessWidget {
         filled: false,
         hintText: hint,
         hintStyle: GoogleFonts.beVietnamPro(
-          fontSize: 16,
+          fontSize: 16.sp,
           color: scheme.onSurface.withValues(alpha: 0.4),
         ),
         contentPadding: EdgeInsets.zero,
@@ -117,7 +118,7 @@ class AppLabeledField extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.center,
               children: [
                 Expanded(child: field),
-                const SizedBox(width: 8),
+                SizedBox(width: 8.w),
                 trailing!,
               ],
             ),

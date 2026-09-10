@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
 import 'package:local_auth/local_auth.dart';
 
@@ -81,15 +82,15 @@ class _BiometricButtonState extends State<BiometricButton> {
         customBorder: const CircleBorder(),
         onTap: _trigger,
         child: SizedBox(
-          width: 56,
-          height: 56,
+          width: 56.w,
+          height: 56.h,
           child: _busy
-              ? const Padding(
-                  padding: EdgeInsets.all(16),
-                  child: CircularProgressIndicator(strokeWidth: 2),
+              ? Padding(
+                  padding: EdgeInsets.all(16.w),
+                  child: const CircularProgressIndicator(strokeWidth: 2),
                 )
               : Icon(Icons.fingerprint_rounded,
-                  size: 28, color: scheme.primary),
+                  size: 28.w, color: scheme.primary),
         ),
       ),
     );

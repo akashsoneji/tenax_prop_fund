@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:confetti/confetti.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
 import 'package:lottie/lottie.dart';
 
@@ -71,8 +72,8 @@ class _ForgotPasswordViewState extends State<ForgotPasswordView> {
   /// repo doesn't have. Falls back to a Material icon when even the network
   /// asset is missing in production.
   Widget get _illustration => Container(
-        width: 160,
-        height: 160,
+        width: 160.w,
+        height: 160.h,
         decoration: BoxDecoration(
           shape: BoxShape.circle,
           color: Theme.of(context)
@@ -82,11 +83,11 @@ class _ForgotPasswordViewState extends State<ForgotPasswordView> {
         ),
         child: LottieBuilder.network(
           'https://assets10.lottiefiles.com/packages/lf20_obhph3sh.json',
-          width: 120,
-          height: 120,
+          width: 120.w,
+          height: 120.h,
           errorBuilder: (_, _, _) => Icon(
             Icons.mark_email_unread_rounded,
-            size: 72,
+            size: 72.w,
             color: Theme.of(context).colorScheme.primary,
           ),
         ),
@@ -108,7 +109,7 @@ class _ForgotPasswordViewState extends State<ForgotPasswordView> {
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
                 Center(child: _illustration),
-                const SizedBox(height: 16),
+                SizedBox(height: 16.h),
                 AnimatedField(
                   index: 0,
                   child: TextField(
@@ -122,29 +123,29 @@ class _ForgotPasswordViewState extends State<ForgotPasswordView> {
                       filled: true,
                       fillColor:
                           scheme.surfaceContainerHighest.withValues(alpha: 0.4),
-                      contentPadding: const EdgeInsets.symmetric(
-                          horizontal: 16, vertical: 18),
+                      contentPadding: EdgeInsets.symmetric(
+                          horizontal: 16.w, vertical: 18.h),
                       enabledBorder: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(16),
+                        borderRadius: BorderRadius.circular(16.r),
                         borderSide: BorderSide(
                             color: scheme.outline.withValues(alpha: 0.18)),
                       ),
                       focusedBorder: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(16),
+                        borderRadius: BorderRadius.circular(16.r),
                         borderSide:
-                            BorderSide(color: scheme.primary, width: 1.6),
+                            BorderSide(color: scheme.primary, width: 1.6.w),
                       ),
                     ),
                   ),
                 ),
-                const SizedBox(height: 8),
+                SizedBox(height: 8.h),
                 if (_sent)
                   Padding(
-                    padding: const EdgeInsets.symmetric(vertical: 6),
+                    padding: EdgeInsets.symmetric(vertical: 6.h),
                     child: Text(
                       'forgot_password.spam_tip'.tr,
                       style: TextStyle(
-                        fontSize: 12,
+                        fontSize: 12.sp,
                         color: scheme.onSurface.withValues(alpha: 0.6),
                       ),
                     ),
@@ -156,7 +157,7 @@ class _ForgotPasswordViewState extends State<ForgotPasswordView> {
                     child: msg == null
                         ? const SizedBox.shrink()
                         : Padding(
-                            padding: const EdgeInsets.only(top: 8),
+                            padding: EdgeInsets.only(top: 8.h),
                             child: Text(
                               msg,
                               style: TextStyle(
@@ -167,7 +168,7 @@ class _ForgotPasswordViewState extends State<ForgotPasswordView> {
                           ),
                   );
                 }),
-                const SizedBox(height: 16),
+                SizedBox(height: 16.h),
                 Obx(
                   () => AppGradientButton(
                     label: _sent
@@ -178,7 +179,7 @@ class _ForgotPasswordViewState extends State<ForgotPasswordView> {
                   ),
                 ),
                 if (_sent) ...[
-                  const SizedBox(height: 12),
+                  SizedBox(height: 12.h),
                   Center(
                     child: TextButton(
                       onPressed: null,

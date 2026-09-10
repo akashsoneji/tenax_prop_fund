@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
 
@@ -43,7 +44,7 @@ class RewardsView extends StatelessWidget {
           PinnedGradientAppBar(title: 'rewards.title'.tr),
           SliverToBoxAdapter(
             child: Padding(
-              padding: const EdgeInsets.fromLTRB(16, 18, 16, 32),
+              padding: EdgeInsets.fromLTRB(16.w, 18.h, 16.w, 32.h),
               child: Obx(
                 () => DataStateBuilder<RewardsData>(
                   state: c.state,
@@ -74,12 +75,12 @@ class _RewardsBody extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
         _StatGrid(data: data),
-        const SizedBox(height: 26),
+        SizedBox(height: 26.h),
         RewardsSectionTitle('rewards.requests'.tr),
         _RequestsCard(controller: controller, data: data),
-        const SizedBox(height: 18),
+        SizedBox(height: 18.h),
         _RequestPayoutCta(controller: controller),
-        const SizedBox(height: 18),
+        SizedBox(height: 18.h),
         InfoBanner(
           variant: InfoBannerVariant.warning,
           title: 'rewards.name_match_id'.tr,
@@ -100,12 +101,12 @@ class _RewardsSkeleton extends StatelessWidget {
   Widget build(BuildContext context) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
-      children: const [
-        HeroSkeleton(height: 120),
-        SizedBox(height: 26),
-        StatGridSkeleton(),
-        SizedBox(height: 18),
-        CardSkeleton(lines: 4, height: 200),
+      children: [
+        HeroSkeleton(height: 120.h),
+        SizedBox(height: 26.h),
+        const StatGridSkeleton(),
+        SizedBox(height: 18.h),
+        CardSkeleton(lines: 4, height: 200.h),
       ],
     );
   }
@@ -175,29 +176,29 @@ class _RequestsCard extends StatelessWidget {
         return Opacity(
           opacity: t.clamp(0, 1),
           child: Transform.translate(
-            offset: Offset(0, (1 - t) * 18),
+            offset: Offset(0, (1 - t) * 18.h),
             child: child,
           ),
         );
       },
       child: Container(
-        padding: const EdgeInsets.fromLTRB(16, 14, 16, 14),
+        padding: EdgeInsets.fromLTRB(16.w, 14.h, 16.w, 14.h),
         decoration: AppTheme.surfaceCard(scheme, radius: 18),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Padding(
-              padding: const EdgeInsets.only(bottom: 6, top: 2),
+              padding: EdgeInsets.only(bottom: 6.h, top: 2.h),
               child: Text(
                 'rewards.what_stands'.tr,
                 style: GoogleFonts.beVietnamPro(
-                  fontSize: 15.5,
+                  fontSize: 15.5.sp,
                   fontWeight: FontWeight.w800,
                   color: scheme.onSurface,
                 ),
               ),
             ),
-            const SizedBox(height: 4),
+            SizedBox(height: 4.h),
             Column(
               children: [
                 for (var i = 0; i < data.requirements.length; i++)
@@ -207,7 +208,7 @@ class _RequestsCard extends StatelessWidget {
                   ),
               ],
             ),
-            const SizedBox(height: 6),
+            SizedBox(height: 6.h),
             Builder(builder: (context) {
               final n = controller.blockingCount(data);
               if (n == 0) return const SizedBox.shrink();
@@ -240,7 +241,7 @@ class _RequestPayoutCta extends StatelessWidget {
         return Opacity(
           opacity: t.clamp(0, 1),
           child: Transform.translate(
-            offset: Offset(0, (1 - t) * 16),
+            offset: Offset(0, (1 - t) * 16.h),
             child: child,
           ),
         );

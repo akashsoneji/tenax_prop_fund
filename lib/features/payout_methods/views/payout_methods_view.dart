@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
 
 import '../../../shared/widgets/data_state_builder.dart';
@@ -28,7 +29,7 @@ class PayoutMethodsView extends StatelessWidget {
           PinnedGradientAppBar(title: 'payout_methods.title'.tr),
           SliverToBoxAdapter(
             child: Padding(
-              padding: const EdgeInsets.fromLTRB(16, 18, 16, 32),
+              padding: EdgeInsets.fromLTRB(16.w, 18.h, 16.w, 32.h),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
@@ -39,7 +40,7 @@ class PayoutMethodsView extends StatelessWidget {
                         'your verified ID — even by a middle name. This is the '
                         'single most common reason a first reward is delayed.',
                   ),
-                  const SizedBox(height: 18),
+                  SizedBox(height: 18.h),
                   Obx(
                     () => DataStateBuilder<List<PayoutMethod>>(
                       state: c.state,
@@ -50,7 +51,7 @@ class PayoutMethodsView extends StatelessWidget {
                           for (var i = 0; i < methods.length; i++)
                             Padding(
                               padding: EdgeInsets.only(
-                                  bottom: i == methods.length - 1 ? 0 : 14),
+                                  bottom: i == methods.length - 1 ? 0 : 14.h),
                               child: PayoutMethodCard(
                                 method: methods[i],
                                 delayMs: i * 70,

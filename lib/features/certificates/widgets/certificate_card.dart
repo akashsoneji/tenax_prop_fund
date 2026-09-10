@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
 
@@ -35,14 +36,14 @@ class CertificateCard extends StatelessWidget {
       builder: (context, t, child) => Opacity(
         opacity: t.clamp(0, 1),
         child: Transform.translate(
-          offset: Offset(0, (1 - t) * 18),
+          offset: Offset(0, (1 - t) * 18.h),
           child: child,
         ),
       ),
       child: Container(
-        margin: const EdgeInsets.only(bottom: 14),
-        padding: const EdgeInsets.fromLTRB(18, 16, 18, 16),
-        decoration: AppTheme.surfaceCard(scheme, radius: 18),
+        margin: EdgeInsets.only(bottom: 14.h),
+        padding: EdgeInsets.fromLTRB(18.w, 16.h, 18.w, 16.h),
+        decoration: AppTheme.surfaceCard(scheme, radius: 18.r),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
@@ -56,27 +57,27 @@ class CertificateCard extends StatelessWidget {
                       Text(
                         certificate.title,
                         style: GoogleFonts.beVietnamPro(
-                          fontSize: 18,
+                          fontSize: 18.sp,
                           fontWeight: FontWeight.w800,
                           color: scheme.onSurface,
                         ),
                       ),
-                      const SizedBox(height: 4),
+                      SizedBox(height: 4.h),
                       Text(
                         certificate.description,
                         style: GoogleFonts.beVietnamPro(
-                          fontSize: 13.5,
+                          fontSize: 13.5.sp,
                           color: scheme.onSurface.withValues(alpha: 0.55),
                         ),
                       ),
                     ],
                   ),
                 ),
-                const SizedBox(width: 12),
+                SizedBox(width: 12.w),
                 Text(
                   locked ? 'certificates.locked'.tr : 'certificates.earned'.tr,
                   style: GoogleFonts.beVietnamPro(
-                    fontSize: 14,
+                    fontSize: 14.sp,
                     fontWeight: FontWeight.w700,
                     color: statusColor,
                   ),
@@ -84,23 +85,23 @@ class CertificateCard extends StatelessWidget {
               ],
             ),
             if (certificate.hasProgress) ...[
-              const SizedBox(height: 16),
+              SizedBox(height: 16.h),
               _ProgressBar(value: certificate.progress!),
-              const SizedBox(height: 10),
+              SizedBox(height: 10.h),
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
                   Text(
                     'certificates.progress'.tr,
                     style: GoogleFonts.beVietnamPro(
-                      fontSize: 13.5,
+                      fontSize: 13.5.sp,
                       color: scheme.onSurface.withValues(alpha: 0.6),
                     ),
                   ),
                   Text(
                     '${(certificate.progress! * 100).round()}%',
                     style: GoogleFonts.beVietnamPro(
-                      fontSize: 13.5,
+                      fontSize: 13.5.sp,
                       fontWeight: FontWeight.w700,
                       color: scheme.onSurface.withValues(alpha: 0.75),
                     ),
@@ -127,11 +128,11 @@ class _ProgressBar extends StatelessWidget {
       builder: (context, constraints) {
         final maxW = constraints.maxWidth;
         return ClipRRect(
-          borderRadius: BorderRadius.circular(999),
+          borderRadius: BorderRadius.circular(999.r),
           child: Stack(
             children: [
               Container(
-                height: 10,
+                height: 10.h,
                 color: scheme.onSurface.withValues(alpha: 0.08),
               ),
               TweenAnimationBuilder<double>(
@@ -139,11 +140,11 @@ class _ProgressBar extends StatelessWidget {
                 duration: AppMotion.slow,
                 curve: AppMotion.enter,
                 builder: (context, t, _) => Container(
-                  height: 10,
+                  height: 10.h,
                   width: maxW * t,
                   decoration: BoxDecoration(
                     gradient: AppTheme.brandGradient(scheme),
-                    borderRadius: BorderRadius.circular(999),
+                    borderRadius: BorderRadius.circular(999.r),
                   ),
                 ),
               ),

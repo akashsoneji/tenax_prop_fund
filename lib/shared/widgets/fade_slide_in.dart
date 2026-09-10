@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 
 import '../theme/app_theme.dart';
 
@@ -32,7 +33,7 @@ class FadeSlideIn extends StatelessWidget {
         return Opacity(
           opacity: v,
           child: Transform.translate(
-            offset: Offset(0, (1 - v) * offset),
+            offset: Offset(0, (1 - v) * offset.h),
             child: child,
           ),
         );

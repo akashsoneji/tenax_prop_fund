@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
 
 import '../../../shared/theme/app_colors.dart';
@@ -36,15 +37,15 @@ class AccountSummaryHero extends StatelessWidget {
     final floating = _stat('account.floating_pl');
 
     return Container(
-      padding: const EdgeInsets.all(18),
+      padding: EdgeInsets.all(18.w),
       decoration: BoxDecoration(
         gradient: AppTheme.brandGradient(scheme),
-        borderRadius: BorderRadius.circular(20),
+        borderRadius: BorderRadius.circular(20.r),
         boxShadow: [
           BoxShadow(
             color: scheme.primary.withValues(alpha: 0.28),
-            blurRadius: 18,
-            offset: const Offset(0, 10),
+            blurRadius: 18.r,
+            offset: Offset(0, 10.h),
           ),
         ],
       ),
@@ -59,7 +60,7 @@ class AccountSummaryHero extends StatelessWidget {
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
                   style: TextStyle(
-                    fontSize: 12,
+                    fontSize: 12.sp,
                     fontWeight: FontWeight.w700,
                     letterSpacing: 0.3,
                     color: AppColors.white.withValues(alpha: 0.82),
@@ -69,42 +70,42 @@ class AccountSummaryHero extends StatelessWidget {
               _HeroStatusPill(label: header.statusLabel, tone: header.tone),
             ],
           ),
-          const SizedBox(height: 14),
+          SizedBox(height: 14.h),
           Text(
             'account.balance'.tr,
             style: TextStyle(
-              fontSize: 10.5,
+              fontSize: 10.5.sp,
               fontWeight: FontWeight.w700,
               letterSpacing: 0.8,
               color: AppColors.white.withValues(alpha: 0.72),
             ),
           ),
-          const SizedBox(height: 4),
+          SizedBox(height: 4.h),
           Text(
             balance?.value.isNotEmpty == true ? balance!.value : '—',
             maxLines: 1,
             overflow: TextOverflow.ellipsis,
-            style: const TextStyle(
-              fontSize: 30,
+            style: TextStyle(
+              fontSize: 30.sp,
               fontWeight: FontWeight.w800,
               color: AppColors.white,
               height: 1.1,
             ),
           ),
           if (header.planLabel.isNotEmpty) ...[
-            const SizedBox(height: 6),
+            SizedBox(height: 6.h),
             Text(
               header.planLabel,
               maxLines: 1,
               overflow: TextOverflow.ellipsis,
               style: TextStyle(
-                fontSize: 12.5,
+                fontSize: 12.5.sp,
                 fontWeight: FontWeight.w600,
                 color: AppColors.white.withValues(alpha: 0.80),
               ),
             ),
           ],
-          const SizedBox(height: 16),
+          SizedBox(height: 16.h),
           Row(
             children: [
               Expanded(
@@ -114,7 +115,7 @@ class AccountSummaryHero extends StatelessWidget {
                   tone: pnl?.tone ?? AccountTone.neutral,
                 ),
               ),
-              const SizedBox(width: 10),
+              SizedBox(width: 10.w),
               Expanded(
                 child: _HeroMiniStat(
                   label: 'account.floating_pl'.tr,
@@ -150,10 +151,10 @@ class _HeroMiniStat extends StatelessWidget {
       AccountTone.neutral => AppColors.white,
     };
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+      padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 10.h),
       decoration: BoxDecoration(
         color: AppColors.white.withValues(alpha: 0.10),
-        borderRadius: BorderRadius.circular(14),
+        borderRadius: BorderRadius.circular(14.r),
         border: Border.all(color: AppColors.white.withValues(alpha: 0.14)),
       ),
       child: Column(
@@ -164,18 +165,18 @@ class _HeroMiniStat extends StatelessWidget {
             maxLines: 1,
             overflow: TextOverflow.ellipsis,
             style: TextStyle(
-              fontSize: 10.5,
+              fontSize: 10.5.sp,
               fontWeight: FontWeight.w600,
               color: AppColors.white.withValues(alpha: 0.72),
             ),
           ),
-          const SizedBox(height: 4),
+          SizedBox(height: 4.h),
           Text(
             value.isEmpty ? '—' : value,
             maxLines: 1,
             overflow: TextOverflow.ellipsis,
             style: TextStyle(
-              fontSize: 16,
+              fontSize: 16.sp,
               fontWeight: FontWeight.w800,
               color: valueColor,
             ),
@@ -201,24 +202,24 @@ class _HeroStatusPill extends StatelessWidget {
       AccountTone.neutral => AppColors.accent,
     };
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+      padding: EdgeInsets.symmetric(horizontal: 10.w, vertical: 5.h),
       decoration: BoxDecoration(
         color: AppColors.white.withValues(alpha: 0.16),
-        borderRadius: BorderRadius.circular(20),
+        borderRadius: BorderRadius.circular(20.r),
       ),
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
           Container(
-            width: 6,
-            height: 6,
+            width: 6.w,
+            height: 6.h,
             decoration: BoxDecoration(color: dot, shape: BoxShape.circle),
           ),
-          const SizedBox(width: 6),
+          SizedBox(width: 6.w),
           Text(
             label,
-            style: const TextStyle(
-              fontSize: 11.5,
+            style: TextStyle(
+              fontSize: 11.5.sp,
               fontWeight: FontWeight.w700,
               color: AppColors.white,
             ),
@@ -245,16 +246,16 @@ class AccountStatusPill extends StatelessWidget {
       AccountTone.neutral => scheme.onSurfaceVariant,
     };
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+      padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 6.h),
       decoration: BoxDecoration(
         color: color.withValues(alpha: 0.12),
-        borderRadius: BorderRadius.circular(20),
+        borderRadius: BorderRadius.circular(20.r),
         border: Border.all(color: color.withValues(alpha: 0.35)),
       ),
       child: Text(
         label,
         style: TextStyle(
-            fontSize: 12, fontWeight: FontWeight.w700, color: color),
+            fontSize: 12.sp, fontWeight: FontWeight.w700, color: color),
       ),
     );
   }
@@ -283,13 +284,13 @@ class AccountHeaderCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final scheme = Theme.of(context).colorScheme;
     return Container(
-      padding: const EdgeInsets.all(16),
+      padding: EdgeInsets.all(16.w),
       decoration: AppTheme.surfaceCard(scheme, radius: 18),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           _SectionHead(icon: Icons.person_outline_rounded, text: 'account.plan_facts'.tr),
-          const SizedBox(height: 12),
+          SizedBox(height: 12.h),
           _Fact(text: '${'account.initial_balance'.tr}: ${header.initialBalance}'),
           _Fact(text: '${'account.leverage'.tr}: ${header.leverageLabel}'),
           _Fact(text: '${'account.plan'.tr}: ${header.planLabel}'),
@@ -297,34 +298,34 @@ class AccountHeaderCard extends StatelessWidget {
             _Fact(text: '${header.phaseLabel} · ${header.drawdownType}'),
           if (header.accountType.isNotEmpty)
             _Fact(text: '${'account.account_type'.tr}: ${header.accountType}'),
-          const Divider(height: 28),
+          Divider(height: 28.h),
           _SectionHead(icon: Icons.shield_outlined, text: 'account.account_details'.tr),
-          const SizedBox(height: 12),
+          SizedBox(height: 12.h),
           _CredRow(
             label: 'account.login'.tr,
             value: credentials.login,
             trailingLabel: 'account.copy'.tr,
             onTrailing: onCopyLogin,
           ),
-          const SizedBox(height: 10),
+          SizedBox(height: 10.h),
           _CredRow(
             label: 'account.master_password'.tr,
             value: revealed ? credentials.password : '••••••••••',
             trailingLabel: revealed ? 'account.hide'.tr : 'account.reveal'.tr,
             onTrailing: onReveal,
           ),
-          const SizedBox(height: 10),
+          SizedBox(height: 10.h),
           _CredRow(
             label: 'account.investor_password'.tr,
             value: revealed ? credentials.investorPassword : '••••••••••',
             trailingLabel: revealed ? 'account.hide'.tr : 'account.reveal'.tr,
             onTrailing: onReveal,
           ),
-          const SizedBox(height: 10),
+          SizedBox(height: 10.h),
           _CredRow(label: 'account.server'.tr, value: credentials.server),
-          const Divider(height: 28),
+          Divider(height: 28.h),
           _SectionHead(icon: Icons.schedule_rounded, text: 'account.cycle_details'.tr),
-          const SizedBox(height: 12),
+          SizedBox(height: 12.h),
           _Kv(k: 'account.phase_started'.tr, v: cycle.phaseStarted),
           _Kv(k: 'account.days_elapsed'.tr, v: '${cycle.daysElapsed}'),
           _Kv(k: 'account.time_limit'.tr, v: cycle.timeLimit),
@@ -345,12 +346,12 @@ class _SectionHead extends StatelessWidget {
     final scheme = Theme.of(context).colorScheme;
     return Row(
       children: [
-        Icon(icon, size: 18, color: scheme.primary),
-        const SizedBox(width: 8),
+        Icon(icon, size: 18.w, color: scheme.primary),
+        SizedBox(width: 8.w),
         Text(
           text,
           style: TextStyle(
-              fontSize: 15,
+              fontSize: 15.sp,
               fontWeight: FontWeight.w800,
               color: scheme.onSurface),
         ),
@@ -367,18 +368,18 @@ class _Fact extends StatelessWidget {
   Widget build(BuildContext context) {
     final scheme = Theme.of(context).colorScheme;
     return Padding(
-      padding: const EdgeInsets.only(bottom: 8),
+      padding: EdgeInsets.only(bottom: 8.h),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Icon(Icons.check_circle_rounded,
-              size: 17, color: AppColors.success),
-          const SizedBox(width: 8),
+          Icon(Icons.check_circle_rounded,
+              size: 17.w, color: AppColors.success),
+          SizedBox(width: 8.w),
           Expanded(
             child: Text(
               text,
               style: TextStyle(
-                  fontSize: 13.5,
+                  fontSize: 13.5.sp,
                   fontWeight: FontWeight.w600,
                   color: scheme.onSurface),
             ),
@@ -406,10 +407,10 @@ class _CredRow extends StatelessWidget {
   Widget build(BuildContext context) {
     final scheme = Theme.of(context).colorScheme;
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+      padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 10.h),
       decoration: BoxDecoration(
         color: scheme.primary.withValues(alpha: 0.04),
-        borderRadius: BorderRadius.circular(12),
+        borderRadius: BorderRadius.circular(12.r),
         border: Border.all(color: scheme.primary.withValues(alpha: 0.08)),
       ),
       child: Row(
@@ -420,13 +421,13 @@ class _CredRow extends StatelessWidget {
               children: [
                 Text(label,
                     style: TextStyle(
-                        fontSize: 11.5,
+                        fontSize: 11.5.sp,
                         fontWeight: FontWeight.w600,
                         color: scheme.onSurfaceVariant)),
-                const SizedBox(height: 3),
+                SizedBox(height: 3.h),
                 Text(value,
                     style: TextStyle(
-                        fontSize: 14.5,
+                        fontSize: 14.5.sp,
                         fontWeight: FontWeight.w700,
                         color: scheme.onSurface)),
               ],
@@ -439,7 +440,7 @@ class _CredRow extends StatelessWidget {
               child: Text(
                 trailingLabel!,
                 style: TextStyle(
-                    fontSize: 12.5,
+                    fontSize: 12.5.sp,
                     fontWeight: FontWeight.w700,
                     color: scheme.primary),
               ),
@@ -459,17 +460,17 @@ class _Kv extends StatelessWidget {
   Widget build(BuildContext context) {
     final scheme = Theme.of(context).colorScheme;
     return Padding(
-      padding: const EdgeInsets.only(bottom: 10),
+      padding: EdgeInsets.only(bottom: 10.h),
       child: Row(
         children: [
           Expanded(
             child: Text(k,
                 style: TextStyle(
-                    fontSize: 13, color: scheme.onSurfaceVariant)),
+                    fontSize: 13.sp, color: scheme.onSurfaceVariant)),
           ),
           Text(v,
               style: TextStyle(
-                  fontSize: 13.5,
+                  fontSize: 13.5.sp,
                   fontWeight: FontWeight.w700,
                   color: scheme.onSurface)),
         ],
@@ -479,7 +480,7 @@ class _Kv extends StatelessWidget {
 }
 
 
-/// One objective card (label + status + detail lines).
+/// One objective card
 class AccountObjectiveCard extends StatelessWidget {
   const AccountObjectiveCard({super.key, required this.objective});
   final AccountObjective objective;
@@ -490,10 +491,10 @@ class AccountObjectiveCard extends StatelessWidget {
     final passed = objective.passed;
     final statusColor = passed ? AppColors.success : AppColors.amber;
     return Container(
-      padding: const EdgeInsets.all(14),
+      padding: EdgeInsets.all(14.w),
       decoration: BoxDecoration(
         color: scheme.primary.withValues(alpha: 0.04),
-        borderRadius: BorderRadius.circular(14),
+        borderRadius: BorderRadius.circular(14.r),
         border: Border.all(color: scheme.primary.withValues(alpha: 0.08)),
       ),
       child: Column(
@@ -505,44 +506,44 @@ class AccountObjectiveCard extends StatelessWidget {
                 passed
                     ? Icons.check_circle_rounded
                     : Icons.radio_button_checked_rounded,
-                size: 18,
+                size: 18.w,
                 color: passed ? AppColors.success : scheme.primary,
               ),
-              const SizedBox(width: 8),
+              SizedBox(width: 8.w),
               Expanded(
                 child: Text(
                   objective.label,
                   style: TextStyle(
-                      fontSize: 13.5,
+                      fontSize: 13.5.sp,
                       fontWeight: FontWeight.w700,
                       color: scheme.onSurface),
                 ),
               ),
               Container(
                 padding:
-                    const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                    EdgeInsets.symmetric(horizontal: 8.w, vertical: 3.h),
                 decoration: BoxDecoration(
                   color: statusColor.withValues(alpha: 0.14),
-                  borderRadius: BorderRadius.circular(20),
+                  borderRadius: BorderRadius.circular(20.r),
                 ),
                 child: Text(
                   objective.status,
                   style: TextStyle(
-                      fontSize: 11,
+                      fontSize: 11.sp,
                       fontWeight: FontWeight.w700,
                       color: statusColor),
                 ),
               ),
             ],
           ),
-          const SizedBox(height: 10),
+          SizedBox(height: 10.h),
           for (final line in objective.lines)
             Padding(
-              padding: const EdgeInsets.only(bottom: 4),
+              padding: EdgeInsets.only(bottom: 4.h),
               child: Text(
                 line,
                 style: TextStyle(
-                    fontSize: 12.5, color: scheme.onSurfaceVariant),
+                    fontSize: 12.5.sp, color: scheme.onSurfaceVariant),
               ),
             ),
         ],
@@ -559,28 +560,28 @@ class AccountHealthCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      padding: const EdgeInsets.all(16),
+      padding: EdgeInsets.all(16.w),
       decoration: BoxDecoration(
         color: AppColors.heroInkDeep,
-        borderRadius: BorderRadius.circular(18),
+        borderRadius: BorderRadius.circular(18.r),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text('account.account_health'.tr,
-              style: const TextStyle(
-                  fontSize: 15,
+              style: TextStyle(
+                  fontSize: 15.sp,
                   fontWeight: FontWeight.w800,
                   color: AppColors.white)),
-          const SizedBox(height: 4),
+          SizedBox(height: 4.h),
           Text('account.account_health_sub'.tr,
               style: TextStyle(
-                  fontSize: 12,
+                  fontSize: 12.sp,
                   color: AppColors.white.withValues(alpha: 0.6))),
-          const SizedBox(height: 14),
+          SizedBox(height: 14.h),
           for (final h in health) ...[
             _HealthRow(health: h),
-            const SizedBox(height: 10),
+            SizedBox(height: 10.h),
           ],
         ],
       ),
@@ -596,10 +597,10 @@ class _HealthRow extends StatelessWidget {
   Widget build(BuildContext context) {
     final color = health.watch ? AppColors.amber : AppColors.success;
     return Container(
-      padding: const EdgeInsets.all(12),
+      padding: EdgeInsets.all(12.w),
       decoration: BoxDecoration(
         color: AppColors.white.withValues(alpha: 0.04),
-        borderRadius: BorderRadius.circular(12),
+        borderRadius: BorderRadius.circular(12.r),
         border: Border.all(color: color.withValues(alpha: 0.4)),
       ),
       child: Column(
@@ -609,22 +610,22 @@ class _HealthRow extends StatelessWidget {
             children: [
               Expanded(
                 child: Text(health.name,
-                    style: const TextStyle(
-                        fontSize: 13.5,
+                    style: TextStyle(
+                        fontSize: 13.5.sp,
                         fontWeight: FontWeight.w700,
                         color: AppColors.white)),
               ),
               Text(health.status,
                   style: TextStyle(
-                      fontSize: 12,
+                      fontSize: 12.sp,
                       fontWeight: FontWeight.w700,
                       color: color)),
             ],
           ),
-          const SizedBox(height: 4),
+          SizedBox(height: 4.h),
           Text(health.note,
               style: TextStyle(
-                  fontSize: 12,
+                  fontSize: 12.sp,
                   color: AppColors.white.withValues(alpha: 0.7))),
         ],
       ),

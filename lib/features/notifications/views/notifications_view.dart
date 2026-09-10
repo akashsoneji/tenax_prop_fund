@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
 
@@ -37,7 +38,7 @@ class NotificationsView extends StatelessWidget {
                   'common.mark_all_read'.tr,
                   style: GoogleFonts.beVietnamPro(
                     color: AppColors.white,
-                    fontSize: 13.5,
+                    fontSize: 13.5.sp,
                     fontWeight: FontWeight.w600,
                   ),
                 ),
@@ -46,7 +47,7 @@ class NotificationsView extends StatelessWidget {
           ),
           SliverToBoxAdapter(
             child: Padding(
-              padding: const EdgeInsets.fromLTRB(16, 18, 16, 32),
+              padding: EdgeInsets.fromLTRB(16.w, 18.h, 16.w, 32.h),
               child: Obx(
                 () => DataStateBuilder<List<NotificationGroup>>(
                   state: c.state,
@@ -77,14 +78,14 @@ class _NotificationsSkeleton extends StatelessWidget {
   Widget build(BuildContext context) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
-      children: const [
-        ShimmerBox(width: 120, height: 16),
-        SizedBox(height: 12),
-        CardSkeleton(lines: 3, height: 130),
-        SizedBox(height: 18),
-        ShimmerBox(width: 120, height: 16),
-        SizedBox(height: 12),
-        CardSkeleton(lines: 3, height: 130),
+      children: [
+        ShimmerBox(width: 120.w, height: 16.h),
+        SizedBox(height: 12.h),
+        CardSkeleton(lines: 3, height: 130.h),
+        SizedBox(height: 18.h),
+        ShimmerBox(width: 120.w, height: 16.h),
+        SizedBox(height: 12.h),
+        CardSkeleton(lines: 3, height: 130.h),
       ],
     );
   }
@@ -109,7 +110,7 @@ class _GroupBlock extends StatelessWidget {
         return Opacity(
           opacity: t.clamp(0, 1),
           child: Transform.translate(
-            offset: Offset(0, (1 - t) * 16),
+            offset: Offset(0, (1 - t) * 16.h),
             child: child,
           ),
         );
@@ -118,19 +119,19 @@ class _GroupBlock extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Padding(
-            padding: const EdgeInsets.only(left: 2, bottom: 10),
+            padding: EdgeInsets.only(left: 2.w, bottom: 10.h),
             child: Text(
               group.label,
               style: GoogleFonts.beVietnamPro(
-                fontSize: 18,
+                fontSize: 18.sp,
                 fontWeight: FontWeight.w800,
                 color: scheme.onSurface,
               ),
             ),
           ),
           Container(
-            padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 2),
-            margin: const EdgeInsets.only(bottom: 18),
+            padding: EdgeInsets.symmetric(horizontal: 14.w, vertical: 2.h),
+            margin: EdgeInsets.only(bottom: 18.h),
             decoration: AppTheme.surfaceCard(scheme, radius: 18),
             child: Column(
               children: [

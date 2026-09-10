@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:google_fonts/google_fonts.dart';
 
 import '../../../shared/theme/app_colors.dart';
@@ -25,15 +26,15 @@ class CalcResultCard extends StatelessWidget {
     final scheme = Theme.of(context).colorScheme;
     return Container(
       width: double.infinity,
-      padding: const EdgeInsets.symmetric(vertical: 26, horizontal: 20),
+      padding: EdgeInsets.symmetric(vertical: 26.h, horizontal: 20.w),
       decoration: BoxDecoration(
         gradient: AppTheme.brandGradient(scheme),
-        borderRadius: BorderRadius.circular(20),
+        borderRadius: BorderRadius.circular(20.r),
         boxShadow: [
           BoxShadow(
             color: scheme.primary.withValues(alpha: 0.30),
-            blurRadius: 22,
-            offset: const Offset(0, 12),
+            blurRadius: 22.r,
+            offset: Offset(0, 12.h),
           ),
         ],
       ),
@@ -51,18 +52,18 @@ class CalcResultCard extends StatelessWidget {
               key: ValueKey(headline),
               textAlign: TextAlign.center,
               style: GoogleFonts.beVietnamPro(
-                fontSize: 30,
+                fontSize: 30.sp,
                 fontWeight: FontWeight.w800,
                 color: AppTheme.accent,
               ),
             ),
           ),
-          const SizedBox(height: 6),
+          SizedBox(height: 6.h),
           Text(
             subtitle,
             textAlign: TextAlign.center,
             style: GoogleFonts.beVietnamPro(
-              fontSize: 14,
+              fontSize: 14.sp,
               fontWeight: FontWeight.w500,
               color: AppColors.white.withValues(alpha: 0.92),
             ),
@@ -102,21 +103,21 @@ class CalcNoteBanner extends StatelessWidget {
 
     return Container(
       width: double.infinity,
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+      padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 14.h),
       decoration: BoxDecoration(
         color: bg,
-        borderRadius: BorderRadius.circular(14),
+        borderRadius: BorderRadius.circular(14.r),
       ),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Icon(icon, size: 20, color: iconColor),
-          const SizedBox(width: 10),
+          Icon(icon, size: 20.w, color: iconColor),
+          SizedBox(width: 10.w),
           Expanded(
             child: Text(
               text,
               style: GoogleFonts.beVietnamPro(
-                fontSize: 14,
+                fontSize: 14.sp,
                 color: scheme.onSurface.withValues(alpha: 0.8),
               ),
             ),

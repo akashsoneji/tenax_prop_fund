@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 
-/// Bottom-sheet notifications panel opened from the floating trade ticket.
+/// Bottom-sheet notifications panel
 /// Spans the full device width. Intentionally blank for now — the
 /// notifications list will be built here.
 class NotificationsSheet extends StatelessWidget {
@@ -13,7 +14,7 @@ class NotificationsSheet extends StatelessWidget {
       child: SafeArea(
         child: SizedBox(
           width: double.infinity,
-          height: 320,
+          height: 320.h,
         ),
       ),
     );

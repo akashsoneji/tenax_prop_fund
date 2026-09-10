@@ -44,9 +44,12 @@ enum ProofKind { idFront, idBack, addressFront, addressBack, bankProof }
 /// Immutable snapshot of an upload slot (design shows a filled gradient tile
 /// when populated and a faint tile when empty).
 class ProofSlot {
-  const ProofSlot({required this.kind, this.fileName});
+  const ProofSlot({required this.kind, this.fileName, this.filePath});
   final ProofKind kind;
   final String? fileName;
 
-  bool get isFilled => fileName != null;
+  /// Absolute path of the picked file (null until the user selects one).
+  final String? filePath;
+
+  bool get isFilled => filePath != null || fileName != null;
 }

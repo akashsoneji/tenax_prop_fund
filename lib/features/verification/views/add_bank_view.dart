@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
 
+import '../../../app/routes/app_routes.dart';
 import '../../../shared/theme/app_colors.dart';
 import '../../../shared/widgets/app_gradient_button.dart';
 import '../../../shared/widgets/app_labeled_dropdown.dart';
@@ -11,6 +13,7 @@ import '../../../shared/widgets/pinned_gradient_app_bar.dart';
 import '../../../shared/widgets/upload_dropzone.dart';
 import '../controllers/add_bank_controller.dart';
 import '../controllers/verification_controller.dart';
+import '../models/verification_models.dart';
 import '../widgets/verify_mobile_dialog.dart';
 
 /// "Add bank" screen: account type/currency/holder fields, IBAN + code,
@@ -22,20 +25,27 @@ class AddBankView extends GetView<AddBankController> {
     await controller.sendOtp();
     final code = await VerifyMobileDialog.show(phone: '+91 987654321');
     if (code == null) return;
-    // When opened as the final step of the verification journey, mark the
-    // Bank step complete and return to the stepper. Standalone use just pops.
+    // When opened as the final step of the verification journey, mark the Bank
+    // step complete and return to the overview. Standalone use just pops.
     if (Get.isRegistered<VerificationController>()) {
-      Get.find<VerificationController>().completeCurrentStep();
+      final vc = Get.find<VerificationController>();
+      vc.steps[2] =
+          vc.steps[2].copyWith(status: VerificationStatus.completed);
+      vc.steps.refresh();
+      Get.until((route) => route.settings.name == AppRoutes.verification);
+    } else {
+      Get.back();
     }
-    Get.back();
   }
 
   @override
   Widget build(BuildContext context) {
     final scheme = Theme.of(context).colorScheme;
     return Scaffold(
+      resizeToAvoidBottomInset: true,
       backgroundColor: scheme.surface,
       body: CustomScrollView(
+        physics: const BouncingScrollPhysics(),
         slivers: [
           PinnedGradientAppBar(
             title: 'verification.add_bank'.tr,
@@ -48,7 +58,7 @@ class AddBankView extends GetView<AddBankController> {
           ),
           SliverToBoxAdapter(
             child: Padding(
-              padding: const EdgeInsets.fromLTRB(16, 18, 16, 24),
+              padding: EdgeInsets.fromLTRB(16.w, 18.h, 16.w, 24.h),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
@@ -60,7 +70,7 @@ class AddBankView extends GetView<AddBankController> {
                       onChanged: (v) => controller.accountType.value = v,
                     ),
                   ),
-                  const SizedBox(height: 16),
+                  SizedBox(height: 16.h),
                   Obx(
                     () => AppLabeledDropdown(
                       label: 'verification.currency'.tr,
@@ -69,15 +79,15 @@ class AddBankView extends GetView<AddBankController> {
                       onChanged: (v) => controller.currency.value = v,
                     ),
                   ),
-                  const SizedBox(height: 16),
+                  SizedBox(height: 16.h),
                   AppLabeledField(
                       controller: controller.accountHolder,
                       label: 'verification.account_holder'.tr),
-                  const SizedBox(height: 16),
+                  SizedBox(height: 16.h),
                   AppLabeledField(
                       controller: controller.beneficiaryBank,
                       label: 'verification.beneficiary_bank'.tr),
-                  const SizedBox(height: 16),
+                  SizedBox(height: 16.h),
                   Row(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
@@ -92,7 +102,7 @@ class AddBankView extends GetView<AddBankController> {
                           ),
                         ),
                       ),
-                      const SizedBox(width: 14),
+                      SizedBox(width: 14.w),
                       Expanded(
                         child: Obx(
                           () => AppLabeledDropdown(
@@ -106,34 +116,34 @@ class AddBankView extends GetView<AddBankController> {
                       ),
                     ],
                   ),
-                  const SizedBox(height: 16),
+                  SizedBox(height: 16.h),
                   AppLabeledField(
                     controller: controller.accountNumber,
                     label: 'verification.bank_account_number'.tr,
                     keyboardType: TextInputType.number,
                   ),
-                  const SizedBox(height: 16),
+                  SizedBox(height: 16.h),
                   AppLabeledField(
                     controller: controller.confirmAccountNumber,
                     label: 'verification.confirm_bank_account_number'.tr,
                     keyboardType: TextInputType.number,
                   ),
-                  const SizedBox(height: 16),
+                  SizedBox(height: 16.h),
                   AppLabeledField(
                     controller: controller.swiftCode,
                     label: 'verification.swift_code'.tr,
                     keyboardType: TextInputType.number,
                   ),
-                  const SizedBox(height: 22),
+                  SizedBox(height: 22.h),
                   Text('verification.add_proof'.tr,
                       style: GoogleFonts.beVietnamPro(
-                          fontSize: 18, fontWeight: FontWeight.w700)),
-                  const SizedBox(height: 12),
+                          fontSize: 18.sp, fontWeight: FontWeight.w700)),
+                  SizedBox(height: 12.h),
                   Obx(
                     () => UploadDropzone(
                       onTap: controller.pickProof,
                       hasFile: controller.proof.value.isFilled,
-                      height: 180,
+                      height: 180.h,
                     ),
                   ),
                 ],

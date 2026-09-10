@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:google_fonts/google_fonts.dart';
 
 import '../../../shared/theme/app_colors.dart';
@@ -30,7 +31,7 @@ class DelayRowTile extends StatelessWidget {
         return Opacity(
           opacity: t.clamp(0, 1),
           child: Transform.translate(
-            offset: Offset(0, (1 - t) * 8),
+            offset: Offset(0, (1 - t) * 8.h),
             child: child,
           ),
         );
@@ -46,7 +47,7 @@ class DelayRowTile extends StatelessWidget {
                 )
               : null,
         ),
-        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+        padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 14.h),
         child: Row(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
@@ -57,30 +58,30 @@ class DelayRowTile extends StatelessWidget {
                   Text(
                     row.title,
                     style: GoogleFonts.beVietnamPro(
-                      fontSize: 15,
+                      fontSize: 15.sp,
                       fontWeight: FontWeight.w800,
                       color: scheme.onSurface,
                     ),
                   ),
-                  const SizedBox(height: 4),
+                  SizedBox(height: 4.h),
                   Text(
                     row.body,
                     style: GoogleFonts.beVietnamPro(
-                      fontSize: 13,
+                      fontSize: 13.sp,
                       color: scheme.onSurface.withValues(alpha: 0.65),
                     ),
                   ),
                 ],
               ),
             ),
-            const SizedBox(width: 12),
+            SizedBox(width: 12.w),
             ConstrainedBox(
-              constraints: const BoxConstraints(maxWidth: 140),
+              constraints: BoxConstraints(maxWidth: 140.w),
               child: Text(
                 row.consequence,
                 textAlign: TextAlign.right,
                 style: GoogleFonts.beVietnamPro(
-                  fontSize: 13.5,
+                  fontSize: 13.5.sp,
                   fontWeight: FontWeight.w800,
                   color: AppColors.warningInk, // amber/orange
                 ),

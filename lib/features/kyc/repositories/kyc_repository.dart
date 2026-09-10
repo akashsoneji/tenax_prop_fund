@@ -1,76 +1,106 @@
-import 'package:flutter/material.dart';
+import 'dart:io';
+
+import 'package:dio/dio.dart';
+import 'package:get/get.dart' hide FormData, MultipartFile, Response;
 
 import '../../../core/network/api_client.dart';
+import '../../../core/network/api_endpoints.dart';
+import '../../../core/network/api_envelope.dart';
 import '../../../core/network/api_response.dart';
 import '../models/kyc_profile.dart';
+import '../models/kyc_status.dart';
 
-/// Single source of truth for the Profile & KYC screen. Currently returns
-/// static demo data (no live API call). The controller and view do not change —
-/// they still consume an `ApiResponse<KycProfile>`.
+/// Single source of truth for the Profile & KYC feature. Talks to the live
+/// TenaxProp Mobile API:
+/// - `GET /profile`  → [getProfile]
+/// - `PUT /profile`  → [updateProfile]
+/// - `GET /kyc`      → [getKycStatus]
+/// - `POST /kyc/documents` (multipart) → [uploadDocuments]
+///
+/// The controller and view consume `ApiResponse<...>` and never change when the
+/// data source does — that is the point of this layer.
 class KycRepository {
   KycRepository(this._api);
 
-  // ignore: unused_field
   final ApiClient _api;
 
-  Future<ApiResponse<KycProfile>> getProfile() {
-    return Future.value(ApiResponse.success(_demoProfile));
+  /// Loads the profile and, in parallel, the KYC status so the verification
+  /// checklist reflects the real per-document state. A failed status call is
+  /// non-fatal — the profile still renders with pending steps.
+  Future<ApiResponse<KycProfile>> getProfile() async {
+    final results = await Future.wait([
+      ApiEnvelope.guard<Map<String, dynamic>>(
+        () => _api.get<Map<String, dynamic>>(ApiEndpoints.profile),
+        (data) => data is Map<String, dynamic> ? data : const {},
+      ),
+      getKycStatus(),
+    ]);
+
+    final profileRes = results[0] as ApiResponse<Map<String, dynamic>>;
+    final kycRes = results[1] as ApiResponse<KycStatus>;
+    if (!profileRes.success || profileRes.data == null) {
+      return ApiResponse.failure(profileRes.message ?? 'errors.generic'.tr);
+    }
+    return ApiResponse.success(
+      KycProfile.fromJson(profileRes.data!, kyc: kycRes.data),
+    );
   }
 
-  static const KycProfile _demoProfile = KycProfile(
-    name: 'Akash Mehta',
-    since: 'IN',
-    avatarUrl: '',
-    steps: [
-      KycVerificationStep(
-        title: 'Email confirmed',
-        subtitle: 'akash.mehta@example.com',
-        status: KycStepStatus.done,
+  Future<ApiResponse<KycStatus>> getKycStatus() {
+    return ApiEnvelope.guard<KycStatus>(
+      () => _api.get<Map<String, dynamic>>(ApiEndpoints.kyc),
+      (data) => KycStatus.fromJson(data),
+      showErrorToast: false,
+    );
+  }
+
+  Future<ApiResponse<KycProfile>> updateProfile(Map<String, dynamic> body) {
+    return ApiEnvelope.guard<KycProfile>(
+      () => _api.put<Map<String, dynamic>>(ApiEndpoints.profile, data: body),
+      (data) => KycProfile.fromJson(
+        data is Map<String, dynamic> ? data : body,
       ),
-      KycVerificationStep(
-        title: 'Identity document',
-        subtitle: 'Passport or national ID',
-        status: KycStepStatus.done,
+      successMessage: 'edit_profile.saved_body'.tr,
+    );
+  }
+
+  /// Uploads one document type (front + optional back) to the PROPCRM API,
+  /// which expects `document_type`, `front` and `back` multipart fields per
+  /// call. Returns the refreshed [KycStatus].
+  Future<ApiResponse<KycStatus>> uploadDocument({
+    required String documentType,
+    required File front,
+    File? back,
+  }) async {
+    final form = FormData.fromMap({'document_type': documentType});
+    form.files.add(
+      MapEntry(
+        'front',
+        await MultipartFile.fromFile(
+          front.path,
+          filename: front.path.split('/').last,
+        ),
       ),
-      KycVerificationStep(
-        title: 'Proof of address',
-        subtitle: 'Bank statement or bill, under 3 months',
-        status: KycStepStatus.pending,
+    );
+    if (back != null) {
+      form.files.add(
+        MapEntry(
+          'back',
+          await MultipartFile.fromFile(
+            back.path,
+            filename: back.path.split('/').last,
+          ),
+        ),
+      );
+    }
+
+    return ApiEnvelope.guard<KycStatus>(
+      () => _api.post<Map<String, dynamic>>(
+        ApiEndpoints.kycDocuments,
+        data: form,
       ),
-    ],
-    details: [
-      KycDetailRow(
-        icon: Icons.person_outline_rounded,
-        label: 'Full name',
-        value: 'Akash Mehta',
-      ),
-      KycDetailRow(
-        icon: Icons.calendar_today_outlined,
-        label: 'Date of birth',
-        value: '14 Aug 1994',
-      ),
-      KycDetailRow(
-        icon: Icons.public_rounded,
-        label: 'Country',
-        value: 'India',
-      ),
-      KycDetailRow(
-        icon: Icons.smartphone_rounded,
-        label: 'Mobile',
-        value: '+91 90000 00001',
-      ),
-      KycDetailRow(
-        icon: Icons.mail_outline_rounded,
-        label: 'Email',
-        value: 'akash.mehta@example.com',
-      ),
-    ],
-    alerts: [
-      KycAlertRow(label: 'Impact level', value: 'High only'),
-      KycAlertRow(label: 'Currency pairs', value: '5 selected'),
-      KycAlertRow(label: 'Alert timing', value: '15 minutes before'),
-      KycAlertRow(label: 'Channels', value: 'Push and email'),
-      KycAlertRow(label: 'Pause alerts', value: 'Off'),
-    ],
-  );
+      (data) => KycStatus.fromJson(data),
+      successMessage: 'kyc.docs_uploaded'.tr,
+    );
+  }
 }

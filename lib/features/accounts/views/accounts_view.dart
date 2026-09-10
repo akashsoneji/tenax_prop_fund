@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
 
 import '../../../app/routes/app_routes.dart';
@@ -40,7 +41,7 @@ class AccountsView extends StatelessWidget {
             PinnedGradientAppBar(title: 'accounts.app_bar'.tr, showBack: false),
             SliverToBoxAdapter(
               child: Padding(
-                padding: const EdgeInsets.fromLTRB(16, 18, 16, 32),
+                padding: EdgeInsets.fromLTRB(16.w, 18.h, 16.w, 32.h),
                 child: Obx(
                   () => DataStateBuilder<AccountsData>(
                     state: c.state,
@@ -84,7 +85,7 @@ class _AccountsBody extends StatelessWidget {
           onFreeTrial: () => Get.toNamed(AppRoutes.challenge),
           onStartChallenge: () => Get.toNamed(AppRoutes.challenge),
         ),
-        const SizedBox(height: 18),
+        SizedBox(height: 18.h),
         Obx(
           () => AccountsStatusTabs(
             labels: labels,
@@ -93,7 +94,7 @@ class _AccountsBody extends StatelessWidget {
             onChanged: controller.selectTab,
           ),
         ),
-        const SizedBox(height: 14),
+        SizedBox(height: 14.h),
         AccountsSearchBar(
           hintText: 'accounts.search_hint'.tr,
           allPlansLabel: 'accounts.all_plans'.tr,
@@ -102,7 +103,7 @@ class _AccountsBody extends StatelessWidget {
           onQueryChanged: controller.setQuery,
           onPlanChanged: controller.setPlanFilter,
         ),
-        const SizedBox(height: 18),
+        SizedBox(height: 18.h),
         Obx(() {
           final rows = controller.visibleAccounts(data);
           if (rows.isEmpty) return const _NoMatches();
@@ -113,7 +114,7 @@ class _AccountsBody extends StatelessWidget {
                 _Entrance(
                   index: i,
                   child: Padding(
-                    padding: const EdgeInsets.only(bottom: 12),
+                    padding: EdgeInsets.only(bottom: 12.h),
                     child: AccountListCard(
                       account: rows[i],
                       onTrade: () => Get.toNamed(
@@ -145,16 +146,16 @@ class _NoMatches extends StatelessWidget {
   Widget build(BuildContext context) {
     final scheme = Theme.of(context).colorScheme;
     return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 36),
+      padding: EdgeInsets.symmetric(vertical: 36.h),
       child: Column(
         children: [
           Icon(Icons.inbox_rounded,
-              size: 44, color: scheme.onSurfaceVariant.withValues(alpha: 0.6)),
-          const SizedBox(height: 12),
+              size: 44.w, color: scheme.onSurfaceVariant.withValues(alpha: 0.6)),
+          SizedBox(height: 12.h),
           Text(
             'accounts.no_matches'.tr,
             style: TextStyle(
-              fontSize: 14,
+              fontSize: 14.sp,
               fontWeight: FontWeight.w600,
               color: scheme.onSurfaceVariant,
             ),
@@ -175,18 +176,18 @@ class _AccountsSkeleton extends StatelessWidget {
   Widget build(BuildContext context) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
-      children: const [
-        HeroSkeleton(height: 180),
-        SizedBox(height: 18),
-        ShimmerBox(height: 40, radius: 22),
-        SizedBox(height: 14),
-        ShimmerBox(height: 46, radius: 14),
-        SizedBox(height: 18),
-        AccountCardSkeleton(),
-        SizedBox(height: 12),
-        AccountCardSkeleton(),
-        SizedBox(height: 12),
-        AccountCardSkeleton(),
+      children: [
+        HeroSkeleton(height: 180.h),
+        SizedBox(height: 18.h),
+        ShimmerBox(height: 40.h, radius: 22.r),
+        SizedBox(height: 14.h),
+        ShimmerBox(height: 46.h, radius: 14.r),
+        SizedBox(height: 18.h),
+        const AccountCardSkeleton(),
+        SizedBox(height: 12.h),
+        const AccountCardSkeleton(),
+        SizedBox(height: 12.h),
+        const AccountCardSkeleton(),
       ],
     );
   }

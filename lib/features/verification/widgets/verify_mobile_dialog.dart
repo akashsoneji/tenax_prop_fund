@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
 
@@ -58,9 +59,9 @@ class _VerifyMobileDialogState extends State<VerifyMobileDialog> {
   Widget build(BuildContext context) {
     final scheme = Theme.of(context).colorScheme;
     return Dialog(
-      insetPadding: const EdgeInsets.symmetric(horizontal: 20),
+      insetPadding: EdgeInsets.symmetric(horizontal: 20.w),
       child: Padding(
-        padding: const EdgeInsets.fromLTRB(20, 22, 20, 20),
+        padding: EdgeInsets.fromLTRB(20.w, 22.h, 20.w, 20.h),
         child: Column(
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -71,7 +72,7 @@ class _VerifyMobileDialogState extends State<VerifyMobileDialog> {
                   child: Text(
                     'verification.verify_mobile'.tr,
                     style: GoogleFonts.beVietnamPro(
-                      fontSize: 19,
+                      fontSize: 19.sp,
                       fontWeight: FontWeight.w700,
                       color: scheme.onSurface,
                     ),
@@ -79,23 +80,23 @@ class _VerifyMobileDialogState extends State<VerifyMobileDialog> {
                 ),
                 InkWell(
                   onTap: () => Get.back(),
-                  borderRadius: BorderRadius.circular(20),
+                  borderRadius: BorderRadius.circular(20.r),
                   child: Icon(Icons.cancel_outlined,
-                      color: scheme.error, size: 24),
+                      color: scheme.error, size: 24.w),
                 ),
               ],
             ),
-            const SizedBox(height: 14),
+            SizedBox(height: 14.h),
             Text(
               'verification.otp_body'.trParams({'phone': widget.phone}),
               textAlign: TextAlign.center,
               style: GoogleFonts.beVietnamPro(
-                fontSize: 14,
+                fontSize: 14.sp,
                 height: 1.4,
                 color: scheme.onSurface.withValues(alpha: 0.6),
               ),
             ),
-            const SizedBox(height: 22),
+            SizedBox(height: 22.h),
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
@@ -107,7 +108,7 @@ class _VerifyMobileDialogState extends State<VerifyMobileDialog> {
                   ),
               ],
             ),
-            const SizedBox(height: 22),
+            SizedBox(height: 22.h),
             widget.verifying == null
                 ? AppGradientButton(
                     label: 'common.verify'.tr,
@@ -145,8 +146,8 @@ class _OtpCell extends StatelessWidget {
   Widget build(BuildContext context) {
     final scheme = Theme.of(context).colorScheme;
     return SizedBox(
-      width: 62,
-      height: 62,
+      width: 62.w,
+      height: 62.w,
       child: TextField(
         controller: controller,
         focusNode: focusNode,
@@ -155,7 +156,7 @@ class _OtpCell extends StatelessWidget {
         textAlign: TextAlign.center,
         maxLength: 1,
         style: GoogleFonts.beVietnamPro(
-          fontSize: 24,
+          fontSize: 24.sp,
           fontWeight: FontWeight.w700,
           color: scheme.onSurface,
         ),
@@ -168,12 +169,12 @@ class _OtpCell extends StatelessWidget {
           filled: false,
           contentPadding: EdgeInsets.zero,
           enabledBorder: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(12),
+            borderRadius: BorderRadius.circular(12.r),
             borderSide:
                 BorderSide(color: scheme.onSurface.withValues(alpha: 0.2)),
           ),
           focusedBorder: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(12),
+            borderRadius: BorderRadius.circular(12.r),
             borderSide: BorderSide(color: scheme.primary, width: 1.6),
           ),
         ),

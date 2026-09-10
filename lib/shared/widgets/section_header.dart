@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:google_fonts/google_fonts.dart';
 
-/// A left-aligned section title used above grouped cards on inner screens
+/// A left-aligned section title
 /// ("Prizes", "Challenge rules", "Trading platform"…). Matches the muted-bold
 /// look from the designs and is fully theme-driven.
 class SectionHeader extends StatelessWidget {
@@ -27,7 +28,7 @@ class SectionHeader extends StatelessWidget {
             child: Text(
               title,
               style: GoogleFonts.beVietnamPro(
-                fontSize: 17,
+                fontSize: 17.sp,
                 fontWeight: FontWeight.w800,
                 color: scheme.onSurface.withValues(alpha: 0.85),
               ),

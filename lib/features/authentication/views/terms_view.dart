@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
 
 import '../../../shared/widgets/app_checkbox.dart';
@@ -28,13 +29,13 @@ class _TermsViewState extends State<TermsView> {
           children: [
             Expanded(
               child: SingleChildScrollView(
-                padding: const EdgeInsets.all(24),
+                padding: EdgeInsets.all(24.w),
                 child: Text('terms.body'.tr),
               ),
             ),
             if (widget.onChanged != null)
               Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 16),
+                padding: EdgeInsets.symmetric(horizontal: 16.w),
                 child: AppCheckbox(
                   value: _agreed,
                   onChanged: (v) {
@@ -44,7 +45,7 @@ class _TermsViewState extends State<TermsView> {
                   label: 'terms.agree'.tr,
                 ),
               ),
-            const SizedBox(height: 12),
+            SizedBox(height: 12.h),
           ],
         ),
       ),

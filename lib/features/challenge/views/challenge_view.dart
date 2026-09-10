@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
 
@@ -39,7 +40,7 @@ class ChallengeView extends StatelessWidget {
         slivers: [
           PinnedGradientAppBar(title: 'challenge.title'.tr),
           SliverPadding(
-            padding: const EdgeInsets.fromLTRB(16, 16, 16, 24),
+            padding: EdgeInsets.fromLTRB(16.w, 16.h, 16.w, 24.h),
             sliver: SliverToBoxAdapter(
               child: Obx(
                 () => DataStateBuilder<ChallengeData>(
@@ -96,7 +97,7 @@ class _ChallengeBody extends StatelessWidget {
             onChanged: (i) => c.setMode(
                 i == 0 ? ChallengeMode.paid : ChallengeMode.freeTrial),
           ),
-          const SizedBox(height: 18),
+          SizedBox(height: 18.h),
           AnimatedSwitcher(
             duration: AppMotion.base,
             switchInCurve: AppMotion.enter,
@@ -128,16 +129,16 @@ class _ChallengeSkeleton extends StatelessWidget {
   Widget build(BuildContext context) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
-      children: const [
-        ShimmerBox(height: 44, radius: 14),
-        SizedBox(height: 18),
-        ShimmerBox(height: 44, radius: 14),
-        SizedBox(height: 16),
-        StatGridSkeleton(tiles: 6),
-        SizedBox(height: 26),
-        CardSkeleton(lines: 5),
-        SizedBox(height: 26),
-        CardSkeleton(lines: 4),
+      children: [
+        ShimmerBox(height: 44.h, radius: 14.r),
+        SizedBox(height: 18.h),
+        ShimmerBox(height: 44.h, radius: 14.r),
+        SizedBox(height: 16.h),
+        const StatGridSkeleton(tiles: 6),
+        SizedBox(height: 26.h),
+        const CardSkeleton(lines: 5),
+        SizedBox(height: 26.h),
+        const CardSkeleton(lines: 4),
       ],
     );
   }
@@ -158,15 +159,15 @@ class _PaidBody extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
         _CompareLink(),
-        const SizedBox(height: 14),
+        SizedBox(height: 14.h),
         AppSegmentedControl(
           labels: ChallengeStep.values.map((s) => s.label).toList(),
           selected: c.step.value.index,
           onChanged: (i) => c.setStep(ChallengeStep.values[i]),
         ),
-        const SizedBox(height: 16),
+        SizedBox(height: 16.h),
         _PlanGrid(c: c, data: data),
-        const SizedBox(height: 26),
+        SizedBox(height: 26.h),
         SectionHeader('challenge.challenge_rules'.tr),
         RulesCard(
           children: [
@@ -179,7 +180,7 @@ class _PaidBody extends StatelessWidget {
               ),
           ],
         ),
-        const SizedBox(height: 26),
+        SizedBox(height: 26.h),
         SectionHeader('challenge.funded_reward_rules'.tr),
         RulesCard(
           children: [
@@ -202,13 +203,13 @@ class _CompareLink extends StatelessWidget {
   Widget build(BuildContext context) {
     final scheme = Theme.of(context).colorScheme;
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
-      decoration: AppTheme.surfaceCard(scheme, radius: 14),
+      padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 14.h),
+      decoration: AppTheme.surfaceCard(scheme, radius: 14.r),
       child: Center(
         child: Text(
           'challenge.compare_plans'.tr,
           style: GoogleFonts.beVietnamPro(
-            fontSize: 14,
+            fontSize: 14.sp,
             fontWeight: FontWeight.w700,
             color: scheme.primary,
           ),
@@ -230,10 +231,10 @@ class _PlanGrid extends StatelessWidget {
       shrinkWrap: true,
       physics: const NeverScrollableScrollPhysics(),
       itemCount: plans.length,
-      gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+      gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
         crossAxisCount: 2,
-        mainAxisSpacing: 12,
-        crossAxisSpacing: 12,
+        mainAxisSpacing: 12.w,
+        crossAxisSpacing: 12.w,
         childAspectRatio: 1.7,
       ),
       itemBuilder: (context, i) => ChallengePlanCard(
@@ -258,10 +259,10 @@ class _TrialBody extends StatelessWidget {
   Widget build(BuildContext context) {
     final scheme = Theme.of(context).colorScheme;
     return Container(
-      padding: const EdgeInsets.all(18),
+      padding: EdgeInsets.all(18.w),
       decoration: BoxDecoration(
         color: scheme.primary.withValues(alpha: 0.06),
-        borderRadius: BorderRadius.circular(18),
+        borderRadius: BorderRadius.circular(18.r),
         border: Border.all(color: scheme.primary.withValues(alpha: 0.12)),
       ),
       child: Column(
@@ -277,16 +278,16 @@ class _TrialBody extends StatelessWidget {
                       'challenge.free_trial_plan'
                           .trParams({'app': FlavorResolver.appName}),
                       style: GoogleFonts.beVietnamPro(
-                        fontSize: 17,
+                        fontSize: 17.sp,
                         fontWeight: FontWeight.w800,
                         color: scheme.onSurface,
                       ),
                     ),
-                    const SizedBox(height: 3),
+                    SizedBox(height: 3.h),
                     Text(
                       r'$10K account, free for 7 days',
                       style: GoogleFonts.beVietnamPro(
-                        fontSize: 13,
+                        fontSize: 13.sp,
                         color: scheme.onSurface.withValues(alpha: 0.6),
                       ),
                     ),
@@ -299,7 +300,7 @@ class _TrialBody extends StatelessWidget {
                   Text(
                     r'$0',
                     style: GoogleFonts.beVietnamPro(
-                      fontSize: 20,
+                      fontSize: 20.sp,
                       fontWeight: FontWeight.w800,
                       color: scheme.primary,
                     ),
@@ -307,7 +308,7 @@ class _TrialBody extends StatelessWidget {
                   Text(
                     'challenge.no_fee'.tr,
                     style: GoogleFonts.beVietnamPro(
-                      fontSize: 12,
+                      fontSize: 12.sp,
                       color: scheme.onSurface.withValues(alpha: 0.5),
                     ),
                   ),
@@ -315,19 +316,19 @@ class _TrialBody extends StatelessWidget {
               ),
             ],
           ),
-          const SizedBox(height: 16),
+          SizedBox(height: 16.h),
           _TrialStatGrid(data: data),
-          const SizedBox(height: 16),
+          SizedBox(height: 16.h),
           AppGradientButton(
             label: 'challenge.start_free_trial'.tr,
             onPressed: () => Get.toNamed(AppRoutes.configure),
           ),
-          const SizedBox(height: 12),
+          SizedBox(height: 12.h),
           Text(
             'challenge.trial_note'.tr,
             textAlign: TextAlign.center,
             style: GoogleFonts.beVietnamPro(
-              fontSize: 12,
+              fontSize: 12.sp,
               height: 1.4,
               color: scheme.onSurface.withValues(alpha: 0.55),
             ),
@@ -349,10 +350,10 @@ class _TrialStatGrid extends StatelessWidget {
       shrinkWrap: true,
       physics: const NeverScrollableScrollPhysics(),
       itemCount: rules.length,
-      gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+      gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
         crossAxisCount: 2,
-        mainAxisSpacing: 12,
-        crossAxisSpacing: 12,
+        mainAxisSpacing: 12.w,
+        crossAxisSpacing: 12.w,
         childAspectRatio: 2.3,
       ),
       itemBuilder: (context, i) => _TrialStatTile(rule: rules[i]),
@@ -368,12 +369,12 @@ class _TrialStatTile extends StatelessWidget {
   Widget build(BuildContext context) {
     final scheme = Theme.of(context).colorScheme;
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+      padding: EdgeInsets.symmetric(horizontal: 14.w, vertical: 12.h),
       decoration: BoxDecoration(
         color: scheme.brightness == Brightness.dark
             ? AppColors.white.withValues(alpha: 0.05)
             : AppColors.white,
-        borderRadius: BorderRadius.circular(12),
+        borderRadius: BorderRadius.circular(12.r),
         border: Border.all(color: scheme.onSurface.withValues(alpha: 0.06)),
       ),
       child: Column(
@@ -383,15 +384,15 @@ class _TrialStatTile extends StatelessWidget {
           Text(
             rule.label,
             style: GoogleFonts.beVietnamPro(
-              fontSize: 12.5,
+              fontSize: 12.5.sp,
               color: scheme.onSurface.withValues(alpha: 0.55),
             ),
           ),
-          const SizedBox(height: 4),
+          SizedBox(height: 4.h),
           Text(
             rule.value,
             style: GoogleFonts.beVietnamPro(
-              fontSize: 15,
+              fontSize: 15.sp,
               fontWeight: FontWeight.w800,
               color: scheme.onSurface,
             ),

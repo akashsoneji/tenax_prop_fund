@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:google_fonts/google_fonts.dart';
 
 import '../theme/app_colors.dart';
@@ -29,10 +30,10 @@ class AppSegmentedControl extends StatelessWidget {
     final scheme = Theme.of(context).colorScheme;
     return Container(
       height: height,
-      padding: const EdgeInsets.all(4),
+      padding: EdgeInsets.all(4.w),
       decoration: BoxDecoration(
         color: scheme.onSurface.withValues(alpha: 0.06),
-        borderRadius: BorderRadius.circular(14),
+        borderRadius: BorderRadius.circular(14.r),
       ),
       child: LayoutBuilder(
         builder: (context, constraints) {
@@ -53,12 +54,12 @@ class AppSegmentedControl extends StatelessWidget {
                   height: double.infinity,
                   decoration: BoxDecoration(
                     gradient: AppTheme.brandGradient(scheme),
-                    borderRadius: BorderRadius.circular(11),
+                    borderRadius: BorderRadius.circular(11.r),
                     boxShadow: [
                       BoxShadow(
                         color: scheme.primary.withValues(alpha: 0.30),
-                        blurRadius: 10,
-                        offset: const Offset(0, 4),
+                        blurRadius: 10.r,
+                        offset: Offset(0, 4.h),
                       ),
                     ],
                   ),
@@ -75,7 +76,7 @@ class AppSegmentedControl extends StatelessWidget {
                           child: Text(
                             labels[i],
                             style: GoogleFonts.beVietnamPro(
-                              fontSize: 14,
+                              fontSize: 14.sp,
                               fontWeight: FontWeight.w700,
                               color: selected == i
                 ? AppColors.white

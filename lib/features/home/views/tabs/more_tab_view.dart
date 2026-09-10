@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
 
@@ -33,15 +34,15 @@ class MoreTabView extends StatelessWidget {
           PinnedGradientAppBar(title: 'home.tabs.more'.tr, showBack: showBack),
           SliverToBoxAdapter(
             child: Padding(
-              padding: const EdgeInsets.fromLTRB(16, 18, 16, 28),
+              padding: EdgeInsets.fromLTRB(16.w, 18.h, 16.w, 28.h),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
                   for (var i = 0; i < _sections.length; i++) ...[
                     _MoreSection(section: _sections[i], order: i),
-                    if (i < _sections.length - 1) const SizedBox(height: 22),
+                    if (i < _sections.length - 1) SizedBox(height: 22.h),
                   ],
-                  const SizedBox(height: 22),
+                  SizedBox(height: 22.h),
                   const _LogoutRow(),
                 ],
               ),
@@ -148,24 +149,24 @@ class _MoreSection extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Padding(
-            padding: const EdgeInsets.only(left: 4, bottom: 10),
+            padding: EdgeInsets.only(left: 4.w, bottom: 10.h),
             child: Text(section.titleKey.tr,
                 style: GoogleFonts.beVietnamPro(
-                    fontSize: 15,
+                    fontSize: 15.sp,
                     fontWeight: FontWeight.w700,
                     color: scheme.onSurface.withValues(alpha: 0.65))),
           ),
           Container(
-            decoration: AppTheme.surfaceCard(scheme, radius: 18),
+            decoration: AppTheme.surfaceCard(scheme, radius: 18.r),
             child: Column(
               children: [
                 for (var i = 0; i < section.items.length; i++) ...[
                   _MoreRow(item: section.items[i]),
                   if (i < section.items.length - 1)
                     Divider(
-                      height: 1,
+                      height: 1.h,
                       thickness: 1,
-                      indent: 64,
+                      indent: 64.w,
                       color: scheme.onSurface.withValues(alpha: 0.06),
                     ),
                 ],
@@ -195,8 +196,8 @@ class _MoreRow extends StatelessWidget {
       item.titleKey.tr,
       'more.coming_soon'.tr,
       snackPosition: SnackPosition.BOTTOM,
-      margin: const EdgeInsets.all(16),
-      borderRadius: 14,
+      margin: EdgeInsets.all(16.w),
+      borderRadius: 14.r,
     );
   }
 
@@ -207,33 +208,33 @@ class _MoreRow extends StatelessWidget {
       color: AppColors.transparent,
       child: InkWell(
         onTap: _onTap,
-        borderRadius: BorderRadius.circular(18),
+        borderRadius: BorderRadius.circular(18.r),
         child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+          padding: EdgeInsets.symmetric(horizontal: 14.w, vertical: 12.h),
           child: Row(
             children: [
               Container(
-                width: 38,
-                height: 38,
+                width: 38.w,
+                height: 38.h,
                 decoration: BoxDecoration(
                   color: scheme.primary.withValues(alpha: 0.10),
-                  borderRadius: BorderRadius.circular(11),
+                  borderRadius: BorderRadius.circular(11.r),
                 ),
                 alignment: Alignment.center,
-                child: Icon(item.icon, size: 19, color: scheme.primary),
+                child: Icon(item.icon, size: 19.w, color: scheme.primary),
               ),
-              const SizedBox(width: 12),
+              SizedBox(width: 12.w),
               Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(item.titleKey.tr,
                         style: GoogleFonts.beVietnamPro(
-                            fontSize: 14, fontWeight: FontWeight.w700)),
-                    const SizedBox(height: 2),
+                            fontSize: 14.sp, fontWeight: FontWeight.w700)),
+                    SizedBox(height: 2.h),
                     Text(item.subtitleKey.tr,
                         style: GoogleFonts.beVietnamPro(
-                            fontSize: 12,
+                            fontSize: 12.sp,
                             color: scheme.onSurface.withValues(alpha: 0.55))),
                   ],
                 ),
@@ -298,32 +299,32 @@ class _LogoutRow extends StatelessWidget {
   Widget build(BuildContext context) {
     final scheme = Theme.of(context).colorScheme;
     return Container(
-      decoration: AppTheme.surfaceCard(scheme, radius: 18),
+      decoration: AppTheme.surfaceCard(scheme, radius: 18.r),
       child: Material(
         color: AppColors.transparent,
         child: InkWell(
           onTap: _confirmAndLogout,
-          borderRadius: BorderRadius.circular(18),
+          borderRadius: BorderRadius.circular(18.r),
           child: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+            padding: EdgeInsets.symmetric(horizontal: 14.w, vertical: 12.h),
             child: Row(
               children: [
                 Container(
-                  width: 38,
-                  height: 38,
+                  width: 38.w,
+                  height: 38.h,
                   decoration: BoxDecoration(
                     color: AppColors.danger.withValues(alpha: 0.10),
-                    borderRadius: BorderRadius.circular(11),
+                    borderRadius: BorderRadius.circular(11.r),
                   ),
                   alignment: Alignment.center,
-                  child: const Icon(Icons.logout_rounded,
-                      size: 19, color: AppColors.danger),
+                  child: Icon(Icons.logout_rounded,
+                      size: 19.w, color: AppColors.danger),
                 ),
-                const SizedBox(width: 12),
+                SizedBox(width: 12.w),
                 Expanded(
                   child: Text('more.logout'.tr,
                       style: GoogleFonts.beVietnamPro(
-                          fontSize: 14,
+                          fontSize: 14.sp,
                           fontWeight: FontWeight.w700,
                           color: AppColors.danger)),
                 ),

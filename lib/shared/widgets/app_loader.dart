@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 
-/// Lightweight themed loader with an optional label. Use on top of any
+/// Lightweight themed loader
 /// blocking operation; colors come from the active theme so dark mode
 /// works automatically.
 class AppLoader extends StatelessWidget {
@@ -16,7 +17,7 @@ class AppLoader extends StatelessWidget {
         children: [
           const CircularProgressIndicator(),
           if (label != null) ...[
-            const SizedBox(height: 12),
+            SizedBox(height: 12.h),
             Text(label!, style: Theme.of(context).textTheme.bodyMedium),
           ],
         ],

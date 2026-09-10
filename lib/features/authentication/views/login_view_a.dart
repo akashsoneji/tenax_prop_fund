@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
 
 import '../../../app/flavor/flavor_config.dart';
@@ -25,9 +26,9 @@ class LoginViewA extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          const SizedBox(height: 4),
+          SizedBox(height: 4.h),
           Center(child: const BrandBadge()),
-          const SizedBox(height: 18),
+          SizedBox(height: 18.h),
           Text(
             config.appName,
             textAlign: TextAlign.center,
@@ -36,7 +37,7 @@ class LoginViewA extends StatelessWidget {
               letterSpacing: 0.4,
             ),
           ),
-          const SizedBox(height: 4),
+          SizedBox(height: 4.h),
           Text(
             'app.tagline'.tr,
             textAlign: TextAlign.center,
@@ -44,7 +45,7 @@ class LoginViewA extends StatelessWidget {
               color: scheme.onSurface.withValues(alpha: 0.55),
             ),
           ),
-          const SizedBox(height: 22),
+          SizedBox(height: 22.h),
           const GlassCard(child: LoginForm()),
         ],
       ),

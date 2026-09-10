@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
 
@@ -30,7 +31,7 @@ class EconomicCalendarView extends StatelessWidget {
         slivers: [
           PinnedGradientAppBar(title: 'economic_calendar.title'.tr),
           SliverPadding(
-            padding: const EdgeInsets.fromLTRB(16, 18, 16, 32),
+            padding: EdgeInsets.fromLTRB(16.w, 18.h, 16.w, 32.h),
             sliver: SliverToBoxAdapter(
               child: Obx(
                 () => DataStateBuilder<List<EventDay>>(
@@ -50,7 +51,7 @@ class EconomicCalendarView extends StatelessWidget {
                           return Column(
                             crossAxisAlignment: CrossAxisAlignment.stretch,
                             children: [
-                              if (d > 0) const SizedBox(height: 24),
+                              if (d > 0) SizedBox(height: 24.h),
                               FadeSlideIn(
                                 order: d * 2,
                                 child: SectionHeader(day.label),
@@ -72,7 +73,7 @@ class EconomicCalendarView extends StatelessWidget {
                           );
                         },
                       ),
-                      const SizedBox(height: 22),
+                      SizedBox(height: 22.h),
                       FadeSlideIn(
                         order: 12,
                         child: AppInfoBanner(
@@ -104,12 +105,12 @@ class _EventRow extends StatelessWidget {
     return Column(
       children: [
         Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 14),
+          padding: EdgeInsets.symmetric(horizontal: 14.w, vertical: 14.h),
           child: Row(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               _CurrencyChip(code: event.currency),
-              const SizedBox(width: 12),
+              SizedBox(width: 12.w),
               Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
@@ -117,16 +118,16 @@ class _EventRow extends StatelessWidget {
                     Text(
                       event.title,
                       style: GoogleFonts.beVietnamPro(
-                        fontSize: 15,
+                        fontSize: 15.sp,
                         fontWeight: FontWeight.w700,
                         color: scheme.onSurface,
                       ),
                     ),
-                    const SizedBox(height: 4),
+                    SizedBox(height: 4.h),
                     Text(
                       event.detail,
                       style: GoogleFonts.beVietnamPro(
-                        fontSize: 12.5,
+                        fontSize: 12.5.sp,
                         height: 1.35,
                         color: scheme.onSurface.withValues(alpha: 0.55),
                       ),
@@ -134,11 +135,11 @@ class _EventRow extends StatelessWidget {
                   ],
                 ),
               ),
-              const SizedBox(width: 10),
+              SizedBox(width: 10.w),
               Text(
                 event.impactLabel,
                 style: GoogleFonts.beVietnamPro(
-                  fontSize: 13,
+                  fontSize: 13.sp,
                   fontWeight: FontWeight.w700,
                   color: event.impactColor(scheme),
                 ),
@@ -148,10 +149,10 @@ class _EventRow extends StatelessWidget {
         ),
         if (showDivider)
           Divider(
-            height: 1,
-            thickness: 1,
-            indent: 14,
-            endIndent: 14,
+            height: 1.h,
+            thickness: 1.h,
+            indent: 14.w,
+            endIndent: 14.w,
             color: scheme.onSurface.withValues(alpha: 0.06),
           ),
       ],
@@ -167,17 +168,17 @@ class _CurrencyChip extends StatelessWidget {
   Widget build(BuildContext context) {
     final scheme = Theme.of(context).colorScheme;
     return Container(
-      width: 48,
-      height: 44,
+      width: 48.w,
+      height: 44.h,
       decoration: BoxDecoration(
         color: scheme.primary.withValues(alpha: 0.10),
-        borderRadius: BorderRadius.circular(12),
+        borderRadius: BorderRadius.circular(12.r),
       ),
       alignment: Alignment.center,
       child: Text(
         code,
         style: GoogleFonts.beVietnamPro(
-          fontSize: 12.5,
+          fontSize: 12.5.sp,
           fontWeight: FontWeight.w700,
           color: scheme.primary,
         ),

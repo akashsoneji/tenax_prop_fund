@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:google_fonts/google_fonts.dart';
 
 import '../../../shared/theme/app_colors.dart';
@@ -39,16 +40,16 @@ class StatTile extends StatelessWidget {
         return Opacity(
           opacity: t.clamp(0, 1),
           child: Transform.translate(
-            offset: Offset(0, (1 - t) * 14),
+            offset: Offset(0, (1 - t) * 14.h),
             child: child,
           ),
         );
       },
       child: Container(
-        padding: const EdgeInsets.fromLTRB(14, 12, 12, 14),
+        padding: EdgeInsets.fromLTRB(14.w, 12.h, 12.w, 14.h),
         decoration: BoxDecoration(
           color: tintBg,
-          borderRadius: BorderRadius.circular(14),
+          borderRadius: BorderRadius.circular(14.r),
           border: Border.all(color: tintAccent.withValues(alpha: 0.35)),
         ),
         child: Column(
@@ -61,7 +62,7 @@ class StatTile extends StatelessWidget {
                   child: Text(
                     label,
                     style: GoogleFonts.beVietnamPro(
-                      fontSize: 13,
+                      fontSize: 13.sp,
                       fontWeight: FontWeight.w600,
                       color: scheme.onSurface.withValues(alpha: 0.7),
                     ),
@@ -69,22 +70,22 @@ class StatTile extends StatelessWidget {
                 ),
                 if (trailingIcon != null)
                   Container(
-                    width: 26,
-                    height: 26,
+                    width: 26.w,
+                    height: 26.w,
                     decoration: BoxDecoration(
                       shape: BoxShape.circle,
                       color: tintAccent.withValues(alpha: 0.18),
                     ),
                     alignment: Alignment.center,
-                    child: Icon(trailingIcon, size: 14, color: tintAccent),
+                    child: Icon(trailingIcon, size: 14.w, color: tintAccent),
                   ),
               ],
             ),
-            const SizedBox(height: 14),
+            SizedBox(height: 14.h),
             Text(
               value,
               style: GoogleFonts.beVietnamPro(
-                fontSize: 26,
+                fontSize: 26.sp,
                 fontWeight: FontWeight.w800,
                 color: tintAccent,
                 height: 1.0,
