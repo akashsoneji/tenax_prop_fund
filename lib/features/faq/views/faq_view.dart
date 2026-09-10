@@ -188,8 +188,8 @@ class _FaqTile extends StatelessWidget {
         ),
         if (showDivider)
           Divider(
-            height: 1,
-            thickness: 1,
+            height: 1.h,
+            thickness: 1.h,
             indent: 16.w,
             endIndent: 16.w,
             color: scheme.onSurface.withValues(alpha: 0.06),

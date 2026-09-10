@@ -15,14 +15,14 @@ class GlassCard extends StatefulWidget {
   const GlassCard({
     super.key,
     required this.child,
-    this.padding = const EdgeInsets.all(22),
-    this.radius = 26,
+    this.padding,
+    this.radius,
     this.sigma = 22,
   });
 
   final Widget child;
-  final EdgeInsets padding;
-  final double radius;
+  final EdgeInsets? padding;
+  final double? radius;
   final double sigma;
 
   @override
@@ -54,7 +54,9 @@ class _GlassCardState extends State<GlassCard>
         ? AppColors.white.withValues(alpha: 0.10)
         : AppColors.white.withValues(alpha: 0.55);
 
-    final radius = BorderRadius.circular(widget.radius);
+    final radiusValue = widget.radius ?? 26.r;
+    final pad = widget.padding ?? EdgeInsets.all(22.w);
+    final radius = BorderRadius.circular(radiusValue);
 
     return AnimatedBuilder(
       animation: _spin,
@@ -82,16 +84,16 @@ class _GlassCardState extends State<GlassCard>
             ],
           ),
           child: ClipRRect(
-            borderRadius: BorderRadius.circular(widget.radius - 1.4),
+            borderRadius: BorderRadius.circular(radiusValue - 1.4.w),
             child: BackdropFilter(
               filter: ImageFilter.blur(
                 sigmaX: widget.sigma,
                 sigmaY: widget.sigma,
               ),
               child: Container(
-                padding: widget.padding,
+                padding: pad,
                 decoration: BoxDecoration(
-                  borderRadius: BorderRadius.circular(widget.radius - 1.4),
+                  borderRadius: BorderRadius.circular(radiusValue - 1.4.w),
                   gradient: LinearGradient(
                     begin: Alignment.topLeft,
                     end: Alignment.bottomRight,

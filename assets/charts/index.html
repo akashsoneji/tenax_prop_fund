@@ -47,6 +47,30 @@
       var boot = window.TENAX_CHART_BOOT || {};
       var offset = q.get('offset');
 
+      // Self-feed wiring. When the app passes historyUrl (+ optional wsUrl) the
+      // bundled chart fetches its own candle history and opens its own live
+      // pricing socket — no dependency on the app pushing ticks. This is what
+      // lets the local bundled page render a full chart on a cold/first launch.
+      // If neither is present we fall back to push mode (app owns the socket).
+      var historyUrl = q.get('historyUrl') || boot.historyUrl || '';
+      var wsUrl = q.get('wsUrl') || boot.wsUrl || '';
+      var group = q.get('group') || boot.group || '';
+      var selfFeed = !!historyUrl;
+
+      var datafeed = selfFeed
+        ? {
+            mode: wsUrl ? 'ws' : 'remote',
+            historyUrl: historyUrl,
+            wsUrl: wsUrl,
+            group: group,
+            displayOffsetMinutes: Number(offset !== null ? offset : boot.displayOffsetMinutes || 0),
+          }
+        : {
+            // Push mode: the app owns the socket and feeds this chart.
+            mode: 'push',
+            displayOffsetMinutes: Number(offset !== null ? offset : boot.displayOffsetMinutes || 0),
+          };
+
       // The UMD bundle defines TenaxChart; mounting replaces it with the
       // bridge handle the app talks to (receive / send / ui).
       // IMPORTANT: Reassign window.TenaxChart to the mounted bridge instance.
@@ -60,13 +84,7 @@
         // 'auto' follows the device's light/dark setting; the app can also
         // send { type: 'theme', mode } at any point.
         themeMode: q.get('theme') || boot.themeMode || 'dark',
-        // Push mode: the app owns the socket and feeds this chart. No
-        // historyUrl or wsUrl on purpose — a second connection would be a
-        // second login for the same stream.
-        datafeed: {
-          mode: 'push',
-          displayOffsetMinutes: Number(offset !== null ? offset : boot.displayOffsetMinutes || 0),
-        },
+        datafeed: datafeed,
         orders: Object.assign({ contractSize: 1, allowDrag: true, allowClose: true }, boot.orders),
         persistence: Object.assign({ key: 'tenax.chart.mobile' }, boot.persistence),
       });

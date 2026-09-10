@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
 
 import '../../../../app/flavor/flavor.dart';
@@ -47,51 +48,51 @@ class HomeTabView extends GetView<HomeController> {
                     child: ListView(
                       physics: const AlwaysScrollableScrollPhysics(
                           parent: BouncingScrollPhysics()),
-                      padding: const EdgeInsets.fromLTRB(16, 8, 16, 28),
+                      padding: EdgeInsets.fromLTRB(16.w, 6.h, 16.w, 24.h),
                       children: [
                         _EquityHero(data: data),
                         if (data.kpis.isNotEmpty) ...[
-                          const SizedBox(height: 18),
+                          SizedBox(height: 12.h),
                           _KpiGrid(kpis: data.kpis),
                         ],
                         if (data.liveAccounts.isNotEmpty) ...[
-                          const SizedBox(height: 24),
+                          SizedBox(height: 14.h),
                           _SectionLabel('home.live_accounts'.tr),
-                          const SizedBox(height: 12),
+                          SizedBox(height: 8.h),
                           _LiveAccountsStrip(accounts: data.liveAccounts),
                         ],
-                        const SizedBox(height: 24),
+                        SizedBox(height: 14.h),
                         _SectionLabel('home.quick_actions'.tr,
                             actionLabel: 'home.recommended'.tr),
-                        const SizedBox(height: 14),
+                        SizedBox(height: 10.h),
                         const _QuickActions(),
                         if (data.health.isNotEmpty) ...[
-                          const SizedBox(height: 26),
+                          SizedBox(height: 14.h),
                           _SectionLabel('home.account_health'.tr,
                               actionLabel: data.healthBadge.isEmpty
                                   ? null
                                   : data.healthBadge),
-                          const SizedBox(height: 12),
+                          SizedBox(height: 8.h),
                           _RiskOverview(items: data.health),
                         ],
                         if (data.activity.isNotEmpty) ...[
-                          const SizedBox(height: 26),
+                          SizedBox(height: 14.h),
                           _SectionLabel(
                             'home.recent_activity'.tr,
                             actionLabel: 'home.view_all'.tr,
                             onAction: () =>
                                 Get.toNamed(AppRoutes.notifications),
                           ),
-                          const SizedBox(height: 12),
+                          SizedBox(height: 8.h),
                           _ActivityList(items: data.activity),
                         ],
                         if (data.trades.isNotEmpty) ...[
-                          const SizedBox(height: 26),
+                          SizedBox(height: 14.h),
                           _SectionLabel('home.recent_trades'.tr),
-                          const SizedBox(height: 12),
+                          SizedBox(height: 8.h),
                           _RecentTrades(items: data.trades),
                         ],
-                        const SizedBox(height: 26),
+                        SizedBox(height: 16.h),
                         const _ReferralPrompt(),
                       ],
                     ),
@@ -116,27 +117,27 @@ class _Header extends GetView<HomeController> {
   Widget build(BuildContext context) {
     final scheme = Theme.of(context).colorScheme;
     return Padding(
-      padding: const EdgeInsets.fromLTRB(16, 8, 12, 10),
+      padding: EdgeInsets.fromLTRB(16.w, 6.h, 12.w, 8.h),
       child: Row(
         children: [
           Container(
-            width: 40,
-            height: 40,
+            width: 36.w,
+            height: 36.w,
             decoration: BoxDecoration(
               gradient: AppTheme.brandGradient(scheme),
-              borderRadius: BorderRadius.circular(13),
+              borderRadius: BorderRadius.circular(12.r),
               boxShadow: [
                 BoxShadow(
                   color: scheme.primary.withValues(alpha: 0.35),
-                  blurRadius: 14,
-                  offset: const Offset(0, 6),
+                  blurRadius: 14.r,
+                  offset: Offset(0, 6.h),
                 ),
               ],
             ),
-            child: const Icon(Icons.change_history_rounded,
-                color: AppColors.white, size: 22),
+            child: Icon(Icons.change_history_rounded,
+                color: AppColors.white, size: 20.w),
           ),
-          const SizedBox(width: 12),
+          SizedBox(width: 10.w),
           Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             mainAxisSize: MainAxisSize.min,
@@ -145,7 +146,7 @@ class _Header extends GetView<HomeController> {
                 FlavorResolver.appName,
                 style: TextStyle(
                     color: scheme.onSurface,
-                    fontSize: 19,
+                    fontSize: 16.sp,
                     fontWeight: FontWeight.w800,
                     letterSpacing: -0.5),
               ),
@@ -159,7 +160,7 @@ class _Header extends GetView<HomeController> {
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
                   style: TextStyle(
-                      fontSize: 12.5,
+                      fontSize: 12.5.sp,
                       fontWeight: FontWeight.w500,
                       color: scheme.onSurface.withValues(alpha: 0.55)),
                 );
@@ -169,7 +170,7 @@ class _Header extends GetView<HomeController> {
           const Spacer(),
           if (FlavorResolver.flavor == Flavor.tenax) ...[
             _SettingsButton(),
-            const SizedBox(width: 10),
+            SizedBox(width: 10.w),
           ],
           _BellButton(),
         ],
@@ -190,20 +191,20 @@ class _SettingsButton extends StatelessWidget {
       onTap: () => Get.toNamed(AppRoutes.more),
       behavior: HitTestBehavior.opaque,
       child: Container(
-        width: 42,
-        height: 42,
+        width: 38.w,
+        height: 38.w,
         decoration: BoxDecoration(
           color: dark
               ? AppColors.white.withValues(alpha: 0.06)
               : AppColors.trackSoft,
-          borderRadius: BorderRadius.circular(13),
+          borderRadius: BorderRadius.circular(12.r),
           border: Border.all(
             color: dark
                 ? AppColors.white.withValues(alpha: 0.06)
                 : AppColors.border,
           ),
         ),
-        child: Icon(Icons.settings_outlined, color: scheme.onSurface, size: 23),
+        child: Icon(Icons.settings_outlined, color: scheme.onSurface, size: 21.w),
       ),
     );
   }
@@ -219,13 +220,13 @@ class _BellButton extends GetView<HomeController> {
       onTap: () => Get.toNamed(AppRoutes.notifications),
       behavior: HitTestBehavior.opaque,
       child: Container(
-        width: 42,
-        height: 42,
+        width: 38.w,
+        height: 38.w,
         decoration: BoxDecoration(
           color: dark
               ? AppColors.white.withValues(alpha: 0.06)
               : AppColors.trackSoft,
-          borderRadius: BorderRadius.circular(13),
+          borderRadius: BorderRadius.circular(12.r),
           border: Border.all(
             color: dark
                 ? AppColors.white.withValues(alpha: 0.06)
@@ -237,23 +238,23 @@ class _BellButton extends GetView<HomeController> {
           alignment: Alignment.center,
           children: [
             Icon(Icons.notifications_none_rounded,
-                color: scheme.onSurface, size: 23),
+                color: scheme.onSurface, size: 21.w),
             Positioned(
-              right: 9,
-              top: 9,
+              right: 9.w,
+              top: 9.h,
               child: Obx(() {
                 if (controller.unreadCount.value == 0) {
                   return const SizedBox.shrink();
                 }
                 return Container(
-                  width: 9,
-                  height: 9,
+                  width: 9.w,
+                  height: 9.w,
                   decoration: BoxDecoration(
                     color: AppColors.dangerBright,
                     shape: BoxShape.circle,
                     border: Border.all(
                         color: dark ? scheme.surface : AppColors.white,
-                        width: 1.5),
+                        width: 1.5.w),
                   ),
                 );
               }),
@@ -284,15 +285,15 @@ class _EquityHero extends GetView<HomeController> {
     final onHeroMuted = AppColors.white.withValues(alpha: 0.7);
 
     return Container(
-      padding: const EdgeInsets.fromLTRB(20, 18, 20, 20),
+      padding: EdgeInsets.fromLTRB(18.w, 16.h, 18.w, 16.h),
       decoration: BoxDecoration(
         gradient: AppTheme.heroGradient(scheme),
-        borderRadius: BorderRadius.circular(22),
+        borderRadius: BorderRadius.circular(20.r),
         boxShadow: [
           BoxShadow(
             color: scheme.primary.withValues(alpha: 0.35),
-            blurRadius: 24,
-            offset: const Offset(0, 12),
+            blurRadius: 24.r,
+            offset: Offset(0, 12.h),
           ),
         ],
       ),
@@ -310,40 +311,43 @@ class _EquityHero extends GetView<HomeController> {
                   color: onHeroMuted,
                 ),
               ),
-              const SizedBox(width: 8),
+              SizedBox(width: 8.w),
               const _LivePill(),
             ],
           ),
-          const SizedBox(height: 14),
+          SizedBox(height: 12.h),
           Text('home.equity'.tr,
-              style: TextStyle(fontSize: 12.5, color: onHeroMuted)),
-          const SizedBox(height: 4),
-          Text(
-            equity.isEmpty ? '—' : equity,
-            maxLines: 1,
-            overflow: TextOverflow.ellipsis,
-            style: const TextStyle(
-                fontSize: 38,
-                fontWeight: FontWeight.w800,
-                letterSpacing: -1.2,
-                color: onHero),
+              style: TextStyle(fontSize: 12.sp, color: onHeroMuted)),
+          SizedBox(height: 3.h),
+          FittedBox(
+            fit: BoxFit.scaleDown,
+            alignment: Alignment.centerLeft,
+            child: Text(
+              equity.isEmpty ? '—' : equity,
+              maxLines: 1,
+              style: TextStyle(
+                  fontSize: 26.sp,
+                  fontWeight: FontWeight.w800,
+                  letterSpacing: -1.0,
+                  color: onHero),
+            ),
           ),
           if (focus?.note.isNotEmpty == true) ...[
-            const SizedBox(height: 6),
+            SizedBox(height: 6.h),
             Text(
               focus!.note,
               style: TextStyle(
-                  fontSize: 13,
+                  fontSize: 13.sp,
                   fontWeight: FontWeight.w600,
                   color: onHeroMuted),
             ),
           ],
-          const SizedBox(height: 18),
+          SizedBox(height: 14.h),
           Container(
-            padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+            padding: EdgeInsets.symmetric(horizontal: 14.w, vertical: 10.h),
             decoration: BoxDecoration(
               color: AppColors.white.withValues(alpha: 0.12),
-              borderRadius: BorderRadius.circular(14),
+              borderRadius: BorderRadius.circular(14.r),
             ),
             child: Row(
               children: [
@@ -352,8 +356,8 @@ class _EquityHero extends GetView<HomeController> {
                   value: balance.isEmpty ? '—' : balance,
                 ),
                 Container(
-                  width: 1,
-                  height: 30,
+                  width: 1.w,
+                  height: 30.h,
                   color: AppColors.white.withValues(alpha: 0.18),
                 ),
                 _HeroStat(
@@ -396,14 +400,14 @@ class _HeroStat extends StatelessWidget {
               maxLines: 1,
               overflow: TextOverflow.ellipsis,
               style: TextStyle(
-                  fontSize: 11.5,
+                  fontSize: 11.5.sp,
                   color: AppColors.white.withValues(alpha: 0.7))),
-          const SizedBox(height: 3),
+          SizedBox(height: 3.h),
           Text(value,
               maxLines: 1,
               overflow: TextOverflow.ellipsis,
-              style: const TextStyle(
-                  fontSize: 16,
+              style: TextStyle(
+                  fontSize: 16.sp,
                   fontWeight: FontWeight.w700,
                   color: AppColors.white)),
         ],
@@ -437,12 +441,12 @@ class _HeroAccountSwitcher extends StatelessWidget {
             maxLines: 1,
             overflow: TextOverflow.ellipsis,
             style: TextStyle(
-                fontSize: 13, fontWeight: FontWeight.w600, color: color),
+                fontSize: 13.sp, fontWeight: FontWeight.w600, color: color),
           ),
         ),
         if (canSwitch) ...[
-          const SizedBox(width: 4),
-          Icon(Icons.keyboard_arrow_down_rounded, size: 18, color: color),
+          SizedBox(width: 4.w),
+          Icon(Icons.keyboard_arrow_down_rounded, size: 18.w, color: color),
         ],
       ],
     );
@@ -490,11 +494,11 @@ class _AccountPickerSheet extends StatelessWidget {
     return SafeArea(
       top: false,
       child: Container(
-        margin: const EdgeInsets.all(12),
-        padding: const EdgeInsets.symmetric(vertical: 8),
+        margin: EdgeInsets.all(12.w),
+        padding: EdgeInsets.symmetric(vertical: 8.h),
         decoration: BoxDecoration(
           color: scheme.surface,
-          borderRadius: BorderRadius.circular(22),
+          borderRadius: BorderRadius.circular(22.r),
         ),
         clipBehavior: Clip.antiAlias,
         child: Material(
@@ -504,11 +508,11 @@ class _AccountPickerSheet extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Padding(
-              padding: const EdgeInsets.fromLTRB(20, 12, 20, 8),
+              padding: EdgeInsets.fromLTRB(20.w, 12.h, 20.w, 8.h),
               child: Text(
                 'home.switch_account'.tr,
                 style: TextStyle(
-                    fontSize: 15,
+                    fontSize: 15.sp,
                     fontWeight: FontWeight.w700,
                     color: scheme.onSurface),
               ),
@@ -526,20 +530,20 @@ class _AccountPickerSheet extends StatelessWidget {
                 title: Text(
                   '${'home.account_hash'.tr}${a.id}',
                   style: TextStyle(
-                      fontSize: 15,
+                      fontSize: 15.sp,
                       fontWeight: FontWeight.w600,
                       color: scheme.onSurface),
                 ),
                 trailing: Text(
                   a.currency,
                   style: TextStyle(
-                      fontSize: 12.5,
+                      fontSize: 12.5.sp,
                       fontWeight: FontWeight.w600,
                       color: scheme.onSurface.withValues(alpha: 0.6)),
                 ),
               );
             }),
-            const SizedBox(height: 4),
+            SizedBox(height: 4.h),
           ],
           ),
         ),
@@ -558,13 +562,13 @@ class _LiveAccountsStrip extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return SizedBox(
-      height: 96,
+      height: 84.h,
       child: ListView.separated(
         scrollDirection: Axis.horizontal,
         physics: const BouncingScrollPhysics(),
         padding: EdgeInsets.zero,
         itemCount: accounts.length,
-        separatorBuilder: (_, _) => const SizedBox(width: 12),
+        separatorBuilder: (_, _) => SizedBox(width: 10.w),
         itemBuilder: (_, i) => _LiveAccountCard(account: accounts[i]),
       ),
     );
@@ -583,11 +587,11 @@ class _LiveAccountCard extends StatelessWidget {
     final pnlColor = isProfit ? AppColors.success : AppColors.danger;
 
     return Container(
-      width: 190,
-      padding: const EdgeInsets.fromLTRB(16, 14, 16, 14),
+      width: 172.w,
+      padding: EdgeInsets.fromLTRB(14.w, 11.h, 14.w, 11.h),
       decoration: BoxDecoration(
         color: scheme.surfaceContainerHighest.withValues(alpha: 0.5),
-        borderRadius: BorderRadius.circular(18),
+        borderRadius: BorderRadius.circular(16.r),
         border: Border.all(color: scheme.outlineVariant.withValues(alpha: 0.4)),
       ),
       child: Column(
@@ -602,7 +606,7 @@ class _LiveAccountCard extends StatelessWidget {
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
                   style: TextStyle(
-                      fontSize: 12.5,
+                      fontSize: 12.5.sp,
                       fontWeight: FontWeight.w600,
                       color: scheme.onSurface.withValues(alpha: 0.6)),
                 ),
@@ -610,15 +614,18 @@ class _LiveAccountCard extends StatelessWidget {
               _PulseDot(active: true),
             ],
           ),
-          Text(
-            _formatMinor(account.equityMinor, account.currency),
-            maxLines: 1,
-            overflow: TextOverflow.ellipsis,
-            style: TextStyle(
-                fontSize: 20,
-                fontWeight: FontWeight.w800,
-                letterSpacing: -0.6,
-                color: scheme.onSurface),
+          FittedBox(
+            fit: BoxFit.scaleDown,
+            alignment: Alignment.centerLeft,
+            child: Text(
+              _formatMinor(account.equityMinor, account.currency),
+              maxLines: 1,
+              style: TextStyle(
+                  fontSize: 16.sp,
+                  fontWeight: FontWeight.w800,
+                  letterSpacing: -0.6,
+                  color: scheme.onSurface),
+            ),
           ),
           Row(
             children: [
@@ -626,17 +633,17 @@ class _LiveAccountCard extends StatelessWidget {
                 isProfit
                     ? Icons.arrow_upward_rounded
                     : Icons.arrow_downward_rounded,
-                size: 13,
+                size: 13.w,
                 color: pnlColor,
               ),
-              const SizedBox(width: 3),
+              SizedBox(width: 3.w),
               Expanded(
                 child: Text(
                   '${isProfit ? '+' : '−'}${_formatMinor(pnlMinor.abs(), account.currency)}',
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
                   style: TextStyle(
-                      fontSize: 12.5,
+                      fontSize: 12.5.sp,
                       fontWeight: FontWeight.w700,
                       color: pnlColor),
                 ),
@@ -672,20 +679,20 @@ class _LivePill extends GetView<HomeController> {
     return Obx(() {
       final live = controller.isLive.value;
       return Container(
-        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+        padding: EdgeInsets.symmetric(horizontal: 10.w, vertical: 5.h),
         decoration: BoxDecoration(
           color: AppColors.white.withValues(alpha: 0.14),
-          borderRadius: BorderRadius.circular(999),
+          borderRadius: BorderRadius.circular(999.r),
         ),
         child: Row(
           mainAxisSize: MainAxisSize.min,
           children: [
             _PulseDot(active: live),
-            const SizedBox(width: 6),
+            SizedBox(width: 6.w),
             Text(
               live ? 'LIVE' : 'OFFLINE',
-              style: const TextStyle(
-                  fontSize: 10.5,
+              style: TextStyle(
+                  fontSize: 10.5.sp,
                   fontWeight: FontWeight.w800,
                   letterSpacing: 0.6,
                   color: AppColors.white),
@@ -739,8 +746,8 @@ class _PulseDotState extends State<_PulseDot>
     final color = widget.active ? AppColors.success : AppColors.white;
     if (!widget.active) {
       return Container(
-        width: 7,
-        height: 7,
+        width: 7.w,
+        height: 7.w,
         decoration: BoxDecoration(
             color: color.withValues(alpha: 0.6), shape: BoxShape.circle),
       );
@@ -748,13 +755,13 @@ class _PulseDotState extends State<_PulseDot>
     return FadeTransition(
       opacity: Tween(begin: 0.4, end: 1.0).animate(_c),
       child: Container(
-        width: 7,
-        height: 7,
+        width: 7.w,
+        height: 7.w,
         decoration: BoxDecoration(
           color: color,
           shape: BoxShape.circle,
           boxShadow: [
-            BoxShadow(color: color.withValues(alpha: 0.8), blurRadius: 6),
+            BoxShadow(color: color.withValues(alpha: 0.8), blurRadius: 6.r),
           ],
         ),
       ),
@@ -774,13 +781,13 @@ class _KpiGrid extends StatelessWidget {
     return Column(
       children: [
         for (var i = 0; i < kpis.length; i += 2) ...[
-          if (i > 0) const SizedBox(height: 12),
+          if (i > 0) SizedBox(height: 12.h),
           IntrinsicHeight(
             child: Row(
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
                 Expanded(child: _KpiCard(kpi: kpis[i])),
-                const SizedBox(width: 12),
+                SizedBox(width: 12.w),
                 if (i + 1 < kpis.length)
                   Expanded(child: _KpiCard(kpi: kpis[i + 1]))
                 else
@@ -810,10 +817,10 @@ class _KpiCard extends StatelessWidget {
                 ? AppColors.success
                 : scheme.primary;
     return Container(
-      padding: const EdgeInsets.all(16),
+      padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 11.h),
       decoration: BoxDecoration(
         color: dark ? AppColors.white.withValues(alpha: 0.05) : AppColors.white,
-        borderRadius: BorderRadius.circular(18),
+        borderRadius: BorderRadius.circular(16.r),
         border: Border.all(
           color: dark
               ? AppColors.white.withValues(alpha: 0.06)
@@ -824,74 +831,68 @@ class _KpiCard extends StatelessWidget {
             : [
                 BoxShadow(
                   color: AppColors.heroInk.withValues(alpha: 0.04),
-                  blurRadius: 16,
-                  offset: const Offset(0, 6),
+                  blurRadius: 16.r,
+                  offset: Offset(0, 6.h),
                 ),
               ],
       ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
+      child: Row(
         children: [
-          Row(
-            children: [
-              Container(
-                width: 36,
-                height: 36,
-                decoration: BoxDecoration(
-                  color: tone.withValues(alpha: 0.12),
-                  borderRadius: BorderRadius.circular(11),
+          Container(
+            width: 38.w,
+            height: 38.w,
+            decoration: BoxDecoration(
+              color: tone.withValues(alpha: 0.12),
+              borderRadius: BorderRadius.circular(11.r),
+            ),
+            child: Icon(_iconFor(kpi), size: 19.w, color: tone),
+          ),
+          SizedBox(width: 10.w),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Text(
+                  kpi.value,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: TextStyle(
+                      fontSize: 16.sp,
+                      fontWeight: FontWeight.w800,
+                      letterSpacing: -0.4,
+                      color: kpi.isGold ? AppColors.amber : scheme.onSurface),
                 ),
-                child: Icon(_iconFor(kpi), size: 19, color: tone),
+                SizedBox(height: 2.h),
+                Text(
+                  kpi.hint.isNotEmpty && !_isDelta(kpi.hint)
+                      ? '${kpi.label} · ${kpi.hint}'
+                      : kpi.label,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: TextStyle(
+                      fontSize: 11.5.sp,
+                      fontWeight: FontWeight.w600,
+                      color: scheme.onSurface.withValues(alpha: 0.6)),
+                ),
+              ],
+            ),
+          ),
+          if (kpi.hint.isNotEmpty && _isDelta(kpi.hint)) ...[
+            SizedBox(width: 8.w),
+            Container(
+              padding: EdgeInsets.symmetric(horizontal: 8.w, vertical: 3.h),
+              decoration: BoxDecoration(
+                color: tone.withValues(alpha: 0.12),
+                borderRadius: BorderRadius.circular(999.r),
               ),
-              const Spacer(),
-              if (kpi.hint.isNotEmpty && _isDelta(kpi.hint))
-                Container(
-                  padding:
-                      const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
-                  decoration: BoxDecoration(
-                    color: tone.withValues(alpha: 0.12),
-                    borderRadius: BorderRadius.circular(999),
-                  ),
-                  child: Text(
-                    kpi.hint,
-                    style: TextStyle(
-                        fontSize: 11.5,
-                        fontWeight: FontWeight.w700,
-                        color: tone),
-                  ),
-                ),
-            ],
-          ),
-          const SizedBox(height: 14),
-          Text(
-            kpi.value,
-            maxLines: 1,
-            overflow: TextOverflow.ellipsis,
-            style: TextStyle(
-                fontSize: 19,
-                fontWeight: FontWeight.w800,
-                letterSpacing: -0.4,
-                color: kpi.isGold ? AppColors.amber : scheme.onSurface),
-          ),
-          const SizedBox(height: 3),
-          Text(
-            kpi.label,
-            maxLines: 1,
-            overflow: TextOverflow.ellipsis,
-            style: TextStyle(
-                fontSize: 12,
-                fontWeight: FontWeight.w600,
-                color: scheme.onSurface.withValues(alpha: 0.6)),
-          ),
-          if (kpi.hint.isNotEmpty && !_isDelta(kpi.hint)) ...[
-            const SizedBox(height: 3),
-            Text(
-              kpi.hint,
-              maxLines: 1,
-              overflow: TextOverflow.ellipsis,
-              style: TextStyle(
-                  fontSize: 11,
-                  color: scheme.onSurface.withValues(alpha: 0.45)),
+              child: Text(
+                kpi.hint,
+                style: TextStyle(
+                    fontSize: 11.sp,
+                    fontWeight: FontWeight.w700,
+                    color: tone),
+              ),
             ),
           ],
         ],
@@ -947,7 +948,7 @@ class _QuickActions extends StatelessWidget {
     return Row(
       children: [
         for (var i = 0; i < _quickActions.length; i++) ...[
-          if (i > 0) const SizedBox(width: 12),
+          if (i > 0) SizedBox(width: 12.w),
           Expanded(child: _QuickActionTile(action: _quickActions[i])),
         ],
       ],
@@ -965,14 +966,14 @@ class _QuickActionTile extends StatelessWidget {
     final dark = scheme.brightness == Brightness.dark;
     return Material(
       color: dark ? AppColors.white.withValues(alpha: 0.05) : AppColors.white,
-      borderRadius: BorderRadius.circular(18),
+      borderRadius: BorderRadius.circular(16.r),
       child: InkWell(
-        borderRadius: BorderRadius.circular(18),
+        borderRadius: BorderRadius.circular(16.r),
         onTap: () => Get.toNamed(action.route),
         child: Container(
-          padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 8),
+          padding: EdgeInsets.symmetric(vertical: 11.h, horizontal: 8.w),
           decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(18),
+            borderRadius: BorderRadius.circular(16.r),
             border: Border.all(
               color: dark
                   ? AppColors.white.withValues(alpha: 0.06)
@@ -982,22 +983,22 @@ class _QuickActionTile extends StatelessWidget {
           child: Column(
             children: [
               Container(
-                width: 46,
-                height: 46,
+                width: 38.w,
+                height: 38.w,
                 decoration: BoxDecoration(
                   color: scheme.primary.withValues(alpha: 0.12),
-                  borderRadius: BorderRadius.circular(14),
+                  borderRadius: BorderRadius.circular(12.r),
                 ),
-                child: Icon(action.icon, color: scheme.primary, size: 22),
+                child: Icon(action.icon, color: scheme.primary, size: 19.w),
               ),
-              const SizedBox(height: 10),
+              SizedBox(height: 7.h),
               Text(
                 action.labelKey.tr,
                 maxLines: 1,
                 overflow: TextOverflow.ellipsis,
                 textAlign: TextAlign.center,
                 style: TextStyle(
-                    fontSize: 12.5,
+                    fontSize: 12.5.sp,
                     fontWeight: FontWeight.w700,
                     color: scheme.onSurface),
               ),
@@ -1021,10 +1022,10 @@ class _RiskOverview extends StatelessWidget {
     final scheme = Theme.of(context).colorScheme;
     final dark = scheme.brightness == Brightness.dark;
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
+      padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 4.h),
       decoration: BoxDecoration(
         color: dark ? AppColors.white.withValues(alpha: 0.05) : AppColors.white,
-        borderRadius: BorderRadius.circular(18),
+        borderRadius: BorderRadius.circular(18.r),
         border: Border.all(
           color: dark
               ? AppColors.white.withValues(alpha: 0.06)
@@ -1036,7 +1037,7 @@ class _RiskOverview extends StatelessWidget {
           for (var i = 0; i < items.length; i++) ...[
             if (i > 0)
               Divider(
-                  height: 1,
+                  height: 1.h,
                   color: scheme.onSurface.withValues(alpha: 0.07)),
             _RiskRow(item: items[i]),
           ],
@@ -1059,17 +1060,17 @@ class _RiskRow extends StatelessWidget {
             ? AppColors.amber
             : AppColors.success;
     return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 14),
+      padding: EdgeInsets.symmetric(vertical: 14.h),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Container(
-            width: 8,
-            height: 8,
-            margin: const EdgeInsets.only(top: 6),
+            width: 8.w,
+            height: 8.w,
+            margin: EdgeInsets.only(top: 6.h),
             decoration: BoxDecoration(color: color, shape: BoxShape.circle),
           ),
-          const SizedBox(width: 12),
+          SizedBox(width: 12.w),
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -1082,23 +1083,23 @@ class _RiskRow extends StatelessWidget {
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
                         style: TextStyle(
-                            fontSize: 15,
+                            fontSize: 15.sp,
                             fontWeight: FontWeight.w700,
                             color: scheme.onSurface),
                       ),
                     ),
-                    const SizedBox(width: 8),
+                    SizedBox(width: 8.w),
                     Container(
-                      padding: const EdgeInsets.symmetric(
-                          horizontal: 9, vertical: 3),
+                      padding: EdgeInsets.symmetric(
+                          horizontal: 9.w, vertical: 3.h),
                       decoration: BoxDecoration(
                         color: color.withValues(alpha: 0.14),
-                        borderRadius: BorderRadius.circular(999),
+                        borderRadius: BorderRadius.circular(999.r),
                       ),
                       child: Text(
                         item.status.toUpperCase(),
                         style: TextStyle(
-                            fontSize: 11,
+                            fontSize: 11.sp,
                             fontWeight: FontWeight.w800,
                             letterSpacing: 0.4,
                             color: color),
@@ -1107,20 +1108,20 @@ class _RiskRow extends StatelessWidget {
                   ],
                 ),
                 if (item.line1.isNotEmpty) ...[
-                  const SizedBox(height: 4),
+                  SizedBox(height: 4.h),
                   Text(
                     item.line1,
                     style: TextStyle(
-                        fontSize: 13,
+                        fontSize: 13.sp,
                         color: scheme.onSurface.withValues(alpha: 0.6)),
                   ),
                 ],
                 if (item.line2.isNotEmpty) ...[
-                  const SizedBox(height: 2),
+                  SizedBox(height: 2.h),
                   Text(
                     item.line2,
                     style: TextStyle(
-                        fontSize: 12.5,
+                        fontSize: 12.5.sp,
                         fontWeight: FontWeight.w600,
                         color: scheme.onSurface.withValues(alpha: 0.8)),
                   ),
@@ -1146,10 +1147,10 @@ class _ActivityList extends StatelessWidget {
     final scheme = Theme.of(context).colorScheme;
     final dark = scheme.brightness == Brightness.dark;
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
+      padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 4.h),
       decoration: BoxDecoration(
         color: dark ? AppColors.white.withValues(alpha: 0.05) : AppColors.white,
-        borderRadius: BorderRadius.circular(18),
+        borderRadius: BorderRadius.circular(18.r),
         border: Border.all(
           color: dark
               ? AppColors.white.withValues(alpha: 0.06)
@@ -1161,7 +1162,7 @@ class _ActivityList extends StatelessWidget {
           for (var i = 0; i < items.length; i++) ...[
             if (i > 0)
               Divider(
-                  height: 1,
+                  height: 1.h,
                   color: scheme.onSurface.withValues(alpha: 0.07)),
             _ActivityRow(item: items[i]),
           ],
@@ -1179,19 +1180,19 @@ class _ActivityRow extends StatelessWidget {
   Widget build(BuildContext context) {
     final scheme = Theme.of(context).colorScheme;
     return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 12),
+      padding: EdgeInsets.symmetric(vertical: 12.h),
       child: Row(
         children: [
           Container(
-            width: 40,
-            height: 40,
+            width: 40.w,
+            height: 40.w,
             decoration: BoxDecoration(
               color: scheme.primary.withValues(alpha: 0.1),
-              borderRadius: BorderRadius.circular(12),
+              borderRadius: BorderRadius.circular(12.r),
             ),
-            child: Icon(Icons.bolt_rounded, size: 20, color: scheme.primary),
+            child: Icon(Icons.bolt_rounded, size: 20.w, color: scheme.primary),
           ),
-          const SizedBox(width: 12),
+          SizedBox(width: 12.w),
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -1201,18 +1202,18 @@ class _ActivityRow extends StatelessWidget {
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
                   style: TextStyle(
-                      fontSize: 15,
+                      fontSize: 15.sp,
                       fontWeight: FontWeight.w700,
                       color: scheme.onSurface),
                 ),
                 if (item.detail.isNotEmpty) ...[
-                  const SizedBox(height: 2),
+                  SizedBox(height: 2.h),
                   Text(
                     item.detail,
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
                     style: TextStyle(
-                        fontSize: 13,
+                        fontSize: 13.sp,
                         color: scheme.onSurface.withValues(alpha: 0.55)),
                   ),
                 ],
@@ -1220,11 +1221,11 @@ class _ActivityRow extends StatelessWidget {
             ),
           ),
           if (item.when.isNotEmpty) ...[
-            const SizedBox(width: 8),
+            SizedBox(width: 8.w),
             Text(
               item.when,
               style: TextStyle(
-                  fontSize: 12.5,
+                  fontSize: 12.5.sp,
                   color: scheme.onSurface.withValues(alpha: 0.5)),
             ),
           ],
@@ -1243,132 +1244,152 @@ class _ReferralPrompt extends GetView<HomeController> {
   @override
   Widget build(BuildContext context) {
     final scheme = Theme.of(context).colorScheme;
+    final dark = scheme.brightness == Brightness.dark;
     final referral = _referral;
     final link = referral?.shareUrl.isNotEmpty == true
         ? referral!.shareUrl
         : (referral?.code ?? '');
+    final referrals = referral?.referrals ?? 0;
+    final pending = referral?.pending ?? '\$0.00';
     return GestureDetector(
       onTap: () => Get.toNamed(AppRoutes.referral),
       behavior: HitTestBehavior.opaque,
       child: Container(
-        padding: const EdgeInsets.all(18),
+        padding: EdgeInsets.all(20.w),
         decoration: BoxDecoration(
-          gradient: AppTheme.brandGradient(scheme),
-          borderRadius: BorderRadius.circular(20),
-          boxShadow: [
-            BoxShadow(
-              color: scheme.primary.withValues(alpha: 0.3),
-              blurRadius: 20,
-              offset: const Offset(0, 10),
-            ),
-          ],
+          color:
+              dark ? AppColors.white.withValues(alpha: 0.04) : AppColors.white,
+          borderRadius: BorderRadius.circular(20.r),
+          border: Border.all(
+            color: dark
+                ? AppColors.white.withValues(alpha: 0.06)
+                : AppColors.border,
+          ),
         ),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Row(
               children: [
-                Container(
-                  width: 48,
-                  height: 48,
-                  decoration: BoxDecoration(
-                    color: AppColors.white.withValues(alpha: 0.16),
-                    borderRadius: BorderRadius.circular(14),
-                  ),
-                  child: const Icon(Icons.card_giftcard_rounded,
-                      color: AppColors.white, size: 24),
-                ),
-                const SizedBox(width: 14),
                 Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        'home.refer_earn'.tr,
-                        style: const TextStyle(
-                            fontSize: 17,
-                            fontWeight: FontWeight.w800,
-                            color: AppColors.white),
-                      ),
-                      const SizedBox(height: 4),
-                      Text(
-                        'home.refer_earn_short'.tr,
-                        style: TextStyle(
-                            fontSize: 13,
-                            color: AppColors.white.withValues(alpha: 0.8)),
-                      ),
-                    ],
+                  child: Text(
+                    'home.refer_earn'.tr,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: TextStyle(
+                        fontSize: 18.sp,
+                        fontWeight: FontWeight.w800,
+                        letterSpacing: -0.4,
+                        color: scheme.onSurface),
+                  ),
+                ),
+                SizedBox(width: 10.w),
+                Container(
+                  padding:
+                      EdgeInsets.symmetric(horizontal: 12.w, vertical: 6.h),
+                  decoration: BoxDecoration(
+                    color: scheme.primary.withValues(alpha: 0.10),
+                    borderRadius: BorderRadius.circular(999.r),
+                  ),
+                  child: Text(
+                    '$referrals ${'home.referrals'.tr}',
+                    style: TextStyle(
+                        fontSize: 12.5.sp,
+                        fontWeight: FontWeight.w700,
+                        color: scheme.primary),
                   ),
                 ),
               ],
             ),
+            SizedBox(height: 10.h),
+            Text(
+              'home.refer_earn_desc'.tr,
+              style: TextStyle(
+                  fontSize: 14.sp,
+                  height: 1.35,
+                  fontWeight: FontWeight.w500,
+                  color: scheme.onSurface.withValues(alpha: 0.6)),
+            ),
             if (link.isNotEmpty) ...[
-              const SizedBox(height: 14),
+              SizedBox(height: 16.h),
               Container(
-                padding: const EdgeInsets.fromLTRB(14, 10, 8, 10),
+                padding: EdgeInsets.fromLTRB(16.w, 14.h, 16.w, 14.h),
                 decoration: BoxDecoration(
-                  color: AppColors.white.withValues(alpha: 0.14),
-                  borderRadius: BorderRadius.circular(14),
+                  color: scheme.primary.withValues(alpha: 0.05),
+                  borderRadius: BorderRadius.circular(16.r),
+                  border: Border.all(
+                    color: scheme.primary.withValues(alpha: 0.28),
+                    width: 1.2.w,
+                  ),
                 ),
-                child: Row(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
+                    Row(
+                      children: [
+                        Expanded(
+                          child: Text(
                             'home.your_link'.tr,
                             style: TextStyle(
-                                fontSize: 11,
+                                fontSize: 14.sp,
                                 fontWeight: FontWeight.w600,
-                                color:
-                                    AppColors.white.withValues(alpha: 0.65)),
+                                color: scheme.onSurface),
                           ),
-                          const SizedBox(height: 2),
-                          Text(
-                            link,
-                            maxLines: 1,
-                            overflow: TextOverflow.ellipsis,
-                            style: const TextStyle(
-                                fontSize: 13.5,
+                        ),
+                        SizedBox(width: 10.w),
+                        GestureDetector(
+                          onTap: _copy,
+                          behavior: HitTestBehavior.opaque,
+                          child: Text(
+                            'home.copy'.tr,
+                            style: TextStyle(
+                                fontSize: 14.sp,
                                 fontWeight: FontWeight.w700,
-                                color: AppColors.white),
+                                color: scheme.primary),
                           ),
-                        ],
-                      ),
+                        ),
+                      ],
                     ),
-                    const SizedBox(width: 8),
-                    GestureDetector(
-                      onTap: _copy,
-                      behavior: HitTestBehavior.opaque,
-                      child: Container(
-                        padding: const EdgeInsets.symmetric(
-                            horizontal: 12, vertical: 9),
-                        decoration: BoxDecoration(
-                          color: AppColors.white.withValues(alpha: 0.18),
-                          borderRadius: BorderRadius.circular(12),
-                        ),
-                        child: Row(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            const Icon(Icons.copy_rounded,
-                                size: 16, color: AppColors.white),
-                            const SizedBox(width: 6),
-                            Text(
-                              'home.copy'.tr,
-                              style: const TextStyle(
-                                  fontSize: 13,
-                                  fontWeight: FontWeight.w700,
-                                  color: AppColors.white),
-                            ),
-                          ],
-                        ),
-                      ),
+                    SizedBox(height: 8.h),
+                    Text(
+                      link,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: TextStyle(
+                          fontSize: 14.sp,
+                          fontWeight: FontWeight.w500,
+                          fontFamily: 'monospace',
+                          color: scheme.onSurface.withValues(alpha: 0.7)),
                     ),
                   ],
                 ),
               ),
             ],
+            SizedBox(height: 16.h),
+            Row(
+              children: [
+                Expanded(
+                  child: Text(
+                    'home.pending_earnings'.tr,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: TextStyle(
+                        fontSize: 15.sp,
+                        fontWeight: FontWeight.w600,
+                        color: scheme.onSurface.withValues(alpha: 0.7)),
+                  ),
+                ),
+                SizedBox(width: 10.w),
+                Text(
+                  pending,
+                  style: TextStyle(
+                      fontSize: 16.sp,
+                      fontWeight: FontWeight.w800,
+                      letterSpacing: -0.4,
+                      color: scheme.onSurface),
+                ),
+              ],
+            ),
           ],
         ),
       ),
@@ -1407,7 +1428,7 @@ class _RecentTrades extends StatelessWidget {
     return Container(
       decoration: BoxDecoration(
         color: dark ? AppColors.white.withValues(alpha: 0.04) : AppColors.white,
-        borderRadius: BorderRadius.circular(18),
+        borderRadius: BorderRadius.circular(18.r),
         border: Border.all(
           color: dark
               ? AppColors.white.withValues(alpha: 0.06)
@@ -1419,10 +1440,10 @@ class _RecentTrades extends StatelessWidget {
           for (var i = 0; i < items.length; i++) ...[
             if (i > 0)
               Divider(
-                height: 1,
+                height: 1.h,
                 thickness: 1,
-                indent: 16,
-                endIndent: 16,
+                indent: 16.w,
+                endIndent: 16.w,
                 color: dark
                     ? AppColors.white.withValues(alpha: 0.05)
                     : AppColors.border,
@@ -1445,25 +1466,25 @@ class _TradeRow extends StatelessWidget {
     final netColor = trade.isLoss ? AppColors.dangerBright : AppColors.success;
     final sideColor = trade.isBuy ? AppColors.success : AppColors.dangerBright;
     return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 13),
+      padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 13.h),
       child: Row(
         children: [
           Container(
-            width: 38,
-            height: 38,
+            width: 38.w,
+            height: 38.w,
             decoration: BoxDecoration(
               color: sideColor.withValues(alpha: 0.14),
-              borderRadius: BorderRadius.circular(11),
+              borderRadius: BorderRadius.circular(11.r),
             ),
             child: Icon(
               trade.isBuy
                   ? Icons.trending_up_rounded
                   : Icons.trending_down_rounded,
               color: sideColor,
-              size: 20,
+              size: 20.w,
             ),
           ),
-          const SizedBox(width: 12),
+          SizedBox(width: 12.w),
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -1474,30 +1495,30 @@ class _TradeRow extends StatelessWidget {
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
                   style: TextStyle(
-                      fontSize: 14.5,
+                      fontSize: 14.5.sp,
                       fontWeight: FontWeight.w700,
                       color: scheme.onSurface),
                 ),
-                const SizedBox(height: 2),
+                SizedBox(height: 2.h),
                 Text(
                   '${trade.side} · ${trade.lots} · ${trade.held}',
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
                   style: TextStyle(
-                      fontSize: 12,
+                      fontSize: 12.sp,
                       fontWeight: FontWeight.w500,
                       color: scheme.onSurface.withValues(alpha: 0.55)),
                 ),
               ],
             ),
           ),
-          const SizedBox(width: 10),
+          SizedBox(width: 10.w),
           Text(
             trade.net,
             maxLines: 1,
             overflow: TextOverflow.ellipsis,
             style: TextStyle(
-                fontSize: 14.5,
+                fontSize: 14.5.sp,
                 fontWeight: FontWeight.w800,
                 color: netColor),
           ),
@@ -1525,7 +1546,7 @@ class _SectionLabel extends StatelessWidget {
         Text(
           text,
           style: TextStyle(
-              fontSize: 17,
+              fontSize: 15.sp,
               fontWeight: FontWeight.w800,
               letterSpacing: -0.3,
               color: scheme.onSurface),
@@ -1537,22 +1558,22 @@ class _SectionLabel extends StatelessWidget {
             child: Text(
               actionLabel!,
               style: TextStyle(
-                  fontSize: 14,
+                  fontSize: 14.sp,
                   fontWeight: FontWeight.w700,
                   color: scheme.primary),
             ),
           )
         else if (actionLabel != null)
           Container(
-            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+            padding: EdgeInsets.symmetric(horizontal: 10.w, vertical: 4.h),
             decoration: BoxDecoration(
               color: AppColors.amber.withValues(alpha: 0.16),
-              borderRadius: BorderRadius.circular(999),
+              borderRadius: BorderRadius.circular(999.r),
             ),
             child: Text(
               actionLabel!,
-              style: const TextStyle(
-                  fontSize: 12,
+              style: TextStyle(
+                  fontSize: 12.sp,
                   fontWeight: FontWeight.w700,
                   color: AppColors.warningInk),
             ),
@@ -1569,15 +1590,15 @@ class _HomeSkeleton extends StatelessWidget {
   Widget build(BuildContext context) {
     return ListView(
       physics: const NeverScrollableScrollPhysics(),
-      padding: const EdgeInsets.fromLTRB(16, 8, 16, 24),
-      children: const [
-        CardSkeleton(lines: 2, height: 150),
-        SizedBox(height: 18),
-        StatGridSkeleton(tiles: 4),
-        SizedBox(height: 24),
-        CardSkeleton(lines: 3),
-        SizedBox(height: 16),
-        CardSkeleton(lines: 2),
+      padding: EdgeInsets.fromLTRB(16.w, 8.h, 16.w, 24.h),
+      children: [
+        CardSkeleton(lines: 2, height: 150.h),
+        SizedBox(height: 18.h),
+        const StatGridSkeleton(tiles: 4),
+        SizedBox(height: 24.h),
+        const CardSkeleton(lines: 3),
+        SizedBox(height: 16.h),
+        const CardSkeleton(lines: 2),
       ],
     );
   }

@@ -35,9 +35,14 @@ class ReferralData {
     final stats = props['stats'] as Map<String, dynamic>? ?? const {};
     final settings =
         props['referral_settings'] as Map<String, dynamic>? ?? const {};
-    // `commissions` is a Laravel paginator object; the rows are under `data`.
-    final commissions = props['commissions'] as Map<String, dynamic>?;
-    final rows = (commissions?['data'] as List<dynamic>?) ?? const [];
+    // `commissions` is either a plain list (REST `/growth/referrals`) or a
+    // Laravel paginator object whose rows are under `data` (Inertia).
+    final commissionsRaw = props['commissions'];
+    final rows = commissionsRaw is List
+        ? commissionsRaw
+        : (commissionsRaw is Map
+            ? (commissionsRaw['data'] as List<dynamic>? ?? const [])
+            : const []);
     return ReferralData(
       referralCode: referral['code'] as String? ?? '',
       shareUrl: referral['share_url'] as String? ?? '',

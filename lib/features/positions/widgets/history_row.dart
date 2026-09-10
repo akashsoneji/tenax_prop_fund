@@ -25,7 +25,7 @@ class HistoryRow extends StatelessWidget {
     return Container(
       margin: EdgeInsets.only(bottom: 10.h),
       padding: EdgeInsets.all(14.w),
-      decoration: AppTheme.surfaceCard(scheme, radius: 16),
+      decoration: AppTheme.surfaceCard(scheme, radius: 16.r),
       child: Row(
         children: [
           Expanded(

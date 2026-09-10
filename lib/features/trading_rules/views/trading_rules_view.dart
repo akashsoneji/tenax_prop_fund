@@ -205,7 +205,7 @@ class _CanDoTab extends StatelessWidget {
           ),
           Container(
             margin: EdgeInsets.symmetric(horizontal: 16.w),
-            decoration: AppTheme.surfaceCard(scheme, radius: 16),
+            decoration: AppTheme.surfaceCard(scheme, radius: 16.r),
             child: Column(
               children: [
                 for (var i = 0; i < rows.length; i++)
@@ -256,7 +256,7 @@ class _DelaysTab extends StatelessWidget {
           ),
           Container(
             margin: EdgeInsets.symmetric(horizontal: 16.w),
-            decoration: AppTheme.surfaceCard(scheme, radius: 16),
+            decoration: AppTheme.surfaceCard(scheme, radius: 16.r),
             child: Column(
               children: [
                 for (var i = 0; i < rows.length; i++)
@@ -308,7 +308,7 @@ class _EverythingTab extends StatelessWidget {
           ),
           Container(
             margin: EdgeInsets.symmetric(horizontal: 16.w),
-            decoration: AppTheme.surfaceCard(scheme, radius: 16),
+            decoration: AppTheme.surfaceCard(scheme, radius: 16.r),
             child: Column(
               children: [
                 for (var i = 0; i < rows.length; i++)

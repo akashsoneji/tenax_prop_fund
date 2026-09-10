@@ -24,7 +24,7 @@ class AuthScaffold extends StatefulWidget {
     this.heroTitle,
     this.heroSubtitle,
     this.showTicker = true,
-    this.padding = const EdgeInsets.fromLTRB(24, 60, 24, 24),
+    this.padding,
     this.bottomBar,
   });
 
@@ -37,7 +37,7 @@ class AuthScaffold extends StatefulWidget {
   /// If true, a faint ticker scrolls at the bottom edge of the background.
   final bool showTicker;
 
-  final EdgeInsets padding;
+  final EdgeInsets? padding;
 
   /// Persistent bottom bar (e.g. primary CTA). Pinned above the safe-area
   /// inset so it stays visible while the content scrolls.
@@ -121,7 +121,8 @@ class _AuthScaffoldState extends State<AuthScaffold>
                 Expanded(
                   child: SingleChildScrollView(
                     physics: const BouncingScrollPhysics(),
-                    padding: widget.padding,
+                    padding: widget.padding ??
+                        EdgeInsets.fromLTRB(24.w, 60.h, 24.w, 24.h),
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.stretch,
                       children: [

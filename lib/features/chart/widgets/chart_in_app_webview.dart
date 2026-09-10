@@ -44,6 +44,10 @@ class _ChartInAppWebViewState extends State<ChartInAppWebView> {
 
   HeadlessInAppWebView? _headlessWebView;
 
+  /// True when the preload service reported a painted canvas at attach time, so
+  /// the attached instance can reveal on the first poll instead of waiting.
+  bool _warmAlreadyPainted = false;
+
   /// The symbol currently displayed by the webview. When we attach the warm
   /// headless instance it is already showing the preloaded default symbol, so
   /// we start from that — this prevents a needless JS switch / reload on first
@@ -59,7 +63,15 @@ class _ChartInAppWebViewState extends State<ChartInAppWebView> {
     if (Get.isRegistered<ChartPreloadService>()) {
       final service = Get.find<ChartPreloadService>();
       _headlessWebView = service.headlessWebView;
-      if (service.isReady) _isLoading = false;
+      if (service.isReady) {
+        // Preload already settled the headless canvas, so we can reveal on the
+        // first check instead of re-polling. NOTE: we deliberately keep the
+        // loader UP (do NOT clear _isLoading here) — attaching the headless
+        // instance to the screen makes the remote chart SPA re-layout/re-render
+        // once, and revealing before that settles is what looks like a fast
+        // flicker. _revealWhenPainted clears the loader after the settle wait.
+        _warmAlreadyPainted = true;
+      }
       warmSymbol = service.currentSymbol;
     }
     // A warm instance already shows the preloaded (last-viewed) symbol; a cold
@@ -226,6 +238,11 @@ class _ChartInAppWebViewState extends State<ChartInAppWebView> {
   /// soon as the page is complete. Falls through to the loading timeout if the
   /// instance was not actually pre-loaded.
   Future<void> _markReadyIfLoaded() async {
+    // The preload already confirmed a painted canvas — reveal immediately.
+    if (_warmAlreadyPainted) {
+      await _revealWhenPainted();
+      return;
+    }
     for (var attempt = 0; attempt < 20; attempt++) {
       if (!mounted || _controller == null || _isReady) return;
       final progress = await _controller!.getProgress();
@@ -237,25 +254,22 @@ class _ChartInAppWebViewState extends State<ChartInAppWebView> {
     }
   }
 
-  /// Keeps the loader up until the TradingView chart CANVAS is actually painted,
-  /// not merely until the HTML finished. The charting library boots in several
-  /// stages (shell → library init → saved-state restore → datafeed redraw); if
-  /// we reveal on HTML-load the user watches those stages happen and it looks
-  /// like the chart refreshes 3-4 times. Polling for a sized <canvas> hides all
-  /// of that under the loader so the chart appears once, already drawn.
+  /// Reveals the chart once the page has loaded. It first makes a BEST-EFFORT
+  /// wait for the canvas to settle (so the library's multi-stage boot —
+  /// shell → init → state restore → datafeed redraw — stays hidden and the
+  /// chart does not appear to refresh 2-3 times), but it ALWAYS reveals
+  /// afterwards. The canvas probe must never gate the reveal: some chart builds
+  /// render into an element the probe can't measure, and gating on it there
+  /// left the loader up until the 15s timeout ("Chart unavailable").
   Future<void> _revealWhenPainted() async {
-    const canvasCheck = '''
-      (function() {
-        var c = document.querySelector('canvas');
-        return !!(c && c.width > 0 && c.height > 0);
-      })();
-    ''';
-    for (var attempt = 0; attempt < 60; attempt++) {
-      if (!mounted || _controller == null || _isReady) return;
-      final painted = await _controller!.evaluateJavascript(source: canvasCheck);
-      if (painted == true) break;
-      await Future.delayed(const Duration(milliseconds: 100));
-    }
+    // The remote chart SPA re-renders a couple of times right after load (shell
+    // → library → datafeed redraw). Canvas SIZE stabilises before that content
+    // re-render finishes, so a size probe alone reveals too early and the user
+    // sees a quick flicker. Hold the loader for a short floor so those redraws
+    // happen underneath it, then reveal once.
+    final settle = Future<void>.delayed(const Duration(milliseconds: 700));
+    await _waitForStableCanvas(_controller);
+    await settle;
     if (!mounted || _isReady) return;
     _loadingTimeout?.cancel();
     setState(() {
@@ -266,6 +280,47 @@ class _ChartInAppWebViewState extends State<ChartInAppWebView> {
     widget.onReady?.call();
     _applyPendingSymbol();
   }
+
+  /// Best-effort wait for the chart canvas to settle: returns as soon as its
+  /// size stays the SAME across [_stableTicksNeeded] consecutive polls, or after
+  /// [_stableMaxTicks] polls, whichever comes first. This ONLY hides the boot
+  /// flicker — the caller reveals regardless of the outcome, so a chart the
+  /// probe can't measure still shows promptly instead of hanging.
+  Future<void> _waitForStableCanvas(InAppWebViewController? controller) async {
+    if (controller == null) return;
+    const canvasSize = '''
+      (function() {
+        var c = document.querySelector('canvas');
+        if (!c || !(c.width > 0 && c.height > 0)) return '';
+        return c.width + 'x' + c.height;
+      })();
+    ''';
+    var last = '';
+    var stable = 0;
+    for (var attempt = 0; attempt < _stableMaxTicks; attempt++) {
+      if (!mounted || _isReady) return;
+      String size = '';
+      try {
+        final res = await controller.evaluateJavascript(source: canvasSize);
+        if (res is String) size = res;
+      } catch (_) {
+        // Eval can be rejected mid-boot — treat as not-yet-stable.
+      }
+      if (size.isNotEmpty && size == last) {
+        if (++stable >= _stableTicksNeeded) return;
+      } else {
+        stable = 0;
+        last = size;
+      }
+      await Future.delayed(const Duration(milliseconds: 100));
+    }
+  }
+
+  /// Consecutive equal-size polls (×100ms) that mark the canvas "settled".
+  static const _stableTicksNeeded = 4;
+
+  /// Hard cap on the settle wait (×100ms) so reveal is never delayed beyond it.
+  static const _stableMaxTicks = 25;
 
   Future<void> _retry() async {
     if (_controller == null) return;
@@ -284,14 +339,20 @@ class _ChartInAppWebViewState extends State<ChartInAppWebView> {
         javaScriptEnabled: true,
         transparentBackground: true,
         cacheEnabled: true,
-        cacheMode: CacheMode.LOAD_DEFAULT,
+        // Cache-first so a cold open (no preload) still loads the shell + JS
+        // bundle from disk on the 2nd+ launch instead of re-downloading it.
+        cacheMode: CacheMode.LOAD_CACHE_ELSE_NETWORK,
         domStorageEnabled: true,
+        databaseEnabled: true,
       );
 
   URLRequest get _fallbackRequest {
     final url =
         widget.symbol.isNotEmpty ? _urlForSymbol(widget.symbol) : widget.url;
-    return URLRequest(url: WebUri(url));
+    return URLRequest(
+      url: WebUri(url),
+      cachePolicy: URLRequestCachePolicy.RETURN_CACHE_DATA_ELSE_LOAD,
+    );
   }
 
   @override
@@ -333,6 +394,11 @@ class _ChartInAppWebViewState extends State<ChartInAppWebView> {
               unawaited(_revealWhenPainted());
             },
             onReceivedError: (controller, request, error) {
+              if (kDebugMode) {
+                debugPrint('[Chart] onReceivedError mainFrame='
+                    '${request.isForMainFrame} url=${request.url} '
+                    'type=${error.type} desc=${error.description}');
+              }
               if (!mounted) return;
               if (request.isForMainFrame == true) {
                 setState(() {
@@ -340,6 +406,13 @@ class _ChartInAppWebViewState extends State<ChartInAppWebView> {
                   _isLoading = false;
                   _isReady = false;
                 });
+              }
+            },
+            onReceivedHttpError: (controller, request, response) {
+              if (kDebugMode) {
+                debugPrint('[Chart] onReceivedHttpError mainFrame='
+                    '${request.isForMainFrame} url=${request.url} '
+                    'status=${response.statusCode}');
               }
             },
             // The charting library emits noisy INFO/WARNING console messages
