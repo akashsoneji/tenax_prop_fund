@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:google_fonts/google_fonts.dart';
 
 import '../../features/verification/models/verification_models.dart';
@@ -34,18 +35,18 @@ class AppLabeledDropdown extends StatelessWidget {
           isExpanded: true,
           isDense: true,
           padding: EdgeInsets.zero,
-          borderRadius: BorderRadius.circular(14),
+          borderRadius: BorderRadius.circular(14.r),
           icon: Icon(Icons.keyboard_arrow_down_rounded,
               color: scheme.onSurface.withValues(alpha: 0.6)),
           hint: Text(
             hint ?? label,
             style: GoogleFonts.beVietnamPro(
-              fontSize: 16,
+              fontSize: 16.sp,
               color: scheme.onSurface.withValues(alpha: 0.4),
             ),
           ),
           style: GoogleFonts.beVietnamPro(
-            fontSize: 16,
+            fontSize: 16.sp,
             fontWeight: FontWeight.w500,
             color: scheme.onSurface,
           ),

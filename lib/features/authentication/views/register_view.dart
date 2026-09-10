@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
 
 import '../../../app/routes/app_routes.dart';
@@ -77,7 +78,7 @@ class _RegisterViewState extends State<RegisterView> {
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
             _SectionLabel(text: 'register.section_identity'.tr, icon: Icons.badge_outlined),
-            const SizedBox(height: 12),
+            SizedBox(height: 12.h),
             AnimatedField(
               index: 0,
               child: _field(
@@ -88,7 +89,7 @@ class _RegisterViewState extends State<RegisterView> {
                 autofill: const [AutofillHints.name],
               ),
             ),
-            const SizedBox(height: 14),
+            SizedBox(height: 14.h),
             AnimatedField(
               index: 1,
               child: _field(
@@ -99,7 +100,7 @@ class _RegisterViewState extends State<RegisterView> {
                 autofill: const [AutofillHints.email],
               ),
             ),
-            const SizedBox(height: 14),
+            SizedBox(height: 14.h),
             AnimatedField(
               index: 2,
               child: _field(
@@ -110,9 +111,9 @@ class _RegisterViewState extends State<RegisterView> {
                 autofill: const [AutofillHints.telephoneNumber],
               ),
             ),
-            const SizedBox(height: 24),
+            SizedBox(height: 24.h),
             _SectionLabel(text: 'register.section_security'.tr, icon: Icons.shield_outlined),
-            const SizedBox(height: 12),
+            SizedBox(height: 12.h),
             AnimatedField(
               index: 2,
               child: _field(
@@ -129,9 +130,9 @@ class _RegisterViewState extends State<RegisterView> {
                 ),
               ),
             ),
-            const SizedBox(height: 12),
+            SizedBox(height: 12.h),
             PasswordStrengthMeter(password: _password.text),
-            const SizedBox(height: 14),
+            SizedBox(height: 14.h),
             // Confirm appears only once a password has been started.
             AnimatedSize(
               duration: const Duration(milliseconds: 250),
@@ -144,7 +145,7 @@ class _RegisterViewState extends State<RegisterView> {
                       obscure: true,
                     ),
             ),
-            const SizedBox(height: 8),
+            SizedBox(height: 8.h),
             Material(
               type: MaterialType.transparency,
               child: CheckboxListTile(
@@ -155,7 +156,7 @@ class _RegisterViewState extends State<RegisterView> {
                 dense: true,
                 title: Text(
                   '${'register.agree_prefix'.tr} ${'register.terms_link'.tr}',
-                  style: const TextStyle(fontSize: 13),
+                  style: TextStyle(fontSize: 13.sp),
                 ),
               ),
             ),
@@ -166,7 +167,7 @@ class _RegisterViewState extends State<RegisterView> {
                 child: msg == null
                     ? const SizedBox.shrink()
                     : Padding(
-                        padding: const EdgeInsets.only(bottom: 8),
+                        padding: EdgeInsets.only(bottom: 8.h),
                         child: Text(
                           msg,
                           style: TextStyle(
@@ -177,7 +178,7 @@ class _RegisterViewState extends State<RegisterView> {
                       ),
               );
             }),
-            const SizedBox(height: 8),
+            SizedBox(height: 8.h),
             Obx(
               () => AppGradientButton(
                 label: 'register.register_button'.tr,
@@ -185,7 +186,7 @@ class _RegisterViewState extends State<RegisterView> {
                 onPressed: _submit,
               ),
             ),
-            const SizedBox(height: 8),
+            SizedBox(height: 8.h),
             TextButton(
               onPressed: () => Get.toNamed(AppRoutes.login),
               child: Text(
@@ -211,7 +212,7 @@ class _RegisterViewState extends State<RegisterView> {
   }) {
     final scheme = Theme.of(context).colorScheme;
     OutlineInputBorder border(Color color, double width) => OutlineInputBorder(
-          borderRadius: BorderRadius.circular(16),
+          borderRadius: BorderRadius.circular(16.r),
           borderSide: BorderSide(color: color, width: width),
         );
     return TextField(
@@ -227,7 +228,7 @@ class _RegisterViewState extends State<RegisterView> {
         filled: true,
         fillColor: scheme.surfaceContainerHighest.withValues(alpha: 0.4),
         contentPadding:
-            const EdgeInsets.symmetric(horizontal: 16, vertical: 18),
+            EdgeInsets.symmetric(horizontal: 16.w, vertical: 18.h),
         enabledBorder: border(scheme.outline.withValues(alpha: 0.18), 1),
         focusedBorder: border(scheme.primary, 1.6),
       ),
@@ -245,8 +246,8 @@ class _SectionLabel extends StatelessWidget {
     final scheme = Theme.of(context).colorScheme;
     return Row(
       children: [
-        Icon(icon, size: 18, color: scheme.primary),
-        const SizedBox(width: 8),
+        Icon(icon, size: 18.w, color: scheme.primary),
+        SizedBox(width: 8.w),
         Text(
           text,
           style: Theme.of(context).textTheme.titleSmall?.copyWith(

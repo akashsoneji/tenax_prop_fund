@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
 
@@ -35,7 +36,7 @@ class SupportView extends StatelessWidget {
           PinnedGradientAppBar(title: 'support.title'.tr),
           SliverToBoxAdapter(
             child: Padding(
-              padding: const EdgeInsets.fromLTRB(16, 18, 16, 32),
+              padding: EdgeInsets.fromLTRB(16.w, 18.h, 16.w, 32.h),
               child: Obx(
                 () => DataStateBuilder<SupportData>(
                   state: c.state,
@@ -45,11 +46,11 @@ class SupportView extends StatelessWidget {
                     crossAxisAlignment: CrossAxisAlignment.stretch,
                     children: [
                       const _Enter(child: SupportContactCard()),
-                      const SizedBox(height: 26),
+                      SizedBox(height: 26.h),
                       const _SectionTitle('Your tickets'),
-                      const SizedBox(height: 10),
+                      SizedBox(height: 10.h),
                       _Enter(delay: 0.15, child: _TicketsCard(data: data)),
-                      const SizedBox(height: 18),
+                      SizedBox(height: 18.h),
                       _Enter(
                         delay: 0.25,
                         child: OutlinedButton(
@@ -87,7 +88,7 @@ class _TicketsCard extends StatelessWidget {
     final scheme = Theme.of(context).colorScheme;
     final rows = data.tickets;
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 16),
+      padding: EdgeInsets.symmetric(horizontal: 16.w),
       decoration: AppTheme.surfaceCard(scheme, radius: 18),
       child: Column(
         children: [
@@ -110,14 +111,14 @@ class _SupportSkeleton extends StatelessWidget {
   Widget build(BuildContext context) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
-      children: const [
-        HeroSkeleton(height: 200),
-        SizedBox(height: 26),
-        ShimmerBox(width: 140, height: 16),
-        SizedBox(height: 10),
-        CardSkeleton(lines: 3, height: 140),
-        SizedBox(height: 18),
-        ShimmerBox(height: 48, radius: 14),
+      children: [
+        HeroSkeleton(height: 200.h),
+        SizedBox(height: 26.h),
+        ShimmerBox(width: 140.w, height: 16.h),
+        SizedBox(height: 10.h),
+        CardSkeleton(lines: 3, height: 140.h),
+        SizedBox(height: 18.h),
+        ShimmerBox(height: 48.h, radius: 14.r),
       ],
     );
   }
@@ -133,7 +134,7 @@ class _SectionTitle extends StatelessWidget {
     return Text(
       text,
       style: GoogleFonts.beVietnamPro(
-        fontSize: 16,
+        fontSize: 16.sp,
         fontWeight: FontWeight.w800,
         color: scheme.onSurface,
       ),
@@ -157,7 +158,7 @@ class _Enter extends StatelessWidget {
         return Opacity(
           opacity: t.clamp(0, 1),
           child: Transform.translate(
-            offset: Offset(0, (1 - t) * 18),
+            offset: Offset(0, (1 - t) * 18.h),
             child: child,
           ),
         );

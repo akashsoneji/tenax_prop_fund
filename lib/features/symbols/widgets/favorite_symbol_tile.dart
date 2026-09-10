@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:get/get.dart';
 
@@ -38,7 +39,7 @@ class FavoriteSymbolTile extends StatelessWidget {
       child: InkWell(
         onTap: onTap,
         child: Container(
-          padding: const EdgeInsets.fromLTRB(4, 8, 12, 8),
+          padding: EdgeInsets.fromLTRB(4.w, 8.h, 12.w, 8.h),
           decoration: BoxDecoration(
             border: Border(
               bottom: BorderSide(
@@ -52,16 +53,16 @@ class FavoriteSymbolTile extends StatelessWidget {
               ReorderableDragStartListener(
                 index: index,
                 child: Padding(
-                  padding: const EdgeInsets.fromLTRB(4, 8, 2, 8),
+                  padding: EdgeInsets.fromLTRB(4.w, 8.h, 2.w, 8.h),
                   child: Icon(Icons.drag_handle_rounded,
-                      size: 20,
+                      size: 20.w,
                       color: scheme.onSurfaceVariant.withValues(alpha: 0.5)),
                 ),
               ),
               _FlagAvatar(code: instrument.code, tint: scheme.primary),
-              const SizedBox(width: 10),
+              SizedBox(width: 10.w),
               Expanded(child: _identity(scheme)),
-              const SizedBox(width: 8),
+              SizedBox(width: 8.w),
               Obx(() => _pill(scheme, rx.value)),
             ],
           ),
@@ -81,17 +82,17 @@ class FavoriteSymbolTile extends StatelessWidget {
           maxLines: 1,
           overflow: TextOverflow.ellipsis,
           style: AppText.base(
-              fontSize: 15,
+              fontSize: 15.sp,
               fontWeight: FontWeight.w600,
               color: scheme.onSurface),
         ),
         if (name.isNotEmpty) ...[
-          const SizedBox(height: 2),
+          SizedBox(height: 2.h),
           Text(
             name,
             maxLines: 1,
             overflow: TextOverflow.ellipsis,
-            style: AppText.base(fontSize: 11, color: scheme.onSurfaceVariant),
+            style: AppText.base(fontSize: 11.sp, color: scheme.onSurfaceVariant),
           ),
         ],
       ],
@@ -115,24 +116,24 @@ class FavoriteSymbolTile extends StatelessWidget {
           mainAxisSize: MainAxisSize.min,
           children: [
             _side('trade.buy'.tr, buy, _buyColor,
-                const BorderRadius.horizontal(left: Radius.circular(6))),
-            const SizedBox(width: 1),
+                BorderRadius.horizontal(left: Radius.circular(6.r))),
+            SizedBox(width: 1.w),
             _side('trade.sell'.tr, sell, _sellColor,
-                const BorderRadius.horizontal(right: Radius.circular(6))),
+                BorderRadius.horizontal(right: Radius.circular(6.r))),
           ],
         ),
         Positioned(
-          top: 3,
+          top: 3.h,
           child: Container(
-            padding: const EdgeInsets.symmetric(horizontal: 5, vertical: 1.5),
+            padding: EdgeInsets.symmetric(horizontal: 5.w, vertical: 1.5.h),
             decoration: BoxDecoration(
               color: const Color(0xFF1E293B),
-              borderRadius: BorderRadius.circular(10),
+              borderRadius: BorderRadius.circular(10.r),
               border: Border.all(color: Colors.white24, width: 0.5),
             ),
             child: Text(spread,
                 style: AppText.base(
-                    fontSize: 10, fontWeight: FontWeight.w500, color: Colors.white)),
+                    fontSize: 10.sp, fontWeight: FontWeight.w500, color: Colors.white)),
           ),
         ),
       ],
@@ -141,8 +142,8 @@ class FavoriteSymbolTile extends StatelessWidget {
 
   Widget _side(String label, String value, Color color, BorderRadius radius) {
     return Container(
-      width: 70,
-      height: 36,
+      width: 70.w,
+      height: 36.h,
       alignment: Alignment.center,
       decoration: BoxDecoration(color: color, borderRadius: radius),
       child: Column(
@@ -150,11 +151,11 @@ class FavoriteSymbolTile extends StatelessWidget {
         children: [
           Text(label,
               style: AppText.base(
-                  fontSize: 10, color: Colors.white.withValues(alpha: 0.85))),
-          const SizedBox(height: 1),
+                  fontSize: 10.sp, color: Colors.white.withValues(alpha: 0.85))),
+          SizedBox(height: 1.h),
           Text(value,
               style: AppText.base(
-                  fontSize: 10, fontWeight: FontWeight.w600, color: Colors.white)),
+                  fontSize: 10.sp, fontWeight: FontWeight.w600, color: Colors.white)),
         ],
       ),
     );
@@ -187,22 +188,22 @@ class _FlagAvatar extends StatelessWidget {
     final letter = clean.isEmpty ? '?' : clean[0].toUpperCase();
 
     return Container(
-      width: 32,
-      height: 32,
+      width: 32.w,
+      height: 32.w,
       decoration: BoxDecoration(
         color: tint.withValues(alpha: 0.10),
         shape: BoxShape.circle,
       ),
       clipBehavior: Clip.antiAlias,
       child: Padding(
-        padding: const EdgeInsets.all(3),
+        padding: EdgeInsets.all(3.w),
         child: SvgPicture.asset(
           'assets/svg/flags/$clean.svg',
           fit: BoxFit.cover,
           placeholderBuilder: (_) => Center(
             child: Text(letter,
                 style: AppText.base(
-                    fontSize: 12, fontWeight: FontWeight.w700, color: tint)),
+                    fontSize: 12.sp, fontWeight: FontWeight.w700, color: tint)),
           ),
         ),
       ),

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:google_fonts/google_fonts.dart';
 
 import '../../../shared/theme/app_colors.dart';
@@ -31,7 +32,7 @@ class ChallengeBottomBar extends StatelessWidget {
       child: SafeArea(
         top: false,
         child: Padding(
-          padding: const EdgeInsets.fromLTRB(18, 14, 14, 14),
+          padding: EdgeInsets.fromLTRB(18.w, 14.h, 14.w, 14.h),
           child: Row(
             children: [
               Expanded(
@@ -45,11 +46,11 @@ class ChallengeBottomBar extends StatelessWidget {
                       overflow: TextOverflow.ellipsis,
                       style: GoogleFonts.beVietnamPro(
                         color: AppColors.white.withValues(alpha: 0.85),
-                        fontSize: 13,
+                        fontSize: 13.sp,
                         fontWeight: FontWeight.w500,
                       ),
                     ),
-                    const SizedBox(height: 2),
+                    SizedBox(height: 2.h),
                     Row(
                       crossAxisAlignment: CrossAxisAlignment.end,
                       children: [
@@ -57,19 +58,19 @@ class ChallengeBottomBar extends StatelessWidget {
                           price,
                           style: GoogleFonts.beVietnamPro(
                             color: AppTheme.accent,
-                            fontSize: 22,
+                            fontSize: 22.sp,
                             fontWeight: FontWeight.w800,
                           ),
                         ),
                         if (strikePrice != null) ...[
-                          const SizedBox(width: 8),
+                          SizedBox(width: 8.w),
                           Padding(
-                            padding: const EdgeInsets.only(bottom: 3),
+                            padding: EdgeInsets.only(bottom: 3.h),
                             child: Text(
                               strikePrice!,
                               style: GoogleFonts.beVietnamPro(
                                 color: AppColors.white.withValues(alpha: 0.6),
-                                fontSize: 14,
+                                fontSize: 14.sp,
                                 decoration: TextDecoration.lineThrough,
                               ),
                             ),
@@ -80,21 +81,21 @@ class ChallengeBottomBar extends StatelessWidget {
                   ],
                 ),
               ),
-              const SizedBox(width: 12),
+              SizedBox(width: 12.w),
               Material(
                 color: AppColors.white.withValues(alpha: 0.18),
-                borderRadius: BorderRadius.circular(12),
+                borderRadius: BorderRadius.circular(12.r),
                 child: InkWell(
                   onTap: onAction,
-                  borderRadius: BorderRadius.circular(12),
+                  borderRadius: BorderRadius.circular(12.r),
                   child: Padding(
-                    padding: const EdgeInsets.symmetric(
-                        horizontal: 22, vertical: 12),
+                    padding: EdgeInsets.symmetric(
+                        horizontal: 22.w, vertical: 12.h),
                     child: Text(
                       actionLabel,
                       style: GoogleFonts.beVietnamPro(
                         color: AppColors.white,
-                        fontSize: 15,
+                        fontSize: 15.sp,
                         fontWeight: FontWeight.w700,
                       ),
                     ),

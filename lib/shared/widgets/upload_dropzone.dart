@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 
 import '../theme/app_colors.dart';
 import '../theme/app_theme.dart';
@@ -33,38 +34,38 @@ class UploadDropzone extends StatelessWidget {
     final faint = scheme.primary.withValues(alpha: 0.08);
     return Material(
       color: AppColors.transparent,
-      borderRadius: BorderRadius.circular(16),
+      borderRadius: BorderRadius.circular(16.r),
       child: InkWell(
         onTap: onTap,
-        borderRadius: BorderRadius.circular(16),
+        borderRadius: BorderRadius.circular(16.r),
         child: Ink(
           height: height,
           decoration: BoxDecoration(
             gradient: filled ? AppTheme.brandGradient(scheme) : null,
             color: filled ? null : faint,
-            borderRadius: BorderRadius.circular(16),
+            borderRadius: BorderRadius.circular(16.r),
           ),
           child: Center(
             child: Container(
-              width: 46,
-              height: 46,
+              width: 46.w,
+              height: 46.h,
               decoration: BoxDecoration(
                 color: filled
                     ? AppColors.white.withValues(alpha: 0.18)
                     : AppColors.white.withValues(alpha: 0.7),
-                borderRadius: BorderRadius.circular(12),
+                borderRadius: BorderRadius.circular(12.r),
               ),
               alignment: Alignment.center,
               child: Container(
-                width: 30,
-                height: 30,
+                width: 30.w,
+                height: 30.h,
                 decoration: BoxDecoration(
                   color: filled ? Colors.white : scheme.onSurface,
-                  borderRadius: BorderRadius.circular(8),
+                  borderRadius: BorderRadius.circular(8.r),
                 ),
                 child: Icon(
                   hasFile ? Icons.check_rounded : Icons.add_rounded,
-                  size: 18,
+                  size: 18.w,
                   color: filled ? scheme.primary : scheme.surface,
                 ),
               ),

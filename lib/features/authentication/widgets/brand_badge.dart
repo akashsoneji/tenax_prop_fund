@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 
 import '../../../shared/theme/app_colors.dart';
 import '../../../shared/theme/app_theme.dart';
@@ -28,14 +29,14 @@ class BrandBadge extends StatelessWidget {
         boxShadow: [
           BoxShadow(
             color: scheme.primary.withValues(alpha: 0.45),
-            blurRadius: 26,
-            spreadRadius: -4,
-            offset: const Offset(0, 12),
+            blurRadius: 26.r,
+            spreadRadius: -4.r,
+            offset: Offset(0, 12.h),
           ),
         ],
         border: Border.all(
           color: AppColors.white.withValues(alpha: 0.25),
-          width: 1,
+          width: 1.w,
         ),
       ),
       child: Icon(icon, color: AppColors.white, size: size * 0.52),

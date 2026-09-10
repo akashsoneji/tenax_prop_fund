@@ -1,5 +1,16 @@
 # Project rules
 
+## Responsive sizing — MANDATORY (flutter_screenutil)
+- The app is wrapped in `ScreenUtilInit(designSize: Size(375, 812))` in `lib/main.dart`. EVERY screen/widget MUST size against it.
+- NEVER write raw pixel values for dimensions. Use ScreenUtil extensions:
+  - horizontal (width, left/right padding, horizontal gap, most radii) → `.w`
+  - vertical (height, top/bottom padding, vertical gap) → `.h`
+  - font size → `.sp`
+- Examples — Bad: `SizedBox(height: 16)`, `fontSize: 14`, `EdgeInsets.all(12)`, `BorderRadius.circular(20)`
+  Good: `SizedBox(height: 16.h)`, `fontSize: 14.sp`, `EdgeInsets.all(12.w)`, `BorderRadius.circular(20.r)`
+- Keep the design UNCHANGED — only convert the numeric literal to its ScreenUtil unit; do not alter layout, colors, or values.
+- A screen is NOT "done" until every dimension uses a ScreenUtil unit, so it renders the same proportion on every device.
+
 ## Imported from .cursorrules
 
 # Flutter & Dart Agent Rules (Cursor / Windsurf / Multi-IDE)

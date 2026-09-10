@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
 
@@ -32,7 +33,7 @@ class ConfigureView extends StatelessWidget {
         slivers: [
           PinnedGradientAppBar(title: 'configure.title'.tr),
           SliverPadding(
-            padding: const EdgeInsets.fromLTRB(16, 16, 16, 24),
+            padding: EdgeInsets.fromLTRB(16.w, 16.h, 16.w, 24.h),
             sliver: SliverToBoxAdapter(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -43,14 +44,14 @@ class ConfigureView extends StatelessWidget {
                     title: 'configure.trial_summary'.tr,
                     body: 'configure.trial_note'.tr,
                   ),
-                  const SizedBox(height: 22),
+                  SizedBox(height: 22.h),
                   SectionHeader('configure.platform'.tr),
                   Obx(() => AppSegmentedControl(
                         labels: ConfigureController.platforms,
                         selected: c.platform.value,
                         onChanged: c.setPlatform,
                       )),
-                  const SizedBox(height: 20),
+                  SizedBox(height: 20.h),
                   SectionHeader('configure.swap'.tr),
                   Obx(() => AppSegmentedControl(
                         labels: [
@@ -60,7 +61,7 @@ class ConfigureView extends StatelessWidget {
                         selected: c.swap.value,
                         onChanged: c.setSwap,
                       )),
-                  const SizedBox(height: 22),
+                  SizedBox(height: 22.h),
                   SectionHeader('configure.addons'.tr),
                   Obx(() => RulesCard(
                         children: [
@@ -78,13 +79,13 @@ class ConfigureView extends StatelessWidget {
                             ),
                         ],
                       )),
-                  const SizedBox(height: 22),
+                  SizedBox(height: 22.h),
                   SectionHeader('configure.quantity'.tr),
                   _QuantityRow(c: c),
-                  const SizedBox(height: 22),
+                  SizedBox(height: 22.h),
                   SectionHeader('configure.your_details'.tr),
                   _CreateAccountCard(c: c),
-                  const SizedBox(height: 22),
+                  SizedBox(height: 22.h),
                   SectionHeader('configure.summary'.tr),
                   Obx(() {
                     final rows = c.summaryRows;
@@ -131,30 +132,30 @@ class _QuantityRow extends StatelessWidget {
   Widget build(BuildContext context) {
     final scheme = Theme.of(context).colorScheme;
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-      decoration: AppTheme.surfaceCard(scheme, radius: 14),
+      padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 12.h),
+      decoration: AppTheme.surfaceCard(scheme, radius: 14.r),
       child: Row(
         children: [
           Expanded(
             child: Text(
               'configure.number_of_accounts'.tr,
               style: GoogleFonts.beVietnamPro(
-                fontSize: 14,
+                fontSize: 14.sp,
                 color: scheme.onSurface.withValues(alpha: 0.75),
               ),
             ),
           ),
           _StepButton(icon: Icons.remove_rounded, onTap: c.decrement),
-          const SizedBox(width: 14),
+          SizedBox(width: 14.w),
           Obx(() => Text(
                 '${c.quantity.value}',
                 style: GoogleFonts.beVietnamPro(
-                  fontSize: 16,
+                  fontSize: 16.sp,
                   fontWeight: FontWeight.w800,
                   color: scheme.onSurface,
                 ),
               )),
-          const SizedBox(width: 14),
+          SizedBox(width: 14.w),
           _StepButton(icon: Icons.add_rounded, onTap: c.increment),
         ],
       ),
@@ -172,13 +173,13 @@ class _StepButton extends StatelessWidget {
     final scheme = Theme.of(context).colorScheme;
     return Material(
       color: scheme.primary.withValues(alpha: 0.10),
-      borderRadius: BorderRadius.circular(9),
+      borderRadius: BorderRadius.circular(9.r),
       child: InkWell(
         onTap: onTap,
-        borderRadius: BorderRadius.circular(9),
+        borderRadius: BorderRadius.circular(9.r),
         child: Padding(
-          padding: const EdgeInsets.all(6),
-          child: Icon(icon, size: 18, color: scheme.primary),
+          padding: EdgeInsets.all(6.w),
+          child: Icon(icon, size: 18.w, color: scheme.primary),
         ),
       ),
     );
@@ -197,8 +198,8 @@ class _CreateAccountCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final scheme = Theme.of(context).colorScheme;
     return Container(
-      padding: const EdgeInsets.all(16),
-      decoration: AppTheme.surfaceCard(scheme, radius: 16),
+      padding: EdgeInsets.all(16.w),
+      decoration: AppTheme.surfaceCard(scheme, radius: 16.r),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
@@ -208,7 +209,7 @@ class _CreateAccountCard extends StatelessWidget {
                 child: Text(
                   'configure.create_account'.tr,
                   style: GoogleFonts.beVietnamPro(
-                    fontSize: 16,
+                    fontSize: 16.sp,
                     fontWeight: FontWeight.w800,
                     color: scheme.onSurface,
                   ),
@@ -225,16 +226,16 @@ class _CreateAccountCard extends StatelessWidget {
               ),
             ],
           ),
-          const SizedBox(height: 6),
+          SizedBox(height: 6.h),
           Text(
             'configure.details_note'.tr,
             style: GoogleFonts.beVietnamPro(
-              fontSize: 12.5,
+              fontSize: 12.5.sp,
               height: 1.4,
               color: scheme.onSurface.withValues(alpha: 0.6),
             ),
           ),
-          const SizedBox(height: 16),
+          SizedBox(height: 16.h),
           Row(
             children: [
               Expanded(
@@ -244,7 +245,7 @@ class _CreateAccountCard extends StatelessWidget {
                   hint: 'configure.first_name_hint'.tr,
                 ),
               ),
-              const SizedBox(width: 12),
+              SizedBox(width: 12.w),
               Expanded(
                 child: AppTextField(
                   controller: c.lastName,
@@ -254,14 +255,14 @@ class _CreateAccountCard extends StatelessWidget {
               ),
             ],
           ),
-          const SizedBox(height: 12),
+          SizedBox(height: 12.h),
           AppTextField(
             controller: c.email,
             label: 'configure.email'.tr,
             hint: 'configure.email_hint'.tr,
             keyboardType: TextInputType.emailAddress,
           ),
-          const SizedBox(height: 12),
+          SizedBox(height: 12.h),
           Obx(() => AppTextField(
                 controller: c.password,
                 label: 'configure.password'.tr,
@@ -277,17 +278,17 @@ class _CreateAccountCard extends StatelessWidget {
                   onPressed: c.togglePasswordVisibility,
                 ),
               )),
-          const SizedBox(height: 12),
+          SizedBox(height: 12.h),
           AppTextField(
             controller: c.phone,
             label: 'configure.mobile'.tr,
             hint: 'configure.mobile_hint'.tr,
             keyboardType: TextInputType.phone,
           ),
-          const SizedBox(height: 12),
+          SizedBox(height: 12.h),
           Obx(() => InkWell(
                 onTap: () => c.setAccepted(!c.acceptedTerms.value),
-                borderRadius: BorderRadius.circular(8),
+                borderRadius: BorderRadius.circular(8.r),
                 child: Row(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
@@ -298,14 +299,14 @@ class _CreateAccountCard extends StatelessWidget {
                       materialTapTargetSize:
                           MaterialTapTargetSize.shrinkWrap,
                     ),
-                    const SizedBox(width: 6),
+                    SizedBox(width: 6.w),
                     Expanded(
                       child: Padding(
-                        padding: const EdgeInsets.only(top: 10),
+                        padding: EdgeInsets.only(top: 10.h),
                         child: Text(
                           'configure.accept_terms'.tr,
                           style: GoogleFonts.beVietnamPro(
-                            fontSize: 12.5,
+                            fontSize: 12.5.sp,
                             height: 1.4,
                             color: scheme.onSurface.withValues(alpha: 0.65),
                           ),

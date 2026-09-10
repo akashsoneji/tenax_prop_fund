@@ -1,10 +1,11 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:google_fonts/google_fonts.dart';
 
 import '../theme/app_colors.dart';
 import '../theme/app_theme.dart';
 
-/// Visual tone of an [AppInfoBanner]. Drives the icon tint + soft fill so the
+/// Visual tone
 /// same widget covers "heads-up" (info), "be careful" (warning) and "danger".
 enum BannerTone { info, warning, danger }
 
@@ -43,17 +44,17 @@ class AppInfoBanner extends StatelessWidget {
 
     return Container(
       margin: margin,
-      padding: const EdgeInsets.fromLTRB(14, 14, 14, 14),
+      padding: EdgeInsets.fromLTRB(14.w, 14.h, 14.w, 14.h),
       decoration: BoxDecoration(
         color: fill,
-        borderRadius: BorderRadius.circular(14),
+        borderRadius: BorderRadius.circular(14.r),
         border: Border.all(color: accent.withValues(alpha: 0.18)),
       ),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Icon(icon ?? _defaultIcon, size: 20, color: accent),
-          const SizedBox(width: 10),
+          Icon(icon ?? _defaultIcon, size: 20.w, color: accent),
+          SizedBox(width: 10.w),
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -61,16 +62,16 @@ class AppInfoBanner extends StatelessWidget {
                 Text(
                   title,
                   style: GoogleFonts.beVietnamPro(
-                    fontSize: 14,
+                    fontSize: 14.sp,
                     fontWeight: FontWeight.w700,
                     color: scheme.onSurface,
                   ),
                 ),
-                const SizedBox(height: 4),
+                SizedBox(height: 4.h),
                 Text(
                   body,
                   style: GoogleFonts.beVietnamPro(
-                    fontSize: 13,
+                    fontSize: 13.sp,
                     height: 1.4,
                     color: scheme.onSurface.withValues(alpha: 0.65),
                   ),

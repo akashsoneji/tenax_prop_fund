@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
 
 import '../../../core/network/api_client.dart';
@@ -49,7 +50,7 @@ class InstrumentSearchSheet extends StatelessWidget {
       child: Container(
         decoration: BoxDecoration(
           color: scheme.surface,
-          borderRadius: const BorderRadius.vertical(top: Radius.circular(22)),
+          borderRadius: BorderRadius.vertical(top: Radius.circular(22.r)),
         ),
         child: SafeArea(
           top: false,
@@ -57,9 +58,9 @@ class InstrumentSearchSheet extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               _SearchHeader(controller: c),
-              const SizedBox(height: 10),
+              SizedBox(height: 10.h),
               _CategoryPills(controller: c),
-              const SizedBox(height: 8),
+              SizedBox(height: 8.h),
               Expanded(child: _ResultsList(controller: c)),
             ],
           ),
@@ -77,7 +78,7 @@ class _SearchHeader extends StatelessWidget {
   Widget build(BuildContext context) {
     final scheme = Theme.of(context).colorScheme;
     return Padding(
-      padding: const EdgeInsets.fromLTRB(12, 12, 12, 0),
+      padding: EdgeInsets.fromLTRB(12.w, 12.h, 12.w, 0),
       child: Row(
         children: [
           IconButton(
@@ -99,7 +100,7 @@ class _SearchHeader extends StatelessWidget {
                 fillColor: scheme.surfaceContainerHighest
                     .withValues(alpha: AppColors.alphaMuted),
                 border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(14),
+                  borderRadius: BorderRadius.circular(14.r),
                   borderSide: BorderSide.none,
                 ),
               ),
@@ -127,14 +128,14 @@ class _CategoryPills extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return SizedBox(
-      height: 40,
+      height: 40.h,
       child: Obx(
         () => ListView.separated(
           scrollDirection: Axis.horizontal,
           physics: const BouncingScrollPhysics(),
-          padding: const EdgeInsets.symmetric(horizontal: 16),
+          padding: EdgeInsets.symmetric(horizontal: 16.w),
           itemCount: InstrumentCategory.filters.length,
-          separatorBuilder: (_, __) => const SizedBox(width: 8),
+          separatorBuilder: (_, __) => SizedBox(width: 8.w),
           itemBuilder: (context, i) {
             final cat = InstrumentCategory.filters[i];
             return _Pill(
@@ -160,14 +161,14 @@ class _Pill extends StatelessWidget {
     final scheme = Theme.of(context).colorScheme;
     return Material(
       color: active ? scheme.primary : AppColors.transparent,
-      borderRadius: BorderRadius.circular(20),
+      borderRadius: BorderRadius.circular(20.r),
       child: InkWell(
         onTap: onTap,
-        borderRadius: BorderRadius.circular(20),
+        borderRadius: BorderRadius.circular(20.r),
         child: Container(
-          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+          padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 8.h),
           decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(20),
+            borderRadius: BorderRadius.circular(20.r),
             border: Border.all(
               color: active ? scheme.primary : scheme.outlineVariant,
             ),
@@ -208,7 +209,7 @@ class _ResultsList extends StatelessWidget {
       }
       return ListView.builder(
         physics: const BouncingScrollPhysics(),
-        padding: const EdgeInsets.fromLTRB(16, 4, 16, 16),
+        padding: EdgeInsets.fromLTRB(16.w, 4.h, 16.w, 16.h),
         itemCount: items.length,
         itemBuilder: (context, i) => _InstrumentRow(
           instrument: items[i],
@@ -228,22 +229,22 @@ class _InstrumentRow extends StatelessWidget {
   Widget build(BuildContext context) {
     final scheme = Theme.of(context).colorScheme;
     return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 6),
+      padding: EdgeInsets.symmetric(vertical: 6.h),
       child: Row(
         children: [
           Container(
-            width: 40,
-            height: 40,
+            width: 40.w,
+            height: 40.w,
             decoration: BoxDecoration(
               color: scheme.surfaceContainerHighest
                   .withValues(alpha: AppColors.alphaMuted),
-              borderRadius: BorderRadius.circular(12),
+              borderRadius: BorderRadius.circular(12.r),
             ),
             alignment: Alignment.center,
             child: Icon(Icons.candlestick_chart_outlined,
-                size: 20, color: scheme.onSurfaceVariant),
+                size: 20.w, color: scheme.onSurfaceVariant),
           ),
-          const SizedBox(width: 12),
+          SizedBox(width: 12.w),
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -252,9 +253,9 @@ class _InstrumentRow extends StatelessWidget {
                   instrument.code,
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
-                  style: AppText.title(color: scheme.onSurface, fontSize: 15),
+                  style: AppText.title(color: scheme.onSurface, fontSize: 15.sp),
                 ),
-                const SizedBox(height: 2),
+                SizedBox(height: 2.h),
                 Text(
                   instrument.category,
                   maxLines: 1,
@@ -264,7 +265,7 @@ class _InstrumentRow extends StatelessWidget {
               ],
             ),
           ),
-          const SizedBox(width: 10),
+          SizedBox(width: 10.w),
           Obx(() {
             final fav = controller.favorites.isFavorite(instrument.code);
             return IconButton(

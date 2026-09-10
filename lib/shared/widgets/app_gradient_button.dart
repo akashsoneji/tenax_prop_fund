@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:google_fonts/google_fonts.dart';
 
 import '../theme/app_colors.dart';
@@ -83,19 +84,19 @@ class _AppGradientButtonState extends State<AppGradientButton>
       opacity: disabled ? 0.85 : 1,
       child: Material(
       color: AppColors.transparent,
-        borderRadius: BorderRadius.circular(14),
+        borderRadius: BorderRadius.circular(14.r),
         child: InkWell(
           onTap: disabled ? null : widget.onPressed,
-          borderRadius: BorderRadius.circular(14),
+          borderRadius: BorderRadius.circular(14.r),
           child: Ink(
             decoration: BoxDecoration(
               gradient: AppTheme.brandGradient(scheme),
-              borderRadius: BorderRadius.circular(14),
+              borderRadius: BorderRadius.circular(14.r),
               boxShadow: [
                 BoxShadow(
                   color: scheme.primary.withValues(alpha: 0.35),
-                  blurRadius: 18,
-                  offset: const Offset(0, 10),
+                  blurRadius: 18.r,
+                  offset: Offset(0, 10.h),
                 ),
               ],
             ),
@@ -110,7 +111,7 @@ class _AppGradientButtonState extends State<AppGradientButton>
                         final v = _sweep?.value ?? 0.0;
                         return Positioned.fill(
                           child: ClipRRect(
-                            borderRadius: BorderRadius.circular(14),
+                            borderRadius: BorderRadius.circular(14.r),
                             child: DecoratedBox(
                               decoration: BoxDecoration(
                                 gradient: LinearGradient(
@@ -129,10 +130,10 @@ class _AppGradientButtonState extends State<AppGradientButton>
                     ),
                   Center(
                     child: widget.loading
-                        ? const SizedBox(
-                            width: 22,
-                            height: 22,
-                            child: CircularProgressIndicator(
+                        ? SizedBox(
+                            width: 22.w,
+                            height: 22.h,
+                            child: const CircularProgressIndicator(
                               strokeWidth: 2.4,
                               valueColor:
                                   AlwaysStoppedAnimation(Colors.white),
@@ -143,14 +144,14 @@ class _AppGradientButtonState extends State<AppGradientButton>
                             children: [
                               if (widget.icon != null) ...[
                                 Icon(widget.icon,
-                                    color: Colors.white, size: 18),
-                                const SizedBox(width: 10),
+                                    color: Colors.white, size: 18.w),
+                                SizedBox(width: 10.w),
                               ],
                               Text(
                                 widget.label,
                                 style: GoogleFonts.beVietnamPro(
                                   color: Colors.white,
-                                  fontSize: 16,
+                                  fontSize: 16.sp,
                                   fontWeight: FontWeight.w700,
                                   letterSpacing: 0.3,
                                 ),

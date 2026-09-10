@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
 
 import '../../../shared/theme/app_colors.dart';
@@ -112,10 +113,10 @@ class _OtpDialogState extends State<OtpDialog> {
       child: Material(
         color: AppColors.transparent,
         child: GlassCard(
-          radius: 24,
-          padding: const EdgeInsets.fromLTRB(20, 22, 20, 16),
+          radius: 24.r,
+          padding: EdgeInsets.fromLTRB(20.w, 22.h, 20.w, 16.h),
           child: ConstrainedBox(
-            constraints: const BoxConstraints(maxWidth: 380),
+            constraints: BoxConstraints(maxWidth: 380.w),
             child: Column(
               mainAxisSize: MainAxisSize.min,
               crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -127,16 +128,16 @@ class _OtpDialogState extends State<OtpDialog> {
                         fontWeight: FontWeight.w700,
                       ),
                 ),
-                const SizedBox(height: 6),
+                SizedBox(height: 6.h),
                 Text(
                   '${'otp.subtitle'.tr}\n${widget.target}',
                   textAlign: TextAlign.center,
                   style: TextStyle(
                     color: scheme.onSurface.withValues(alpha: 0.65),
-                    fontSize: 13,
+                    fontSize: 13.sp,
                   ),
                 ),
-                const SizedBox(height: 20),
+                SizedBox(height: 20.h),
                 ShakeWidget(
                   controller: _shake,
                   child: Row(
@@ -154,18 +155,18 @@ class _OtpDialogState extends State<OtpDialog> {
                   ),
                 ),
                 if (_error != null) ...[
-                  const SizedBox(height: 10),
+                  SizedBox(height: 10.h),
                   Text(
                     _error!,
                     textAlign: TextAlign.center,
                     style: TextStyle(
                       color: scheme.error,
-                      fontSize: 12,
+                      fontSize: 12.sp,
                       fontWeight: FontWeight.w600,
                     ),
                   ),
                 ],
-                const SizedBox(height: 18),
+                SizedBox(height: 18.h),
                 Row(
                   mainAxisAlignment: MainAxisAlignment.end,
                   children: [
@@ -173,15 +174,15 @@ class _OtpDialogState extends State<OtpDialog> {
                       onPressed: () => Get.back(),
                       child: Text('common.cancel'.tr),
                     ),
-                    const SizedBox(width: 8),
+                    SizedBox(width: 8.w),
                     FilledButton(
                       style: FilledButton.styleFrom(
                         backgroundColor: scheme.primary,
                         foregroundColor: scheme.onPrimary,
-                        padding: const EdgeInsets.symmetric(
-                            horizontal: 22, vertical: 12),
+                        padding: EdgeInsets.symmetric(
+                            horizontal: 22.w, vertical: 12.h),
                         shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(10)),
+                            borderRadius: BorderRadius.circular(10.r)),
                       ),
                       onPressed: _verify,
                       child: Text('common.verify'.tr),
@@ -219,16 +220,16 @@ class _PinCell extends StatelessWidget {
     final scheme = Theme.of(context).colorScheme;
     return AnimatedContainer(
       duration: AppMotion.fast,
-      width: 44,
-      height: 52,
+      width: 44.w,
+      height: 52.h,
       decoration: BoxDecoration(
         color: scheme.surfaceContainerHighest,
-        borderRadius: BorderRadius.circular(10),
+        borderRadius: BorderRadius.circular(10.r),
         border: Border.all(
           color: hasError
               ? scheme.error
               : (focusNode.hasFocus ? scheme.primary : AppColors.transparent),
-          width: 1.6,
+          width: 1.6.w,
         ),
       ),
       child: Center(
@@ -246,7 +247,7 @@ class _PinCell extends StatelessWidget {
           autofocus: true,
           autofillHints: const [AutofillHints.oneTimeCode],
           style: TextStyle(
-            fontSize: 22,
+            fontSize: 22.sp,
             fontWeight: FontWeight.w700,
             color: scheme.onSurface,
           ),

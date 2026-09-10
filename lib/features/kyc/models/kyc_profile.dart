@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 
+import 'kyc_status.dart';
+
 /// Status of a single verification step in the KYC checklist.
 enum KycStepStatus { done, pending }
 
@@ -59,7 +61,7 @@ class KycProfile {
   /// Maps the live `GET /profile` envelope `data` into the screen model. Fields
   /// with no API source (avatar, date of birth, identity/address step state,
   /// news-alert prefs) are defaulted sensibly and preserved for the views.
-  factory KycProfile.fromJson(Map<String, dynamic> json) {
+  factory KycProfile.fromJson(Map<String, dynamic> json, {KycStatus? kyc}) {
     final name = (json['name'] as String?)?.trim() ?? '';
     final first = (json['first_name'] as String?)?.trim() ?? '';
     final last = (json['last_name'] as String?)?.trim() ?? '';
@@ -81,15 +83,19 @@ class KycProfile {
           subtitle: email,
           status: emailVerified ? KycStepStatus.done : KycStepStatus.pending,
         ),
-        const KycVerificationStep(
+        KycVerificationStep(
           title: 'Identity document',
           subtitle: 'Passport or national ID',
-          status: KycStepStatus.pending,
+          status: kyc?.identity == KycDocState.approved
+              ? KycStepStatus.done
+              : KycStepStatus.pending,
         ),
-        const KycVerificationStep(
+        KycVerificationStep(
           title: 'Proof of address',
           subtitle: 'Bank statement or bill, under 3 months',
-          status: KycStepStatus.pending,
+          status: kyc?.address == KycDocState.approved
+              ? KycStepStatus.done
+              : KycStepStatus.pending,
         ),
       ],
       details: [

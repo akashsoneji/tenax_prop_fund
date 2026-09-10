@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:google_fonts/google_fonts.dart';
 
 import '../../../shared/theme/app_colors.dart';
@@ -14,15 +15,15 @@ class SupportContactCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final scheme = Theme.of(context).colorScheme;
     return Container(
-      padding: const EdgeInsets.all(16),
+      padding: EdgeInsets.all(16.w),
       decoration: BoxDecoration(
         gradient: AppTheme.brandGradient(scheme),
-        borderRadius: BorderRadius.circular(20),
+        borderRadius: BorderRadius.circular(20.r),
         boxShadow: [
           BoxShadow(
             color: scheme.primary.withValues(alpha: 0.30),
-            blurRadius: 22,
-            offset: const Offset(0, 12),
+            blurRadius: 22.r,
+            offset: Offset(0, 12.h),
           ),
         ],
       ),
@@ -33,39 +34,39 @@ class SupportContactCard extends StatelessWidget {
             'How can we help?',
             style: GoogleFonts.beVietnamPro(
               color: AppColors.white,
-              fontSize: 18,
+              fontSize: 18.sp,
               fontWeight: FontWeight.w800,
             ),
           ),
-          const SizedBox(height: 4),
+          SizedBox(height: 4.h),
           Text(
             'Reach us any way you like.',
             style: GoogleFonts.beVietnamPro(
               color: AppColors.white.withValues(alpha: 0.82),
-              fontSize: 13,
+              fontSize: 13.sp,
               fontWeight: FontWeight.w500,
             ),
           ),
-          const SizedBox(height: 16),
+          SizedBox(height: 16.h),
           Row(
-            children: const [
-              Expanded(
+            children: [
+              const Expanded(
                 child: _ContactTile(icon: Icons.chat, label: 'WhatsApp'),
               ),
-              SizedBox(width: 12),
-              Expanded(
+              SizedBox(width: 12.w),
+              const Expanded(
                 child: _ContactTile(icon: Icons.mail_outline, label: 'Email'),
               ),
             ],
           ),
-          const SizedBox(height: 12),
+          SizedBox(height: 12.h),
           Row(
-            children: const [
-              Expanded(
+            children: [
+              const Expanded(
                 child: _ContactTile(icon: Icons.help_outline, label: 'FAQ'),
               ),
-              SizedBox(width: 12),
-              Expanded(
+              SizedBox(width: 12.w),
+              const Expanded(
                 child: _ContactTile(
                     icon: Icons.menu_book_rounded, label: 'Rules'),
               ),
@@ -86,23 +87,23 @@ class _ContactTile extends StatelessWidget {
   Widget build(BuildContext context) {
     return Material(
       color: AppColors.white.withValues(alpha: 0.16),
-      borderRadius: BorderRadius.circular(14),
+      borderRadius: BorderRadius.circular(14.r),
       child: InkWell(
         onTap: () {},
-        borderRadius: BorderRadius.circular(14),
+        borderRadius: BorderRadius.circular(14.r),
         child: Container(
-          height: 84,
+          height: 84.h,
           alignment: Alignment.center,
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              Icon(icon, color: AppColors.white, size: 26),
-              const SizedBox(height: 8),
+              Icon(icon, color: AppColors.white, size: 26.w),
+              SizedBox(height: 8.h),
               Text(
                 label,
                 style: GoogleFonts.beVietnamPro(
                   color: AppColors.white,
-                  fontSize: 12.5,
+                  fontSize: 12.5.sp,
                   fontWeight: FontWeight.w700,
                 ),
               ),

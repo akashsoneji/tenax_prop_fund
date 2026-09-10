@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
 
@@ -32,15 +33,15 @@ class CompetitionHeroCard extends StatelessWidget {
     ];
 
     return Container(
-      padding: const EdgeInsets.all(20),
+      padding: EdgeInsets.all(20.w),
       decoration: BoxDecoration(
         gradient: AppTheme.heroGradient(scheme),
-        borderRadius: BorderRadius.circular(20),
+        borderRadius: BorderRadius.circular(20.r),
         boxShadow: [
           BoxShadow(
             color: scheme.primary.withValues(alpha: 0.30),
-            blurRadius: 24,
-            offset: const Offset(0, 12),
+            blurRadius: 24.r,
+            offset: Offset(0, 12.h),
           ),
         ],
       ),
@@ -55,53 +56,53 @@ class CompetitionHeroCard extends StatelessWidget {
                   info.title,
                   style: GoogleFonts.beVietnamPro(
                     color: AppColors.white,
-                    fontSize: 26,
+                    fontSize: 26.sp,
                     fontWeight: FontWeight.w800,
                   ),
                 ),
               ),
               Container(
-                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 6.h),
                 decoration: BoxDecoration(
                   color: AppColors.white.withValues(alpha: 0.16),
-                  borderRadius: BorderRadius.circular(20),
+                  borderRadius: BorderRadius.circular(20.r),
                 ),
                 child: Text(
                   info.status,
                   style: GoogleFonts.beVietnamPro(
                     color: AppColors.white,
-                    fontSize: 12,
+                    fontSize: 12.sp,
                     fontWeight: FontWeight.w600,
                   ),
                 ),
               ),
             ],
           ),
-          const SizedBox(height: 6),
+          SizedBox(height: 6.h),
           Text(
             info.dateRange,
             style: GoogleFonts.beVietnamPro(
               color: AppColors.white.withValues(alpha: 0.75),
-              fontSize: 13,
+              fontSize: 13.sp,
             ),
           ),
-          const SizedBox(height: 18),
+          SizedBox(height: 18.h),
           Row(
             children: [
               Expanded(child: _StatTile(stat: stats[0])),
-              const SizedBox(width: 12),
+              SizedBox(width: 12.w),
               Expanded(child: _StatTile(stat: stats[1])),
             ],
           ),
-          const SizedBox(height: 12),
+          SizedBox(height: 12.h),
           Row(
             children: [
               Expanded(child: _StatTile(stat: stats[2])),
-              const SizedBox(width: 12),
+              SizedBox(width: 12.w),
               Expanded(child: _StatTile(stat: stats[3])),
             ],
           ),
-          const SizedBox(height: 18),
+          SizedBox(height: 18.h),
           _RegisterButton(registered: registered, onRegister: onRegister),
         ],
       ),
@@ -116,10 +117,10 @@ class _StatTile extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 14),
+      padding: EdgeInsets.symmetric(horizontal: 14.w, vertical: 14.h),
       decoration: BoxDecoration(
         color: AppColors.white.withValues(alpha: 0.12),
-        borderRadius: BorderRadius.circular(14),
+        borderRadius: BorderRadius.circular(14.r),
         border: Border.all(color: AppColors.white.withValues(alpha: 0.10)),
       ),
       child: Column(
@@ -129,15 +130,15 @@ class _StatTile extends StatelessWidget {
             stat.label,
             style: GoogleFonts.beVietnamPro(
               color: AppColors.white.withValues(alpha: 0.70),
-              fontSize: 13,
+              fontSize: 13.sp,
             ),
           ),
-          const SizedBox(height: 6),
+          SizedBox(height: 6.h),
           Text(
             stat.value,
             style: GoogleFonts.beVietnamPro(
               color: AppColors.white,
-              fontSize: 19,
+              fontSize: 19.sp,
               fontWeight: FontWeight.w800,
             ),
           ),
@@ -159,21 +160,21 @@ class _RegisterButton extends StatelessWidget {
   Widget build(BuildContext context) {
     return SizedBox(
       width: double.infinity,
-      height: 52,
+      height: 52.h,
       child: Material(
         color: registered ? AppColors.white.withValues(alpha: 0.18) : AppTheme.accent,
-        borderRadius: BorderRadius.circular(14),
+        borderRadius: BorderRadius.circular(14.r),
         child: InkWell(
           onTap: registered ? null : onRegister,
-          borderRadius: BorderRadius.circular(14),
+          borderRadius: BorderRadius.circular(14.r),
           child: Center(
             child: Row(
               mainAxisSize: MainAxisSize.min,
               children: [
                 if (registered) ...[
-                  const Icon(Icons.check_circle_rounded,
-                      color: AppColors.white, size: 18),
-                  const SizedBox(width: 8),
+                  Icon(Icons.check_circle_rounded,
+                      color: AppColors.white, size: 18.w),
+                  SizedBox(width: 8.w),
                 ],
                 Text(
                   registered
@@ -181,7 +182,7 @@ class _RegisterButton extends StatelessWidget {
                       : 'competitions.register_free'.tr,
                   style: GoogleFonts.beVietnamPro(
                     color: registered ? AppColors.white : AppColors.brandPurple,
-                    fontSize: 16,
+                    fontSize: 16.sp,
                     fontWeight: FontWeight.w700,
                   ),
                 ),

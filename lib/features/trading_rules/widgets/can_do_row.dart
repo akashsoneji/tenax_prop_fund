@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
 
@@ -55,7 +56,7 @@ class CanDoRowTile extends StatelessWidget {
         return Opacity(
           opacity: t.clamp(0, 1),
           child: Transform.translate(
-            offset: Offset(0, (1 - t) * 8),
+            offset: Offset(0, (1 - t) * 8.h),
             child: child,
           ),
         );
@@ -71,38 +72,38 @@ class CanDoRowTile extends StatelessWidget {
                 )
               : null,
         ),
-        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+        padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 14.h),
         child: Row(
           children: [
             Container(
-              width: 28,
-              height: 28,
+              width: 28.w,
+              height: 28.w,
               decoration: BoxDecoration(
                 color: iconBg,
-                borderRadius: BorderRadius.circular(7),
+                borderRadius: BorderRadius.circular(7.r),
               ),
               alignment: Alignment.center,
-              child: Icon(icon, color: iconFg, size: 18),
+              child: Icon(icon, color: iconFg, size: 18.w),
             ),
-            const SizedBox(width: 12),
+            SizedBox(width: 12.w),
             Expanded(
               child: Text(
                 row.label,
                 style: GoogleFonts.beVietnamPro(
-                  fontSize: 14,
+                  fontSize: 14.sp,
                   fontWeight: FontWeight.w600,
                   color: scheme.onSurface,
                 ),
               ),
             ),
-            const SizedBox(width: 12),
+            SizedBox(width: 12.w),
             ConstrainedBox(
-              constraints: const BoxConstraints(maxWidth: 140),
+              constraints: BoxConstraints(maxWidth: 140.w),
               child: Text(
                 footnote,
                 textAlign: TextAlign.right,
                 style: GoogleFonts.beVietnamPro(
-                  fontSize: 13.5,
+                  fontSize: 13.5.sp,
                   fontWeight: FontWeight.w700,
                   color: value,
                 ),

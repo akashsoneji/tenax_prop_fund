@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
 
 import '../../../app/routes/app_routes.dart';
@@ -49,7 +50,7 @@ class LoginFormState extends State<LoginForm> {
   }) {
     final scheme = Theme.of(context).colorScheme;
     OutlineInputBorder border(Color color, double width) => OutlineInputBorder(
-          borderRadius: BorderRadius.circular(16),
+          borderRadius: BorderRadius.circular(16.r),
           borderSide: BorderSide(color: color, width: width),
         );
     return InputDecoration(
@@ -59,7 +60,7 @@ class LoginFormState extends State<LoginForm> {
       suffixIcon: suffix,
       filled: true,
       fillColor: scheme.surfaceContainerHighest.withValues(alpha: 0.4),
-      contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 18),
+      contentPadding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 18.h),
       enabledBorder: border(scheme.outline.withValues(alpha: 0.18), 1),
       focusedBorder: border(scheme.primary, 1.6),
     );
@@ -86,7 +87,7 @@ class LoginFormState extends State<LoginForm> {
             ),
           ),
         ),
-        const SizedBox(height: 14),
+        SizedBox(height: 14.h),
         AnimatedField(
           index: 1,
           child: TextField(
@@ -106,7 +107,7 @@ class LoginFormState extends State<LoginForm> {
             ),
           ),
         ),
-        const SizedBox(height: 8),
+        SizedBox(height: 8.h),
         AnimatedField(
           index: 2,
           child: Align(
@@ -117,7 +118,7 @@ class LoginFormState extends State<LoginForm> {
             ),
           ),
         ),
-        const SizedBox(height: 8),
+        SizedBox(height: 8.h),
         Obx(() {
           final msg = controller.errorMessage.value;
           if (msg != null) {
@@ -133,7 +134,7 @@ class LoginFormState extends State<LoginForm> {
               child: msg == null
                   ? const SizedBox.shrink()
                   : Padding(
-                      padding: const EdgeInsets.only(bottom: 8),
+                      padding: EdgeInsets.only(bottom: 8.h),
                       child: Text(
                         msg,
                         style: TextStyle(
@@ -145,7 +146,7 @@ class LoginFormState extends State<LoginForm> {
             ),
           );
         }),
-        const SizedBox(height: 8),
+        SizedBox(height: 8.h),
         Obx(
           () => AppGradientButton(
             label: 'login.login_button'.tr,
@@ -153,9 +154,9 @@ class LoginFormState extends State<LoginForm> {
             onPressed: submit,
           ),
         ),
-        const SizedBox(height: 16),
+        SizedBox(height: 16.h),
         _OrContinue(),
-        const SizedBox(height: 14),
+        SizedBox(height: 14.h),
         Center(
           child: BiometricButton(
             savedEmail: _email.text.trim().isEmpty ? null : _email.text.trim(),
@@ -164,7 +165,7 @@ class LoginFormState extends State<LoginForm> {
             },
           ),
         ),
-        const SizedBox(height: 12),
+        SizedBox(height: 12.h),
         TextButton(
           onPressed: () => Get.toNamed(AppRoutes.register),
           child: Text(
@@ -186,7 +187,7 @@ class _OrContinue extends StatelessWidget {
       children: [
         Expanded(child: Divider(color: color, thickness: 0.6)),
         Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 12),
+          padding: EdgeInsets.symmetric(horizontal: 12.w),
           child: Text(
             'login.or_continue'.tr,
             style: TextStyle(
@@ -194,7 +195,7 @@ class _OrContinue extends StatelessWidget {
                   .colorScheme
                   .onSurface
                   .withValues(alpha: 0.6),
-              fontSize: 12,
+              fontSize: 12.sp,
             ),
           ),
         ),

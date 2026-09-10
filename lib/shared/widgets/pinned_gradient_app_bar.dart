@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
 
@@ -44,16 +45,16 @@ class PinnedGradientAppBar extends StatelessWidget {
       automaticallyImplyLeading: false,
         backgroundColor: AppColors.transparent,
       surfaceTintColor: AppColors.transparent,
-      toolbarHeight: 60,
+      toolbarHeight: 60.h,
       flexibleSpace: Container(
         decoration: BoxDecoration(gradient: AppTheme.heroGradient(scheme)),
       ),
-      titleSpacing: 16,
+      titleSpacing: 16.w,
       title: Row(
         children: [
           if (showBack) ...[
             _CircleBack(onTap: onBack ?? Get.back),
-            const SizedBox(width: 8),
+            SizedBox(width: 8.w),
           ],
           Expanded(
             child: Text(
@@ -62,7 +63,7 @@ class PinnedGradientAppBar extends StatelessWidget {
               overflow: TextOverflow.ellipsis,
               style: GoogleFonts.beVietnamPro(
                 color: Colors.white,
-                fontSize: 20,
+                fontSize: 20.sp,
                 fontWeight: FontWeight.w800,
               ),
             ),
@@ -87,15 +88,15 @@ class _CircleBack extends StatelessWidget {
       child: InkWell(
         onTap: onTap,
         child: Container(
-          width: 36,
-          height: 36,
+          width: 36.w,
+          height: 36.h,
           decoration: BoxDecoration(
             shape: BoxShape.circle,
             color: Colors.white.withValues(alpha: 0.16),
           ),
           alignment: Alignment.center,
-          child: const Icon(Icons.arrow_back_rounded,
-              color: Colors.white, size: 18),
+          child: Icon(Icons.arrow_back_rounded,
+              color: Colors.white, size: 18.w),
         ),
       ),
     );

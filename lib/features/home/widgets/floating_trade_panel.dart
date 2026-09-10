@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
 
 import 'dart:math';
@@ -188,7 +189,7 @@ class _FloatingTradePanelState extends State<FloatingTradePanel> {
       color: scheme.surface,
       child: Container(
         width: double.infinity,
-        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+        padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 8.h),
         decoration: BoxDecoration(
           color: scheme.surface,
           border: Border(
@@ -202,13 +203,13 @@ class _FloatingTradePanelState extends State<FloatingTradePanel> {
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
             _header(scheme),
-            const SizedBox(height: 8),
+            SizedBox(height: 8.h),
             _volumeStepper(scheme),
-            const SizedBox(height: 6),
+            SizedBox(height: 6.h),
             _volumePresetChips(scheme),
-            const SizedBox(height: 8),
+            SizedBox(height: 8.h),
             _tpSlSection(scheme),
-            const SizedBox(height: 8),
+            SizedBox(height: 8.h),
             Row(
               children: [
                 Expanded(
@@ -240,9 +241,9 @@ class _FloatingTradePanelState extends State<FloatingTradePanel> {
         Expanded(
           child: InkWell(
             onTap: _openSymbolPicker,
-            borderRadius: BorderRadius.circular(10),
+            borderRadius: BorderRadius.circular(10.r),
             child: Padding(
-              padding: const EdgeInsets.symmetric(vertical: 4, horizontal: 4),
+              padding: EdgeInsets.symmetric(vertical: 4.h, horizontal: 4.w),
               child: Row(
                 children: [
                   Flexible(
@@ -251,14 +252,14 @@ class _FloatingTradePanelState extends State<FloatingTradePanel> {
                       overflow: TextOverflow.ellipsis,
                       style: TextStyle(
                         fontWeight: FontWeight.w700,
-                        fontSize: 15,
+                        fontSize: 15.sp,
                         color: scheme.onSurface,
                       ),
                     ),
                   ),
-                  const SizedBox(width: 2),
+                  SizedBox(width: 2.w),
                   Icon(Icons.expand_more,
-                      size: 18, color: scheme.onSurfaceVariant),
+                      size: 18.w, color: scheme.onSurfaceVariant),
                 ],
               ),
             ),
@@ -266,11 +267,11 @@ class _FloatingTradePanelState extends State<FloatingTradePanel> {
         ),
         InkWell(
           onTap: _openNotifications,
-          borderRadius: BorderRadius.circular(20),
+          borderRadius: BorderRadius.circular(20.r),
           child: Padding(
-            padding: const EdgeInsets.all(4),
+            padding: EdgeInsets.all(4.w),
             child: Icon(Icons.notifications_none,
-                size: 22, color: scheme.onSurfaceVariant),
+                size: 22.w, color: scheme.onSurfaceVariant),
           ),
         ),
       ],
@@ -290,11 +291,11 @@ class _FloatingTradePanelState extends State<FloatingTradePanel> {
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
               Padding(
-                padding: const EdgeInsets.fromLTRB(20, 4, 20, 12),
+                padding: EdgeInsets.fromLTRB(20.w, 4.h, 20.w, 12.h),
                 child: Text(
                   'trade.select_symbol'.tr,
                   style: TextStyle(
-                    fontSize: 16,
+                    fontSize: 16.sp,
                     fontWeight: FontWeight.w700,
                     color: scheme.onSurface,
                   ),
@@ -318,11 +319,11 @@ class _FloatingTradePanelState extends State<FloatingTradePanel> {
 
   Widget _spreadBadge(ColorScheme scheme) {
     return Container(
-      margin: const EdgeInsets.symmetric(horizontal: 8),
-      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+      margin: EdgeInsets.symmetric(horizontal: 8.w),
+      padding: EdgeInsets.symmetric(horizontal: 10.w, vertical: 6.h),
       decoration: BoxDecoration(
         color: scheme.surfaceContainerHighest,
-        borderRadius: BorderRadius.circular(10),
+        borderRadius: BorderRadius.circular(10.r),
       ),
       child: Column(
         mainAxisSize: MainAxisSize.min,
@@ -330,16 +331,16 @@ class _FloatingTradePanelState extends State<FloatingTradePanel> {
           Text(
             'trade.spread'.tr,
             style: TextStyle(
-              fontSize: 9,
+              fontSize: 9.sp,
               fontWeight: FontWeight.w600,
               color: scheme.onSurfaceVariant,
             ),
           ),
-          const SizedBox(height: 2),
+          SizedBox(height: 2.h),
           Text(
             widget.spread.toStringAsFixed(1),
             style: TextStyle(
-              fontSize: 13,
+              fontSize: 13.sp,
               fontWeight: FontWeight.w700,
               color: scheme.onSurface,
             ),
@@ -353,14 +354,14 @@ class _FloatingTradePanelState extends State<FloatingTradePanel> {
     return Row(
       children: [
         _stepBtn(scheme, Icons.remove, () => _bumpVolume(-0.01)),
-        const SizedBox(width: 8),
+        SizedBox(width: 8.w),
         Expanded(
           child: Container(
             height: _controlHeight,
             alignment: Alignment.center,
             decoration: BoxDecoration(
               color: scheme.surfaceContainerHighest,
-              borderRadius: BorderRadius.circular(10),
+              borderRadius: BorderRadius.circular(10.r),
             ),
             child: TextField(
               controller: _volumeCtrl,
@@ -373,7 +374,7 @@ class _FloatingTradePanelState extends State<FloatingTradePanel> {
               ],
               onChanged: _onVolumeEdited,
               style: TextStyle(
-                fontSize: 16,
+                fontSize: 16.sp,
                 fontWeight: FontWeight.w700,
                 color: scheme.onSurface,
               ),
@@ -390,9 +391,9 @@ class _FloatingTradePanelState extends State<FloatingTradePanel> {
             ),
           ),
         ),
-        const SizedBox(width: 8),
+        SizedBox(width: 8.w),
         _stepBtn(scheme, Icons.add, () => _bumpVolume(0.01)),
-        const SizedBox(width: 8),
+        SizedBox(width: 8.w),
         _PendingButton(onTap: _openPendingOrder),
       ],
     );
@@ -401,15 +402,15 @@ class _FloatingTradePanelState extends State<FloatingTradePanel> {
   Widget _stepBtn(ColorScheme scheme, IconData icon, VoidCallback onTap) {
     return InkWell(
       onTap: onTap,
-      borderRadius: BorderRadius.circular(10),
+      borderRadius: BorderRadius.circular(10.r),
       child: Container(
         width: _controlHeight,
         height: _controlHeight,
         decoration: BoxDecoration(
           color: scheme.surfaceContainerHighest,
-          borderRadius: BorderRadius.circular(10),
+          borderRadius: BorderRadius.circular(10.r),
         ),
-        child: Icon(icon, size: 18, color: scheme.onSurface),
+        child: Icon(icon, size: 18.w, color: scheme.onSurface),
       ),
     );
   }
@@ -418,7 +419,7 @@ class _FloatingTradePanelState extends State<FloatingTradePanel> {
     return Row(
       children: [
         for (var i = 0; i < _volumePresets.length; i++) ...[
-          if (i > 0) const SizedBox(width: 8),
+          if (i > 0) SizedBox(width: 8.w),
           Expanded(
             child: _PresetChip(
               label: _volumePresets[i].toStringAsFixed(2),
@@ -441,7 +442,7 @@ class _FloatingTradePanelState extends State<FloatingTradePanel> {
               child: Text(
                 'trade.tp_sl'.tr,
                 style: TextStyle(
-                  fontSize: 13,
+                  fontSize: 13.sp,
                   fontWeight: FontWeight.w700,
                   color: scheme.onSurface,
                 ),
@@ -462,7 +463,7 @@ class _FloatingTradePanelState extends State<FloatingTradePanel> {
               ? Column(
                   crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: [
-                    const SizedBox(height: 8),
+                    SizedBox(height: 8.h),
                     _priceField(
                       scheme,
                       label: 'trade.take_profit'.tr,
@@ -470,7 +471,7 @@ class _FloatingTradePanelState extends State<FloatingTradePanel> {
                       onDec: () => _bumpTakeProfit(-_pipSize),
                       onInc: () => _bumpTakeProfit(_pipSize),
                     ),
-                    const SizedBox(height: 10),
+                    SizedBox(height: 10.h),
                     _priceField(
                       scheme,
                       label: 'trade.stop_loss'.tr,
@@ -499,16 +500,16 @@ class _FloatingTradePanelState extends State<FloatingTradePanel> {
         Text(
           label,
           style: TextStyle(
-            fontSize: 11,
+            fontSize: 11.sp,
             fontWeight: FontWeight.w600,
             color: scheme.onSurfaceVariant,
           ),
         ),
-        const SizedBox(height: 6),
+        SizedBox(height: 6.h),
         Container(
           height: _controlHeight,
           decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(12),
+            borderRadius: BorderRadius.circular(12.r),
             border: Border.all(
               color: scheme.outline.withValues(alpha: 0.4),
             ),
@@ -525,7 +526,7 @@ class _FloatingTradePanelState extends State<FloatingTradePanel> {
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
                     style: TextStyle(
-                      fontSize: 15,
+                      fontSize: 15.sp,
                       fontWeight: FontWeight.w700,
                       color: value == null
                           ? scheme.onSurfaceVariant
@@ -548,7 +549,7 @@ class _FloatingTradePanelState extends State<FloatingTradePanel> {
       showDragHandle: true,
       isScrollControlled: true,
       useSafeArea: true,
-      constraints: const BoxConstraints.expand(height: 360),
+      constraints: BoxConstraints.expand(height: 360.h),
       builder: (context) => const NotificationsSheet(),
     );
   }
@@ -572,22 +573,22 @@ class _PresetChip extends StatelessWidget {
     final scheme = Theme.of(context).colorScheme;
     return InkWell(
       onTap: onTap,
-      borderRadius: BorderRadius.circular(10),
+      borderRadius: BorderRadius.circular(10.r),
       child: AnimatedContainer(
         duration: const Duration(milliseconds: 180),
         curve: Curves.easeOutCubic,
-        height: 36,
+        height: 36.h,
         alignment: Alignment.center,
         decoration: BoxDecoration(
           color: selected ? scheme.primary : scheme.surfaceContainerHighest,
-          borderRadius: BorderRadius.circular(10),
+          borderRadius: BorderRadius.circular(10.r),
         ),
         child: Text(
           label,
           maxLines: 1,
           overflow: TextOverflow.ellipsis,
           style: TextStyle(
-            fontSize: 13,
+            fontSize: 13.sp,
             fontWeight: FontWeight.w700,
             color: selected ? scheme.onPrimary : scheme.onSurface,
           ),
@@ -612,18 +613,18 @@ class _SideButton extends StatelessWidget {
   Widget build(BuildContext context) {
     return Material(
       color: color,
-      borderRadius: BorderRadius.circular(14),
+      borderRadius: BorderRadius.circular(14.r),
       child: InkWell(
         onTap: onTap,
-        borderRadius: BorderRadius.circular(14),
+        borderRadius: BorderRadius.circular(14.r),
         child: SizedBox(
-          height: 48,
+          height: 48.h,
           child: Center(
             child: Text(
               label,
-              style: const TextStyle(
+              style: TextStyle(
                 color: AppColors.white,
-                fontSize: 15,
+                fontSize: 15.sp,
                 fontWeight: FontWeight.w700,
               ),
             ),
@@ -646,24 +647,24 @@ class _PendingButton extends StatelessWidget {
     final scheme = Theme.of(context).colorScheme;
     return InkWell(
       onTap: onTap,
-      borderRadius: BorderRadius.circular(10),
+      borderRadius: BorderRadius.circular(10.r),
       child: Container(
-        height: 44,
-        padding: const EdgeInsets.symmetric(horizontal: 10),
+        height: 44.h,
+        padding: EdgeInsets.symmetric(horizontal: 10.w),
         decoration: BoxDecoration(
           color: scheme.primary.withValues(alpha: 0.12),
-          borderRadius: BorderRadius.circular(10),
+          borderRadius: BorderRadius.circular(10.r),
         ),
         child: Column(
           mainAxisSize: MainAxisSize.min,
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Icon(Icons.pending_actions, size: 18, color: scheme.primary),
-            const SizedBox(height: 2),
+            Icon(Icons.pending_actions, size: 18.w, color: scheme.primary),
+            SizedBox(height: 2.h),
             Text(
               'trade.pending'.tr,
               style: TextStyle(
-                fontSize: 9,
+                fontSize: 9.sp,
                 fontWeight: FontWeight.w600,
                 color: scheme.primary,
               ),

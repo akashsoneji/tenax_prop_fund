@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:google_fonts/google_fonts.dart';
 
 import '../../../shared/theme/app_colors.dart';
@@ -32,12 +33,12 @@ class AddonTile extends StatelessWidget {
           child: InkWell(
             onTap: onTap,
             child: Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 14),
+              padding: EdgeInsets.symmetric(horizontal: 14.w, vertical: 14.h),
               child: Row(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   _CheckCircle(selected: selected),
-                  const SizedBox(width: 12),
+                  SizedBox(width: 12.w),
                   Expanded(
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
@@ -45,25 +46,25 @@ class AddonTile extends StatelessWidget {
                         Text(
                           addon.title,
                           style: GoogleFonts.beVietnamPro(
-                            fontSize: 14.5,
+                            fontSize: 14.5.sp,
                             fontWeight: FontWeight.w700,
                             color: scheme.onSurface,
                           ),
                         ),
-                        const SizedBox(height: 3),
+                        SizedBox(height: 3.h),
                         Text(
                           addon.description,
                           style: GoogleFonts.beVietnamPro(
-                            fontSize: 12.5,
+                            fontSize: 12.5.sp,
                             height: 1.35,
                             color: scheme.onSurface.withValues(alpha: 0.55),
                           ),
                         ),
-                        const SizedBox(height: 4),
+                        SizedBox(height: 4.h),
                         Text(
                           addon.tagLabel,
                           style: GoogleFonts.beVietnamPro(
-                            fontSize: 12.5,
+                            fontSize: 12.5.sp,
                             fontWeight: FontWeight.w600,
                             color: scheme.primary,
                           ),
@@ -71,11 +72,11 @@ class AddonTile extends StatelessWidget {
                       ],
                     ),
                   ),
-                  const SizedBox(width: 10),
+                  SizedBox(width: 10.w),
                   Text(
                     addon.priceLabel,
                     style: GoogleFonts.beVietnamPro(
-                      fontSize: 14,
+                      fontSize: 14.sp,
                       fontWeight: FontWeight.w800,
                       color: scheme.primary,
                     ),
@@ -87,10 +88,10 @@ class AddonTile extends StatelessWidget {
         ),
         if (showDivider)
           Divider(
-            height: 1,
-            thickness: 1,
-            indent: 14,
-            endIndent: 14,
+            height: 1.h,
+            thickness: 1.h,
+            indent: 14.w,
+            endIndent: 14.w,
             color: scheme.onSurface.withValues(alpha: 0.06),
           ),
       ],
@@ -107,17 +108,17 @@ class _CheckCircle extends StatelessWidget {
     final scheme = Theme.of(context).colorScheme;
     return AnimatedContainer(
       duration: AppMotion.fast,
-      width: 24,
-      height: 24,
+      width: 24.w,
+      height: 24.w,
       decoration: BoxDecoration(
         shape: BoxShape.circle,
         gradient: selected ? AppTheme.brandGradient(scheme) : null,
         border: selected
             ? null
-            : Border.all(color: scheme.onSurface.withValues(alpha: 0.25), width: 1.5),
+            : Border.all(color: scheme.onSurface.withValues(alpha: 0.25), width: 1.5.w),
       ),
       child: selected
-          ? const Icon(Icons.check_rounded, size: 15, color: AppColors.white)
+          ? Icon(Icons.check_rounded, size: 15.w, color: AppColors.white)
           : null,
     );
   }

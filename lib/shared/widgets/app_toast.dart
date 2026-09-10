@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
 
 import '../theme/app_colors.dart';
@@ -152,9 +153,9 @@ class _ToastCardState extends State<_ToastCard>
     final media = MediaQuery.of(context);
 
     return Positioned(
-      top: media.padding.top + 12,
-      left: 16,
-      right: 16,
+      top: media.padding.top + 12.h,
+      left: 16.w,
+      right: 16.w,
       child: SlideTransition(
         position: _slide,
         child: FadeTransition(
@@ -168,7 +169,7 @@ class _ToastCardState extends State<_ToastCard>
               child: Container(
                 decoration: BoxDecoration(
                   color: dark ? AppColors.sheetDark : AppColors.white,
-                  borderRadius: BorderRadius.circular(16),
+                  borderRadius: BorderRadius.circular(16.r),
                   border: Border.all(
                     color: dark
                         ? AppColors.white.withValues(alpha: 0.08)
@@ -178,8 +179,8 @@ class _ToastCardState extends State<_ToastCard>
                     BoxShadow(
                       color: (dark ? AppColors.black : scheme.primary)
                           .withValues(alpha: dark ? 0.45 : 0.16),
-                      blurRadius: 24,
-                      offset: const Offset(0, 10),
+                      blurRadius: 24.r,
+                      offset: Offset(0, 10.h),
                     ),
                   ],
                 ),
@@ -188,12 +189,12 @@ class _ToastCardState extends State<_ToastCard>
                   mainAxisSize: MainAxisSize.min,
                   children: [
                     Padding(
-                      padding: const EdgeInsets.fromLTRB(12, 12, 12, 12),
+                      padding: EdgeInsets.fromLTRB(12.w, 12.h, 12.w, 12.h),
                       child: Row(
                         children: [
                           Container(
-                            width: 40,
-                            height: 40,
+                            width: 40.w,
+                            height: 40.h,
                             decoration: BoxDecoration(
                               gradient: LinearGradient(
                                 colors: [
@@ -203,12 +204,12 @@ class _ToastCardState extends State<_ToastCard>
                                 begin: Alignment.topLeft,
                                 end: Alignment.bottomRight,
                               ),
-                              borderRadius: BorderRadius.circular(12),
+                              borderRadius: BorderRadius.circular(12.r),
                             ),
                             child: Icon(_icon(),
-                                color: AppColors.white, size: 22),
+                                color: AppColors.white, size: 22.w),
                           ),
-                          const SizedBox(width: 12),
+                          SizedBox(width: 12.w),
                           Expanded(
                             child: Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
@@ -219,19 +220,19 @@ class _ToastCardState extends State<_ToastCard>
                                   Text(
                                     widget.title!,
                                     style: TextStyle(
-                                      fontSize: 13.5,
+                                      fontSize: 13.5.sp,
                                       fontWeight: FontWeight.w800,
                                       color: scheme.onSurface,
                                     ),
                                   ),
-                                  const SizedBox(height: 2),
+                                  SizedBox(height: 2.h),
                                 ],
                                 Text(
                                   widget.message,
                                   maxLines: 2,
                                   overflow: TextOverflow.ellipsis,
                                   style: TextStyle(
-                                    fontSize: 12.5,
+                                    fontSize: 12.5.sp,
                                     height: 1.3,
                                     fontWeight: FontWeight.w500,
                                     color: scheme.onSurface
@@ -241,13 +242,13 @@ class _ToastCardState extends State<_ToastCard>
                               ],
                             ),
                           ),
-                          const SizedBox(width: 8),
+                          SizedBox(width: 8.w),
                           GestureDetector(
                             onTap: widget.onDismiss,
                             behavior: HitTestBehavior.opaque,
                             child: Icon(
                               Icons.close_rounded,
-                              size: 18,
+                              size: 18.w,
                               color: scheme.onSurface.withValues(alpha: 0.4),
                             ),
                           ),
@@ -259,7 +260,7 @@ class _ToastCardState extends State<_ToastCard>
                       animation: _progress,
                       builder: (context, _) => LinearProgressIndicator(
                         value: 1 - _progress.value,
-                        minHeight: 3,
+                        minHeight: 3.h,
                         backgroundColor: AppColors.transparent,
                         valueColor: AlwaysStoppedAnimation(
                             accent.withValues(alpha: 0.85)),

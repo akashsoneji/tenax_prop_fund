@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:google_fonts/google_fonts.dart';
 
 import '../models/rules_models.dart';
@@ -42,14 +43,14 @@ class PlanRowTile extends StatelessWidget {
                 )
               : null,
         ),
-        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+        padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 14.h),
         child: Row(
           children: [
             Expanded(
               child: Text(
                 row.label,
                 style: GoogleFonts.beVietnamPro(
-                  fontSize: 14,
+                  fontSize: 14.sp,
                   fontWeight: FontWeight.w600,
                   color: scheme.onSurface,
                 ),
@@ -58,15 +59,15 @@ class PlanRowTile extends StatelessWidget {
             Text(
               row.value,
               style: GoogleFonts.beVietnamPro(
-                fontSize: 14,
+                fontSize: 14.sp,
                 fontWeight: row.emphasized ? FontWeight.w800 : FontWeight.w600,
                 color: row.emphasized ? scheme.primary : scheme.onSurface,
               ),
             ),
-            const SizedBox(width: 6),
+            SizedBox(width: 6.w),
             Icon(
               Icons.chevron_right_rounded,
-              size: 20,
+              size: 20.w,
               color: scheme.onSurface.withValues(alpha: 0.55),
             ),
           ],

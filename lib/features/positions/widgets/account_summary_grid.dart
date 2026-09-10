@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
 
 import '../../../shared/theme/app_colors.dart';
@@ -6,7 +7,7 @@ import '../../../shared/theme/app_text.dart';
 import '../../../shared/theme/app_theme.dart';
 import '../models/positions_models.dart';
 
-/// The 6-cell account summary grid at the top of the Positions screen:
+/// The 6-cell account summary grid
 /// Balance / Credit / Equity / Margin / Free Margin / Margin Level, each an
 /// icon + label + live value. Mirrors white_label's trade-screen metric strip.
 class AccountSummaryGrid extends StatelessWidget {
@@ -27,15 +28,15 @@ class AccountSummaryGrid extends StatelessWidget {
           Icons.speed_rounded, isPercent: true),
     ];
     return Container(
-      padding: const EdgeInsets.all(12),
+      padding: EdgeInsets.all(12.w),
       decoration: AppTheme.surfaceCard(scheme, radius: 18),
       child: GridView.count(
         crossAxisCount: 3,
         shrinkWrap: true,
         physics: const NeverScrollableScrollPhysics(),
         childAspectRatio: 1.55,
-        mainAxisSpacing: 8,
-        crossAxisSpacing: 8,
+        mainAxisSpacing: 8.h,
+        crossAxisSpacing: 8.w,
         children: [for (final c in cells) _MetricCell(metric: c)],
       ),
     );
@@ -67,24 +68,24 @@ class _MetricCell extends StatelessWidget {
       children: [
         Row(
           children: [
-            Icon(metric.icon, size: 14, color: scheme.primary),
-            const SizedBox(width: 4),
+            Icon(metric.icon, size: 14.w, color: scheme.primary),
+            SizedBox(width: 4.w),
             Expanded(
               child: Text(
                 metric.label,
                 maxLines: 1,
                 overflow: TextOverflow.ellipsis,
-                style: AppText.label(color: muted, fontSize: 11),
+                style: AppText.label(color: muted, fontSize: 11.sp),
               ),
             ),
           ],
         ),
-        const SizedBox(height: 2),
+        SizedBox(height: 2.h),
         Text(
           text,
           maxLines: 1,
           overflow: TextOverflow.ellipsis,
-          style: AppText.subtitle(color: scheme.onSurface, fontSize: 14),
+          style: AppText.subtitle(color: scheme.onSurface, fontSize: 14.sp),
         ),
       ],
     );

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
 
@@ -29,38 +30,38 @@ class ReferralView extends StatelessWidget {
           PinnedGradientAppBar(title: 'referral.title'.tr),
           SliverToBoxAdapter(
             child: Padding(
-              padding: const EdgeInsets.fromLTRB(16, 18, 16, 32),
+              padding: EdgeInsets.fromLTRB(16.w, 18.h, 16.w, 32.h),
               child: Obx(
                 () => DataStateBuilder<ReferralData>(
                   state: c.state,
                   onRetry: c.load,
                   skeleton: Column(
                     crossAxisAlignment: CrossAxisAlignment.stretch,
-                    children: const [
-                      HeroSkeleton(),
-                      SizedBox(height: 18),
-                      StatGridSkeleton(),
-                      SizedBox(height: 26),
-                      CardSkeleton(lines: 4),
+                    children: [
+                      const HeroSkeleton(),
+                      SizedBox(height: 18.h),
+                      const StatGridSkeleton(),
+                      SizedBox(height: 26.h),
+                      const CardSkeleton(lines: 4),
                     ],
                   ),
                   builder: (data) => Column(
                     crossAxisAlignment: CrossAxisAlignment.stretch,
                     children: [
                       _CodeHeroCard(controller: c, data: data),
-                      const SizedBox(height: 18),
+                      SizedBox(height: 18.h),
                       _StatGridCard(data: data),
-                      const SizedBox(height: 26),
+                      SizedBox(height: 26.h),
                       const _SectionTitle('How you get paid'),
                       const _HowYouGetPaidCard(),
-                      const SizedBox(height: 18),
+                      SizedBox(height: 18.h),
                       const ReferralWarningBanner(
                         title: 'Referral earnings need a funded account',
                         body:
                             'You can collect them once you have passed a challenge. '
                             'Until then they accrue.',
                       ),
-                      const SizedBox(height: 26),
+                      SizedBox(height: 26.h),
                       const _SectionTitle('Your referrals'),
                       const _EmptyReferralsCard(),
                     ],
@@ -85,11 +86,11 @@ class _SectionTitle extends StatelessWidget {
   Widget build(BuildContext context) {
     final scheme = Theme.of(context).colorScheme;
     return Padding(
-      padding: const EdgeInsets.only(bottom: 12),
+      padding: EdgeInsets.only(bottom: 12.h),
       child: Text(
         text,
         style: GoogleFonts.beVietnamPro(
-          fontSize: 17,
+          fontSize: 17.sp,
           fontWeight: FontWeight.w800,
           color: scheme.onSurface,
         ),
@@ -112,7 +113,7 @@ class _Enter extends StatelessWidget {
       curve: AppMotion.enter,
       builder: (context, t, c) => Opacity(
         opacity: t.clamp(0, 1),
-        child: Transform.translate(offset: Offset(0, (1 - t) * 16), child: c),
+        child: Transform.translate(offset: Offset(0, (1 - t) * 16.h), child: c),
       ),
       child: child,
     );
@@ -132,15 +133,15 @@ class _CodeHeroCard extends StatelessWidget {
     final scheme = Theme.of(context).colorScheme;
     return _Enter(
       child: Container(
-        padding: const EdgeInsets.fromLTRB(18, 16, 18, 18),
+        padding: EdgeInsets.fromLTRB(18.w, 16.h, 18.w, 18.h),
         decoration: BoxDecoration(
           gradient: AppTheme.brandGradient(scheme),
-          borderRadius: BorderRadius.circular(20),
+          borderRadius: BorderRadius.circular(20.r),
           boxShadow: [
             BoxShadow(
               color: scheme.primary.withValues(alpha: 0.3),
-              blurRadius: 20,
-              offset: const Offset(0, 12),
+              blurRadius: 20.r,
+              offset: Offset(0, 12.h),
             ),
           ],
         ),
@@ -157,16 +158,16 @@ class _CodeHeroCard extends StatelessWidget {
                       Text(
                         'Your referral code',
                         style: GoogleFonts.beVietnamPro(
-                          fontSize: 13,
+                          fontSize: 13.sp,
                           fontWeight: FontWeight.w600,
                           color: AppColors.white.withValues(alpha: 0.85),
                         ),
                       ),
-                      const SizedBox(height: 8),
+                      SizedBox(height: 8.h),
                       Text(
                         data.referralCode,
                         style: GoogleFonts.beVietnamPro(
-                          fontSize: 32,
+                          fontSize: 32.sp,
                           fontWeight: FontWeight.w800,
                           color: scheme.tertiary,
                           letterSpacing: 1.5,
@@ -179,7 +180,7 @@ class _CodeHeroCard extends StatelessWidget {
                 _CopyButton(onTap: controller.copyCode),
               ],
             ),
-            const SizedBox(height: 18),
+            SizedBox(height: 18.h),
             _FrostedShareButton(onTap: controller.shareLink),
           ],
         ),
@@ -196,25 +197,25 @@ class _CopyButton extends StatelessWidget {
   Widget build(BuildContext context) {
     return Material(
       color: Colors.transparent,
-      borderRadius: BorderRadius.circular(10),
+      borderRadius: BorderRadius.circular(10.r),
       child: InkWell(
         onTap: onTap,
-        borderRadius: BorderRadius.circular(10),
+        borderRadius: BorderRadius.circular(10.r),
         child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 4),
+          padding: EdgeInsets.symmetric(horizontal: 6.w, vertical: 4.h),
           child: Row(
             mainAxisSize: MainAxisSize.min,
             children: [
               Text(
                 'Copy Code',
                 style: GoogleFonts.beVietnamPro(
-                  fontSize: 13,
+                  fontSize: 13.sp,
                   fontWeight: FontWeight.w700,
                   color: Colors.white,
                 ),
               ),
-              const SizedBox(width: 6),
-              const Icon(Icons.copy_rounded, size: 16, color: Colors.white),
+              SizedBox(width: 6.w),
+              Icon(Icons.copy_rounded, size: 16.w, color: Colors.white),
             ],
           ),
         ),
@@ -231,24 +232,24 @@ class _FrostedShareButton extends StatelessWidget {
   Widget build(BuildContext context) {
     return Material(
       color: Colors.white.withValues(alpha: 0.18),
-      borderRadius: BorderRadius.circular(14),
+      borderRadius: BorderRadius.circular(14.r),
       child: InkWell(
         onTap: onTap,
-        borderRadius: BorderRadius.circular(14),
+        borderRadius: BorderRadius.circular(14.r),
         child: SizedBox(
-          height: 50,
+          height: 50.h,
           width: double.infinity,
           child: Center(
             child: Row(
               mainAxisSize: MainAxisSize.min,
               children: [
-                const Icon(Icons.ios_share_rounded,
-                    size: 18, color: Colors.white),
-                const SizedBox(width: 10),
+                Icon(Icons.ios_share_rounded,
+                    size: 18.w, color: Colors.white),
+                SizedBox(width: 10.w),
                 Text(
                   'Share Link',
                   style: GoogleFonts.beVietnamPro(
-                    fontSize: 15,
+                    fontSize: 15.sp,
                     fontWeight: FontWeight.w700,
                     color: Colors.white,
                   ),
@@ -275,7 +276,7 @@ class _StatGridCard extends StatelessWidget {
     return _Enter(
       delayMs: 60,
       child: Container(
-        padding: const EdgeInsets.all(6),
+        padding: EdgeInsets.all(6.w),
         decoration: AppTheme.surfaceCard(scheme, radius: 18),
         child: Column(
           children: [
@@ -318,23 +319,23 @@ class _StatCell extends StatelessWidget {
   Widget build(BuildContext context) {
     final scheme = Theme.of(context).colorScheme;
     return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 14),
+      padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 14.h),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
             label,
             style: GoogleFonts.beVietnamPro(
-              fontSize: 12.5,
+              fontSize: 12.5.sp,
               fontWeight: FontWeight.w600,
               color: scheme.onSurfaceVariant,
             ),
           ),
-          const SizedBox(height: 8),
+          SizedBox(height: 8.h),
           Text(
             value,
             style: GoogleFonts.beVietnamPro(
-              fontSize: 24,
+              fontSize: 24.sp,
               fontWeight: FontWeight.w800,
               color: scheme.onSurface,
               height: 1.0,
@@ -376,7 +377,7 @@ class _HowYouGetPaidCard extends StatelessWidget {
     return _Enter(
       delayMs: 120,
       child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 16),
+        padding: EdgeInsets.symmetric(horizontal: 16.w),
         decoration: AppTheme.surfaceCard(scheme, radius: 18),
         child: Column(
           children: [
@@ -386,7 +387,7 @@ class _HowYouGetPaidCard extends StatelessWidget {
                 title: _steps[i].$2,
                 body: _steps[i].$3,
               ),
-              if (i != _steps.length - 1) const Divider(height: 1),
+              if (i != _steps.length - 1) Divider(height: 1.h),
             ],
           ],
         ),
@@ -409,13 +410,13 @@ class _StepRow extends StatelessWidget {
   Widget build(BuildContext context) {
     final scheme = Theme.of(context).colorScheme;
     return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 16),
+      padding: EdgeInsets.symmetric(vertical: 16.h),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Container(
-            width: 28,
-            height: 28,
+            width: 28.w,
+            height: 28.w,
             decoration: BoxDecoration(
               shape: BoxShape.circle,
               color: scheme.primary.withValues(alpha: 0.12),
@@ -424,13 +425,13 @@ class _StepRow extends StatelessWidget {
             child: Text(
               number,
               style: GoogleFonts.beVietnamPro(
-                fontSize: 14,
+                fontSize: 14.sp,
                 fontWeight: FontWeight.w800,
                 color: scheme.primary,
               ),
             ),
           ),
-          const SizedBox(width: 12),
+          SizedBox(width: 12.w),
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -438,16 +439,16 @@ class _StepRow extends StatelessWidget {
                 Text(
                   title,
                   style: GoogleFonts.beVietnamPro(
-                    fontSize: 15,
+                    fontSize: 15.sp,
                     fontWeight: FontWeight.w700,
                     color: scheme.onSurface,
                   ),
                 ),
-                const SizedBox(height: 4),
+                SizedBox(height: 4.h),
                 Text(
                   body,
                   style: GoogleFonts.beVietnamPro(
-                    fontSize: 13,
+                    fontSize: 13.sp,
                     height: 1.4,
                     fontWeight: FontWeight.w500,
                     color: scheme.onSurface.withValues(alpha: 0.72),
@@ -474,10 +475,10 @@ class _EmptyReferralsCard extends StatelessWidget {
     return _Enter(
       delayMs: 160,
       child: Container(
-        padding: const EdgeInsets.fromLTRB(18, 18, 18, 18),
+        padding: EdgeInsets.fromLTRB(18.w, 18.h, 18.w, 18.h),
         decoration: BoxDecoration(
           gradient: AppTheme.brandGradient(scheme),
-          borderRadius: BorderRadius.circular(18),
+          borderRadius: BorderRadius.circular(18.r),
         ),
         child: Row(
           children: [
@@ -488,16 +489,16 @@ class _EmptyReferralsCard extends StatelessWidget {
                   Text(
                     'Nobody yet',
                     style: GoogleFonts.beVietnamPro(
-                      fontSize: 18,
+                      fontSize: 18.sp,
                       fontWeight: FontWeight.w800,
                       color: Colors.white,
                     ),
                   ),
-                  const SizedBox(height: 6),
+                  SizedBox(height: 6.h),
                   Text(
                     'Share your link to get started.',
                     style: GoogleFonts.beVietnamPro(
-                      fontSize: 13.5,
+                      fontSize: 13.5.sp,
                       fontWeight: FontWeight.w500,
                       color: Colors.white.withValues(alpha: 0.85),
                     ),
@@ -505,17 +506,17 @@ class _EmptyReferralsCard extends StatelessWidget {
                 ],
               ),
             ),
-            const SizedBox(width: 12),
+            SizedBox(width: 12.w),
             Container(
-              width: 46,
-              height: 46,
+              width: 46.w,
+              height: 46.w,
               decoration: BoxDecoration(
                 shape: BoxShape.circle,
                 color: Colors.white.withValues(alpha: 0.18),
               ),
               alignment: Alignment.center,
-              child: const Icon(Icons.groups_rounded,
-                  color: Colors.white, size: 24),
+              child: Icon(Icons.groups_rounded,
+                  color: Colors.white, size: 24.w),
             ),
           ],
         ),

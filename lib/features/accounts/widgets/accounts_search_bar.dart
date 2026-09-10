@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 
 import '../../../shared/theme/app_colors.dart';
 
@@ -37,7 +38,7 @@ class AccountsSearchBar extends StatelessWidget {
           child: TextField(
             onChanged: onQueryChanged,
             textInputAction: TextInputAction.search,
-            style: TextStyle(color: scheme.onSurface, fontSize: 14),
+            style: TextStyle(color: scheme.onSurface, fontSize: 14.sp),
             decoration: InputDecoration(
               isDense: true,
               filled: true,
@@ -45,39 +46,39 @@ class AccountsSearchBar extends StatelessWidget {
               hintText: hintText,
               hintStyle: TextStyle(
                 color: scheme.onSurfaceVariant,
-                fontSize: 13.5,
+                fontSize: 13.5.sp,
               ),
               prefixIcon: Icon(
                 Icons.search_rounded,
-                size: 20,
+                size: 20.w,
                 color: scheme.onSurfaceVariant,
               ),
               contentPadding:
-                  const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
+                  EdgeInsets.symmetric(horizontal: 12.w, vertical: 12.h),
               border: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(14),
+                borderRadius: BorderRadius.circular(14.r),
                 borderSide: BorderSide(color: border),
               ),
               enabledBorder: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(14),
+                borderRadius: BorderRadius.circular(14.r),
                 borderSide: BorderSide(color: border),
               ),
               focusedBorder: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(14),
-                borderSide: BorderSide(color: scheme.primary, width: 1.4),
+                borderRadius: BorderRadius.circular(14.r),
+                borderSide: BorderSide(color: scheme.primary, width: 1.4.w),
               ),
             ),
           ),
         ),
-        const SizedBox(width: 10),
+        SizedBox(width: 10.w),
         Expanded(
           flex: 2,
           child: Container(
-            height: 46,
-            padding: const EdgeInsets.symmetric(horizontal: 12),
+            height: 46.h,
+            padding: EdgeInsets.symmetric(horizontal: 12.w),
             decoration: BoxDecoration(
               color: fill,
-              borderRadius: BorderRadius.circular(14),
+              borderRadius: BorderRadius.circular(14.r),
               border: Border.all(color: border),
             ),
             child: DropdownButtonHideUnderline(
@@ -94,11 +95,11 @@ class AccountsSearchBar extends StatelessWidget {
                   overflow: TextOverflow.ellipsis,
                   style: TextStyle(
                     color: scheme.onSurfaceVariant,
-                    fontSize: 13.5,
+                    fontSize: 13.5.sp,
                     fontWeight: FontWeight.w600,
                   ),
                 ),
-                style: TextStyle(color: scheme.onSurface, fontSize: 13.5),
+                style: TextStyle(color: scheme.onSurface, fontSize: 13.5.sp),
                 dropdownColor: scheme.surfaceContainerHighest,
                 items: [
                   DropdownMenuItem<String>(

@@ -1,8 +1,12 @@
 import 'dart:async';
+import 'dart:io';
 
+import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
+import '../../../shared/widgets/app_toast.dart';
+import '../../kyc/repositories/kyc_repository.dart';
 import '../models/verification_models.dart';
 
 /// Drives the whole "Verify your account" journey: the overview, the paged
@@ -13,6 +17,13 @@ import '../models/verification_models.dart';
 /// send/verify) are guarded with `busy` flags so a double-tap cannot fire two
 /// in-flight requests (race-condition safe).
 class VerificationController extends GetxController {
+  VerificationController(this._repository);
+
+  final KycRepository _repository;
+
+  final uploadingDocs = false.obs;
+  final savingPersonal = false.obs;
+
   // --- Step model -----------------------------------------------------------
   final steps = <VerificationStep>[
     const VerificationStep(
@@ -136,20 +147,79 @@ class VerificationController extends GetxController {
   }
 
   // --- Proof mutation -------------------------------------------------------
-  void pickProof(ProofKind kind) {
-    const stub = 'document.jpg';
+  /// Opens the gallery/file picker and stores the chosen image path in the
+  /// matching slot. No-op if the user cancels.
+  Future<void> pickProof(ProofKind kind) async {
+    final picked = await FilePicker.pickFile(type: FileType.image);
+    final path = picked?.path;
+    if (path == null) return;
+    final name = path.split('/').last;
+    final slot = ProofSlot(kind: kind, fileName: name, filePath: path);
     switch (kind) {
       case ProofKind.idFront:
-        idFront.value = ProofSlot(kind: kind, fileName: stub);
+        idFront.value = slot;
       case ProofKind.idBack:
-        idBack.value = ProofSlot(kind: kind, fileName: stub);
+        idBack.value = slot;
       case ProofKind.addressFront:
-        addressFront.value = ProofSlot(kind: kind, fileName: stub);
+        addressFront.value = slot;
       case ProofKind.addressBack:
-        addressBack.value = ProofSlot(kind: kind, fileName: stub);
+        addressBack.value = slot;
       case ProofKind.bankProof:
         break;
     }
+  }
+
+  /// Uploads the selected ID and address proofs to the PROPCRM API (one request
+  /// per document type). Returns true when every attempted upload succeeded.
+  Future<bool> uploadDocuments() async {
+    if (uploadingDocs.value) return false;
+    final idPath = idFront.value.filePath;
+    final addressPath = addressFront.value.filePath;
+    if (idPath == null && addressPath == null) {
+      AppToast.error('kyc.docs_select_first'.tr);
+      return false;
+    }
+    uploadingDocs.value = true;
+    var ok = true;
+    if (idPath != null) {
+      final res = await _repository.uploadDocument(
+        documentType: 'id_proof',
+        front: File(idPath),
+        back: idBack.value.filePath == null
+            ? null
+            : File(idBack.value.filePath!),
+      );
+      ok = res.success;
+    }
+    if (ok && addressPath != null) {
+      final res = await _repository.uploadDocument(
+        documentType: 'address_proof',
+        front: File(addressPath),
+        back: addressBack.value.filePath == null
+            ? null
+            : File(addressBack.value.filePath!),
+      );
+      ok = res.success;
+    }
+    uploadingDocs.value = false;
+    return ok;
+  }
+
+  /// Persists the personal-details form via `PUT /profile`. Returns true on
+  /// success so the caller can advance the stepper.
+  Future<bool> savePersonalDetails() async {
+    if (savingPersonal.value) return false;
+    savingPersonal.value = true;
+    final res = await _repository.updateProfile({
+      'first_name': firstName.text.trim(),
+      'last_name': lastName.text.trim(),
+      'phone': phone.text.trim(),
+      if (city.value != null) 'city': city.value,
+      if (state.value != null) 'state': state.value,
+      'address': address.text.trim(),
+    });
+    savingPersonal.value = false;
+    return res.success;
   }
 
   @override

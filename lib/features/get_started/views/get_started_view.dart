@@ -1,6 +1,7 @@
 import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
 
@@ -84,8 +85,8 @@ class _LogoMark extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      width: 180,
-      height: 180,
+      width: 180.w,
+      height: 180.h,
       decoration: BoxDecoration(
         shape: BoxShape.circle,
         gradient: RadialGradient(
@@ -97,15 +98,15 @@ class _LogoMark extends StatelessWidget {
         boxShadow: [
           BoxShadow(
             color: scheme.primary.withValues(alpha: 0.45),
-            blurRadius: 60,
-            spreadRadius: 4,
+            blurRadius: 60.r,
+            spreadRadius: 4.r,
           ),
         ],
       ),
       alignment: Alignment.center,
       child: Container(
-        width: 96,
-        height: 96,
+        width: 96.w,
+        height: 96.h,
         decoration: BoxDecoration(
           shape: BoxShape.circle,
           color: Colors.white.withValues(alpha: 0.14),
@@ -118,7 +119,7 @@ class _LogoMark extends StatelessWidget {
         child: Text(
           'tp',
           style: GoogleFonts.beVietnamPro(
-            fontSize: 44,
+            fontSize: 44.sp,
             fontWeight: FontWeight.w800,
             color: AppTheme.accent,
             letterSpacing: -1,
@@ -149,10 +150,10 @@ class _BottomSheetCard extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       width: double.infinity,
-      padding: const EdgeInsets.fromLTRB(24, 28, 24, 20),
+      padding: EdgeInsets.fromLTRB(24.w, 28.h, 24.w, 20.h),
       decoration: BoxDecoration(
         color: sheetColor,
-        borderRadius: const BorderRadius.vertical(top: Radius.circular(28)),
+        borderRadius: BorderRadius.vertical(top: Radius.circular(28.r)),
         border: isDark
             ? Border.all(color: Colors.white.withValues(alpha: 0.06))
             : null,
@@ -164,24 +165,24 @@ class _BottomSheetCard extends StatelessWidget {
             'get_started.headline'.tr,
             textAlign: TextAlign.center,
             style: GoogleFonts.beVietnamPro(
-              fontSize: 26,
+              fontSize: 26.sp,
               fontWeight: FontWeight.w800,
               color: onSheet,
               height: 1.15,
               letterSpacing: 0.2,
             ),
           ),
-          const SizedBox(height: 14),
+          SizedBox(height: 14.h),
           Text(
             'get_started.subtitle'.tr,
             textAlign: TextAlign.center,
             style: GoogleFonts.beVietnamPro(
-              fontSize: 14,
+              fontSize: 14.sp,
               color: onSheetMuted,
               height: 1.5,
             ),
           ),
-          const SizedBox(height: 22),
+          SizedBox(height: 22.h),
           Row(
             children: [
               Expanded(
@@ -201,7 +202,7 @@ class _BottomSheetCard extends StatelessWidget {
                   child: Text('get_started.get_started'.tr),
                 ),
               ),
-              const SizedBox(width: 12),
+              SizedBox(width: 12.w),
               Expanded(
                 child: AppGradientButton(
                   label: 'get_started.create_account'.tr,

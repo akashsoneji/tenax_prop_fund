@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:google_fonts/google_fonts.dart';
 
 import '../theme/app_colors.dart';
@@ -44,20 +45,20 @@ class IconLeadingRow extends StatelessWidget {
           child: InkWell(
             onTap: onTap,
             child: Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 13),
+              padding: EdgeInsets.symmetric(horizontal: 14.w, vertical: 13.h),
               child: Row(
                 children: [
                   Container(
-                    width: 40,
-                    height: 40,
+                    width: 40.w,
+                    height: 40.h,
                     decoration: BoxDecoration(
                       color: tint.withValues(alpha: 0.10),
-                      borderRadius: BorderRadius.circular(12),
+                      borderRadius: BorderRadius.circular(12.r),
                     ),
                     alignment: Alignment.center,
-                    child: Icon(icon, size: 20, color: tint),
+                    child: Icon(icon, size: 20.w, color: tint),
                   ),
-                  const SizedBox(width: 12),
+                  SizedBox(width: 12.w),
                   Expanded(
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
@@ -65,17 +66,17 @@ class IconLeadingRow extends StatelessWidget {
                         Text(
                           title,
                           style: GoogleFonts.beVietnamPro(
-                            fontSize: 15,
+                            fontSize: 15.sp,
                             fontWeight: FontWeight.w700,
                             color: scheme.onSurface,
                           ),
                         ),
                         if (hasSubtitle) ...[
-                          const SizedBox(height: 2),
+                          SizedBox(height: 2.h),
                           Text(
                             subtitle!,
                             style: GoogleFonts.beVietnamPro(
-                              fontSize: 12.5,
+                              fontSize: 12.5.sp,
                               color: scheme.onSurface.withValues(alpha: 0.55),
                             ),
                           ),
@@ -84,11 +85,11 @@ class IconLeadingRow extends StatelessWidget {
                     ),
                   ),
                   if (trailing != null) ...[
-                    const SizedBox(width: 8),
+                    SizedBox(width: 8.w),
                     trailing!,
                   ],
                   if (showChevron) ...[
-                    const SizedBox(width: 4),
+                    SizedBox(width: 4.w),
                     Icon(
                       Icons.chevron_right_rounded,
                       color: scheme.onSurface.withValues(alpha: 0.35),
@@ -101,10 +102,10 @@ class IconLeadingRow extends StatelessWidget {
         ),
         if (showDivider)
           Divider(
-            height: 1,
+            height: 1.h,
             thickness: 1,
-            indent: 66,
-            endIndent: 14,
+            indent: 66.w,
+            endIndent: 14.w,
             color: scheme.onSurface.withValues(alpha: 0.06),
           ),
       ],

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
 
 import '../../../shared/theme/app_colors.dart';
@@ -27,11 +28,11 @@ class PositionsView extends GetView<PositionsController> {
         child: Column(
           children: [
             Padding(
-              padding: const EdgeInsets.fromLTRB(16, 12, 16, 8),
+              padding: EdgeInsets.fromLTRB(16.w, 12.h, 16.w, 8.h),
               child: Obx(() => AccountSummaryGrid(account: controller.account.value)),
             ),
             Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 16),
+              padding: EdgeInsets.symmetric(horizontal: 16.w),
               child: Obx(
                 () => AppSegmentedControl(
                   labels: [
@@ -45,7 +46,7 @@ class PositionsView extends GetView<PositionsController> {
                 ),
               ),
             ),
-            const SizedBox(height: 8),
+            SizedBox(height: 8.h),
             Expanded(
               child: Obx(() {
                 switch (controller.selectedTab.value) {
@@ -80,7 +81,7 @@ class _MarketList extends StatelessWidget {
       return Column(
         children: [
           Padding(
-            padding: const EdgeInsets.fromLTRB(16, 0, 16, 8),
+            padding: EdgeInsets.fromLTRB(16.w, 0, 16.w, 8.h),
             child: Row(
               mainAxisAlignment: MainAxisAlignment.end,
               children: [
@@ -91,7 +92,7 @@ class _MarketList extends StatelessWidget {
                       'positions.close_all'.tr,
                       style: AppText.subtitle(
                         color: AppColors.danger,
-                        fontSize: 13,
+                        fontSize: 13.sp,
                       ),
                     ),
                   ),
@@ -102,7 +103,7 @@ class _MarketList extends StatelessWidget {
           Expanded(
             child: ListView.builder(
               physics: const BouncingScrollPhysics(),
-              padding: const EdgeInsets.symmetric(horizontal: 16),
+              padding: EdgeInsets.symmetric(horizontal: 16.w),
               itemCount: items.length,
               itemBuilder: (context, i) => Obx(
                 () => PositionCard(
@@ -133,7 +134,7 @@ class _PendingList extends StatelessWidget {
       final items = controller.pendingOrders;
       return ListView.builder(
         physics: const BouncingScrollPhysics(),
-        padding: const EdgeInsets.symmetric(horizontal: 16),
+        padding: EdgeInsets.symmetric(horizontal: 16.w),
         itemCount: items.length,
         itemBuilder: (context, i) => Obx(
           () => PositionCard(
@@ -170,7 +171,7 @@ class _HistoryList extends StatelessWidget {
       }
       return ListView.builder(
         physics: const BouncingScrollPhysics(),
-        padding: const EdgeInsets.symmetric(horizontal: 16),
+        padding: EdgeInsets.symmetric(horizontal: 16.w),
         itemCount: items.length,
         itemBuilder: (context, i) => HistoryRow(entry: items[i]),
       );
@@ -191,11 +192,11 @@ class _EmptyState extends StatelessWidget {
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
-          Icon(Icons.inbox_outlined, size: 44, color: muted),
-          const SizedBox(height: 12),
+          Icon(Icons.inbox_outlined, size: 44.w, color: muted),
+          SizedBox(height: 12.h),
           Text(messageKey.tr, style: AppText.subtitle(color: muted)),
           if (onRetry != null) ...[
-            const SizedBox(height: 12),
+            SizedBox(height: 12.h),
             TextButton(
               onPressed: onRetry,
               child: Text('state.retry'.tr,

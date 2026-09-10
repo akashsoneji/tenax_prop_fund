@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
 
@@ -49,9 +50,9 @@ class _RequestPayoutSheetState extends State<RequestPayoutSheet> {
           color: scheme.brightness == Brightness.dark
               ? AppColors.sheetDark
               : Colors.white,
-          borderRadius: const BorderRadius.vertical(top: Radius.circular(24)),
+          borderRadius: BorderRadius.vertical(top: Radius.circular(24.r)),
         ),
-        padding: const EdgeInsets.fromLTRB(20, 14, 20, 22),
+        padding: EdgeInsets.fromLTRB(20.w, 14.h, 20.w, 22.h),
         child: SingleChildScrollView(
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -60,30 +61,30 @@ class _RequestPayoutSheetState extends State<RequestPayoutSheet> {
               // Drag handle.
               Center(
                 child: Container(
-                  width: 38,
-                  height: 4,
-                  margin: const EdgeInsets.only(bottom: 14),
+                  width: 38.w,
+                  height: 4.h,
+                  margin: EdgeInsets.only(bottom: 14.h),
                   decoration: BoxDecoration(
                     color: scheme.onSurface.withValues(alpha: 0.15),
-                    borderRadius: BorderRadius.circular(2),
+                    borderRadius: BorderRadius.circular(2.r),
                   ),
                 ),
               ),
               _SheetHeader(onClose: c.closePayoutSheet),
-              const SizedBox(height: 18),
+              SizedBox(height: 18.h),
               _NameMatchBanner(scheme: scheme),
-              const SizedBox(height: 18),
+              SizedBox(height: 18.h),
               _AccountPicker(controller: c, data: data),
-              const SizedBox(height: 14),
+              SizedBox(height: 14.h),
               _AmountField(
                 controller: c,
                 textController: _amountText,
                 focusNode: _amountFocus,
                 scheme: scheme,
               ),
-              const SizedBox(height: 14),
+              SizedBox(height: 14.h),
               _MethodPicker(controller: c, data: data),
-              const SizedBox(height: 22),
+              SizedBox(height: 22.h),
               _SubmitButton(controller: c, data: data, onSubmitted: () {
                 _amountText.clear();
                 c.setAmount('');
@@ -112,7 +113,7 @@ class _SheetHeader extends StatelessWidget {
           child: Text(
             'rewards.request_payout'.tr,
             style: GoogleFonts.beVietnamPro(
-              fontSize: 18,
+              fontSize: 18.sp,
               fontWeight: FontWeight.w800,
             ),
           ),
@@ -133,15 +134,15 @@ class _CloseButton extends StatelessWidget {
       onTap: onTap,
       customBorder: const CircleBorder(),
       child: Container(
-        width: 32,
-        height: 32,
+        width: 32.w,
+        height: 32.w,
         decoration: BoxDecoration(
           shape: BoxShape.circle,
           border: Border.all(color: AppColors.danger, width: 1.4),
         ),
         alignment: Alignment.center,
-        child: const Icon(Icons.close_rounded,
-            size: 16, color: AppColors.danger),
+        child: Icon(Icons.close_rounded,
+            size: 16.w, color: AppColors.danger),
       ),
     );
   }
@@ -154,35 +155,35 @@ class _NameMatchBanner extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      padding: const EdgeInsets.fromLTRB(14, 12, 14, 14),
+      padding: EdgeInsets.fromLTRB(14.w, 12.h, 14.w, 14.h),
       decoration: BoxDecoration(
         color: AppColors.warningInk.withValues(
             alpha: scheme.brightness == Brightness.dark ? 0.16 : 0.12),
-        borderRadius: BorderRadius.circular(12),
+        borderRadius: BorderRadius.circular(12.r),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Row(
             children: [
-              const Icon(Icons.info_outline_rounded,
-                  size: 18, color: Color(0xFFA36A00)),
-              const SizedBox(width: 8),
+              Icon(Icons.info_outline_rounded,
+                  size: 18.w, color: const Color(0xFFA36A00)),
+              SizedBox(width: 8.w),
               Text(
                 'rewards.name_match_id_short'.tr,
                 style: GoogleFonts.beVietnamPro(
-                  fontSize: 13.5,
+                  fontSize: 13.5.sp,
                   fontWeight: FontWeight.w700,
                   color: const Color(0xFFA36A00),
                 ),
               ),
             ],
           ),
-          const SizedBox(height: 6),
+          SizedBox(height: 6.h),
           Text(
             'rewards.name_match_id_short_body'.tr,
             style: GoogleFonts.beVietnamPro(
-              fontSize: 12.5,
+              fontSize: 12.5.sp,
               color: scheme.onSurface.withValues(alpha: 0.7),
               height: 1.4,
             ),
@@ -215,7 +216,7 @@ class _AccountPicker extends StatelessWidget {
                   value: a.id,
                   child: Text(a.label,
                       style: GoogleFonts.beVietnamPro(
-                          fontSize: 14, fontWeight: FontWeight.w600)),
+                          fontSize: 14.sp, fontWeight: FontWeight.w600)),
                 ),
             ],
             onChanged: (v) {
@@ -251,7 +252,7 @@ class _AmountField extends StatelessWidget {
         keyboardType: const TextInputType.numberWithOptions(decimal: true),
         onChanged: controller.setAmount,
         style: GoogleFonts.beVietnamPro(
-          fontSize: 16,
+          fontSize: 16.sp,
           fontWeight: FontWeight.w700,
           color: scheme.onSurface,
         ),
@@ -289,7 +290,7 @@ class _MethodPicker extends StatelessWidget {
                   value: m,
                   child: Text(m,
                       style: GoogleFonts.beVietnamPro(
-                          fontSize: 14, fontWeight: FontWeight.w600)),
+                          fontSize: 14.sp, fontWeight: FontWeight.w600)),
                 ),
             ],
             onChanged: (v) {
@@ -326,7 +327,7 @@ class _SubmitButton extends StatelessWidget {
             'rewards.payout_requested'.tr,
             'rewards.payout_requested_body'.tr,
             snackPosition: SnackPosition.BOTTOM,
-            margin: const EdgeInsets.all(16),
+            margin: EdgeInsets.all(16.w),
             borderRadius: 14,
           );
         } else {
@@ -334,7 +335,7 @@ class _SubmitButton extends StatelessWidget {
             'rewards.cannot_submit'.tr,
             result.message ?? 'rewards.cannot_submit_body'.tr,
             snackPosition: SnackPosition.BOTTOM,
-            margin: const EdgeInsets.all(16),
+            margin: EdgeInsets.all(16.w),
             borderRadius: 14,
           );
         }
@@ -355,23 +356,23 @@ class _SheetField extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Padding(
-          padding: const EdgeInsets.only(left: 4, bottom: 6),
+          padding: EdgeInsets.only(left: 4.w, bottom: 6.h),
           child: Text(
             label,
             style: GoogleFonts.beVietnamPro(
-              fontSize: 12.5,
+              fontSize: 12.5.sp,
               fontWeight: FontWeight.w600,
               color: scheme.onSurface.withValues(alpha: 0.55),
             ),
           ),
         ),
         Container(
-          padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+          padding: EdgeInsets.symmetric(horizontal: 14.w, vertical: 12.h),
           decoration: BoxDecoration(
             color: scheme.brightness == Brightness.dark
                 ? Colors.white.withValues(alpha: 0.05)
                 : AppColors.track,
-            borderRadius: BorderRadius.circular(12),
+            borderRadius: BorderRadius.circular(12.r),
             border: Border.all(
                 color: Theme.of(context)
                     .colorScheme

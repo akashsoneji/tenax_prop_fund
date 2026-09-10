@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
 
@@ -23,12 +24,12 @@ class OpenTicketSheet extends StatelessWidget {
       child: Container(
         decoration: BoxDecoration(
           color: scheme.surface,
-          borderRadius: const BorderRadius.vertical(top: Radius.circular(24)),
+          borderRadius: BorderRadius.vertical(top: Radius.circular(24.r)),
         ),
         child: SafeArea(
           top: false,
           child: SingleChildScrollView(
-            padding: const EdgeInsets.fromLTRB(20, 14, 20, 20),
+            padding: EdgeInsets.fromLTRB(20.w, 14.h, 20.w, 20.h),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,
               mainAxisSize: MainAxisSize.min,
@@ -39,7 +40,7 @@ class OpenTicketSheet extends StatelessWidget {
                       child: Text(
                         'Open a ticket',
                         style: GoogleFonts.beVietnamPro(
-                          fontSize: 18,
+                          fontSize: 18.sp,
                           fontWeight: FontWeight.w800,
                           color: scheme.onSurface,
                         ),
@@ -48,21 +49,21 @@ class OpenTicketSheet extends StatelessWidget {
                     _CloseButton(onTap: Get.back),
                   ],
                 ),
-                const SizedBox(height: 16),
+                SizedBox(height: 16.h),
                 _Label('Topic'),
                 _SheetDropdown(
                   options: c.topics,
                   value: c.selectedTopic,
                   onChanged: c.selectTopic,
                 ),
-                const SizedBox(height: 14),
+                SizedBox(height: 14.h),
                 _Label('Account'),
                 _SheetDropdown(
                   options: c.accounts,
                   value: c.selectedAccount,
                   onChanged: c.selectAccount,
                 ),
-                const SizedBox(height: 14),
+                SizedBox(height: 14.h),
                 _Label('Message'),
                 TextField(
                   minLines: 4,
@@ -73,9 +74,9 @@ class OpenTicketSheet extends StatelessWidget {
                     hintText: 'support.ticket_hint'.tr,
                   ),
                 ),
-                const SizedBox(height: 16),
+                SizedBox(height: 16.h),
                 _RuleAnswerBox(),
-                const SizedBox(height: 18),
+                SizedBox(height: 18.h),
                 AppGradientButton(
                   label: 'Send',
                   icon: Icons.send_rounded,
@@ -98,11 +99,11 @@ class _Label extends StatelessWidget {
   Widget build(BuildContext context) {
     final scheme = Theme.of(context).colorScheme;
     return Padding(
-      padding: const EdgeInsets.only(bottom: 6, left: 2),
+      padding: EdgeInsets.only(bottom: 6.h, left: 2.w),
       child: Text(
         text,
         style: GoogleFonts.beVietnamPro(
-          fontSize: 13,
+          fontSize: 13.sp,
           fontWeight: FontWeight.w700,
           color: scheme.onSurfaceVariant,
         ),
@@ -129,9 +130,9 @@ class _SheetDropdown extends StatelessWidget {
       () => DropdownButtonFormField<String>(
         initialValue: value.value,
         isExpanded: true,
-        borderRadius: BorderRadius.circular(12),
+        borderRadius: BorderRadius.circular(12.r),
         style: GoogleFonts.beVietnamPro(
-          fontSize: 14,
+          fontSize: 14.sp,
           fontWeight: FontWeight.w600,
           color: scheme.onSurface,
         ),
@@ -154,17 +155,17 @@ class _RuleAnswerBox extends StatelessWidget {
   Widget build(BuildContext context) {
     final scheme = Theme.of(context).colorScheme;
     return Container(
-      padding: const EdgeInsets.all(14),
+      padding: EdgeInsets.all(14.w),
       decoration: BoxDecoration(
         color: scheme.primary.withValues(alpha: 0.08),
-        borderRadius: BorderRadius.circular(14),
+        borderRadius: BorderRadius.circular(14.r),
         border: Border.all(color: scheme.primary.withValues(alpha: 0.18)),
       ),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Icon(Icons.verified_outlined, color: scheme.primary, size: 20),
-          const SizedBox(width: 10),
+          Icon(Icons.verified_outlined, color: scheme.primary, size: 20.w),
+          SizedBox(width: 10.w),
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -172,17 +173,17 @@ class _RuleAnswerBox extends StatelessWidget {
                 Text(
                   'A written rule answer binds us',
                   style: GoogleFonts.beVietnamPro(
-                    fontSize: 13.5,
+                    fontSize: 13.5.sp,
                     fontWeight: FontWeight.w800,
                     color: scheme.onSurface,
                   ),
                 ),
-                const SizedBox(height: 3),
+                SizedBox(height: 3.h),
                 Text(
                   'If support tells you a strategy is allowed, that answer '
                   'stands for your account.',
                   style: GoogleFonts.beVietnamPro(
-                    fontSize: 12.5,
+                    fontSize: 12.5.sp,
                     height: 1.35,
                     color: scheme.onSurfaceVariant,
                   ),
@@ -208,10 +209,10 @@ class _CloseButton extends StatelessWidget {
       clipBehavior: Clip.antiAlias,
       child: InkWell(
         onTap: onTap,
-        child: const SizedBox(
-          width: 32,
-          height: 32,
-          child: Icon(Icons.close_rounded, color: Colors.white, size: 18),
+        child: SizedBox(
+          width: 32.w,
+          height: 32.w,
+          child: Icon(Icons.close_rounded, color: Colors.white, size: 18.w),
         ),
       ),
     );

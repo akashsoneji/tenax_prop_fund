@@ -1,6 +1,7 @@
 import 'dart:ui';
 
 import 'package:flutter/material.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 
 import '../../../shared/theme/app_colors.dart';
 
@@ -59,7 +60,7 @@ class _GlassCardState extends State<GlassCard>
       animation: _spin,
       builder: (context, _) {
         return Container(
-          padding: const EdgeInsets.all(1.4),
+          padding: EdgeInsets.all(1.4.w),
           decoration: BoxDecoration(
             borderRadius: radius,
             gradient: SweepGradient(
@@ -74,9 +75,9 @@ class _GlassCardState extends State<GlassCard>
             boxShadow: [
               BoxShadow(
                 color: scheme.primary.withValues(alpha: isDark ? 0.28 : 0.16),
-                blurRadius: 34,
-                spreadRadius: -6,
-                offset: const Offset(0, 18),
+                blurRadius: 34.r,
+                spreadRadius: -6.r,
+                offset: Offset(0, 18.h),
               ),
             ],
           ),

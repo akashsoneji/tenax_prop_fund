@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
 
@@ -65,7 +66,7 @@ class _BillingBody extends StatelessWidget {
       children: [
         _StatGridBanner(stats: data.stats),
         Padding(
-          padding: const EdgeInsets.fromLTRB(16, 20, 16, 32),
+          padding: EdgeInsets.fromLTRB(16.w, 20.h, 16.w, 32.h),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
@@ -75,7 +76,7 @@ class _BillingBody extends StatelessWidget {
                   onChanged: controller.setFilter,
                 ),
               ),
-              const SizedBox(height: 18),
+              SizedBox(height: 18.h),
               Obx(
                 () => BillingTransactionList(
                   transactions: controller.filteredTransactions(data),
@@ -98,15 +99,15 @@ class _BillingSkeleton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.fromLTRB(16, 4, 16, 32),
+      padding: EdgeInsets.fromLTRB(16.w, 4.h, 16.w, 32.h),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: const [
-          HeroSkeleton(height: 120),
-          SizedBox(height: 20),
-          StatGridSkeleton(),
-          SizedBox(height: 20),
-          ListSkeleton(),
+        children: [
+          HeroSkeleton(height: 120.h),
+          SizedBox(height: 20.h),
+          const StatGridSkeleton(),
+          SizedBox(height: 20.h),
+          const ListSkeleton(),
         ],
       ),
     );
@@ -126,7 +127,7 @@ class _StatGridBanner extends StatelessWidget {
     return Container(
       decoration: BoxDecoration(gradient: AppTheme.heroGradient(scheme)),
       child: Padding(
-        padding: const EdgeInsets.fromLTRB(16, 4, 16, 22),
+        padding: EdgeInsets.fromLTRB(16.w, 4.h, 16.w, 22.h),
         child: _StatGrid(stats: stats),
       ),
     );
@@ -148,15 +149,15 @@ class _StatGrid extends StatelessWidget {
         Row(
           children: [
             Expanded(child: _StatCell(stat: stats[0])),
-            const SizedBox(width: 12),
+            SizedBox(width: 12.w),
             Expanded(child: _StatCell(stat: stats[1])),
           ],
         ),
-        const SizedBox(height: 12),
+        SizedBox(height: 12.h),
         Row(
           children: [
             Expanded(child: _StatCell(stat: stats[2])),
-            const SizedBox(width: 12),
+            SizedBox(width: 12.w),
             Expanded(child: _StatCell(stat: stats[3])),
           ],
         ),
@@ -172,10 +173,10 @@ class _StatCell extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 12),
+      padding: EdgeInsets.symmetric(vertical: 16.h, horizontal: 12.w),
       decoration: BoxDecoration(
         color: AppColors.white.withValues(alpha: 0.10),
-        borderRadius: BorderRadius.circular(14),
+        borderRadius: BorderRadius.circular(14.r),
         border: Border.all(color: AppColors.white.withValues(alpha: 0.14)),
       ),
       child: Column(
@@ -184,18 +185,18 @@ class _StatCell extends StatelessWidget {
             stat.label,
             style: GoogleFonts.beVietnamPro(
               color: AppColors.white.withValues(alpha: 0.75),
-              fontSize: 13,
+              fontSize: 13.sp,
               fontWeight: FontWeight.w500,
             ),
           ),
-          const SizedBox(height: 6),
+          SizedBox(height: 6.h),
           Text(
             stat.value,
             maxLines: 1,
             overflow: TextOverflow.ellipsis,
             style: GoogleFonts.beVietnamPro(
               color: AppColors.white,
-              fontSize: 22,
+              fontSize: 22.sp,
               fontWeight: FontWeight.w800,
             ),
           ),

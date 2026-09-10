@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 
 /// Themed checkbox with a label.
 class AppCheckbox extends StatelessWidget {
@@ -17,9 +18,9 @@ class AppCheckbox extends StatelessWidget {
   Widget build(BuildContext context) {
     return InkWell(
       onTap: () => onChanged(!value),
-      borderRadius: BorderRadius.circular(4),
+      borderRadius: BorderRadius.circular(4.r),
       child: Padding(
-        padding: const EdgeInsets.symmetric(vertical: 4),
+        padding: EdgeInsets.symmetric(vertical: 4.h),
         child: Row(
           children: [
             Checkbox(
@@ -27,7 +28,7 @@ class AppCheckbox extends StatelessWidget {
               onChanged: onChanged,
               materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
             ),
-            const SizedBox(width: 4),
+            SizedBox(width: 4.w),
             Expanded(child: Text(label)),
           ],
         ),

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:google_fonts/google_fonts.dart';
 
 import '../models/reward_models.dart';
@@ -24,14 +25,14 @@ class RequirementRow extends StatelessWidget {
     return Column(
       children: [
         Padding(
-          padding: const EdgeInsets.symmetric(vertical: 12),
+          padding: EdgeInsets.symmetric(vertical: 12.h),
           child: Row(
             children: [
               Expanded(
                 child: Text(
                   requirement.label,
                   style: GoogleFonts.beVietnamPro(
-                    fontSize: 14,
+                    fontSize: 14.sp,
                     fontWeight: FontWeight.w500,
                     color: scheme.onSurface.withValues(alpha: 0.78),
                   ),
@@ -43,7 +44,7 @@ class RequirementRow extends StatelessWidget {
         ),
         if (showDivider)
           Divider(
-            height: 1,
+            height: 1.h,
             thickness: 1,
             color: scheme.onSurface.withValues(alpha: 0.06),
           ),
@@ -60,15 +61,15 @@ class _StatusPill extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+      padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 6.h),
       decoration: BoxDecoration(
         color: color.withValues(alpha: 0.10),
-        borderRadius: BorderRadius.circular(999),
+        borderRadius: BorderRadius.circular(999.r),
       ),
       child: Text(
         text,
         style: GoogleFonts.beVietnamPro(
-          fontSize: 12.5,
+          fontSize: 12.5.sp,
           fontWeight: FontWeight.w700,
           color: color,
         ),

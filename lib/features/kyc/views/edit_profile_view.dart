@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
 
@@ -25,44 +26,44 @@ class EditProfileView extends GetView<EditProfileController> {
           PinnedGradientAppBar(title: 'edit_profile.title'.tr),
           SliverToBoxAdapter(
             child: Padding(
-              padding: const EdgeInsets.fromLTRB(16, 16, 16, 28),
+              padding: EdgeInsets.fromLTRB(16.w, 16.h, 16.w, 28.h),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
                   const _AvatarHero(),
-                  const SizedBox(height: 22),
+                  SizedBox(height: 22.h),
                   AppLabeledField(
                     controller: controller.fullName,
                     label: 'edit_profile.full_name'.tr,
                     textInputAction: TextInputAction.next,
                   ),
-                  const SizedBox(height: 12),
+                  SizedBox(height: 12.h),
                   AppLabeledField(
                     controller: controller.email,
                     label: 'edit_profile.email'.tr,
                     keyboardType: TextInputType.emailAddress,
                     textInputAction: TextInputAction.next,
                   ),
-                  const SizedBox(height: 12),
+                  SizedBox(height: 12.h),
                   AppLabeledField(
                     controller: controller.mobile,
                     label: 'edit_profile.mobile'.tr,
                     keyboardType: TextInputType.phone,
                     textInputAction: TextInputAction.next,
                   ),
-                  const SizedBox(height: 12),
+                  SizedBox(height: 12.h),
                   AppLabeledField(
                     controller: controller.dateOfBirth,
                     label: 'edit_profile.date_of_birth'.tr,
                     textInputAction: TextInputAction.next,
                   ),
-                  const SizedBox(height: 12),
+                  SizedBox(height: 12.h),
                   AppLabeledField(
                     controller: controller.country,
                     label: 'edit_profile.country'.tr,
                     textInputAction: TextInputAction.done,
                   ),
-                  const SizedBox(height: 24),
+                  SizedBox(height: 24.h),
                   Obx(
                     () => AppGradientButton(
                       label: 'edit_profile.save'.tr,
@@ -90,16 +91,16 @@ class _AvatarHero extends StatelessWidget {
   Widget build(BuildContext context) {
     final scheme = Theme.of(context).colorScheme;
     return Container(
-      padding: const EdgeInsets.fromLTRB(20, 22, 12, 22),
+      padding: EdgeInsets.fromLTRB(20.w, 22.h, 12.w, 22.h),
       decoration: BoxDecoration(
         gradient: AppTheme.brandGradient(scheme),
-        borderRadius: BorderRadius.circular(20),
+        borderRadius: BorderRadius.circular(20.r),
         boxShadow: [
           BoxShadow(
             color: scheme.primary.withValues(alpha: 0.3),
-            blurRadius: 22,
-            spreadRadius: -6,
-            offset: const Offset(0, 12),
+            blurRadius: 22.r,
+            spreadRadius: -6.r,
+            offset: Offset(0, 12.h),
           ),
         ],
       ),
@@ -108,28 +109,28 @@ class _AvatarHero extends StatelessWidget {
           Stack(
             children: [
               CircleAvatar(
-                radius: 34,
+                radius: 34.r,
         backgroundColor: AppColors.white.withValues(alpha: 0.16),
-                child: const Icon(Icons.person_rounded,
-                    size: 34, color: AppColors.white),
+                child: Icon(Icons.person_rounded,
+                    size: 34.w, color: AppColors.white),
               ),
               Positioned(
                 right: 0,
                 bottom: 0,
                 child: Container(
-                  padding: const EdgeInsets.all(5),
+                  padding: EdgeInsets.all(5.w),
                   decoration: BoxDecoration(
                     color: Colors.white,
                     shape: BoxShape.circle,
-                    border: Border.all(color: scheme.primary, width: 1.5),
+                    border: Border.all(color: scheme.primary, width: 1.5.w),
                   ),
                   child: Icon(Icons.camera_alt_rounded,
-                      size: 13, color: scheme.primary),
+                      size: 13.w, color: scheme.primary),
                 ),
               ),
             ],
           ),
-          const SizedBox(width: 16),
+          SizedBox(width: 16.w),
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -138,16 +139,16 @@ class _AvatarHero extends StatelessWidget {
                   'edit_profile.hero_title'.tr,
                   style: GoogleFonts.beVietnamPro(
                     color: Colors.white,
-                    fontSize: 17,
+                    fontSize: 17.sp,
                     fontWeight: FontWeight.w700,
                   ),
                 ),
-                const SizedBox(height: 4),
+                SizedBox(height: 4.h),
                 Text(
                   'edit_profile.hero_subtitle'.tr,
                   style: GoogleFonts.beVietnamPro(
                     color: Colors.white.withValues(alpha: 0.85),
-                    fontSize: 13,
+                    fontSize: 13.sp,
                     height: 1.3,
                   ),
                 ),

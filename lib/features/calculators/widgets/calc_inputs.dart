@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
 
@@ -45,7 +46,7 @@ class _CalcInputFieldState extends State<CalcInputField> {
         FilteringTextInputFormatter.allow(RegExp(r'[0-9.]')),
       ],
       style: GoogleFonts.beVietnamPro(
-        fontSize: 18,
+        fontSize: 18.sp,
         fontWeight: FontWeight.w600,
         color: scheme.onSurface,
       ),
@@ -53,7 +54,7 @@ class _CalcInputFieldState extends State<CalcInputField> {
         labelText: widget.label,
         floatingLabelBehavior: FloatingLabelBehavior.always,
         filled: false,
-        contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 18),
+        contentPadding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 18.h),
       ),
     );
   }
@@ -82,7 +83,7 @@ class CalcSymbolDropdown extends StatelessWidget {
         floatingLabelBehavior: FloatingLabelBehavior.always,
         filled: false,
         contentPadding:
-            const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+            EdgeInsets.symmetric(horizontal: 16.w, vertical: 8.h),
       ),
       child: DropdownButtonHideUnderline(
         child: DropdownButton<String>(
@@ -94,7 +95,7 @@ class CalcSymbolDropdown extends StatelessWidget {
               ? AppColors.sheetDark
               : Colors.white,
           style: GoogleFonts.beVietnamPro(
-            fontSize: 18,
+            fontSize: 18.sp,
             fontWeight: FontWeight.w600,
             color: scheme.onSurface,
           ),

@@ -45,7 +45,9 @@ import '../../features/home/views/home_shell_view.dart';
 import '../../features/home/views/tabs/more_tab_view.dart';
 import '../../features/kyc/bindings/edit_profile_binding.dart';
 import '../../features/kyc/bindings/kyc_binding.dart';
+import '../../features/kyc/bindings/kyc_docs_binding.dart';
 import '../../features/kyc/views/edit_profile_view.dart';
+import '../../features/kyc/views/kyc_docs_view.dart';
 import '../../features/kyc/views/profile_kyc_view.dart';
 import '../../features/rewards/bindings/rewards_binding.dart';
 import '../../features/rewards/views/rewards_view.dart';
@@ -60,7 +62,6 @@ import '../../features/verification/views/add_bank_view.dart';
 import '../../features/verification/views/verification_documents_view.dart';
 import '../../features/verification/views/verification_overview_view.dart';
 import '../../features/verification/views/verification_personal_view.dart';
-import '../../features/verification/views/verification_stepper_view.dart';
 import '../flavor/flavor_resolver.dart';
 import 'app_routes.dart';
 
@@ -121,6 +122,11 @@ class AppPages {
       name: AppRoutes.editProfile,
       page: () => const EditProfileView(),
       binding: EditProfileBinding(),
+    ),
+    GetPage(
+      name: AppRoutes.kycDocuments,
+      page: () => const KycDocsView(),
+      binding: KycDocsBinding(),
     ),
     GetPage(
       name: AppRoutes.rewards,
@@ -185,11 +191,6 @@ class AppPages {
     GetPage(
       name: AppRoutes.verification,
       page: () => const VerificationOverviewView(),
-      binding: VerificationBinding(),
-    ),
-    GetPage(
-      name: AppRoutes.verificationStepper,
-      page: () => const VerificationStepperView(),
       binding: VerificationBinding(),
     ),
     GetPage(

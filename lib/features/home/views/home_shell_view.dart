@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
 
@@ -88,7 +89,7 @@ class HomeShellView extends StatelessWidget {
               ),
             ),
           ),
-          padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 8),
+          padding: EdgeInsets.symmetric(vertical: 8.h, horizontal: 8.w),
           child: Obx(
             () => Row(
               mainAxisAlignment: MainAxisAlignment.spaceEvenly,
@@ -138,20 +139,20 @@ class _NavItem extends StatelessWidget {
         : scheme.onSurface.withValues(alpha: 0.55);
     return InkWell(
       onTap: onTap,
-      borderRadius: BorderRadius.circular(16),
+      borderRadius: BorderRadius.circular(16.r),
       child: AnimatedContainer(
         duration: const Duration(milliseconds: 200),
         curve: Curves.easeOutCubic,
-        padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 6),
+        padding: EdgeInsets.symmetric(vertical: 8.h, horizontal: 6.w),
         decoration: BoxDecoration(
           color: active ? AppTheme.accent : Colors.transparent,
-          borderRadius: BorderRadius.circular(16),
+          borderRadius: BorderRadius.circular(16.r),
           boxShadow: active
               ? [
                   BoxShadow(
                     color: AppTheme.accent.withValues(alpha: 0.45),
-                    blurRadius: 14,
-                    offset: const Offset(0, 6),
+                    blurRadius: 14.r,
+                    offset: Offset(0, 6.h),
                   ),
                 ]
               : null,
@@ -159,12 +160,12 @@ class _NavItem extends StatelessWidget {
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Icon(icon, size: 22, color: fg),
-            const SizedBox(height: 4),
+            Icon(icon, size: 22.w, color: fg),
+            SizedBox(height: 4.h),
             Text(
               label,
               style: GoogleFonts.beVietnamPro(
-                fontSize: 11,
+                fontSize: 11.sp,
                 fontWeight: active ? FontWeight.w600 : FontWeight.w500,
                 color: fg,
               ),

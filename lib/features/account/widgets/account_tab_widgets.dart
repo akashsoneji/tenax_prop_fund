@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
 
 import '../../../shared/theme/app_colors.dart';
@@ -20,8 +21,8 @@ class AccountInsightsGrid extends StatelessWidget {
       crossAxisCount: 2,
       shrinkWrap: true,
       physics: const NeverScrollableScrollPhysics(),
-      mainAxisSpacing: 10,
-      crossAxisSpacing: 10,
+      mainAxisSpacing: 10.h,
+      crossAxisSpacing: 10.w,
       childAspectRatio: 2.4,
       children: [for (final m in metrics) _MetricTile(metric: m)],
     );
@@ -41,10 +42,10 @@ class _MetricTile extends StatelessWidget {
       AccountTone.neutral => scheme.onSurface,
     };
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+      padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 10.h),
       decoration: BoxDecoration(
         color: scheme.primary.withValues(alpha: 0.04),
-        borderRadius: BorderRadius.circular(12),
+        borderRadius: BorderRadius.circular(12.r),
         border: Border.all(color: scheme.primary.withValues(alpha: 0.08)),
       ),
       child: Column(
@@ -55,11 +56,11 @@ class _MetricTile extends StatelessWidget {
               maxLines: 1,
               overflow: TextOverflow.ellipsis,
               style: TextStyle(
-                  fontSize: 11.5, color: scheme.onSurfaceVariant)),
-          const SizedBox(height: 3),
+                  fontSize: 11.5.sp, color: scheme.onSurfaceVariant)),
+          SizedBox(height: 3.h),
           Text(metric.value,
               style: TextStyle(
-                  fontSize: 15,
+                  fontSize: 15.sp,
                   fontWeight: FontWeight.w800,
                   color: valueColor)),
         ],
@@ -78,28 +79,28 @@ class AccountTradeRow extends StatelessWidget {
     final scheme = Theme.of(context).colorScheme;
     final sideColor = trade.isBuy ? AppColors.success : AppColors.danger;
     return Container(
-      padding: const EdgeInsets.all(12),
-      margin: const EdgeInsets.only(bottom: 10),
+      padding: EdgeInsets.all(12.w),
+      margin: EdgeInsets.only(bottom: 10.h),
       decoration: AppTheme.surfaceCard(scheme, radius: 14),
       child: Row(
         children: [
           Container(
-            width: 40,
-            height: 40,
+            width: 40.w,
+            height: 40.h,
             alignment: Alignment.center,
             decoration: BoxDecoration(
               color: sideColor.withValues(alpha: 0.12),
-              borderRadius: BorderRadius.circular(12),
+              borderRadius: BorderRadius.circular(12.r),
             ),
             child: Icon(
               trade.isBuy
                   ? Icons.north_east_rounded
                   : Icons.south_east_rounded,
-              size: 18,
+              size: 18.w,
               color: sideColor,
             ),
           ),
-          const SizedBox(width: 12),
+          SizedBox(width: 12.w),
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -108,28 +109,28 @@ class AccountTradeRow extends StatelessWidget {
                   children: [
                     Text(trade.symbol,
                         style: TextStyle(
-                            fontSize: 14.5,
+                            fontSize: 14.5.sp,
                             fontWeight: FontWeight.w700,
                             color: scheme.onSurface)),
-                    const SizedBox(width: 8),
+                    SizedBox(width: 8.w),
                     Text('${trade.side.toUpperCase()} · ${trade.volume}',
                         style: TextStyle(
-                            fontSize: 11.5,
+                            fontSize: 11.5.sp,
                             fontWeight: FontWeight.w600,
                             color: scheme.onSurfaceVariant)),
                   ],
                 ),
-                const SizedBox(height: 3),
+                SizedBox(height: 3.h),
                 Text('${trade.openPrice} → ${trade.closePrice} · ${trade.closedAt}',
                     style: TextStyle(
-                        fontSize: 11.5, color: scheme.onSurfaceVariant)),
+                        fontSize: 11.5.sp, color: scheme.onSurfaceVariant)),
               ],
             ),
           ),
           Text(
             trade.profit,
             style: TextStyle(
-              fontSize: 14,
+              fontSize: 14.sp,
               fontWeight: FontWeight.w800,
               color: trade.profitNegative ? AppColors.danger : AppColors.success,
             ),
@@ -159,7 +160,7 @@ class PlatformDownloadCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final scheme = Theme.of(context).colorScheme;
     return Container(
-      padding: const EdgeInsets.all(14),
+      padding: EdgeInsets.all(14.w),
       decoration: AppTheme.surfaceCard(scheme, radius: 16),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -169,30 +170,30 @@ class PlatformDownloadCard extends StatelessWidget {
               Expanded(
                 child: Text(download.label,
                     style: TextStyle(
-                        fontSize: 14.5,
+                        fontSize: 14.5.sp,
                         fontWeight: FontWeight.w700,
                         color: scheme.onSurface)),
               ),
-              Icon(Icons.download_rounded, size: 18, color: scheme.primary),
+              Icon(Icons.download_rounded, size: 18.w, color: scheme.primary),
             ],
           ),
-          const SizedBox(height: 6),
+          SizedBox(height: 6.h),
           Text(download.note,
               style: TextStyle(
-                  fontSize: 12, color: scheme.onSurfaceVariant)),
-          const SizedBox(height: 12),
+                  fontSize: 12.sp, color: scheme.onSurfaceVariant)),
+          SizedBox(height: 12.h),
           Material(
             color: scheme.primary,
-            borderRadius: BorderRadius.circular(12),
+            borderRadius: BorderRadius.circular(12.r),
             child: InkWell(
               onTap: onDownload,
-              borderRadius: BorderRadius.circular(12),
+              borderRadius: BorderRadius.circular(12.r),
               child: Container(
-                height: 42,
+                height: 42.h,
                 alignment: Alignment.center,
                 child: Text('account.download'.tr,
-                    style: const TextStyle(
-                        fontSize: 13.5,
+                    style: TextStyle(
+                        fontSize: 13.5.sp,
                         fontWeight: FontWeight.w700,
                         color: AppColors.white)),
               ),
@@ -222,44 +223,44 @@ class ResetCarryList extends StatelessWidget {
       (false, 'account.reset_clear_counter'.tr),
     ];
     return Container(
-      padding: const EdgeInsets.all(16),
+      padding: EdgeInsets.all(16.w),
       decoration: AppTheme.surfaceCard(scheme, radius: 16),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text('account.reset_carries'.tr,
               style: TextStyle(
-                  fontSize: 15,
+                  fontSize: 15.sp,
                   fontWeight: FontWeight.w800,
                   color: scheme.onSurface)),
-          const SizedBox(height: 12),
+          SizedBox(height: 12.h),
           for (final (kept, label) in items)
             Padding(
-              padding: const EdgeInsets.only(bottom: 10),
+              padding: EdgeInsets.only(bottom: 10.h),
               child: Row(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Container(
-                    padding: const EdgeInsets.symmetric(
-                        horizontal: 8, vertical: 2),
+                    padding: EdgeInsets.symmetric(
+                        horizontal: 8.w, vertical: 2.h),
                     decoration: BoxDecoration(
                       color: (kept ? AppColors.success : AppColors.amber)
                           .withValues(alpha: 0.14),
-                      borderRadius: BorderRadius.circular(20),
+                      borderRadius: BorderRadius.circular(20.r),
                     ),
                     child: Text(
                       kept ? 'account.reset_kept'.tr : 'account.reset_reset'.tr,
                       style: TextStyle(
-                          fontSize: 11,
+                          fontSize: 11.sp,
                           fontWeight: FontWeight.w700,
                           color: kept ? AppColors.success : AppColors.amber),
                     ),
                   ),
-                  const SizedBox(width: 10),
+                  SizedBox(width: 10.w),
                   Expanded(
                     child: Text(label,
                         style: TextStyle(
-                            fontSize: 13, color: scheme.onSurface)),
+                            fontSize: 13.sp, color: scheme.onSurface)),
                   ),
                 ],
               ),

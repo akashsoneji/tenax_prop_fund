@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
 
 import '../../../shared/widgets/data_state_builder.dart';
@@ -28,7 +29,7 @@ class CertificatesView extends StatelessWidget {
         slivers: [
           PinnedGradientAppBar(title: 'certificates.title'.tr),
           SliverPadding(
-            padding: const EdgeInsets.fromLTRB(16, 18, 16, 32),
+            padding: EdgeInsets.fromLTRB(16.w, 18.h, 16.w, 32.h),
             sliver: SliverToBoxAdapter(
               child: Obx(
                 () => DataStateBuilder<List<Certificate>>(
@@ -62,14 +63,14 @@ class _CertificatesSkeleton extends StatelessWidget {
   Widget build(BuildContext context) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
-      children: const [
-        CardSkeleton(lines: 2, height: 120),
-        SizedBox(height: 14),
-        CardSkeleton(lines: 2, height: 96),
-        SizedBox(height: 14),
-        CardSkeleton(lines: 2, height: 96),
-        SizedBox(height: 14),
-        CardSkeleton(lines: 2, height: 96),
+      children: [
+        CardSkeleton(lines: 2, height: 120.h),
+        SizedBox(height: 14.h),
+        CardSkeleton(lines: 2, height: 96.h),
+        SizedBox(height: 14.h),
+        CardSkeleton(lines: 2, height: 96.h),
+        SizedBox(height: 14.h),
+        CardSkeleton(lines: 2, height: 96.h),
       ],
     );
   }

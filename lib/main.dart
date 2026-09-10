@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
 import 'package:get_storage/get_storage.dart';
 
@@ -80,40 +81,61 @@ class TenaxApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final settings = Get.find<SettingsController>();
-    return GetMaterialApp(
-      title: config.appName,
-      debugShowCheckedModeBanner: false,
-
-      // Theme — light + dark variants driven by flavor; mode from settings.
-      theme: AppTheme.lightFromFlavor(config),
-      darkTheme: AppTheme.darkFromFlavor(config),
-      themeMode: settings.themeMode,
-
-      // Localization.
-      translations: AppTranslations(),
-      locale: settings.locale,
-      fallbackLocale: const Locale('en'),
-
-      initialBinding: InitialBinding(config),
-      initialRoute: AppRoutes.splash,
-      getPages: AppPages.routes,
-
-      // Keep the system bar ICON brightness in sync with the active theme so
-      // the 3-button / gesture nav bar stays readable in both light and dark.
+    return ScreenUtilInit(
+      designSize: const Size(375, 812),
+      minTextAdapt: true,
+      splitScreenMode: true,
       builder: (context, child) {
-        final isDark = Theme.of(context).brightness == Brightness.dark;
-        return AnnotatedRegion<SystemUiOverlayStyle>(
-          value: SystemUiOverlayStyle(
-            statusBarColor: Colors.transparent,
-            statusBarIconBrightness:
-                isDark ? Brightness.light : Brightness.dark,
-            statusBarBrightness: isDark ? Brightness.dark : Brightness.light,
-            systemNavigationBarColor: Colors.transparent,
-            systemNavigationBarContrastEnforced: false,
-            systemNavigationBarIconBrightness:
-                isDark ? Brightness.light : Brightness.dark,
-          ),
-          child: child ?? const SizedBox.shrink(),
+        return GetMaterialApp(
+          title: config.appName,
+          debugShowCheckedModeBanner: false,
+
+          // Theme — light + dark variants driven by flavor; mode from settings.
+          theme: AppTheme.lightFromFlavor(config),
+          darkTheme: AppTheme.darkFromFlavor(config),
+          themeMode: settings.themeMode,
+
+          // Localization.
+          translations: AppTranslations(),
+          locale: settings.locale,
+          fallbackLocale: const Locale('en'),
+
+          initialBinding: InitialBinding(config),
+          initialRoute: AppRoutes.splash,
+          getPages: AppPages.routes,
+
+          // Keep the system bar ICON brightness in sync with the active theme so
+          // the 3-button / gesture nav bar stays readable in both light and dark.
+          builder: (context, child) {
+            final isDark = Theme.of(context).brightness == Brightness.dark;
+            // Clamp the OS font-scale to a narrow band so the layout looks the
+            // same across devices. Without this, a phone with a larger system
+            // font size enlarges every label, wrapping titles to two lines and
+            // pushing content off-screen. 0.9–1.1 keeps accessibility scaling
+            // but prevents breakage.
+            final mq = MediaQuery.of(context);
+            final clamped = mq.textScaler.clamp(
+              minScaleFactor: 0.9,
+              maxScaleFactor: 1.1,
+            );
+            return MediaQuery(
+              data: mq.copyWith(textScaler: clamped),
+              child: AnnotatedRegion<SystemUiOverlayStyle>(
+                value: SystemUiOverlayStyle(
+                  statusBarColor: Colors.transparent,
+                  statusBarIconBrightness:
+                      isDark ? Brightness.light : Brightness.dark,
+                  statusBarBrightness:
+                      isDark ? Brightness.dark : Brightness.light,
+                  systemNavigationBarColor: Colors.transparent,
+                  systemNavigationBarContrastEnforced: false,
+                  systemNavigationBarIconBrightness:
+                      isDark ? Brightness.light : Brightness.dark,
+                ),
+                child: child ?? const SizedBox.shrink(),
+              ),
+            );
+          },
         );
       },
     );

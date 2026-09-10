@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 
-/// Two-column responsive grid that staggers child entrance animations. Used
+/// Two-column responsive grid
 /// for the rewards stats block where the four tiles should fade-in one after
 /// the other rather than all at once.
 class StaggeredGrid extends StatelessWidget {
@@ -28,11 +29,11 @@ class StaggeredGrid extends StatelessWidget {
       rows.add(Row(
         children: [
           Expanded(child: first),
-          SizedBox(width: crossAxisSpacing),
+          SizedBox(width: crossAxisSpacing.w),
           Expanded(child: second),
         ],
       ));
-      if (i + 2 < children.length) rows.add(SizedBox(height: mainAxisSpacing));
+      if (i + 2 < children.length) rows.add(SizedBox(height: mainAxisSpacing.h));
     }
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,

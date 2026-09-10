@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
 
@@ -71,31 +72,31 @@ class _ErrorState extends StatelessWidget {
     final scheme = Theme.of(context).colorScheme;
     return Center(
       child: Padding(
-        padding: const EdgeInsets.all(32),
+        padding: EdgeInsets.all(32.w),
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
             Icon(Icons.cloud_off_rounded,
-                size: 48, color: scheme.onSurface.withValues(alpha: 0.4)),
-            const SizedBox(height: 16),
+                size: 48.w, color: scheme.onSurface.withValues(alpha: 0.4)),
+            SizedBox(height: 16.h),
             Text(
               'state.error_title'.tr,
               style: GoogleFonts.beVietnamPro(
-                  fontSize: 16, fontWeight: FontWeight.w700),
+                  fontSize: 16.sp, fontWeight: FontWeight.w700),
             ),
-            const SizedBox(height: 6),
+            SizedBox(height: 6.h),
             Text(
               message,
               textAlign: TextAlign.center,
               style: GoogleFonts.beVietnamPro(
-                fontSize: 13,
+                fontSize: 13.sp,
                 color: scheme.onSurface.withValues(alpha: 0.6),
               ),
             ),
             if (onRetry != null) ...[
-              const SizedBox(height: 20),
+              SizedBox(height: 20.h),
               SizedBox(
-                width: 160,
+                width: 160.w,
                 child: AppGradientButton(
                   label: 'state.retry'.tr,
                   onPressed: onRetry!,
@@ -125,23 +126,23 @@ class _EmptyState extends StatelessWidget {
     final scheme = Theme.of(context).colorScheme;
     return Center(
       child: Padding(
-        padding: const EdgeInsets.all(32),
+        padding: EdgeInsets.all(32.w),
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Icon(icon, size: 48, color: scheme.onSurface.withValues(alpha: 0.35)),
-            const SizedBox(height: 16),
+            Icon(icon, size: 48.w, color: scheme.onSurface.withValues(alpha: 0.35)),
+            SizedBox(height: 16.h),
             Text(
               title,
               style: GoogleFonts.beVietnamPro(
-                  fontSize: 16, fontWeight: FontWeight.w700),
+                  fontSize: 16.sp, fontWeight: FontWeight.w700),
             ),
-            const SizedBox(height: 6),
+            SizedBox(height: 6.h),
             Text(
               message,
               textAlign: TextAlign.center,
               style: GoogleFonts.beVietnamPro(
-                fontSize: 13,
+                fontSize: 13.sp,
                 color: scheme.onSurface.withValues(alpha: 0.6),
               ),
             ),

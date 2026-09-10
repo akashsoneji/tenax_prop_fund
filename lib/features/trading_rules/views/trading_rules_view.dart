@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
 
@@ -122,17 +123,17 @@ class _RulesSkeleton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.fromLTRB(16, 16, 16, 24),
+      padding: EdgeInsets.fromLTRB(16.w, 16.h, 16.w, 24.h),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: const [
-          HeroSkeleton(height: 96),
-          SizedBox(height: 16),
-          CardSkeleton(lines: 3, height: 130),
-          SizedBox(height: 12),
-          CardSkeleton(lines: 3, height: 130),
-          SizedBox(height: 12),
-          CardSkeleton(lines: 2, height: 100),
+        children: [
+          HeroSkeleton(height: 96.h),
+          SizedBox(height: 16.h),
+          CardSkeleton(lines: 3, height: 130.h),
+          SizedBox(height: 12.h),
+          CardSkeleton(lines: 3, height: 130.h),
+          SizedBox(height: 12.h),
+          CardSkeleton(lines: 2, height: 100.h),
         ],
       ),
     );
@@ -171,7 +172,7 @@ class _ClosesTab extends StatelessWidget {
             title: data.closingTip.title,
             body: data.closingTip.body,
           ),
-          const SizedBox(height: 8),
+          SizedBox(height: 8.h),
         ],
       ),
     );
@@ -203,7 +204,7 @@ class _CanDoTab extends StatelessWidget {
             body: 'trading_rules.cando_body'.tr,
           ),
           Container(
-            margin: const EdgeInsets.symmetric(horizontal: 16),
+            margin: EdgeInsets.symmetric(horizontal: 16.w),
             decoration: AppTheme.surfaceCard(scheme, radius: 16),
             child: Column(
               children: [
@@ -215,14 +216,14 @@ class _CanDoTab extends StatelessWidget {
               ],
             ),
           ),
-          const SizedBox(height: 12),
+          SizedBox(height: 12.h),
           RulesInfoBanner(
             icon: Icons.check_circle_outline_rounded,
             tone: RuleTone.info,
             title: 'trading_rules.grid_title'.tr,
             body: 'trading_rules.grid_body'.tr,
           ),
-          const SizedBox(height: 8),
+          SizedBox(height: 8.h),
         ],
       ),
     );
@@ -254,7 +255,7 @@ class _DelaysTab extends StatelessWidget {
             body: 'trading_rules.delays_body'.tr,
           ),
           Container(
-            margin: const EdgeInsets.symmetric(horizontal: 16),
+            margin: EdgeInsets.symmetric(horizontal: 16.w),
             decoration: AppTheme.surfaceCard(scheme, radius: 16),
             child: Column(
               children: [
@@ -266,7 +267,7 @@ class _DelaysTab extends StatelessWidget {
               ],
             ),
           ),
-          const SizedBox(height: 8),
+          SizedBox(height: 8.h),
         ],
       ),
     );
@@ -292,13 +293,13 @@ class _EverythingTab extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
           Padding(
-            padding: const EdgeInsets.fromLTRB(20, 12, 20, 8),
+            padding: EdgeInsets.fromLTRB(20.w, 12.h, 20.w, 8.h),
             child: Align(
               alignment: Alignment.centerLeft,
               child: Text(
                 'trading_rules.your_plan'.tr,
                 style: GoogleFonts.beVietnamPro(
-                  fontSize: 16,
+                  fontSize: 16.sp,
                   fontWeight: FontWeight.w800,
                   color: scheme.onSurface,
                 ),
@@ -306,7 +307,7 @@ class _EverythingTab extends StatelessWidget {
             ),
           ),
           Container(
-            margin: const EdgeInsets.symmetric(horizontal: 16),
+            margin: EdgeInsets.symmetric(horizontal: 16.w),
             decoration: AppTheme.surfaceCard(scheme, radius: 16),
             child: Column(
               children: [
@@ -318,9 +319,9 @@ class _EverythingTab extends StatelessWidget {
               ],
             ),
           ),
-          const SizedBox(height: 16),
+          SizedBox(height: 16.h),
           Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 16),
+            padding: EdgeInsets.symmetric(horizontal: 16.w),
             child: AppGradientButton(
               label: 'trading_rules.read_full'.tr,
               icon: Icons.menu_book_rounded,
@@ -336,7 +337,7 @@ class _EverythingTab extends StatelessWidget {
               },
             ),
           ),
-          const SizedBox(height: 8),
+          SizedBox(height: 8.h),
         ],
       ),
     );
@@ -358,7 +359,7 @@ class _TabScroll extends StatelessWidget {
       physics: const BouncingScrollPhysics(),
       slivers: [
         SliverPadding(
-          padding: const EdgeInsets.only(bottom: 24),
+          padding: EdgeInsets.only(bottom: 24.h),
           sliver: SliverToBoxAdapter(child: child),
         ),
       ],

@@ -20,6 +20,21 @@ abstract class ApiEndpoints {
   static const forgotPassword = '/auth/forgot-password';
   static const logout = '/auth/logout';
 
+  // ---------------------------------------------------------------------------
+  // Profile & KYC
+  // ---------------------------------------------------------------------------
+  /// User profile. `GET` returns the profile envelope; `PUT` updates name,
+  /// email, phone, country_code, city.
+  static const profile = '/profile';
+
+  /// KYC verification status. `GET` returns the standard envelope whose `data`
+  /// describes the user's document/verification state.
+  static const kyc = '/kyc';
+
+  /// KYC document upload (`POST`, multipart). Fields: `id_document`,
+  /// `id_document_back`, `proof_of_address`, `proof_of_address_back`.
+  static const kycDocuments = '/kyc/documents';
+
   /// Home dashboard snapshot (KPIs, live accounts, health, activity). This is
   /// the one live `/api/v1` data screen; every other portal screen uses the
   /// Inertia `/app/...` routes or static demo data.

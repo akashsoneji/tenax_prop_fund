@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
 
 import '../../../shared/theme/app_colors.dart';
@@ -32,7 +33,7 @@ class AccountView extends StatelessWidget {
           PinnedGradientAppBar(title: 'account.title'.tr),
           SliverToBoxAdapter(
             child: Padding(
-              padding: const EdgeInsets.fromLTRB(16, 16, 16, 32),
+              padding: EdgeInsets.fromLTRB(16.w, 16.h, 16.w, 32.h),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
@@ -40,7 +41,7 @@ class AccountView extends StatelessWidget {
                         selected: c.selectedTab.value,
                         onChanged: c.selectTab,
                       )),
-                  const SizedBox(height: 16),
+                  SizedBox(height: 16.h),
                   _TabBody(controller: c),
                 ],
               ),
@@ -70,12 +71,12 @@ class _Tabs extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return SizedBox(
-      height: 42,
+      height: 42.h,
       child: ListView.separated(
         scrollDirection: Axis.horizontal,
         physics: const BouncingScrollPhysics(),
         itemCount: AccountDetailTab.values.length,
-        separatorBuilder: (_, _) => const SizedBox(width: 10),
+        separatorBuilder: (_, _) => SizedBox(width: 10.w),
         itemBuilder: (context, i) {
           final tab = AccountDetailTab.values[i];
           return _TabChip(
@@ -108,11 +109,11 @@ class _TabChip extends StatelessWidget {
       child: AnimatedContainer(
         duration: const Duration(milliseconds: 200),
         curve: Curves.easeOutCubic,
-        padding: const EdgeInsets.symmetric(horizontal: 16),
+        padding: EdgeInsets.symmetric(horizontal: 16.w),
         alignment: Alignment.center,
         decoration: BoxDecoration(
           color: selected ? scheme.primary : AppColors.transparent,
-          borderRadius: BorderRadius.circular(22),
+          borderRadius: BorderRadius.circular(22.r),
           border: Border.all(
             color: selected
                 ? scheme.primary
@@ -122,7 +123,7 @@ class _TabChip extends StatelessWidget {
         child: Text(
           label,
           style: TextStyle(
-            fontSize: 13,
+            fontSize: 13.sp,
             fontWeight: FontWeight.w700,
             color: selected ? AppColors.white : scheme.onSurfaceVariant,
           ),
@@ -190,7 +191,7 @@ class _OverviewTab extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
         AccountSummaryHero(header: data.header, stats: data.stats),
-        const SizedBox(height: 16),
+        SizedBox(height: 16.h),
         Obx(() => AccountHeaderCard(
               header: data.header,
               credentials: data.credentials,
@@ -200,18 +201,18 @@ class _OverviewTab extends StatelessWidget {
               onCopyLogin: () =>
                   controller.copy(data.credentials.login, 'account.copied'),
             )),
-        const SizedBox(height: 22),
+        SizedBox(height: 22.h),
         _SectionLabel('account.trading_objectives'.tr),
-        const SizedBox(height: 12),
+        SizedBox(height: 12.h),
         for (final o in data.objectives) ...[
           AccountObjectiveCard(objective: o),
-          const SizedBox(height: 12),
+          SizedBox(height: 12.h),
         ],
         if (data.health.isNotEmpty) ...[
-          const SizedBox(height: 6),
+          SizedBox(height: 6.h),
           AccountHealthCard(health: data.health),
         ],
-        const SizedBox(height: 18),
+        SizedBox(height: 18.h),
         AppGradientButton(
           label: 'account.trade_now'.tr,
           icon: Icons.trending_up_rounded,
@@ -236,11 +237,11 @@ class _TradingTab extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
         _SectionLabel('account.insights'.tr),
-        const SizedBox(height: 12),
+        SizedBox(height: 12.h),
         AccountInsightsGrid(metrics: data.insights.metrics),
-        const SizedBox(height: 22),
+        SizedBox(height: 22.h),
         _SectionLabel('account.recent_trades'.tr),
-        const SizedBox(height: 12),
+        SizedBox(height: 12.h),
         if (data.trades.isEmpty)
           _EmptyNote(text: 'account.no_trades'.tr)
         else
@@ -269,7 +270,7 @@ class _PlatformTab extends StatelessWidget {
               child: Text(
                 'account.connection_details'.tr,
                 style: TextStyle(
-                    fontSize: 16,
+                    fontSize: 16.sp,
                     fontWeight: FontWeight.w800,
                     color: Theme.of(context).colorScheme.onSurface),
               ),
@@ -277,7 +278,7 @@ class _PlatformTab extends StatelessWidget {
             AccountStatusPill(label: data.statusLabel, tone: data.tone),
           ],
         ),
-        const SizedBox(height: 14),
+        SizedBox(height: 14.h),
         Obx(() => AccountHeaderCard(
               header: AccountHeader(
                 login: data.credentials.login,
@@ -301,18 +302,18 @@ class _PlatformTab extends StatelessWidget {
               onCopyLogin: () =>
                   controller.copy(data.credentials.login, 'account.copied'),
             )),
-        const SizedBox(height: 22),
+        SizedBox(height: 22.h),
         _SectionLabel('account.downloads'.tr),
-        const SizedBox(height: 12),
+        SizedBox(height: 12.h),
         for (final d in data.downloads) ...[
           PlatformDownloadCard(
             download: d,
             onDownload: () =>
                 controller.copy(d.href, 'account.download_link_copied'),
           ),
-          const SizedBox(height: 12),
+          SizedBox(height: 12.h),
         ],
-        const SizedBox(height: 6),
+        SizedBox(height: 6.h),
         AppGradientButton(
           label: 'account.launch_web_terminal'.tr,
           icon: Icons.open_in_new_rounded,
@@ -338,7 +339,7 @@ class _ResetTab extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
         Container(
-          padding: const EdgeInsets.all(16),
+          padding: EdgeInsets.all(16.w),
           decoration: AppTheme.surfaceCard(scheme, radius: 16),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
@@ -349,59 +350,59 @@ class _ResetTab extends StatelessWidget {
                     child: Text(
                       '${'account.reset'.tr} ${data.login}',
                       style: TextStyle(
-                          fontSize: 16,
+                          fontSize: 16.sp,
                           fontWeight: FontWeight.w800,
                           color: scheme.onSurface),
                     ),
                   ),
                   if (data.percentLabel.isNotEmpty)
                     Container(
-                      padding: const EdgeInsets.symmetric(
-                          horizontal: 10, vertical: 4),
+                      padding: EdgeInsets.symmetric(
+                          horizontal: 10.w, vertical: 4.h),
                       decoration: BoxDecoration(
                         color: AppColors.amber.withValues(alpha: 0.16),
-                        borderRadius: BorderRadius.circular(20),
+                        borderRadius: BorderRadius.circular(20.r),
                       ),
                       child: Text(data.percentLabel,
-                          style: const TextStyle(
-                              fontSize: 11.5,
+                          style: TextStyle(
+                              fontSize: 11.5.sp,
                               fontWeight: FontWeight.w700,
                               color: AppColors.warningInk)),
                     ),
                 ],
               ),
-              const SizedBox(height: 12),
+              SizedBox(height: 12.h),
               Text('account.reset_blurb'.tr,
                   style: TextStyle(
-                      fontSize: 13,
+                      fontSize: 13.sp,
                       height: 1.4,
                       color: scheme.onSurfaceVariant)),
-              const SizedBox(height: 14),
+              SizedBox(height: 14.h),
               _KvLine(k: 'account.reset_original_fee'.tr, v: data.originalFee),
               _KvLine(k: 'account.reset_price'.tr, v: data.resetPrice),
               _KvLine(k: 'account.reset_valid_until'.tr, v: data.validUntil),
             ],
           ),
         ),
-        const SizedBox(height: 16),
+        SizedBox(height: 16.h),
         const ResetCarryList(),
         if (data.message.isNotEmpty) ...[
-          const SizedBox(height: 16),
+          SizedBox(height: 16.h),
           Container(
-            padding: const EdgeInsets.all(14),
+            padding: EdgeInsets.all(14.w),
             decoration: BoxDecoration(
               color: AppColors.amber.withValues(alpha: 0.10),
-              borderRadius: BorderRadius.circular(14),
+              borderRadius: BorderRadius.circular(14.r),
               border: Border.all(color: AppColors.amber.withValues(alpha: 0.3)),
             ),
             child: Text(data.message,
                 style: TextStyle(
-                    fontSize: 12.5,
+                    fontSize: 12.5.sp,
                     height: 1.4,
                     color: scheme.onSurface.withValues(alpha: 0.85))),
           ),
         ],
-        const SizedBox(height: 18),
+        SizedBox(height: 18.h),
         AppGradientButton(
           label: 'account.reset_this'.tr,
           onPressed: data.eligible && data.quotable ? () {} : null,
@@ -420,17 +421,17 @@ class _KvLine extends StatelessWidget {
   Widget build(BuildContext context) {
     final scheme = Theme.of(context).colorScheme;
     return Padding(
-      padding: const EdgeInsets.only(bottom: 10),
+      padding: EdgeInsets.only(bottom: 10.h),
       child: Row(
         children: [
           Expanded(
             child: Text(k,
                 style: TextStyle(
-                    fontSize: 13, color: scheme.onSurfaceVariant)),
+                    fontSize: 13.sp, color: scheme.onSurfaceVariant)),
           ),
           Text(v,
               style: TextStyle(
-                  fontSize: 13.5,
+                  fontSize: 13.5.sp,
                   fontWeight: FontWeight.w700,
                   color: scheme.onSurface)),
         ],
@@ -452,7 +453,7 @@ class _SectionLabel extends StatelessWidget {
     return Text(
       text,
       style: TextStyle(
-          fontSize: 18, fontWeight: FontWeight.w800, color: scheme.onSurface),
+          fontSize: 18.sp, fontWeight: FontWeight.w800, color: scheme.onSurface),
     );
   }
 }
@@ -465,11 +466,11 @@ class _EmptyNote extends StatelessWidget {
   Widget build(BuildContext context) {
     final scheme = Theme.of(context).colorScheme;
     return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 24),
+      padding: EdgeInsets.symmetric(vertical: 24.h),
       child: Center(
         child: Text(text,
             style: TextStyle(
-                fontSize: 13.5, color: scheme.onSurfaceVariant)),
+                fontSize: 13.5.sp, color: scheme.onSurfaceVariant)),
       ),
     );
   }
@@ -482,14 +483,14 @@ class _OverviewSkeleton extends StatelessWidget {
   Widget build(BuildContext context) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
-      children: const [
-        CardSkeleton(lines: 5, height: 240),
-        SizedBox(height: 16),
-        ShimmerBox(height: 90, radius: 16),
-        SizedBox(height: 22),
-        CardSkeleton(lines: 3, height: 120),
-        SizedBox(height: 12),
-        CardSkeleton(lines: 3, height: 120),
+      children: [
+        CardSkeleton(lines: 5, height: 240.h),
+        SizedBox(height: 16.h),
+        ShimmerBox(height: 90.h, radius: 16.r),
+        SizedBox(height: 22.h),
+        CardSkeleton(lines: 3, height: 120.h),
+        SizedBox(height: 12.h),
+        CardSkeleton(lines: 3, height: 120.h),
       ],
     );
   }

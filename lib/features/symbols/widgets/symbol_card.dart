@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
 
@@ -27,12 +28,12 @@ class SymbolCard extends StatelessWidget {
 
     return Material(
       color: AppColors.transparent,
-      borderRadius: BorderRadius.circular(18),
+      borderRadius: BorderRadius.circular(18.r),
       child: InkWell(
         onTap: onTap,
-        borderRadius: BorderRadius.circular(18),
+        borderRadius: BorderRadius.circular(18.r),
         child: Ink(
-          padding: const EdgeInsets.all(16),
+          padding: EdgeInsets.all(16.w),
           decoration: AppTheme.surfaceCard(scheme, radius: 18),
           child: Obx(() {
             final price = rx.value;
@@ -44,7 +45,7 @@ class SymbolCard extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 _header(scheme),
-                const SizedBox(height: 14),
+                SizedBox(height: 14.h),
                 Row(
                   children: [
                     Expanded(
@@ -55,7 +56,7 @@ class SymbolCard extends StatelessWidget {
                         scheme: scheme,
                       ),
                     ),
-                    const SizedBox(width: 10),
+                    SizedBox(width: 10.w),
                     Expanded(
                       child: _PriceTile(
                         label: 'trade.buy'.tr,
@@ -66,7 +67,7 @@ class SymbolCard extends StatelessWidget {
                     ),
                   ],
                 ),
-                const SizedBox(height: 12),
+                SizedBox(height: 12.h),
                 _MetricStrip(
                   high: fmt(price.dayHigh ?? 0),
                   low: fmt(price.dayLow ?? 0),
@@ -93,30 +94,30 @@ class SymbolCard extends StatelessWidget {
                 maxLines: 1,
                 overflow: TextOverflow.ellipsis,
                 style: GoogleFonts.beVietnamPro(
-                  fontSize: 17,
+                  fontSize: 17.sp,
                   fontWeight: FontWeight.w800,
                   color: scheme.onSurface,
                 ),
               ),
-              const SizedBox(height: 2),
+              SizedBox(height: 2.h),
               Text(
                 symbol.subtitle,
                 maxLines: 1,
                 overflow: TextOverflow.ellipsis,
                 style: GoogleFonts.beVietnamPro(
-                  fontSize: 12.5,
+                  fontSize: 12.5.sp,
                   color: scheme.onSurfaceVariant,
                 ),
               ),
             ],
           ),
         ),
-        const SizedBox(width: 10),
+        SizedBox(width: 10.w),
         Container(
-          padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+          padding: EdgeInsets.symmetric(horizontal: 10.w, vertical: 6.h),
           decoration: BoxDecoration(
             color: scheme.primary.withValues(alpha: 0.10),
-            borderRadius: BorderRadius.circular(20),
+            borderRadius: BorderRadius.circular(20.r),
           ),
           child: Row(
             mainAxisSize: MainAxisSize.min,
@@ -124,13 +125,13 @@ class SymbolCard extends StatelessWidget {
               Text(
                 'symbols.trade'.tr,
                 style: GoogleFonts.beVietnamPro(
-                  fontSize: 12,
+                  fontSize: 12.sp,
                   fontWeight: FontWeight.w700,
                   color: scheme.primary,
                 ),
               ),
-              const SizedBox(width: 2),
-              Icon(Icons.arrow_forward_ios, size: 11, color: scheme.primary),
+              SizedBox(width: 2.w),
+              Icon(Icons.arrow_forward_ios, size: 11.w, color: scheme.primary),
             ],
           ),
         ),
@@ -157,10 +158,10 @@ class _PriceTile extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+      padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 10.h),
       decoration: BoxDecoration(
         color: color.withValues(alpha: 0.10),
-        borderRadius: BorderRadius.circular(14),
+        borderRadius: BorderRadius.circular(14.r),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -170,18 +171,18 @@ class _PriceTile extends StatelessWidget {
             maxLines: 1,
             overflow: TextOverflow.ellipsis,
             style: GoogleFonts.beVietnamPro(
-              fontSize: 11.5,
+              fontSize: 11.5.sp,
               fontWeight: FontWeight.w600,
               color: scheme.onSurfaceVariant,
             ),
           ),
-          const SizedBox(height: 3),
+          SizedBox(height: 3.h),
           Text(
             value,
             maxLines: 1,
             overflow: TextOverflow.ellipsis,
             style: GoogleFonts.beVietnamPro(
-              fontSize: 18,
+              fontSize: 18.sp,
               fontWeight: FontWeight.w800,
               color: color,
             ),
@@ -227,18 +228,18 @@ class _MetricStrip extends StatelessWidget {
           maxLines: 1,
           overflow: TextOverflow.ellipsis,
           style: GoogleFonts.beVietnamPro(
-            fontSize: 10.5,
+            fontSize: 10.5.sp,
             fontWeight: FontWeight.w500,
             color: scheme.onSurfaceVariant,
           ),
         ),
-        const SizedBox(height: 3),
+        SizedBox(height: 3.h),
         Text(
           value,
           maxLines: 1,
           overflow: TextOverflow.ellipsis,
           style: GoogleFonts.beVietnamPro(
-            fontSize: 13,
+            fontSize: 13.sp,
             fontWeight: FontWeight.w800,
             color: scheme.onSurface,
           ),
@@ -258,41 +259,41 @@ class SymbolCardSkeleton extends StatelessWidget {
   Widget build(BuildContext context) {
     final scheme = Theme.of(context).colorScheme;
     return Container(
-      padding: const EdgeInsets.all(16),
+      padding: EdgeInsets.all(16.w),
       decoration: AppTheme.surfaceCard(scheme, radius: 18),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
-        children: const [
+        children: [
           Row(
             children: [
               Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    ShimmerBox(width: 90, height: 16),
-                    SizedBox(height: 8),
-                    ShimmerBox(width: 140, height: 11),
+                    ShimmerBox(width: 90.w, height: 16.h),
+                    SizedBox(height: 8.h),
+                    ShimmerBox(width: 140.w, height: 11.h),
                   ],
                 ),
               ),
-              SizedBox(width: 12),
-              ShimmerBox(width: 84, height: 34, radius: 10),
+              SizedBox(width: 12.w),
+              ShimmerBox(width: 84.w, height: 34.h, radius: 10.r),
             ],
           ),
-          SizedBox(height: 14),
+          SizedBox(height: 14.h),
           Row(
             children: [
-              Expanded(child: ShimmerBox(height: 38, radius: 12)),
-              SizedBox(width: 10),
-              Expanded(child: ShimmerBox(height: 38, radius: 12)),
+              Expanded(child: ShimmerBox(height: 38.h, radius: 12.r)),
+              SizedBox(width: 10.w),
+              Expanded(child: ShimmerBox(height: 38.h, radius: 12.r)),
             ],
           ),
-          SizedBox(height: 14),
+          SizedBox(height: 14.h),
           Row(
             children: [
-              Expanded(child: ShimmerBox(width: 60, height: 30)),
-              Expanded(child: ShimmerBox(width: 60, height: 30)),
-              Expanded(child: ShimmerBox(width: 60, height: 30)),
+              Expanded(child: ShimmerBox(width: 60.w, height: 30.h)),
+              Expanded(child: ShimmerBox(width: 60.w, height: 30.h)),
+              Expanded(child: ShimmerBox(width: 60.w, height: 30.h)),
             ],
           ),
         ],
@@ -315,7 +316,7 @@ class SymbolListSkeleton extends StatelessWidget {
       children: [
         for (var i = 0; i < rows; i++)
           Padding(
-            padding: EdgeInsets.only(bottom: i == rows - 1 ? 0 : 14),
+            padding: EdgeInsets.only(bottom: i == rows - 1 ? 0 : 14.h),
             child: const SymbolCardSkeleton(),
           ),
       ],

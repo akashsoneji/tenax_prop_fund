@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
 
 import '../../../shared/theme/app_theme.dart';
@@ -28,7 +29,7 @@ class CalculatorsView extends StatelessWidget {
           PinnedGradientAppBar(title: 'calculators.title'.tr),
           SliverToBoxAdapter(
             child: Padding(
-              padding: const EdgeInsets.fromLTRB(16, 18, 16, 32),
+              padding: EdgeInsets.fromLTRB(16.w, 18.h, 16.w, 32.h),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
@@ -44,7 +45,7 @@ class CalculatorsView extends StatelessWidget {
                       onSelected: (i) => c.setMode(CalcMode.values[i]),
                     ),
                   ),
-                  const SizedBox(height: 18),
+                  SizedBox(height: 18.h),
                   Obx(
                     () => AnimatedSwitcher(
                       duration: AppMotion.base,
@@ -128,7 +129,7 @@ class _PositionSizeTab extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
         _symbolField(c),
-        const SizedBox(height: 14),
+        SizedBox(height: 14.h),
         Row(
           children: [
             Expanded(
@@ -138,7 +139,7 @@ class _PositionSizeTab extends StatelessWidget {
                 onChanged: (v) => c.balance.value = v,
               ),
             ),
-            const SizedBox(width: 12),
+            SizedBox(width: 12.w),
             Expanded(
               child: CalcInputField(
                 label: 'calculators.risk_percent'.tr,
@@ -148,13 +149,13 @@ class _PositionSizeTab extends StatelessWidget {
             ),
           ],
         ),
-        const SizedBox(height: 14),
+        SizedBox(height: 14.h),
         CalcInputField(
           label: 'calculators.stop_loss_pips'.tr,
           value: c.stopLossPips.value,
           onChanged: (v) => c.stopLossPips.value = v,
         ),
-        const SizedBox(height: 20),
+        SizedBox(height: 20.h),
         Obx(
           () => CalcResultCard(
             headline: '${_num2(c.positionLots)} lots',
@@ -162,7 +163,7 @@ class _PositionSizeTab extends StatelessWidget {
                 'Risking ${_money(c.riskAmount)} · ${_money(c.riskPerPip)} per pip',
           ),
         ),
-        const SizedBox(height: 14),
+        SizedBox(height: 14.h),
         const CalcNoteBanner(
           tone: CalcNoteTone.success,
           text: 'Inside your per-trade cap and today\u2019s remaining room.',
@@ -185,13 +186,13 @@ class _PipValueTab extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
         _symbolField(c),
-        const SizedBox(height: 14),
+        SizedBox(height: 14.h),
         CalcInputField(
           label: 'calculators.lots'.tr,
           value: c.lots.value,
           onChanged: (v) => c.lots.value = v,
         ),
-        const SizedBox(height: 20),
+        SizedBox(height: 20.h),
         Obx(
           () => CalcResultCard(
             headline: '${_money(c.pipValue)} per pip',
@@ -199,7 +200,7 @@ class _PipValueTab extends StatelessWidget {
                 'On ${c.lots.value} lots of ${c.symbol.value} · contract ${c.contractSize}',
           ),
         ),
-        const SizedBox(height: 14),
+        SizedBox(height: 14.h),
         Obx(
           () => CalcNoteBanner(
             text: 'A 30 pip stop on this size risks ${_money(c.pipValueStopRisk)}.',
@@ -223,20 +224,20 @@ class _MarginTab extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
         _symbolField(c),
-        const SizedBox(height: 14),
+        SizedBox(height: 14.h),
         CalcInputField(
           label: 'calculators.lots'.tr,
           value: c.lots.value,
           onChanged: (v) => c.lots.value = v,
         ),
-        const SizedBox(height: 20),
+        SizedBox(height: 20.h),
         Obx(
           () => CalcResultCard(
             headline: '${_money(c.marginRequired)} margin',
             subtitle: 'Notional ${_money(c.notional)} at 1:${c.leverage}',
           ),
         ),
-        const SizedBox(height: 14),
+        SizedBox(height: 14.h),
         Obx(
           () => CalcNoteBanner(
             text:
@@ -261,7 +262,7 @@ class _ProfitLossTab extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
         _symbolField(c),
-        const SizedBox(height: 14),
+        SizedBox(height: 14.h),
         Obx(
           () => CalcTwoWayToggle(
             leftLabel: 'calculators.buy'.tr,
@@ -271,7 +272,7 @@ class _ProfitLossTab extends StatelessWidget {
                 c.setSide(buy ? TradeSide.buy : TradeSide.sell),
           ),
         ),
-        const SizedBox(height: 14),
+        SizedBox(height: 14.h),
         Row(
           children: [
             Expanded(
@@ -281,7 +282,7 @@ class _ProfitLossTab extends StatelessWidget {
                 onChanged: (v) => c.entry.value = v,
               ),
             ),
-            const SizedBox(width: 12),
+            SizedBox(width: 12.w),
             Expanded(
               child: CalcInputField(
                 label: 'calculators.exit'.tr,
@@ -291,13 +292,13 @@ class _ProfitLossTab extends StatelessWidget {
             ),
           ],
         ),
-        const SizedBox(height: 14),
+        SizedBox(height: 14.h),
         CalcInputField(
           label: 'calculators.lots'.tr,
           value: c.lots.value,
           onChanged: (v) => c.lots.value = v,
         ),
-        const SizedBox(height: 20),
+        SizedBox(height: 20.h),
         Obx(() {
           final pl = c.profitLoss;
           final sign = pl >= 0 ? '+' : '';

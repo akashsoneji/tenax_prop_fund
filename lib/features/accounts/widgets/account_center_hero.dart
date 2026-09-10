@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
 
 import '../../../shared/theme/app_colors.dart';
@@ -34,15 +35,15 @@ class AccountCenterHero extends StatelessWidget {
     final text = Theme.of(context).textTheme;
 
     return Container(
-      padding: const EdgeInsets.all(16),
+      padding: EdgeInsets.all(16.w),
       decoration: BoxDecoration(
         gradient: AppTheme.brandGradient(scheme),
-        borderRadius: BorderRadius.circular(20),
+        borderRadius: BorderRadius.circular(20.r),
         boxShadow: [
           BoxShadow(
             color: scheme.primary.withValues(alpha: 0.28),
-            blurRadius: 18,
-            offset: const Offset(0, 10),
+            blurRadius: 18.r,
+            offset: Offset(0, 10.h),
           ),
         ],
       ),
@@ -57,7 +58,7 @@ class AccountCenterHero extends StatelessWidget {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     _Eyebrow(label: 'accounts.center'.tr),
-                    const SizedBox(height: 8),
+                    SizedBox(height: 8.h),
                     Text(
                       'accounts.subtitle'.tr,
                       maxLines: 2,
@@ -71,7 +72,7 @@ class AccountCenterHero extends StatelessWidget {
                   ],
                 ),
               ),
-              const SizedBox(width: 12),
+              SizedBox(width: 12.w),
               if (trialEnabled)
                 _IconCta(
                   icon: Icons.card_giftcard_rounded,
@@ -80,14 +81,14 @@ class AccountCenterHero extends StatelessWidget {
                 ),
             ],
           ),
-          const SizedBox(height: 14),
+          SizedBox(height: 14.h),
           _MetricStrip(
             owned: ownedTotal,
             active: active,
             funded: funded,
             provisioning: provisioning,
           ),
-          const SizedBox(height: 14),
+          SizedBox(height: 14.h),
           _HeroButton(
             label: 'accounts.start_challenge'.tr,
             icon: Icons.rocket_launch_rounded,
@@ -106,28 +107,28 @@ class _Eyebrow extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+      padding: EdgeInsets.symmetric(horizontal: 10.w, vertical: 5.h),
       decoration: BoxDecoration(
         color: AppColors.white.withValues(alpha: 0.15),
-        borderRadius: BorderRadius.circular(30),
+        borderRadius: BorderRadius.circular(30.r),
       ),
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
           Container(
-            width: 6,
-            height: 6,
+            width: 6.w,
+            height: 6.h,
             decoration: const BoxDecoration(
               color: AppColors.accent,
               shape: BoxShape.circle,
             ),
           ),
-          const SizedBox(width: 7),
+          SizedBox(width: 7.w),
           Text(
             label,
-            style: const TextStyle(
+            style: TextStyle(
               color: AppColors.white,
-              fontSize: 10,
+              fontSize: 10.sp,
               fontWeight: FontWeight.w700,
               letterSpacing: 1.1,
             ),
@@ -155,10 +156,10 @@ class _MetricStrip extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 12),
+      padding: EdgeInsets.symmetric(horizontal: 8.w, vertical: 12.h),
       decoration: BoxDecoration(
         color: AppColors.white.withValues(alpha: 0.10),
-        borderRadius: BorderRadius.circular(14),
+        borderRadius: BorderRadius.circular(14.r),
         border: Border.all(color: AppColors.white.withValues(alpha: 0.14)),
       ),
       child: Row(
@@ -193,8 +194,8 @@ class _StripDivider extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      width: 1,
-      height: 30,
+      width: 1.w,
+      height: 30.h,
       color: AppColors.white.withValues(alpha: 0.14),
     );
   }
@@ -212,14 +213,14 @@ class _Metric extends StatelessWidget {
       children: [
         Text(
           '$value',
-          style: const TextStyle(
+          style: TextStyle(
             color: AppColors.white,
-            fontSize: 22,
+            fontSize: 22.sp,
             fontWeight: FontWeight.w800,
             height: 1.1,
           ),
         ),
-        const SizedBox(height: 4),
+        SizedBox(height: 4.h),
         Text(
           label.toUpperCase(),
           maxLines: 1,
@@ -227,7 +228,7 @@ class _Metric extends StatelessWidget {
           textAlign: TextAlign.center,
           style: TextStyle(
             color: AppColors.white.withValues(alpha: 0.72),
-            fontSize: 9,
+            fontSize: 9.sp,
             fontWeight: FontWeight.w700,
             letterSpacing: 0.5,
           ),
@@ -258,11 +259,11 @@ class _IconCta extends StatelessWidget {
         child: InkWell(
           customBorder: const CircleBorder(),
           onTap: onTap,
-          child: const SizedBox(
-            width: 40,
-            height: 40,
+          child: SizedBox(
+            width: 40.w,
+            height: 40.h,
             child: Icon(Icons.card_giftcard_rounded,
-                size: 20, color: AppColors.white),
+                size: 20.w, color: AppColors.white),
           ),
         ),
       ),
@@ -285,26 +286,26 @@ class _HeroButton extends StatelessWidget {
   Widget build(BuildContext context) {
     return Material(
       color: AppColors.white,
-      borderRadius: BorderRadius.circular(30),
+      borderRadius: BorderRadius.circular(30.r),
       child: InkWell(
         onTap: onTap,
-        borderRadius: BorderRadius.circular(30),
+        borderRadius: BorderRadius.circular(30.r),
         child: Container(
-          height: 44,
+          height: 44.h,
           alignment: Alignment.center,
           child: Row(
             mainAxisSize: MainAxisSize.min,
             children: [
               Icon(icon,
-                  size: 17, color: Theme.of(context).colorScheme.primary),
-              const SizedBox(width: 8),
+                  size: 17.w, color: Theme.of(context).colorScheme.primary),
+              SizedBox(width: 8.w),
               Text(
                 label,
                 maxLines: 1,
                 overflow: TextOverflow.ellipsis,
                 style: TextStyle(
                   color: Theme.of(context).colorScheme.primary,
-                  fontSize: 14,
+                  fontSize: 14.sp,
                   fontWeight: FontWeight.w700,
                 ),
               ),

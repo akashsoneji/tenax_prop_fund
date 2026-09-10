@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
 
 import '../../../shared/theme/app_colors.dart';
@@ -6,7 +7,7 @@ import '../../../shared/theme/app_text.dart';
 import '../../../shared/theme/app_theme.dart';
 import '../models/positions_models.dart';
 
-/// One open-position (or pending-order) card: symbol + side pill, volume, open
+/// One open-position
 /// and current price, live PnL, and a close/cancel action. Mirrors the
 /// white_label trade-screen row/expanded card. Profit/loss is the ONLY colour
 /// that maps to a semantic token (success/danger); everything else is theme.
@@ -31,8 +32,8 @@ class PositionCard extends StatelessWidget {
     final muted = scheme.onSurface.withValues(alpha: AppColors.alphaMuted);
 
     return Container(
-      margin: const EdgeInsets.only(bottom: 10),
-      padding: const EdgeInsets.all(14),
+      margin: EdgeInsets.only(bottom: 10.h),
+      padding: EdgeInsets.all(14.w),
       decoration: AppTheme.surfaceCard(scheme, radius: 16),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -44,7 +45,7 @@ class PositionCard extends StatelessWidget {
                   position.symbol,
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
-                  style: AppText.title(color: scheme.onSurface, fontSize: 15),
+                  style: AppText.title(color: scheme.onSurface, fontSize: 15.sp),
                 ),
               ),
               _SidePill(
@@ -53,12 +54,12 @@ class PositionCard extends StatelessWidget {
               ),
             ],
           ),
-          const SizedBox(height: 4),
+          SizedBox(height: 4.h),
           Text(
             '${'positions.volume'.tr}: ${position.volume.toStringAsFixed(2)}',
             style: AppText.label(color: muted),
           ),
-          const SizedBox(height: 10),
+          SizedBox(height: 10.h),
           Row(
             children: [
               Expanded(
@@ -86,7 +87,7 @@ class PositionCard extends StatelessWidget {
                 ),
             ],
           ),
-          const SizedBox(height: 12),
+          SizedBox(height: 12.h),
           SizedBox(
             width: double.infinity,
             child: OutlinedButton(
@@ -95,12 +96,12 @@ class PositionCard extends StatelessWidget {
                 foregroundColor: AppColors.danger,
                 side: const BorderSide(color: AppColors.danger),
                 shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(12),
+                  borderRadius: BorderRadius.circular(12.r),
                 ),
               ),
               child: Text(
                 (position.isPending ? 'positions.cancel' : 'positions.close').tr,
-                style: AppText.subtitle(color: AppColors.danger, fontSize: 13),
+                style: AppText.subtitle(color: AppColors.danger, fontSize: 13.sp),
               ),
             ),
           ),
@@ -116,15 +117,15 @@ class _SidePill extends StatelessWidget {
   final Color color;
 
   @override
-  Widget build(BuildContext context) => Container(
-        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+      Widget build(BuildContext context) => Container(
+        padding: EdgeInsets.symmetric(horizontal: 10.w, vertical: 4.h),
         decoration: BoxDecoration(
           color: color.withValues(alpha: AppColors.alphaHairline),
-          borderRadius: BorderRadius.circular(8),
+          borderRadius: BorderRadius.circular(8.r),
         ),
         child: Text(
           label.toUpperCase(),
-          style: AppText.label(color: color, fontSize: 11),
+          style: AppText.label(color: color, fontSize: 11.sp),
         ),
       );
 }
@@ -150,15 +151,15 @@ class _PriceBlock extends StatelessWidget {
       crossAxisAlignment:
           alignEnd ? CrossAxisAlignment.end : CrossAxisAlignment.start,
       children: [
-        Text(label, style: AppText.label(color: muted, fontSize: 11)),
-        const SizedBox(height: 2),
+        Text(label, style: AppText.label(color: muted, fontSize: 11.sp)),
+        SizedBox(height: 2.h),
         Text(
           value,
           maxLines: 1,
           overflow: TextOverflow.ellipsis,
           style: AppText.subtitle(
             color: valueColor ?? scheme.onSurface,
-            fontSize: 13,
+            fontSize: 13.sp,
           ),
         ),
       ],

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
 
@@ -55,8 +56,8 @@ class _SplashViewState extends State<SplashView> {
             mainAxisSize: MainAxisSize.min,
             children: [
               Container(
-                width: 120,
-                height: 120,
+                width: 120.w,
+                height: 120.h,
                 decoration: BoxDecoration(
                   shape: BoxShape.circle,
                   color: AppColors.white.withValues(alpha: 0.10),
@@ -69,29 +70,29 @@ class _SplashViewState extends State<SplashView> {
                 child: Text(
                   'tp',
                   style: GoogleFonts.beVietnamPro(
-                    fontSize: 48,
+                    fontSize: 48.sp,
                     fontWeight: FontWeight.w800,
                     fontStyle: FontStyle.italic,
                     color: AppTheme.accent,
                   ),
                 ),
               ),
-              const SizedBox(height: 20),
+              SizedBox(height: 20.h),
               Text(
                 config.appName,
                 style: GoogleFonts.beVietnamPro(
-                  fontSize: 24,
+                  fontSize: 24.sp,
                   fontWeight: FontWeight.w700,
                   color: AppColors.white,
                   letterSpacing: 0.4,
                 ),
               ),
-              const SizedBox(height: 8),
+              SizedBox(height: 8.h),
               Text(
                 'splash.loading'.tr,
                 style: GoogleFonts.beVietnamPro(
                   color: AppColors.white.withValues(alpha: 0.8),
-                  fontSize: 13,
+                  fontSize: 13.sp,
                 ),
               ),
             ],
