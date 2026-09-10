@@ -130,17 +130,24 @@ class PositionsController extends GetxController {
     _accountWs.switchAccount(account);
   }
 
-  /// Closes one open position. Optimistically removes the row, then calls REST;
-  /// on failure the next socket frame restores it.
-  Future<void> closePosition(TradePosition position) async {
-    if (busy.value) return;
+  /// Closes one open position. For a FULL close (volume null) the row is removed
+  /// optimistically; a PARTIAL close ([volume] set) keeps the row so the socket
+  /// can update its remaining lots. Returns true on success.
+  Future<bool> closePosition(TradePosition position, {double? volume}) async {
+    if (busy.value) return false;
     busy.value = true;
-    _positionsWs.removePositionOptimistic(position.orderId);
-    await _repository.closePositionByPositionId(
+    if (volume == null) {
+      _positionsWs.removePositionOptimistic(position.orderId);
+    }
+    final res = await _repository.closePositionByPositionId(
       positionId: position.orderId,
-      tradingAccount: tradingAccount.value,
+      tradingAccount: position.mt5Account.isNotEmpty
+          ? position.mt5Account
+          : tradingAccount.value,
+      volume: volume,
     );
     if (!isClosed) busy.value = false;
+    return res.success;
   }
 
   /// Closes ALL open positions.
@@ -150,6 +157,26 @@ class PositionsController extends GetxController {
     _positionsWs.openPositions.clear();
     await _repository.closeAllPositions(tradingAccount: tradingAccount.value);
     if (!isClosed) busy.value = false;
+  }
+
+  /// Updates take-profit / stop-loss for [position]. Pass `0` to clear a level.
+  /// Returns true on success so the caller can close the edit sheet.
+  Future<bool> updateTPSL(
+    TradePosition position, {
+    num? takeProfit,
+    num? stopLoss,
+  }) async {
+    if (busy.value) return false;
+    busy.value = true;
+    final res = await _repository.updateTPSL(
+      tradingAccount:
+          position.mt5Account.isNotEmpty ? position.mt5Account : tradingAccount.value,
+      positionId: position.orderId,
+      takeProfit: takeProfit,
+      stopLoss: stopLoss,
+    );
+    if (!isClosed) busy.value = false;
+    return res.success;
   }
 
   /// Cancels a pending order.

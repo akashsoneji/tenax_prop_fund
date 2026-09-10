@@ -165,13 +165,110 @@ class PositionsWsService extends GetxService with WidgetsBindingObserver {
   }
 
   void _onOpFrame(dynamic decoded) {
-    if (decoded is! Map) return;
-    final map = decoded.cast<String, dynamic>();
-    // Control messages (authenticated / errors) have a `type` and no positions.
-    final op = map['openPositions'] ?? map['open_positions'];
-    if (op is! Map) return;
-    final data = OpenPositionsData.fromJson(op.cast<String, dynamic>());
-    openPositions.assignAll(data.positions);
+    // Format A — Map envelope: `{ openPositions: { positions: [...] } }` (full snapshot).
+    if (decoded is Map) {
+      final map = decoded.cast<String, dynamic>();
+      final op = map['openPositions'] ?? map['open_positions'];
+      if (op is Map) {
+        final data = OpenPositionsData.fromJson(op.cast<String, dynamic>());
+        openPositions.assignAll(data.positions);
+        return;
+      }
+      // Full snapshot chunk: `{ type: '..._init', chunk: [[...], ...] }`.
+      final chunk = map['chunk'];
+      if (chunk is List) {
+        final parsed = <TradingPosition>[];
+        for (final row in chunk) {
+          final p = _positionFromOpArray(row);
+          if (p != null) parsed.add(p);
+        }
+        openPositions.assignAll(parsed);
+      }
+      // Any other Map (authenticated / subscribed / errors) — nothing to do.
+      return;
+    }
+    // Format B — prefixed array(s). A batch is a list-of-lists
+    // (`[["a","op",...], ["u","op",...]]`); a single tick is a bare row whose
+    // first element is the string tag (`["u","op",...]`). Differentiate on the
+    // first element so a bare row is applied whole, not field-by-field.
+    if (decoded is List && decoded.isNotEmpty) {
+      if (decoded.first is List) {
+        for (final row in decoded) {
+          _applyOpRow(row);
+        }
+      } else {
+        _applyOpRow(decoded);
+      }
+    }
+  }
+
+  /// Applies one `/op` row: `["a"|"u","op", id, acct, symbol, side, vol, open,
+  /// current, profit, swap, sl, tp, serverType, timeCreate, digits, ...]` upserts,
+  /// `["r","op", id]` / `["r", acct, id]` removes.
+  void _applyOpRow(dynamic row) {
+    if (row is! List || row.isEmpty) return;
+    final tag = row[0].toString();
+    if (tag == 'r') {
+      // Remove: id is the last scalar element.
+      final id = row.last.toString();
+      openPositions.removeWhere((p) => p.position.toString() == id);
+      return;
+    }
+    final position = _positionFromOpArray(row);
+    if (position == null) return;
+    final idx =
+        openPositions.indexWhere((p) => p.position == position.position);
+    if (idx >= 0) {
+      openPositions[idx] = position;
+    } else {
+      openPositions.add(position);
+    }
+  }
+
+  /// Parses a prefixed `/op` array into a [TradingPosition]. Tolerant of the
+  /// 8/10/12/17-element variants the trade-engine emits; missing fields default.
+  TradingPosition? _positionFromOpArray(dynamic row) {
+    if (row is! List) return null;
+    // Skip the `["a","op", ...]` prefix when present; some frames are bare.
+    final hasPrefix = row.isNotEmpty && row[0] is String;
+    final f = hasPrefix && row.length > 2 && row[1].toString() == 'op'
+        ? row.sublist(2)
+        : row;
+    if (f.length < 8) return null;
+    double toD(int i) =>
+        i < f.length ? (double.tryParse(f[i].toString()) ?? 0.0) : 0.0;
+    int toI(int i) => i < f.length ? (int.tryParse(f[i].toString()) ?? 0) : 0;
+
+    // Stripped layout (prefix `["a","op"]` already removed):
+    // [0]positionId [1]mt5Account [2]symbol [3]side(0=Buy,1=Sell) [4]volume
+    // [5]priceOpen [6]priceCurrent [7]profit [8]swap [9]SL [10]TP
+    // [11]serverType("sh") [12]timeCreate(unix s) [13]digits [14]contractSize.
+    final side = toI(3);
+    final swap = toD(8);
+    final sl = toD(9);
+    final tp = toD(10);
+    final timeCreate = toI(12);
+    final digits = f.length > 13 ? toI(13) : 5;
+    return TradingPosition(
+      mt5Account: toI(1),
+      position: toI(0),
+      action: side == 0 ? 'Buy' : 'Sell',
+      volume: f.length > 4 ? f[4].toString() : '0',
+      priceOpen: f.length > 5 ? f[5].toString() : '0',
+      priceSL: sl == 0.0 ? '0' : sl.toString(),
+      priceTP: tp == 0.0 ? '0' : tp.toString(),
+      priceCurrent: f.length > 6 ? f[6].toString() : '0',
+      closeTime: '',
+      timeCreate: timeCreate > 0
+          ? DateTime.fromMillisecondsSinceEpoch(timeCreate * 1000, isUtc: true)
+              .toIso8601String()
+          : '',
+      symbol: f.length > 2 ? f[2].toString() : '',
+      logo: '',
+      profit: toD(7),
+      digits: digits > 0 ? digits : 5,
+      swap: swap,
+    );
   }
 
   void _onPoFrame(dynamic decoded) {
@@ -251,7 +348,7 @@ class _Channel {
   void startHeartbeat() {
     heartbeatTimer?.cancel();
     heartbeatTimer = Timer.periodic(const Duration(seconds: 20), (_) {
-      if (channel != null) send({'action': 'ping'});
+      if (channel != null) send(const {});
     });
   }
 

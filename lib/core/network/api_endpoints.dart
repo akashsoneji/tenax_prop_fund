@@ -81,21 +81,22 @@ abstract class ApiEndpoints {
   // root-relative (`/accounts`, `/dashboard`), so the trade paths follow that
   // convention below.
   //
-  // TODO(backend): confirm the real tenax trade paths. white_label calls
-  // `user/trade/new-order`, `user/trade/closePositionByPositionId`, etc. If the
-  // tenax backend actually expects the `user/` prefix (or a different base than
-  // `/api/v1`), adjust these constants accordingly — the request bodies and
-  // socket protocol are already verbatim from white_label.
-  static const placeOrder = '/trade/new-order';
-  static const closePositionByPositionId = '/trade/closePositionByPositionId';
-  static const closePositions = '/trade/closePositions';
-  static const cancelPendingOrder = '/trade/cancel-pending-order';
-  static const closePendingOrder = '/trade/closePendingOrder';
-  static const modifyPendingOrder = '/trade/modify-pending-order';
-  static const updateTPSL = '/trade/update-tp-sl';
-  static const updatePendingOrderTPSL = '/trade/update-pending-order-tp-sl';
+  // These trade endpoints live on the WEB host under `/api/user/trade/...`
+  // (verified against the live pipzefunded.com portal), NOT the `/api/v1`
+  // mobile base — the mobile API v1 collection has no trade routes. They are
+  // therefore called via ApiClient.postWeb / getWeb, which target the root host.
+  static const placeOrder = '/api/user/trade/new-order';
+  static const closePositionByPositionId =
+      '/api/user/trade/closePositionByPositionId';
+  static const closePositions = '/api/user/trade/closePositions';
+  static const cancelPendingOrder = '/api/user/trade/cancel-pending-order';
+  static const closePendingOrder = '/api/user/trade/closePendingOrder';
+  static const modifyPendingOrder = '/api/user/trade/modify-pending-order';
+  static const updateTPSL = '/api/user/trade/update-tp-sl';
+  static const updatePendingOrderTPSL =
+      '/api/user/trade/update-pending-order-tp-sl';
 
-  /// Trade history (GET). Standard `{success, message, data, meta}` envelope;
-  /// `data` may be a flat list or `{data, pagination, totals, summary}`.
-  static const tradeHistory = '/trade/tradehistory';
+  /// Trade history (GET) on the web host. Standard envelope; `data` may be a
+  /// flat list or `{data, pagination, totals, summary}`.
+  static const tradeHistory = '/api/user/trade/tradehistory';
 }

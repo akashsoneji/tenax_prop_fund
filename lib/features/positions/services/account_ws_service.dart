@@ -121,7 +121,7 @@ class AccountWsService extends GetxService with WidgetsBindingObserver {
   void _startHeartbeat() {
     _heartbeatTimer?.cancel();
     _heartbeatTimer = Timer.periodic(const Duration(seconds: 20), (_) {
-      if (_channel != null) _send({'action': 'ping'});
+      if (_channel != null) _send(const {});
     });
   }
 

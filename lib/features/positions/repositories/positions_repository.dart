@@ -16,18 +16,21 @@ class PositionsRepository {
 
   final ApiClient _api;
 
-  /// Closes one open position by its trade-engine position id.
-  /// white_label body: `{ position_id, trading_account }`.
+  /// Closes one open position by its trade-engine position id. Pass [volume]
+  /// for a PARTIAL close (lots to close); omit it for a full close.
+  /// Web body: `{ position_id, mt5_account, volume? }`.
   Future<ApiResponse<bool>> closePositionByPositionId({
     required String positionId,
     required String tradingAccount,
+    double? volume,
   }) {
     return ApiEnvelope.guard<bool>(
-      () => _api.post<Map<String, dynamic>>(
+      () => _api.postWeb<Map<String, dynamic>>(
         ApiEndpoints.closePositionByPositionId,
         data: {
-          'position_id': positionId,
-          'trading_account': tradingAccount,
+          'position_id': int.tryParse(positionId) ?? positionId,
+          'mt5_account': tradingAccount,
+          if (volume != null) 'volume': volume,
         },
       ),
       (_) => true,
@@ -41,9 +44,9 @@ class PositionsRepository {
     required String tradingAccount,
   }) {
     return ApiEnvelope.guard<bool>(
-      () => _api.post<Map<String, dynamic>>(
+      () => _api.postWeb<Map<String, dynamic>>(
         ApiEndpoints.closePositions,
-        data: {'trading_account': tradingAccount},
+        data: {'mt5_account': tradingAccount},
       ),
       (_) => true,
       successMessage: 'positions.close_all_success'.tr,
@@ -56,15 +59,39 @@ class PositionsRepository {
     required String tradingAccount,
   }) {
     return ApiEnvelope.guard<bool>(
-      () => _api.post<Map<String, dynamic>>(
+      () => _api.postWeb<Map<String, dynamic>>(
         ApiEndpoints.closePendingOrder,
         data: {
-          'order_id': orderId,
-          'trading_account': tradingAccount,
+          'order_id': int.tryParse(orderId) ?? orderId,
+          'mt5_account': tradingAccount,
         },
       ),
       (_) => true,
       successMessage: 'positions.cancel_success'.tr,
+    );
+  }
+
+  /// Updates take-profit / stop-loss for an open position. Web POST body:
+  /// `{ mt5_account, position_id, take_profit, stop_loss }` — pass `0` to clear
+  /// a level. Endpoint: `/trade/update-tp-sl`.
+  Future<ApiResponse<bool>> updateTPSL({
+    required String tradingAccount,
+    required String positionId,
+    num? takeProfit,
+    num? stopLoss,
+  }) {
+    return ApiEnvelope.guard<bool>(
+      () => _api.postWeb<Map<String, dynamic>>(
+        ApiEndpoints.updateTPSL,
+        data: {
+          'mt5_account': tradingAccount,
+          'position_id': int.tryParse(positionId) ?? positionId,
+          if (takeProfit != null) 'take_profit': takeProfit,
+          if (stopLoss != null) 'stop_loss': stopLoss,
+        },
+      ),
+      (_) => true,
+      successMessage: 'positions.tpsl_success'.tr,
     );
   }
 
@@ -73,13 +100,19 @@ class PositionsRepository {
   Future<ApiResponse<List<HistoryEntry>>> getTradeHistory({
     required String tradingAccount,
     int page = 1,
+    int perPage = 10,
+    String? from,
+    String? to,
   }) {
     return ApiEnvelope.guard<List<HistoryEntry>>(
-      () => _api.get<Map<String, dynamic>>(
+      () => _api.getWeb<Map<String, dynamic>>(
         ApiEndpoints.tradeHistory,
         query: {
-          'trading_account': tradingAccount,
+          'mt5_account': tradingAccount,
           'page': page,
+          'per_page': perPage,
+          if (from != null) 'from': from,
+          if (to != null) 'to': to,
         },
       ),
       parseHistory,

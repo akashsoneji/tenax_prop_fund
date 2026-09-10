@@ -194,6 +194,22 @@ class ApiClient {
   Future<Response<T>> post<T>(String path, {Object? data}) =>
       _dio.post<T>(path, data: data);
 
+  /// POST to the WEB host (root domain, no `/api/v1`). Used for the trade
+  /// endpoints which live under `/api/user/trade/...`, not the mobile REST base.
+  Future<Response<T>> postWeb<T>(String path, {Object? data}) => _web.post<T>(
+        path,
+        data: data,
+        options: Options(headers: {'Accept': 'application/json'}),
+      );
+
+  /// GET from the WEB host (root domain, no `/api/v1`) — trade history etc.
+  Future<Response<T>> getWeb<T>(String path, {Map<String, dynamic>? query}) =>
+      _web.get<T>(
+        path,
+        queryParameters: query,
+        options: Options(headers: {'Accept': 'application/json'}),
+      );
+
   Future<Response<T>> put<T>(String path, {Object? data}) =>
       _dio.put<T>(path, data: data);
 

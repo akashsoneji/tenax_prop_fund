@@ -61,7 +61,9 @@ class ApiEnvelope {
       if (body is! Map<String, dynamic>) {
         return _fail('Unexpected server response.', showErrorToast);
       }
-      final success = body['success'] as bool? ?? false;
+      // Mobile API uses `success`; the web trade API uses `status`. Accept both.
+      final success =
+          (body['success'] as bool?) ?? (body['status'] as bool?) ?? false;
       final message = body['message'] as String?;
       if (!success) {
         return _fail(message ?? 'Something went wrong.', showErrorToast);
