@@ -496,7 +496,10 @@ class _AccountPickerSheet extends StatelessWidget {
           color: scheme.surface,
           borderRadius: BorderRadius.circular(22),
         ),
-        child: Column(
+        clipBehavior: Clip.antiAlias,
+        child: Material(
+          type: MaterialType.transparency,
+          child: Column(
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
@@ -538,6 +541,7 @@ class _AccountPickerSheet extends StatelessWidget {
             }),
             const SizedBox(height: 4),
           ],
+          ),
         ),
       ),
     );
