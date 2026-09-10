@@ -10,6 +10,7 @@ import '../../../shared/widgets/skeletons/skeletons.dart';
 import '../../../core/state/data_state.dart';
 import '../controllers/account_controller.dart';
 import '../models/account_models.dart';
+import '../widgets/account_analytics_widgets.dart';
 import '../widgets/account_overview_widgets.dart';
 import '../widgets/account_tab_widgets.dart';
 
@@ -155,7 +156,7 @@ class _TabBody extends StatelessWidget {
             state: controller.state,
             onRetry: controller.load,
             skeleton: const _OverviewSkeleton(),
-            builder: (data) => _TradingTab(data: data),
+            builder: (data) => _TradingTab(controller: controller, data: data),
           );
         case AccountDetailTab.platform:
           return DataStateBuilder<PlatformData>(
@@ -227,7 +228,36 @@ class _OverviewTab extends StatelessWidget {
 // Trading overview tab
 // ---------------------------------------------------------------------------
 class _TradingTab extends StatelessWidget {
-  const _TradingTab({required this.data});
+  const _TradingTab({required this.controller, required this.data});
+  final AccountController controller;
+  final AccountData data;
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        Obx(() => AccountSegmentedTabs(
+              labels: [
+                'account.detailed_stats'.tr,
+                'account.analytics'.tr,
+              ],
+              selectedIndex: controller.tradingSub.value.index,
+              onChanged: (i) =>
+                  controller.selectTradingSub(TradingSubTab.values[i]),
+            )),
+        const SizedBox(height: 18),
+        Obx(() => controller.tradingSub.value == TradingSubTab.detailed
+            ? _DetailedStats(data: data)
+            : _Analytics(controller: controller, data: data)),
+      ],
+    );
+  }
+}
+
+// Detailed stats: metric grid + recent trades.
+class _DetailedStats extends StatelessWidget {
+  const _DetailedStats({required this.data});
   final AccountData data;
 
   @override
@@ -245,6 +275,49 @@ class _TradingTab extends StatelessWidget {
           _EmptyNote(text: 'account.no_trades'.tr)
         else
           for (final t in data.trades) AccountTradeRow(trade: t),
+      ],
+    );
+  }
+}
+
+// Analytics: equity-growth chart + performance breakdowns.
+class _Analytics extends StatelessWidget {
+  const _Analytics({required this.controller, required this.data});
+  final AccountController controller;
+  final AccountData data;
+
+  @override
+  Widget build(BuildContext context) {
+    final insights = data.insights;
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        EquityGrowthCard(points: data.equity),
+        const SizedBox(height: 18),
+        Obx(() => AccountPillSelector(
+              labels: [
+                'account.symbol_performance'.tr,
+                'account.pl_weekday'.tr,
+                'account.pl_hour'.tr,
+                'account.win_loss'.tr,
+              ],
+              selectedIndex: controller.perfBreakdown.value.index,
+              onChanged: (i) => controller
+                  .selectPerfBreakdown(PerformanceBreakdown.values[i]),
+            )),
+        const SizedBox(height: 14),
+        Obx(() {
+          switch (controller.perfBreakdown.value) {
+            case PerformanceBreakdown.symbol:
+              return PerformanceBarsCard(bars: insights.symbolBars);
+            case PerformanceBreakdown.weekday:
+              return PerformanceBarsCard(bars: insights.weekdayBars);
+            case PerformanceBreakdown.hour:
+              return PerformanceBarsCard(bars: insights.hourBars);
+            case PerformanceBreakdown.winLoss:
+              return WinLossCard(won: insights.won, lost: insights.lost);
+          }
+        }),
       ],
     );
   }
@@ -301,24 +374,24 @@ class _PlatformTab extends StatelessWidget {
               onCopyLogin: () =>
                   controller.copy(data.credentials.login, 'account.copied'),
             )),
-        const SizedBox(height: 22),
-        _SectionLabel('account.downloads'.tr),
-        const SizedBox(height: 12),
-        for (final d in data.downloads) ...[
-          PlatformDownloadCard(
-            download: d,
-            onDownload: () =>
-                controller.copy(d.href, 'account.download_link_copied'),
-          ),
-          const SizedBox(height: 12),
-        ],
-        const SizedBox(height: 6),
-        AppGradientButton(
-          label: 'account.launch_web_terminal'.tr,
-          icon: Icons.open_in_new_rounded,
-          onPressed: () =>
-              controller.copy(data.webTerminal, 'account.trade_link_copied'),
-        ),
+        // const SizedBox(height: 22),
+        // _SectionLabel('account.downloads'.tr),
+        // const SizedBox(height: 12),
+        // for (final d in data.downloads) ...[
+        //   PlatformDownloadCard(
+        //     download: d,
+        //     onDownload: () =>
+        //         controller.copy(d.href, 'account.download_link_copied'),
+        //   ),
+        //   const SizedBox(height: 12),
+        // ],
+        // const SizedBox(height: 6),
+        // AppGradientButton(
+        //   label: 'account.launch_web_terminal'.tr,
+        //   icon: Icons.open_in_new_rounded,
+        //   onPressed: () =>
+        //       controller.copy(data.webTerminal, 'account.trade_link_copied'),
+        // ),
       ],
     );
   }

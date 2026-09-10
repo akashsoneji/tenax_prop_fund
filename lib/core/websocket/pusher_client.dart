@@ -195,13 +195,24 @@ class PusherClient {
       case 'pusher:error':
         log.w('Pusher error: ${frame['data']}');
         return;
-      case 'AccountStateUpdated':
-        _onAccountState(frame['data']);
-        return;
       default:
+        // Laravel/Reverb broadcasts the event as `AccountStateUpdated`, but a
+        // custom broadcastAs or class-name broadcast can arrive namespaced
+        // (`.AccountStateUpdated`, `App\\Events\\AccountStateUpdated`). Match on
+        // the trailing segment so the tick is never silently dropped.
+        if (event != null && _isAccountStateEvent(event)) {
+          _onAccountState(frame['data']);
+        }
         // pusher_internal:subscription_succeeded and others — ignored.
         return;
     }
+  }
+
+  /// True when [event] is an `AccountStateUpdated` broadcast, tolerating a
+  /// leading `.` (Laravel `broadcastAs`) or a `App\Events\`/`\` class prefix.
+  bool _isAccountStateEvent(String event) {
+    final name = event.split(RegExp(r'[\\.]')).last;
+    return name == 'AccountStateUpdated';
   }
 
   void _onEstablished(dynamic data) {

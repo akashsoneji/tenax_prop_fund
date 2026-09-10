@@ -88,25 +88,7 @@ class DashboardData {
       );
     }
     if (focus == null && liveAccounts.isNotEmpty) {
-      final a = liveAccounts.first;
-      final pnl = a.equityMinor - a.balanceMinor;
-      focus = DashboardFocus(
-        accountId: a.id,
-        title: 'Account #${a.id}',
-        subtitle: '${a.currency} · Live equity',
-        badge: '',
-        badgeTone: 'neutral',
-        equity: _formatMinor(a.equityMinor, a.currency),
-        equityMinor: a.equityMinor,
-        balance: _formatMinor(a.balanceMinor, a.currency),
-        balanceMinor: a.balanceMinor,
-        currency: a.currency,
-        note: pnl == 0
-            ? ''
-            : '${pnl > 0 ? '+' : '-'}${_formatMinor(pnl.abs(), a.currency)} '
-                'vs balance',
-        tiles: const [],
-      );
+      focus = DashboardFocus.fromAccount(liveAccounts.first);
     }
 
     return DashboardData(
@@ -135,20 +117,6 @@ class DashboardData {
           0,
       trades: _list(json['trades']).map(DashboardTrade.fromJson).toList(),
     );
-  }
-
-  /// Formats a minor-unit (cents) amount into a display string like `$4,981.89`.
-  static String _formatMinor(int minor, String currency) {
-    final major = (minor / 100).toStringAsFixed(2);
-    final parts = major.split('.');
-    final buf = StringBuffer();
-    final intPart = parts[0];
-    for (var i = 0; i < intPart.length; i++) {
-      if (i > 0 && (intPart.length - i) % 3 == 0) buf.write(',');
-      buf.write(intPart[i]);
-    }
-    final symbol = currency == 'USD' ? '\$' : '';
-    return '$symbol$buf.${parts[1]}';
   }
 
   static List<Map<String, dynamic>> _list(dynamic raw) =>
@@ -306,6 +274,42 @@ class DashboardFocus {
         note: note,
         tiles: tiles,
       );
+
+  /// Builds the focused-account hero from a `live_accounts[]` row — used both
+  /// for the initial synth and when the user switches accounts in the hero.
+  factory DashboardFocus.fromAccount(DashboardAccount a) {
+    final pnl = a.equityMinor - a.balanceMinor;
+    return DashboardFocus(
+      accountId: a.id,
+      title: 'Account #${a.id}',
+      subtitle: '${a.currency} · Live equity',
+      badge: '',
+      badgeTone: 'neutral',
+      equity: _fmtMinor(a.equityMinor, a.currency),
+      equityMinor: a.equityMinor,
+      balance: _fmtMinor(a.balanceMinor, a.currency),
+      balanceMinor: a.balanceMinor,
+      currency: a.currency,
+      note: pnl == 0
+          ? ''
+          : '${pnl > 0 ? '+' : '-'}${_fmtMinor(pnl.abs(), a.currency)} '
+              'vs balance',
+      tiles: const [],
+    );
+  }
+
+  static String _fmtMinor(int minor, String currency) {
+    final major = (minor / 100).toStringAsFixed(2);
+    final parts = major.split('.');
+    final buf = StringBuffer();
+    final intPart = parts[0];
+    for (var i = 0; i < intPart.length; i++) {
+      if (i > 0 && (intPart.length - i) % 3 == 0) buf.write(',');
+      buf.write(intPart[i]);
+    }
+    final symbol = currency == 'USD' ? '\$' : '';
+    return '$symbol$buf.${parts[1]}';
+  }
 
   factory DashboardFocus.fromJson(Map<String, dynamic> json) => DashboardFocus(
         accountId: (json['account_id'] as num?)?.toInt() ?? 0,

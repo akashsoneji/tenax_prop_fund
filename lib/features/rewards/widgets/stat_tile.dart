@@ -110,7 +110,7 @@ class StatTile extends StatelessWidget {
       case StatTileTone.amber:
         return AppColors.warningInk;
       case StatTileTone.purple:
-        return const Color(0xFF7A1F8E);
+        return scheme.primary;
       case StatTileTone.blue:
         return const Color(0xFF1E6FB8);
     }

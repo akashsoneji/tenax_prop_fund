@@ -36,6 +36,7 @@ class AccountData {
     required this.options,
     required this.trades,
     required this.insights,
+    required this.equity,
   });
 
   final AccountHeader header;
@@ -44,6 +45,9 @@ class AccountData {
   final List<AccountStat> stats;
   final List<AccountObjective> objectives;
   final List<AccountHealth> health;
+
+  /// Equity-growth series (Analytics chart).
+  final List<AccountEquityPoint> equity;
 
   /// Add-ons availability note (empty when purchasable).
   final String addonReason;
@@ -65,10 +69,14 @@ class AccountData {
   /// flat `data` into the `props` shape lets [fromProps] do the actual parsing,
   /// so there is exactly one mapping to maintain.
   factory AccountData.fromJson(Map<String, dynamic> data) {
+    final account = _map(data['account']);
     return AccountData.fromProps({
-      'account': data,
-      'overview': _map(data['overview']),
-      'credentials': _map(data['credentials']),
+      'account': account,
+      'overview': _map(account['overview']),
+      'credentials': _map(account['credentials']),
+      'trades': _map(data['trades']),
+      'insights': _map(data['insights']),
+      'addonShop': _map(data['addon_shop']),
     });
   }
 
@@ -150,8 +158,32 @@ class AccountData {
           if (t is Map<String, dynamic>) AccountTrade.fromJson(t),
       ],
       insights: AccountInsights.fromJson(_map(props['insights'])),
+      equity: [
+        for (final p in (account['chart'] as List?) ?? const [])
+          if (p is Map<String, dynamic>) AccountEquityPoint.fromJson(p),
+      ],
     );
   }
+}
+
+/// One point on the equity-growth series (Analytics chart).
+class AccountEquityPoint {
+  const AccountEquityPoint({
+    required this.label,
+    required this.equity,
+    required this.balance,
+  });
+
+  final String label;
+  final double equity;
+  final double balance;
+
+  factory AccountEquityPoint.fromJson(Map<String, dynamic> json) =>
+      AccountEquityPoint(
+        label: json['t'] as String? ?? '',
+        equity: (json['equity'] as num?)?.toDouble() ?? 0,
+        balance: (json['balance'] as num?)?.toDouble() ?? 0,
+      );
 }
 
 /// Header facts checklist + status.
@@ -355,14 +387,27 @@ class AccountTrade {
 
 /// Trading insights (metric tiles + win/loss counts).
 class AccountInsights {
-  const AccountInsights({required this.metrics, required this.won, required this.lost});
+  const AccountInsights({
+    required this.metrics,
+    required this.won,
+    required this.lost,
+    required this.symbolBars,
+    required this.weekdayBars,
+    required this.hourBars,
+  });
 
   final List<AccountMetric> metrics;
   final int won;
   final int lost;
 
+  /// Analytics performance breakdowns (signed minor P/L per bucket).
+  final List<AccountPerfBar> symbolBars;
+  final List<AccountPerfBar> weekdayBars;
+  final List<AccountPerfBar> hourBars;
+
   factory AccountInsights.fromJson(Map<String, dynamic> json) {
-    final winloss = (_map(json['graphs'])['winloss'] as List?) ?? const [];
+    final graphs = _map(json['graphs']);
+    final winloss = (graphs['winloss'] as List?) ?? const [];
     int pick(String label) {
       for (final w in winloss) {
         if (w is Map && (w['label'] as String?) == label) {
@@ -372,6 +417,11 @@ class AccountInsights {
       return 0;
     }
 
+    List<AccountPerfBar> bars(String key) => [
+          for (final g in (graphs[key] as List?) ?? const [])
+            if (g is Map<String, dynamic>) AccountPerfBar.fromJson(g),
+        ];
+
     return AccountInsights(
       metrics: [
         for (final m in (json['mets'] as List?) ?? const [])
@@ -379,8 +429,28 @@ class AccountInsights {
       ],
       won: pick('Won'),
       lost: pick('Lost'),
+      symbolBars: bars('symbol'),
+      weekdayBars: bars('weekday'),
+      hourBars: bars('hour'),
     );
   }
+}
+
+/// One labelled performance bar (P/L in minor units for a bucket such as a
+/// symbol, weekday or hour).
+class AccountPerfBar {
+  const AccountPerfBar({required this.label, required this.valueMinor});
+
+  final String label;
+  final int valueMinor;
+
+  bool get negative => valueMinor < 0;
+  String get amount => _signedMinor(valueMinor);
+
+  factory AccountPerfBar.fromJson(Map<String, dynamic> json) => AccountPerfBar(
+        label: json['label'] as String? ?? '',
+        valueMinor: (json['value'] as num?)?.toInt() ?? 0,
+      );
 }
 
 /// A single insight metric tile.
@@ -432,6 +502,35 @@ class PlatformData {
       locked: props['platformLocked'] as bool? ?? false,
     );
   }
+
+  /// Builds from the REST `GET /accounts/{id}/platform` `data` block, where the
+  /// credentials + status live under `data.account` and the lock flag under
+  /// `data.platform_locked`. The credentials object carries only
+  /// login/server/passwords, so platform + account-type come from the account
+  /// root. This endpoint has no downloads / web-terminal payload.
+  factory PlatformData.fromJson(Map<String, dynamic> data) {
+    final account = _map(data['account']);
+    final credentials = _map(account['credentials']);
+    return PlatformData(
+      credentials: AccountCredentials(
+        login: credentials['login']?.toString() ??
+            account['login']?.toString() ??
+            '',
+        server: credentials['server'] as String? ?? '',
+        password: credentials['password'] as String? ?? '',
+        investorPassword: credentials['investor_password'] as String? ?? '',
+        platform: account['platform'] as String? ??
+            account['platform_short'] as String? ??
+            'Pipze Self-Hosted Engine',
+        accountType: account['account_type'] as String? ?? '',
+      ),
+      statusLabel: account['status_label'] as String? ?? '',
+      tone: _toneFrom(account['status_tone'] as String?),
+      downloads: const [],
+      webTerminal: '',
+      locked: data['platform_locked'] as bool? ?? false,
+    );
+  }
 }
 
 class PlatformDownload {
@@ -478,6 +577,11 @@ class ResetData {
   final String message;
   final bool eligible;
   final bool quotable;
+
+  /// The REST `GET /accounts/{id}/reset` `data` block already has `account` and
+  /// `quote` at the shape [fromProps] expects, so it delegates directly.
+  factory ResetData.fromJson(Map<String, dynamic> data) =>
+      ResetData.fromProps(data);
 
   factory ResetData.fromProps(Map<String, dynamic> props) {
     final account = _map(props['account']);

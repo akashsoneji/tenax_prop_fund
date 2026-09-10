@@ -45,9 +45,29 @@ class HomeController extends BaseController<DashboardData>
   /// WebSocket connection indicator for the "live" pill in the hero.
   final isLive = false.obs;
 
+  /// The account id currently shown in the hero. `null` = follow the snapshot's
+  /// default focus (first live account). Set when the user picks an account in
+  /// the hero switcher.
+  int? _selectedAccountId;
+
   final _wsSubs = <StreamSubscription>[];
 
   void selectTab(int index) => selectedTab.value = index;
+
+  /// Switches the hero to the live account with [id]. Rebuilds the focused-card
+  /// from that account's current snapshot row so its equity/balance (and any
+  /// live tick already applied to it) show immediately.
+  void selectAccount(int id) {
+    final current = state;
+    if (current is! DataSuccess<DashboardData>) return;
+    final data = current.data;
+    final account = data.liveAccounts.firstWhereOrNull((a) => a.id == id);
+    if (account == null) return;
+    _selectedAccountId = id;
+    stateRx.value = DataSuccess(
+      data.copyWith(focus: DashboardFocus.fromAccount(account)),
+    );
+  }
 
   @override
   Future<ApiResponse<DashboardData>> fetch() => _repository.getDashboard();
@@ -148,6 +168,9 @@ class HomeController extends BaseController<DashboardData>
       _channel = channel;
       _pusher.subscribe(channel);
     }
+    // A fresh REST snapshot resets `focus` to the first account; re-apply the
+    // user's picked account so a refresh/tick doesn't yank the hero back.
+    if (_selectedAccountId != null) selectAccount(_selectedAccountId!);
   }
 
   /// Applies a decoded live account frame to the in-memory snapshot, patching

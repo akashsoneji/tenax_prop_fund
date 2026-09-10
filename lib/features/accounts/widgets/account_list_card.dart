@@ -391,32 +391,36 @@ class _DashboardButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final scheme = Theme.of(context).colorScheme;
-    return Ink(
+    return DecoratedBox(
       decoration: BoxDecoration(
         gradient: AppTheme.brandGradient(scheme),
         borderRadius: BorderRadius.circular(12),
       ),
-      child: InkWell(
-        onTap: onTap,
+      child: Material(
+        color: Colors.transparent,
         borderRadius: BorderRadius.circular(12),
-        child: Container(
-          height: 42,
-          alignment: Alignment.center,
-          child: Row(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Text(
-                'accounts.dashboard'.tr,
-                style: const TextStyle(
-                  fontSize: 13.5,
-                  fontWeight: FontWeight.w700,
-                  color: AppColors.white,
+        child: InkWell(
+          onTap: onTap,
+          borderRadius: BorderRadius.circular(12),
+          child: Container(
+            height: 42,
+            alignment: Alignment.center,
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                const Icon(Icons.dashboard_rounded,
+                    size: 16, color: AppColors.white),
+                const SizedBox(width: 6),
+                Text(
+                  'accounts.dashboard'.tr,
+                  style: const TextStyle(
+                    fontSize: 13.5,
+                    fontWeight: FontWeight.w700,
+                    color: AppColors.white,
+                  ),
                 ),
-              ),
-              const SizedBox(width: 6),
-              const Icon(Icons.arrow_forward_rounded,
-                  size: 16, color: AppColors.white),
-            ],
+              ],
+            ),
           ),
         ),
       ),

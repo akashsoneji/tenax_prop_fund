@@ -34,7 +34,19 @@ abstract class ApiEndpoints {
   /// Single trading account overview. Standard `{success, message, data}`
   /// envelope where `data` carries the account fields plus nested `stats`,
   /// `objectives`, `credentials`, `overview` and `chart`.
-  static String accountDetail(Object id) => '/accounts/$id';
+  static String accountDetail(Object id) => '/accounts/$id/overview';
+
+  /// Platform & credentials for a single account. Standard `{success, data}`
+  /// envelope; `data.account.credentials` holds login/server/passwords and
+  /// `data.platform_locked` flags a locked platform. `reveal=true` unmasks the
+  /// passwords server-side.
+  static String accountPlatform(Object id, {bool reveal = false}) =>
+      '/accounts/$id/platform?reveal=$reveal';
+
+  /// Reset quote for a single account. Standard `{success, data}` envelope with
+  /// `data.account` and `data.quote` (pricing + eligibility). POST to the same
+  /// path with `{payment_method_id}` to purchase a reset.
+  static String accountReset(Object id) => '/accounts/$id/reset';
 
 
 

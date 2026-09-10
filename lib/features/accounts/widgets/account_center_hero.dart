@@ -36,7 +36,7 @@ class AccountCenterHero extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        gradient: AppTheme.brandGradient(scheme),
+        gradient: AppTheme.heroGradient(scheme),
         borderRadius: BorderRadius.circular(20),
         boxShadow: [
           BoxShadow(

@@ -9,27 +9,60 @@ import '../models/account_models.dart';
 // Trading overview
 // ---------------------------------------------------------------------------
 
-/// Grid of insight metric tiles.
+/// Detailed-stats card — metrics laid out as compact two-column rows
+/// (label muted on the left, value bold/toned on the right), mirroring the web
+/// "Detailed stats" table. Rows are split by hairline dividers.
 class AccountInsightsGrid extends StatelessWidget {
   const AccountInsightsGrid({super.key, required this.metrics});
   final List<AccountMetric> metrics;
 
   @override
   Widget build(BuildContext context) {
-    return GridView.count(
-      crossAxisCount: 2,
-      shrinkWrap: true,
-      physics: const NeverScrollableScrollPhysics(),
-      mainAxisSpacing: 10,
-      crossAxisSpacing: 10,
-      childAspectRatio: 2.4,
-      children: [for (final m in metrics) _MetricTile(metric: m)],
+    final scheme = Theme.of(context).colorScheme;
+    if (metrics.isEmpty) return const SizedBox.shrink();
+
+    // Pair metrics up: [0,1] [2,3] … so each row shows two cells.
+    final rows = <List<AccountMetric>>[];
+    for (var i = 0; i < metrics.length; i += 2) {
+      rows.add(metrics.sublist(i, (i + 2).clamp(0, metrics.length)));
+    }
+
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 4),
+      decoration: AppTheme.surfaceCard(scheme, radius: 16),
+      child: Column(
+        children: [
+          for (var r = 0; r < rows.length; r++) ...[
+            if (r > 0)
+              Divider(
+                height: 1,
+                thickness: 1,
+                color: scheme.primary.withValues(alpha: 0.06),
+              ),
+            Row(
+              children: [
+                Expanded(child: _MetricCell(metric: rows[r][0])),
+                Container(
+                  width: 1,
+                  height: 34,
+                  color: scheme.primary.withValues(alpha: 0.06),
+                ),
+                Expanded(
+                  child: rows[r].length > 1
+                      ? _MetricCell(metric: rows[r][1])
+                      : const SizedBox.shrink(),
+                ),
+              ],
+            ),
+          ],
+        ],
+      ),
     );
   }
 }
 
-class _MetricTile extends StatelessWidget {
-  const _MetricTile({required this.metric});
+class _MetricCell extends StatelessWidget {
+  const _MetricCell({required this.metric});
   final AccountMetric metric;
 
   @override
@@ -40,28 +73,30 @@ class _MetricTile extends StatelessWidget {
       AccountTone.down => AppColors.danger,
       AccountTone.neutral => scheme.onSurface,
     };
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
-      decoration: BoxDecoration(
-        color: scheme.primary.withValues(alpha: 0.04),
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: scheme.primary.withValues(alpha: 0.08)),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        mainAxisAlignment: MainAxisAlignment.center,
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
+      child: Row(
         children: [
-          Text(metric.label,
+          Expanded(
+            child: Text(
+              metric.label,
               maxLines: 1,
               overflow: TextOverflow.ellipsis,
               style: TextStyle(
-                  fontSize: 11.5, color: scheme.onSurfaceVariant)),
-          const SizedBox(height: 3),
-          Text(metric.value,
-              style: TextStyle(
-                  fontSize: 15,
-                  fontWeight: FontWeight.w800,
-                  color: valueColor)),
+                fontSize: 12.5,
+                color: scheme.onSurfaceVariant,
+              ),
+            ),
+          ),
+          const SizedBox(width: 8),
+          Text(
+            metric.value,
+            style: TextStyle(
+              fontSize: 13.5,
+              fontWeight: FontWeight.w800,
+              color: valueColor,
+            ),
+          ),
         ],
       ),
     );

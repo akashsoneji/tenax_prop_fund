@@ -11,6 +11,12 @@ import '../repositories/account_repository.dart';
 /// The four tabs of the Account detail screen.
 enum AccountDetailTab { overview, trading, platform, reset }
 
+/// The two sub-views of the Trading-overview tab.
+enum TradingSubTab { detailed, analytics }
+
+/// The four performance breakdowns inside the Analytics sub-view.
+enum PerformanceBreakdown { symbol, weekday, hour, winLoss }
+
 /// Backs the Account detail screen. The Account-overview + Trading-overview tabs
 /// share one endpoint, so they load into [BaseController]'s
 /// `DataState<AccountData>`. Platform & Reset are separate endpoints loaded
@@ -26,8 +32,17 @@ class AccountController extends BaseController<AccountData> {
 
   final selectedTab = AccountDetailTab.overview.obs;
 
+  /// Trading-overview sub-view (Detailed stats / Analytics).
+  final tradingSub = TradingSubTab.detailed.obs;
+
+  /// Selected performance breakdown inside Analytics.
+  final perfBreakdown = PerformanceBreakdown.symbol.obs;
+
   /// Whether the master/investor passwords are revealed.
   final revealPassword = false.obs;
+
+  void selectTradingSub(TradingSubTab sub) => tradingSub.value = sub;
+  void selectPerfBreakdown(PerformanceBreakdown b) => perfBreakdown.value = b;
 
   final platform = Rxn<DataState<PlatformData>>(const DataInitial());
   final reset = Rxn<DataState<ResetData>>(const DataInitial());
@@ -48,7 +63,10 @@ class AccountController extends BaseController<AccountData> {
 
   Future<void> _loadPlatform() async {
     platform.value = const DataLoading();
-    final res = await _repository.getPlatform(accountId);
+    final res = await _repository.getPlatform(
+      accountId,
+      reveal: revealPassword.value,
+    );
     if (isClosed) return;
     platform.value = res.success && res.data != null
         ? DataSuccess(res.data as PlatformData)
@@ -67,7 +85,13 @@ class AccountController extends BaseController<AccountData> {
   Future<void> retryPlatform() => _loadPlatform();
   Future<void> retryReset() => _loadReset();
 
-  void toggleReveal() => revealPassword.toggle();
+  /// Toggles password visibility. The API returns masked passwords by default
+  /// and the real values only when `reveal=true`, so revealing (re)fetches the
+  /// platform payload with the unmasked credentials.
+  void toggleReveal() {
+    revealPassword.toggle();
+    _loadPlatform();
+  }
 
   void copy(String value, String toastKey) {
     if (value.isEmpty) return;

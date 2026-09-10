@@ -54,6 +54,12 @@ class HomeTabView extends GetView<HomeController> {
                           const SizedBox(height: 18),
                           _KpiGrid(kpis: data.kpis),
                         ],
+                        if (data.liveAccounts.isNotEmpty) ...[
+                          const SizedBox(height: 24),
+                          _SectionLabel('home.live_accounts'.tr),
+                          const SizedBox(height: 12),
+                          _LiveAccountsStrip(accounts: data.liveAccounts),
+                        ],
                         const SizedBox(height: 24),
                         _SectionLabel('home.quick_actions'.tr,
                             actionLabel: 'home.recommended'.tr),
@@ -296,16 +302,12 @@ class _EquityHero extends GetView<HomeController> {
           Row(
             children: [
               Expanded(
-                child: Text(
-                  focus?.title.isNotEmpty == true
+                child: _HeroAccountSwitcher(
+                  data: data,
+                  title: focus?.title.isNotEmpty == true
                       ? focus!.title
                       : 'home.total_equity'.tr,
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                  style: TextStyle(
-                      fontSize: 13,
-                      fontWeight: FontWeight.w600,
-                      color: onHeroMuted),
+                  color: onHeroMuted,
                 ),
               ),
               const SizedBox(width: 8),
@@ -407,6 +409,253 @@ class _HeroStat extends StatelessWidget {
         ],
       ),
     );
+  }
+}
+
+/// The hero title, rendered as a tap target that opens the account picker when
+/// more than one live account exists. Shows a chevron to signal it is tappable.
+class _HeroAccountSwitcher extends StatelessWidget {
+  const _HeroAccountSwitcher({
+    required this.data,
+    required this.title,
+    required this.color,
+  });
+
+  final DashboardData data;
+  final String title;
+  final Color color;
+
+  @override
+  Widget build(BuildContext context) {
+    final canSwitch = data.liveAccounts.length > 1;
+    final label = Row(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        Flexible(
+          child: Text(
+            title,
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+            style: TextStyle(
+                fontSize: 13, fontWeight: FontWeight.w600, color: color),
+          ),
+        ),
+        if (canSwitch) ...[
+          const SizedBox(width: 4),
+          Icon(Icons.keyboard_arrow_down_rounded, size: 18, color: color),
+        ],
+      ],
+    );
+    if (!canSwitch) return label;
+    return GestureDetector(
+      behavior: HitTestBehavior.opaque,
+      onTap: () => _openPicker(context, data),
+      child: label,
+    );
+  }
+
+  void _openPicker(BuildContext context, DashboardData data) {
+    final controller = Get.find<HomeController>();
+    final currentId = data.focus?.accountId;
+    showModalBottomSheet<void>(
+      context: context,
+      backgroundColor: Colors.transparent,
+      builder: (_) => _AccountPickerSheet(
+        accounts: data.liveAccounts,
+        selectedId: currentId,
+        onSelected: (id) {
+          controller.selectAccount(id);
+          Get.back<void>();
+        },
+      ),
+    );
+  }
+}
+
+/// Bottom sheet listing the trader's live accounts so the hero can be switched.
+class _AccountPickerSheet extends StatelessWidget {
+  const _AccountPickerSheet({
+    required this.accounts,
+    required this.selectedId,
+    required this.onSelected,
+  });
+
+  final List<DashboardAccount> accounts;
+  final int? selectedId;
+  final ValueChanged<int> onSelected;
+
+  @override
+  Widget build(BuildContext context) {
+    final scheme = Theme.of(context).colorScheme;
+    return SafeArea(
+      top: false,
+      child: Container(
+        margin: const EdgeInsets.all(12),
+        padding: const EdgeInsets.symmetric(vertical: 8),
+        decoration: BoxDecoration(
+          color: scheme.surface,
+          borderRadius: BorderRadius.circular(22),
+        ),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Padding(
+              padding: const EdgeInsets.fromLTRB(20, 12, 20, 8),
+              child: Text(
+                'home.switch_account'.tr,
+                style: TextStyle(
+                    fontSize: 15,
+                    fontWeight: FontWeight.w700,
+                    color: scheme.onSurface),
+              ),
+            ),
+            ...accounts.map((a) {
+              final selected = a.id == selectedId;
+              return ListTile(
+                onTap: () => onSelected(a.id),
+                leading: Icon(
+                  selected
+                      ? Icons.radio_button_checked_rounded
+                      : Icons.radio_button_unchecked_rounded,
+                  color: selected ? scheme.primary : scheme.outline,
+                ),
+                title: Text(
+                  '${'home.account_hash'.tr}${a.id}',
+                  style: TextStyle(
+                      fontSize: 15,
+                      fontWeight: FontWeight.w600,
+                      color: scheme.onSurface),
+                ),
+                trailing: Text(
+                  a.currency,
+                  style: TextStyle(
+                      fontSize: 12.5,
+                      fontWeight: FontWeight.w600,
+                      color: scheme.onSurface.withValues(alpha: 0.6)),
+                ),
+              );
+            }),
+            const SizedBox(height: 4),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+/// Horizontal strip of live account cards. Each card shows the account's live
+/// equity (patched by the Pusher feed) and its P/L versus balance. Rebuilds with
+/// the parent `Obx` on every equity tick.
+class _LiveAccountsStrip extends StatelessWidget {
+  const _LiveAccountsStrip({required this.accounts});
+  final List<DashboardAccount> accounts;
+
+  @override
+  Widget build(BuildContext context) {
+    return SizedBox(
+      height: 96,
+      child: ListView.separated(
+        scrollDirection: Axis.horizontal,
+        physics: const BouncingScrollPhysics(),
+        padding: EdgeInsets.zero,
+        itemCount: accounts.length,
+        separatorBuilder: (_, _) => const SizedBox(width: 12),
+        itemBuilder: (_, i) => _LiveAccountCard(account: accounts[i]),
+      ),
+    );
+  }
+}
+
+class _LiveAccountCard extends StatelessWidget {
+  const _LiveAccountCard({required this.account});
+  final DashboardAccount account;
+
+  @override
+  Widget build(BuildContext context) {
+    final scheme = Theme.of(context).colorScheme;
+    final pnlMinor = account.equityMinor - account.balanceMinor;
+    final isProfit = pnlMinor >= 0;
+    final pnlColor = isProfit ? AppColors.success : AppColors.danger;
+
+    return Container(
+      width: 190,
+      padding: const EdgeInsets.fromLTRB(16, 14, 16, 14),
+      decoration: BoxDecoration(
+        color: scheme.surfaceContainerHighest.withValues(alpha: 0.5),
+        borderRadius: BorderRadius.circular(18),
+        border: Border.all(color: scheme.outlineVariant.withValues(alpha: 0.4)),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          Row(
+            children: [
+              Expanded(
+                child: Text(
+                  '${'home.account_hash'.tr}${account.id}',
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: TextStyle(
+                      fontSize: 12.5,
+                      fontWeight: FontWeight.w600,
+                      color: scheme.onSurface.withValues(alpha: 0.6)),
+                ),
+              ),
+              _PulseDot(active: true),
+            ],
+          ),
+          Text(
+            _formatMinor(account.equityMinor, account.currency),
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+            style: TextStyle(
+                fontSize: 20,
+                fontWeight: FontWeight.w800,
+                letterSpacing: -0.6,
+                color: scheme.onSurface),
+          ),
+          Row(
+            children: [
+              Icon(
+                isProfit
+                    ? Icons.arrow_upward_rounded
+                    : Icons.arrow_downward_rounded,
+                size: 13,
+                color: pnlColor,
+              ),
+              const SizedBox(width: 3),
+              Expanded(
+                child: Text(
+                  '${isProfit ? '+' : '−'}${_formatMinor(pnlMinor.abs(), account.currency)}',
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: TextStyle(
+                      fontSize: 12.5,
+                      fontWeight: FontWeight.w700,
+                      color: pnlColor),
+                ),
+              ),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+
+  String _formatMinor(int minor, String currency) {
+    final major = minor / 100;
+    final symbol = currency == 'USD' ? '\$' : '';
+    final s = major.toStringAsFixed(2);
+    final parts = s.split('.');
+    final buf = StringBuffer();
+    final intPart = parts[0];
+    for (var i = 0; i < intPart.length; i++) {
+      if (i > 0 && (intPart.length - i) % 3 == 0) buf.write(',');
+      buf.write(intPart[i]);
+    }
+    return '$symbol$buf.${parts[1]}';
   }
 }
 

@@ -326,7 +326,7 @@ class _PersonalDetailsSection extends StatelessWidget {
                   Divider(
                     height: 1,
                     thickness: 1,
-      color: AppColors.brandPurpleLight.withValues(alpha: 0.35),
+                    color: scheme.primary.withValues(alpha: 0.12),
                   ),
               ],
             ],
