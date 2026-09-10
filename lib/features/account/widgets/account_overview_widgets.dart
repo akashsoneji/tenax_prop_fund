@@ -37,7 +37,7 @@ class AccountSummaryHero extends StatelessWidget {
     final floating = _stat('account.floating_pl');
 
     return Container(
-      padding: EdgeInsets.all(18.w),
+      padding: EdgeInsets.all(16.w),
       decoration: BoxDecoration(
         gradient: AppTheme.brandGradient(scheme),
         borderRadius: BorderRadius.circular(20.r),
@@ -70,7 +70,7 @@ class AccountSummaryHero extends StatelessWidget {
               _HeroStatusPill(label: header.statusLabel, tone: header.tone),
             ],
           ),
-          SizedBox(height: 14.h),
+          SizedBox(height: 12.h),
           Text(
             'account.balance'.tr,
             style: TextStyle(
@@ -81,15 +81,18 @@ class AccountSummaryHero extends StatelessWidget {
             ),
           ),
           SizedBox(height: 4.h),
-          Text(
-            balance?.value.isNotEmpty == true ? balance!.value : '—',
-            maxLines: 1,
-            overflow: TextOverflow.ellipsis,
-            style: TextStyle(
-              fontSize: 30.sp,
-              fontWeight: FontWeight.w800,
-              color: AppColors.white,
-              height: 1.1,
+          FittedBox(
+            fit: BoxFit.scaleDown,
+            alignment: Alignment.centerLeft,
+            child: Text(
+              balance?.value.isNotEmpty == true ? balance!.value : '—',
+              maxLines: 1,
+              style: TextStyle(
+                fontSize: 23.sp,
+                fontWeight: FontWeight.w800,
+                color: AppColors.white,
+                height: 1.1,
+              ),
             ),
           ),
           if (header.planLabel.isNotEmpty) ...[
@@ -105,7 +108,7 @@ class AccountSummaryHero extends StatelessWidget {
               ),
             ),
           ],
-          SizedBox(height: 16.h),
+          SizedBox(height: 14.h),
           Row(
             children: [
               Expanded(

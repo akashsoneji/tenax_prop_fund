@@ -1,5 +1,6 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
 
 import '../../../core/platform/platform_info.dart';
@@ -23,7 +24,7 @@ class SettingsView extends StatelessWidget {
             trailing: const Icon(Icons.chevron_right),
             onTap: () => _pickTheme(context, settings),
           ),
-          const Divider(height: 1),
+          Divider(height: 1.h),
           ListTile(
             title: Text('settings.language'.tr),
             subtitle: Text(_langLabel(settings.locale.languageCode)),

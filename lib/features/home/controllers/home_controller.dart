@@ -131,11 +131,10 @@ class HomeController extends BaseController<DashboardData>
     _loadReferral();
   }
 
-  /// The `/app/dashboard` payload already carries the referral summary, so read
-  /// it from the last fetch and splice it into the loaded snapshot for the Home
-  /// card (no extra network call).
-  void _loadReferral() {
-    final referral = _repository.getReferralCard();
+  /// Fetches the referral summary from the live `GET /growth/referrals`
+  /// endpoint and splices it into the loaded snapshot for the Home card.
+  Future<void> _loadReferral() async {
+    final referral = await _repository.getReferralCard();
     if (isClosed || referral == null) return;
     final current = state;
     if (current is! DataSuccess<DashboardData>) return;

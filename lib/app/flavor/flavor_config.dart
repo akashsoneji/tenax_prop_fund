@@ -55,7 +55,8 @@ class FlavorConfig {
   String get assetRoot => 'assets/flavors/${flavor.name}';
 
   /// Builds the embedded-chart URL for [symbol]. [dark] picks the chart theme so
-  /// it matches the app's current brightness.
+  /// it matches the app's current brightness. The remote chart page self-feeds
+  /// (own candle history + pricing socket), so only symbol + theme are passed.
   String chartUrl(String symbol, {bool dark = true}) {
     final query = Uri(queryParameters: {
       'symbol': symbol,

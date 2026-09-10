@@ -111,7 +111,7 @@ class AppLabeledField extends StatelessWidget {
     );
     return LabeledFieldShell(
       label: label,
-      minHeight: maxLines > 1 ? minHeight : 58,
+      minHeight: maxLines > 1 ? minHeight : 58.h,
       child: trailing == null
           ? field
           : Row(

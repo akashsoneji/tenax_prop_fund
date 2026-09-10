@@ -328,7 +328,7 @@ class _SubmitButton extends StatelessWidget {
             'rewards.payout_requested_body'.tr,
             snackPosition: SnackPosition.BOTTOM,
             margin: EdgeInsets.all(16.w),
-            borderRadius: 14,
+            borderRadius: 14.r,
           );
         } else {
           Get.snackbar(
@@ -336,7 +336,7 @@ class _SubmitButton extends StatelessWidget {
             result.message ?? 'rewards.cannot_submit_body'.tr,
             snackPosition: SnackPosition.BOTTOM,
             margin: EdgeInsets.all(16.w),
-            borderRadius: 14,
+            borderRadius: 14.r,
           );
         }
       },

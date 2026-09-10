@@ -58,16 +58,16 @@ class AccountListCard extends StatelessWidget {
             Container(width: 4.w, color: tone),
             Expanded(
               child: Padding(
-                padding: EdgeInsets.all(14.w),
+                padding: EdgeInsets.all(12.w),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     _Header(account: account, tone: tone),
-                    SizedBox(height: 14.h),
+                    SizedBox(height: 10.h),
                     _PnlBand(account: account),
-                    SizedBox(height: 12.h),
+                    SizedBox(height: 10.h),
                     _StatGrid(account: account),
-                    SizedBox(height: 14.h),
+                    SizedBox(height: 12.h),
                     Row(
                       children: [
                         Expanded(child: _TradeButton(onTap: onTrade)),
@@ -156,17 +156,17 @@ class _PnlBand extends StatelessWidget {
     final scheme = Theme.of(context).colorScheme;
     final color = account.pnlNegative ? AppColors.danger : AppColors.success;
     return Container(
-      padding: EdgeInsets.symmetric(horizontal: 14.w, vertical: 12.h),
+      padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 9.h),
       decoration: BoxDecoration(
         color: color.withValues(alpha: 0.10),
-        borderRadius: BorderRadius.circular(14.r),
+        borderRadius: BorderRadius.circular(12.r),
         border: Border.all(color: color.withValues(alpha: 0.22)),
       ),
       child: Row(
         children: [
           Container(
-            width: 34.w,
-            height: 34.h,
+            width: 32.w,
+            height: 32.h,
             decoration: BoxDecoration(
               color: color.withValues(alpha: 0.16),
               borderRadius: BorderRadius.circular(10.r),
@@ -201,7 +201,7 @@ class _PnlBand extends StatelessWidget {
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
                   style: TextStyle(
-                    fontSize: 20.sp,
+                    fontSize: 18.sp,
                     fontWeight: FontWeight.w800,
                     color: color,
                     height: 1.05,
@@ -262,7 +262,7 @@ class _StatGrid extends StatelessWidget {
             ),
           ],
         ),
-        SizedBox(height: 10.h),
+        SizedBox(height: 8.h),
         Row(
           children: [
             Expanded(
@@ -302,7 +302,7 @@ class _StatTile extends StatelessWidget {
     final scheme = Theme.of(context).colorScheme;
     final isDark = scheme.brightness == Brightness.dark;
     return Container(
-      padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 10.h),
+      padding: EdgeInsets.symmetric(horizontal: 11.w, vertical: 8.h),
       decoration: BoxDecoration(
         color: isDark
             ? AppColors.white.withValues(alpha: 0.04)
@@ -361,7 +361,7 @@ class _TradeButton extends StatelessWidget {
         onTap: onTap,
         borderRadius: BorderRadius.circular(12.r),
         child: Container(
-          height: 42.h,
+          height: 38.h,
           alignment: Alignment.center,
           child: Row(
             mainAxisSize: MainAxisSize.min,
@@ -399,23 +399,23 @@ class _DashboardButton extends StatelessWidget {
       ),
       child: Material(
         color: Colors.transparent,
-        borderRadius: BorderRadius.circular(12),
+        borderRadius: BorderRadius.circular(12.r),
         child: InkWell(
           onTap: onTap,
-          borderRadius: BorderRadius.circular(12),
+          borderRadius: BorderRadius.circular(12.r),
           child: Container(
-            height: 42,
+            height: 38.h,
             alignment: Alignment.center,
             child: Row(
               mainAxisSize: MainAxisSize.min,
               children: [
-                const Icon(Icons.dashboard_rounded,
-                    size: 16, color: AppColors.white),
-                const SizedBox(width: 6),
+                Icon(Icons.dashboard_rounded,
+                    size: 16.w, color: AppColors.white),
+                SizedBox(width: 6.w),
                 Text(
                   'accounts.dashboard'.tr,
-                  style: const TextStyle(
-                    fontSize: 13.5,
+                  style: TextStyle(
+                    fontSize: 13.5.sp,
                     fontWeight: FontWeight.w700,
                     color: AppColors.white,
                   ),

@@ -114,10 +114,10 @@ class TenaxApp extends StatelessWidget {
             // pushing content off-screen. 0.9–1.1 keeps accessibility scaling
             // but prevents breakage.
             final mq = MediaQuery.of(context);
-            final clamped = mq.textScaler.clamp(
-              minScaleFactor: 0.9,
-              maxScaleFactor: 1.1,
-            );
+              final clamped = mq.textScaler.clamp(
+                minScaleFactor: 0.9,
+                maxScaleFactor: 1.0,
+              );
             return MediaQuery(
               data: mq.copyWith(textScaler: clamped),
               child: AnnotatedRegion<SystemUiOverlayStyle>(

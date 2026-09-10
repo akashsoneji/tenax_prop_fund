@@ -9,19 +9,19 @@ class SectionHeader extends StatelessWidget {
   const SectionHeader(
     this.title, {
     super.key,
-    this.padding = const EdgeInsets.only(left: 4, bottom: 10, top: 2),
+    this.padding,
     this.trailing,
   });
 
   final String title;
-  final EdgeInsetsGeometry padding;
+  final EdgeInsetsGeometry? padding;
   final Widget? trailing;
 
   @override
   Widget build(BuildContext context) {
     final scheme = Theme.of(context).colorScheme;
     return Padding(
-      padding: padding,
+      padding: padding ?? EdgeInsets.only(left: 4.w, bottom: 10.h, top: 2.h),
       child: Row(
         children: [
           Expanded(

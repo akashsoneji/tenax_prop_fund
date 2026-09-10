@@ -74,7 +74,7 @@ class _FloatingTradePanelState extends State<FloatingTradePanel> {
 
   /// Shared height for the volume field, +/- steppers and Pending button so
   /// they line up on one row.
-  static const double _controlHeight = 44;
+  static final double _controlHeight = 44.w;
 
   final _volumeCtrl = TextEditingController(text: '0.01');
 

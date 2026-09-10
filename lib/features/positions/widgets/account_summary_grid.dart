@@ -29,7 +29,7 @@ class AccountSummaryGrid extends StatelessWidget {
     ];
     return Container(
       padding: EdgeInsets.all(12.w),
-      decoration: AppTheme.surfaceCard(scheme, radius: 18),
+      decoration: AppTheme.surfaceCard(scheme, radius: 18.r),
       child: GridView.count(
         crossAxisCount: 3,
         shrinkWrap: true,

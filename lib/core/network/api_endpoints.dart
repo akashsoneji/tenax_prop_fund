@@ -40,6 +40,11 @@ abstract class ApiEndpoints {
   /// Inertia `/app/...` routes or static demo data.
   static const dashboard = '/dashboard';
 
+  /// Referral summary for the Home "Refer & earn" card. Standard
+  /// `{success, message, data}` envelope where `data` nests `referral`
+  /// (code/share_url) and `stats` (referrals count, to_be_paid).
+  static const referrals = '/growth/referrals';
+
   /// Trading accounts list for the "Account Center" screen. Standard
   /// `{success, message, data[], meta}` envelope. Query params: `status`
   /// (all | active | breached | passed | raw-status) and `phase`

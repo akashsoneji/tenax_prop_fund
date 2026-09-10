@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
 
 import '../../../shared/theme/app_colors.dart';
@@ -6,7 +7,7 @@ import '../../../shared/theme/app_theme.dart';
 import '../models/account_models.dart';
 
 // ---------------------------------------------------------------------------
-// Trading-overview segmented control (Detailed stats / Analytics, and the
+// Trading-overview segmented control
 // performance-breakdown pills). Kept generic so both bars reuse it.
 // ---------------------------------------------------------------------------
 class AccountSegmentedTabs extends StatelessWidget {
@@ -25,10 +26,10 @@ class AccountSegmentedTabs extends StatelessWidget {
   Widget build(BuildContext context) {
     final scheme = Theme.of(context).colorScheme;
     return Container(
-      padding: const EdgeInsets.all(4),
+      padding: EdgeInsets.all(4.w),
       decoration: BoxDecoration(
         color: scheme.primary.withValues(alpha: 0.06),
-        borderRadius: BorderRadius.circular(14),
+        borderRadius: BorderRadius.circular(14.r),
       ),
       child: Row(
         children: [
@@ -40,20 +41,20 @@ class AccountSegmentedTabs extends StatelessWidget {
                 child: AnimatedContainer(
                   duration: const Duration(milliseconds: 200),
                   curve: Curves.easeOutCubic,
-                  height: 36,
+                  height: 36.h,
                   alignment: Alignment.center,
                   decoration: BoxDecoration(
                     gradient: i == selectedIndex
                         ? AppTheme.brandGradient(scheme)
                         : null,
-                    borderRadius: BorderRadius.circular(10),
+                    borderRadius: BorderRadius.circular(10.r),
                   ),
                   child: Text(
                     labels[i],
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
                     style: TextStyle(
-                      fontSize: 12.5,
+                      fontSize: 12.5.sp,
                       fontWeight: FontWeight.w700,
                       color: i == selectedIndex
                           ? AppColors.white
@@ -88,12 +89,12 @@ class AccountPillSelector extends StatelessWidget {
   Widget build(BuildContext context) {
     final scheme = Theme.of(context).colorScheme;
     return SizedBox(
-      height: 38,
+      height: 38.h,
       child: ListView.separated(
         scrollDirection: Axis.horizontal,
         physics: const BouncingScrollPhysics(),
         itemCount: labels.length,
-        separatorBuilder: (_, _) => const SizedBox(width: 8),
+        separatorBuilder: (_, _) => SizedBox(width: 8.w),
         itemBuilder: (context, i) {
           final selected = i == selectedIndex;
           return GestureDetector(
@@ -102,12 +103,12 @@ class AccountPillSelector extends StatelessWidget {
             child: AnimatedContainer(
               duration: const Duration(milliseconds: 200),
               curve: Curves.easeOutCubic,
-              padding: const EdgeInsets.symmetric(horizontal: 16),
+              padding: EdgeInsets.symmetric(horizontal: 16.w),
               alignment: Alignment.center,
               decoration: BoxDecoration(
                 gradient: selected ? AppTheme.brandGradient(scheme) : null,
                 color: selected ? null : scheme.primary.withValues(alpha: 0.06),
-                borderRadius: BorderRadius.circular(20),
+                borderRadius: BorderRadius.circular(20.r),
                 border: Border.all(
                   color: selected
                       ? Colors.transparent
@@ -117,7 +118,7 @@ class AccountPillSelector extends StatelessWidget {
               child: Text(
                 labels[i],
                 style: TextStyle(
-                  fontSize: 12.5,
+                  fontSize: 12.5.sp,
                   fontWeight: FontWeight.w700,
                   color: selected ? AppColors.white : scheme.onSurfaceVariant,
                 ),
@@ -149,7 +150,7 @@ class EquityGrowthCard extends StatelessWidget {
         '${up ? '+' : '-'}\$${change.abs().toStringAsFixed(2)}';
 
     return Container(
-      padding: const EdgeInsets.fromLTRB(16, 16, 16, 12),
+      padding: EdgeInsets.fromLTRB(16.w, 16.h, 16.w, 12.h),
       decoration: AppTheme.surfaceCard(scheme, radius: 18),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -162,7 +163,7 @@ class EquityGrowthCard extends StatelessWidget {
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
                   style: TextStyle(
-                    fontSize: 15,
+                    fontSize: 15.sp,
                     fontWeight: FontWeight.w800,
                     color: scheme.onSurface,
                   ),
@@ -172,36 +173,36 @@ class EquityGrowthCard extends StatelessWidget {
                 Text(
                   changeLabel,
                   style: TextStyle(
-                    fontSize: 13.5,
+                    fontSize: 13.5.sp,
                     fontWeight: FontWeight.w800,
                     color: up ? AppColors.success : AppColors.danger,
                   ),
                 ),
             ],
           ),
-          const SizedBox(height: 8),
+          SizedBox(height: 8.h),
           Row(
             children: [
               _LegendDot(color: scheme.primary, label: 'account.equity'.tr),
-              const SizedBox(width: 14),
+              SizedBox(width: 14.w),
               _LegendDot(color: AppColors.amber, label: 'account.balance'.tr),
             ],
           ),
-          const SizedBox(height: 14),
+          SizedBox(height: 14.h),
           if (points.length < 2)
             SizedBox(
-              height: 160,
+              height: 160.h,
               child: Center(
                 child: Text(
                   'account.no_chart'.tr,
                   style: TextStyle(
-                      fontSize: 13, color: scheme.onSurfaceVariant),
+                      fontSize: 13.sp, color: scheme.onSurfaceVariant),
                 ),
               ),
             )
           else ...[
             SizedBox(
-              height: 170,
+              height: 170.h,
               width: double.infinity,
               child: CustomPaint(
                 painter: _EquityChartPainter(
@@ -211,16 +212,16 @@ class EquityGrowthCard extends StatelessWidget {
                 ),
               ),
             ),
-            const SizedBox(height: 8),
+            SizedBox(height: 8.h),
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 Text(points.first.label,
                     style: TextStyle(
-                        fontSize: 10.5, color: scheme.onSurfaceVariant)),
+                        fontSize: 10.5.sp, color: scheme.onSurfaceVariant)),
                 Text(points.last.label,
                     style: TextStyle(
-                        fontSize: 10.5, color: scheme.onSurfaceVariant)),
+                        fontSize: 10.5.sp, color: scheme.onSurfaceVariant)),
               ],
             ),
           ],
@@ -242,14 +243,14 @@ class _LegendDot extends StatelessWidget {
       mainAxisSize: MainAxisSize.min,
       children: [
         Container(
-          width: 8,
-          height: 8,
+          width: 8.w,
+          height: 8.h,
           decoration: BoxDecoration(color: color, shape: BoxShape.circle),
         ),
-        const SizedBox(width: 6),
+        SizedBox(width: 6.w),
         Text(label,
             style: TextStyle(
-                fontSize: 11.5,
+                fontSize: 11.5.sp,
                 fontWeight: FontWeight.w600,
                 color: scheme.onSurfaceVariant)),
       ],
@@ -359,11 +360,11 @@ class PerformanceBarsCard extends StatelessWidget {
     final scheme = Theme.of(context).colorScheme;
     if (bars.isEmpty) {
       return Container(
-        padding: const EdgeInsets.symmetric(vertical: 28),
+        padding: EdgeInsets.symmetric(vertical: 28.h),
         decoration: AppTheme.surfaceCard(scheme, radius: 18),
         alignment: Alignment.center,
         child: Text('account.no_breakdown'.tr,
-            style: TextStyle(fontSize: 13, color: scheme.onSurfaceVariant)),
+            style: TextStyle(fontSize: 13.sp, color: scheme.onSurfaceVariant)),
       );
     }
     final peak = bars
@@ -371,13 +372,13 @@ class PerformanceBarsCard extends StatelessWidget {
         .fold<int>(0, (a, b) => a > b ? a : b);
 
     return Container(
-      padding: const EdgeInsets.all(16),
+      padding: EdgeInsets.all(16.w),
       decoration: AppTheme.surfaceCard(scheme, radius: 18),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
           for (var i = 0; i < bars.length; i++) ...[
-            if (i > 0) const SizedBox(height: 14),
+            if (i > 0) SizedBox(height: 14.h),
             _PerfBarRow(bar: bars[i], peak: peak),
           ],
         ],
@@ -407,37 +408,37 @@ class _PerfBarRow extends StatelessWidget {
                 maxLines: 1,
                 overflow: TextOverflow.ellipsis,
                 style: TextStyle(
-                    fontSize: 12.5,
+                    fontSize: 12.5.sp,
                     fontWeight: FontWeight.w600,
                     color: scheme.onSurface),
               ),
             ),
-            const SizedBox(width: 8),
+            SizedBox(width: 8.w),
             Text(
               bar.amount,
               style: TextStyle(
-                  fontSize: 12.5,
+                  fontSize: 12.5.sp,
                   fontWeight: FontWeight.w800,
                   color: color),
             ),
           ],
         ),
-        const SizedBox(height: 6),
+        SizedBox(height: 6.h),
         ClipRRect(
-          borderRadius: BorderRadius.circular(6),
+          borderRadius: BorderRadius.circular(6.r),
           child: Stack(
             children: [
               Container(
-                height: 8,
+                height: 8.h,
                 color: scheme.primary.withValues(alpha: 0.06),
               ),
               FractionallySizedBox(
                 widthFactor: fraction.clamp(0.0, 1.0),
                 child: Container(
-                  height: 8,
+                  height: 8.h,
                   decoration: BoxDecoration(
                     color: color,
-                    borderRadius: BorderRadius.circular(6),
+                    borderRadius: BorderRadius.circular(6.r),
                   ),
                 ),
               ),
@@ -471,31 +472,31 @@ class WinLossCard extends StatelessWidget {
               Expanded(
                 child: Text(label,
                     style: TextStyle(
-                        fontSize: 12.5,
+                        fontSize: 12.5.sp,
                         fontWeight: FontWeight.w600,
                         color: scheme.onSurface)),
               ),
               Text('$value ${'account.trades_count'.tr}',
                   style: TextStyle(
-                      fontSize: 12.5,
+                      fontSize: 12.5.sp,
                       fontWeight: FontWeight.w800,
                       color: color)),
             ],
           ),
-          const SizedBox(height: 6),
+          SizedBox(height: 6.h),
           ClipRRect(
-            borderRadius: BorderRadius.circular(6),
+            borderRadius: BorderRadius.circular(6.r),
             child: Stack(
               children: [
                 Container(
-                    height: 8, color: scheme.primary.withValues(alpha: 0.06)),
+                    height: 8.h, color: scheme.primary.withValues(alpha: 0.06)),
                 FractionallySizedBox(
                   widthFactor: fraction.clamp(0.0, 1.0),
                   child: Container(
-                    height: 8,
+                    height: 8.h,
                     decoration: BoxDecoration(
                       color: color,
-                      borderRadius: BorderRadius.circular(6),
+                      borderRadius: BorderRadius.circular(6.r),
                     ),
                   ),
                 ),
@@ -507,12 +508,12 @@ class WinLossCard extends StatelessWidget {
     }
 
     return Container(
-      padding: const EdgeInsets.all(16),
+      padding: EdgeInsets.all(16.w),
       decoration: AppTheme.surfaceCard(scheme, radius: 18),
       child: Column(
         children: [
           row('account.won'.tr, won, AppColors.success),
-          const SizedBox(height: 14),
+          SizedBox(height: 14.h),
           row('account.lost'.tr, lost, AppColors.danger),
         ],
       ),

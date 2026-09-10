@@ -214,8 +214,8 @@ class _VerificationSection extends StatelessWidget {
                 _VerificationRow(step: profile.steps[i]),
                 if (i < profile.steps.length - 1)
                   Divider(
-                    height: 1,
-                    thickness: 1,
+                    height: 1.h,
+                    thickness: 1.h,
                     indent: 14.w,
                     endIndent: 14.w,
                     color: scheme.onSurface.withValues(alpha: 0.06),
@@ -327,8 +327,8 @@ class _PersonalDetailsSection extends StatelessWidget {
                 _DetailRow(row: profile.details[i]),
                 if (i < profile.details.length - 1)
                   Divider(
-                    height: 1,
-                    thickness: 1,
+                    height: 1.h,
+                    thickness: 1.h,
                     color: scheme.primary.withValues(alpha: 0.12),
                   ),
               ],
@@ -447,8 +447,8 @@ class _NewsAlertsSection extends StatelessWidget {
                 _AlertRow(row: profile.alerts[i]),
                 if (i < profile.alerts.length - 1)
                   Divider(
-                    height: 1,
-                    thickness: 1,
+                    height: 1.h,
+                    thickness: 1.h,
                     color: scheme.onSurface.withValues(alpha: 0.06),
                   ),
               ],

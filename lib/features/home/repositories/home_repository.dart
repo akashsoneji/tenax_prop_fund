@@ -29,13 +29,17 @@ class HomeRepository {
     );
   }
 
-  /// The referral summary shown on the dashboard, taken from the same
-  /// `/app/dashboard` payload (`props.referral`). Returns null when absent so
-  /// the card simply hides.
-  DashboardReferral? getReferralCard() {
-    final referral = (_lastData['referral'] as Map?)?.cast<String, dynamic>();
-    if (referral == null || referral.isEmpty) return null;
-    return DashboardReferral.fromJson(referral);
+  /// The referral summary shown on the Home "Refer & earn" card. Fetched from
+  /// the live `GET /growth/referrals` endpoint (standard envelope; `data` nests
+  /// `referral` + `stats`). Returns null when the call fails so the card hides.
+  Future<DashboardReferral?> getReferralCard() async {
+    final res = await ApiEnvelope.guard<DashboardReferral>(
+      () => _api.get<Map<String, dynamic>>(ApiEndpoints.referrals),
+      (data) => DashboardReferral.fromReferralsJson(
+        (data as Map?)?.cast<String, dynamic>() ?? const {},
+      ),
+    );
+    return res.success ? res.data : null;
   }
 
   /// Unread notification count for the hero bell badge, read from the dashboard
