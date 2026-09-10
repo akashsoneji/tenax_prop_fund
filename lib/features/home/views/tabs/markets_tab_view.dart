@@ -32,9 +32,9 @@ class MarketsTabView extends StatelessWidget {
         // Union of the presets and the live-selected symbol so the picker always
         // contains the current one even if it came from the Trade list.
         final symbols = <String>{symbol, ..._symbols}.toList();
-        return Stack(
+        return Column(
           children: [
-            Positioned.fill(
+            Expanded(
               // Reuse the EXACT preloaded URL so the warm webview is never
               // reloaded for a differing theme/symbol URL. Symbol switching goes
               // through fast JS injection, not a URL change.
@@ -43,15 +43,13 @@ class MarketsTabView extends StatelessWidget {
                 symbol: symbol,
               ),
             ),
-            Positioned.fill(
-              child: FloatingTradePanel(
-                symbol: symbol,
-                symbols: symbols,
-                onSymbolSelected: (s) {
-                  market.selectSymbol(s);
-                  Get.find<ChartPreloadService>().saveSymbol(s);
-                },
-              ),
+            FloatingTradePanel(
+              symbol: symbol,
+              symbols: symbols,
+              onSymbolSelected: (s) {
+                market.selectSymbol(s);
+                Get.find<ChartPreloadService>().saveSymbol(s);
+              },
             ),
           ],
         );

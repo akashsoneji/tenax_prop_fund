@@ -9,11 +9,9 @@ import '../../symbols/services/market_watch_v2_service.dart';
 import '../views/pending_order_view.dart';
 import 'notifications_sheet.dart';
 
-/// A draggable, collapsible trading order ticket that floats over the Markets
-/// chart. The user can drag it anywhere on screen (it snaps within bounds) and
-/// collapse it to a small pill. It exposes Buy / Sell, live spread, order type
-/// (Market / Pending) with an optional price field, a volume/lot stepper, and a
-/// notify-on-fill toggle.
+/// A docked trading order ticket shown below the Markets chart and above the
+/// bottom navigation bar. It exposes Buy / Sell, live spread, order type
+/// (Market / Pending) with an optional TP/SL section, and a volume/lot stepper.
 class FloatingTradePanel extends StatefulWidget {
   const FloatingTradePanel({
     super.key,
@@ -64,10 +62,7 @@ class TradeTicket {
 
 enum TradeSide { buy, sell }
 
-class _FloatingTradePanelState extends State<FloatingTradePanel>
-    with SingleTickerProviderStateMixin {
-  Offset _pos = const Offset(16, 120);
-  bool _collapsed = false;
+class _FloatingTradePanelState extends State<FloatingTradePanel> {
   double _volume = 0.01;
   bool _tpSlEnabled = false;
   double? _takeProfit;
@@ -76,47 +71,16 @@ class _FloatingTradePanelState extends State<FloatingTradePanel>
   /// Quick-set lot presets shown as chips above the volume field.
   static const List<double> _volumePresets = [0.01, 0.10, 0.50, 1.00];
 
-  /// Step size for the TP/SL +/- steppers (in price units).
-  static const double _tpSlStep = 0.10;
-
   /// Shared height for the volume field, +/- steppers and Pending button so
   /// they line up on one row.
   static const double _controlHeight = 44;
 
-  /// Collapsed pill diameter and an estimated open-panel height, used to anchor
-  /// the grow/shrink origin to the corner nearest the pill.
-  static const double _pillSize = 56;
-  static const double _panelHeightEstimate = 300;
-
   final _volumeCtrl = TextEditingController(text: '0.01');
-
-  /// Drives the open (1) <-> collapsed (0) transition with an ease-in-out feel.
-  late final AnimationController _anim;
-
-  @override
-  void initState() {
-    super.initState();
-    _anim = AnimationController(
-      vsync: this,
-      duration: const Duration(milliseconds: 320),
-      value: _collapsed ? 0 : 1,
-    );
-  }
 
   @override
   void dispose() {
-    _anim.dispose();
     _volumeCtrl.dispose();
     super.dispose();
-  }
-
-  void _setCollapsed(bool collapsed) {
-    setState(() => _collapsed = collapsed);
-    if (collapsed) {
-      _anim.reverse();
-    } else {
-      _anim.forward();
-    }
   }
 
   void _bumpVolume(double delta) {
@@ -216,129 +180,35 @@ class _FloatingTradePanelState extends State<FloatingTradePanel>
   @override
   Widget build(BuildContext context) {
     final scheme = Theme.of(context).colorScheme;
-    return LayoutBuilder(
-      builder: (context, constraints) {
-        // Panel spans 65% of the device width (35% narrower than full width).
-        final panelWidth = constraints.maxWidth * 0.65;
-
-        // The pill roams the WHOLE screen; clamp its top-left to the pill size.
-        final maxX =
-            (constraints.maxWidth - _pillSize).clamp(0.0, double.infinity);
-        final maxY =
-            (constraints.maxHeight - _pillSize).clamp(0.0, double.infinity);
-        final pill = Offset(
-          _pos.dx.clamp(0.0, maxX),
-          _pos.dy.clamp(0.0, maxY),
-        );
-
-        // Anchor the panel to the pill corner nearest the screen edge so it
-        // opens/collapses FROM the pill wherever it rests (grows leftward when
-        // docked right, upward when docked at the bottom, etc.).
-        final onRight = pill.dx + _pillSize / 2 > constraints.maxWidth / 2;
-        final onBottom = pill.dy + _pillSize / 2 > constraints.maxHeight / 2;
-        final panelLeft = onRight ? pill.dx + _pillSize - panelWidth : pill.dx;
-        final panelTop =
-            onBottom ? pill.dy + _pillSize - _panelHeightEstimate : pill.dy;
-        final origin = Alignment(onRight ? 1 : -1, onBottom ? 1 : -1);
-
-        // When the keyboard opens (editing volume), lift the panel so its
-        // bottom stays visible above the keyboard, with an 8px breathing gap.
-        final keyboardInset = MediaQuery.of(context).viewInsets.bottom;
-        final keyboardTop = constraints.maxHeight - keyboardInset;
-        final panelBottom = panelTop + _panelHeightEstimate;
-        final overlap = panelBottom - keyboardTop + 8;
-        final liftedTop = (keyboardInset > 0 && overlap > 0)
-            ? (panelTop - overlap).clamp(0.0, panelTop)
-            : panelTop;
-
-        final curved = CurvedAnimation(
-          parent: _anim,
-          curve: Curves.easeInOutCubic,
-          reverseCurve: Curves.easeInOutCubic,
-        );
-
-        return Stack(
-          children: [
-            // Pill layer — draggable in either state, fades/shrinks as it opens.
-            Positioned(
-              left: pill.dx,
-              top: pill.dy,
-              child: GestureDetector(
-                onPanUpdate: (d) => setState(() => _pos = pill + d.delta),
-                child: FadeTransition(
-                  opacity: Tween<double>(begin: 1, end: 0).animate(curved),
-                  child: ScaleTransition(
-                    scale: Tween<double>(begin: 1, end: 0.6).animate(curved),
-                    child: IgnorePointer(
-                      ignoring: !_collapsed,
-                      child: _CollapsedPill(
-                        symbol: widget.symbol,
-                        onTap: () => _setCollapsed(false),
-                      ),
-                    ),
-                  ),
-                ),
-              ),
-            ),
-            // Panel layer — grows out of the pill corner with ease-in-out.
-            // The whole panel is draggable; it also lifts above the keyboard
-            // when the volume field is being edited.
-            AnimatedPositioned(
-              duration: const Duration(milliseconds: 220),
-              curve: Curves.easeOutCubic,
-              left: panelLeft,
-              top: liftedTop,
-              child: FadeTransition(
-                opacity: curved,
-                child: ScaleTransition(
-                  scale: curved,
-                  alignment: origin,
-                  child: IgnorePointer(
-                    ignoring: _collapsed,
-                    child: GestureDetector(
-                      behavior: HitTestBehavior.translucent,
-                      onPanUpdate: (d) => setState(() => _pos = pill + d.delta),
-                      child: _buildPanel(scheme, panelWidth, pill),
-                    ),
-                  ),
-                ),
-              ),
-            ),
-          ],
-        );
-      },
-    );
+    return _buildPanel(scheme);
   }
 
-  Widget _buildPanel(ColorScheme scheme, double panelWidth, Offset pill) {
-    final isDark = Theme.of(context).brightness == Brightness.dark;
+  Widget _buildPanel(ColorScheme scheme) {
     return Material(
-      elevation: 16,
-      borderRadius: BorderRadius.circular(20),
-      color: AppColors.transparent,
-      shadowColor: scheme.primary.withValues(alpha: isDark ? 0.45 : 0.28),
+      color: scheme.surface,
       child: Container(
-        width: panelWidth,
-        padding: const EdgeInsets.all(14),
+        width: double.infinity,
+        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
         decoration: BoxDecoration(
           color: scheme.surface,
-          borderRadius: BorderRadius.circular(20),
-          border: Border.all(
-            color: scheme.primary.withValues(alpha: 0.25),
+          border: Border(
+            top: BorderSide(
+              color: scheme.primary.withValues(alpha: 0.25),
+            ),
           ),
         ),
         child: Column(
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            _header(scheme, pill),
-            const SizedBox(height: 12),
-            _volumeStepper(scheme),
+            _header(scheme),
             const SizedBox(height: 8),
+            _volumeStepper(scheme),
+            const SizedBox(height: 6),
             _volumePresetChips(scheme),
-            const SizedBox(height: 12),
+            const SizedBox(height: 8),
             _tpSlSection(scheme),
-            const SizedBox(height: 12),
+            const SizedBox(height: 8),
             Row(
               children: [
                 Expanded(
@@ -364,15 +234,9 @@ class _FloatingTradePanelState extends State<FloatingTradePanel>
     );
   }
 
-  Widget _header(ColorScheme scheme, Offset pill) {
+  Widget _header(ColorScheme scheme) {
     return Row(
       children: [
-        Padding(
-          padding: const EdgeInsets.all(4),
-          child: Icon(Icons.drag_indicator,
-              size: 18, color: scheme.onSurfaceVariant),
-        ),
-        const SizedBox(width: 2),
         Expanded(
           child: InkWell(
             onTap: _openSymbolPicker,
@@ -406,16 +270,6 @@ class _FloatingTradePanelState extends State<FloatingTradePanel>
           child: Padding(
             padding: const EdgeInsets.all(4),
             child: Icon(Icons.notifications_none,
-                size: 22, color: scheme.onSurfaceVariant),
-          ),
-        ),
-        const SizedBox(width: 4),
-        InkWell(
-          onTap: () => _setCollapsed(true),
-          borderRadius: BorderRadius.circular(20),
-          child: Padding(
-            padding: const EdgeInsets.all(4),
-            child: Icon(Icons.close,
                 size: 22, color: scheme.onSurfaceVariant),
           ),
         ),
@@ -501,29 +355,37 @@ class _FloatingTradePanelState extends State<FloatingTradePanel>
         _stepBtn(scheme, Icons.remove, () => _bumpVolume(-0.01)),
         const SizedBox(width: 8),
         Expanded(
-          child: SizedBox(
+          child: Container(
             height: _controlHeight,
-            child: Center(
-              child: TextField(
-                controller: _volumeCtrl,
-                textAlign: TextAlign.center,
-                textAlignVertical: TextAlignVertical.center,
-                keyboardType:
-                    const TextInputType.numberWithOptions(decimal: true),
-                inputFormatters: [
-                  FilteringTextInputFormatter.allow(RegExp(r'[0-9.]')),
-                ],
-                onChanged: _onVolumeEdited,
-                style: TextStyle(
-                  fontSize: 18,
-                  fontWeight: FontWeight.w700,
-                  color: scheme.onSurface,
-                ),
-                decoration: const InputDecoration(
-                  isCollapsed: true,
-                  border: InputBorder.none,
-                  contentPadding: EdgeInsets.zero,
-                ),
+            alignment: Alignment.center,
+            decoration: BoxDecoration(
+              color: scheme.surfaceContainerHighest,
+              borderRadius: BorderRadius.circular(10),
+            ),
+            child: TextField(
+              controller: _volumeCtrl,
+              textAlign: TextAlign.center,
+              textAlignVertical: TextAlignVertical.center,
+              keyboardType:
+                  const TextInputType.numberWithOptions(decimal: true),
+              inputFormatters: [
+                FilteringTextInputFormatter.allow(RegExp(r'[0-9.]')),
+              ],
+              onChanged: _onVolumeEdited,
+              style: TextStyle(
+                fontSize: 16,
+                fontWeight: FontWeight.w700,
+                color: scheme.onSurface,
+              ),
+              decoration: const InputDecoration(
+                isCollapsed: true,
+                filled: false,
+                fillColor: AppColors.transparent,
+                border: InputBorder.none,
+                enabledBorder: InputBorder.none,
+                focusedBorder: InputBorder.none,
+                disabledBorder: InputBorder.none,
+                contentPadding: EdgeInsets.zero,
               ),
             ),
           ),
@@ -807,47 +669,6 @@ class _PendingButton extends StatelessWidget {
               ),
             ),
           ],
-        ),
-      ),
-    );
-  }
-}
-class _CollapsedPill extends StatelessWidget {
-  const _CollapsedPill({required this.symbol, required this.onTap});
-
-  final String symbol;
-  final VoidCallback onTap;
-
-  @override
-  Widget build(BuildContext context) {
-    final scheme = Theme.of(context).colorScheme;
-    return Container(
-      width: 56,
-      height: 56,
-      decoration: BoxDecoration(
-        color: scheme.primary,
-        shape: BoxShape.circle,
-        boxShadow: [
-          BoxShadow(
-            color: scheme.primary.withValues(alpha: 0.45),
-            blurRadius: 18,
-            spreadRadius: 1,
-            offset: const Offset(0, 6),
-          ),
-          BoxShadow(
-            color: AppColors.black.withValues(alpha: 0.25),
-            blurRadius: 8,
-            offset: const Offset(0, 3),
-          ),
-        ],
-      ),
-      child: Material(
-        color: AppColors.transparent,
-        shape: const CircleBorder(),
-        clipBehavior: Clip.antiAlias,
-        child: InkWell(
-          onTap: onTap,
-          child: Icon(Icons.candlestick_chart, color: scheme.onPrimary),
         ),
       ),
     );
