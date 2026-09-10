@@ -75,6 +75,7 @@ flutter:
     - assets/flavors/clientA/
     - assets/flavors/clientB/
     - assets/flavors/clientC/
+    - assets/svg/flags/
 
   # To add assets to your application, add an assets section, like this:
   # assets:
