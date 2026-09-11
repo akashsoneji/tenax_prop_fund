@@ -16,6 +16,28 @@ class PositionsRepository {
 
   final ApiClient _api;
 
+  /// Places a market order on the web trade host.
+  Future<ApiResponse<bool>> placeMarketOrder({
+    required String symbol,
+    required double volume,
+    required String type,
+    required String tradingAccount,
+  }) {
+    return ApiEnvelope.guard<bool>(
+      () => _api.postWeb<Map<String, dynamic>>(
+        ApiEndpoints.placeOrder,
+        data: {
+          'symbol': symbol,
+          'volume': volume,
+          'type': type,
+          'mt5_account': tradingAccount,
+        },
+      ),
+      (_) => true,
+      successMessage: 'positions.order_success'.tr,
+    );
+  }
+
   /// Closes one open position by its trade-engine position id. Pass [volume]
   /// for a PARTIAL close (lots to close); omit it for a full close.
   /// Web body: `{ position_id, mt5_account, volume? }`.
@@ -23,6 +45,7 @@ class PositionsRepository {
     required String positionId,
     required String tradingAccount,
     double? volume,
+    bool showSuccessToast = true,
   }) {
     return ApiEnvelope.guard<bool>(
       () => _api.postWeb<Map<String, dynamic>>(
@@ -34,7 +57,7 @@ class PositionsRepository {
         },
       ),
       (_) => true,
-      successMessage: 'positions.close_success'.tr,
+      successMessage: showSuccessToast ? 'positions.close_success'.tr : null,
     );
   }
 

@@ -36,7 +36,7 @@ class FloatingTradePanel extends StatefulWidget {
   final double spread;
 
   /// Called when the user taps Buy or Sell with the assembled ticket.
-  final ValueChanged<TradeTicket>? onSubmit;
+  final Future<void> Function(TradeTicket ticket)? onSubmit;
 
   @override
   State<FloatingTradePanel> createState() => _FloatingTradePanelState();
@@ -68,6 +68,7 @@ class _FloatingTradePanelState extends State<FloatingTradePanel> {
   bool _tpSlEnabled = false;
   double? _takeProfit;
   double? _stopLoss;
+  bool _isSubmitting = false;
 
   /// Quick-set lot presets shown as chips above the volume field.
   static const List<double> _volumePresets = [0.01, 0.10, 0.50, 1.00];
@@ -161,17 +162,24 @@ class _FloatingTradePanelState extends State<FloatingTradePanel> {
     });
   }
 
-  void _submit(TradeSide side) {
+  Future<void> _submit(TradeSide side) async {
+    final onSubmit = widget.onSubmit;
+    if (_isSubmitting || onSubmit == null) return;
     _onVolumeEdited(_volumeCtrl.text);
-    widget.onSubmit?.call(
-      TradeTicket(
-        symbol: widget.symbol,
-        side: side,
-        volume: _volume,
-        takeProfit: _tpSlEnabled ? _takeProfit : null,
-        stopLoss: _tpSlEnabled ? _stopLoss : null,
-      ),
-    );
+    _isSubmitting = true;
+    try {
+      await onSubmit(
+        TradeTicket(
+          symbol: widget.symbol,
+          side: side,
+          volume: _volume,
+          takeProfit: _tpSlEnabled ? _takeProfit : null,
+          stopLoss: _tpSlEnabled ? _stopLoss : null,
+        ),
+      );
+    } finally {
+      _isSubmitting = false;
+    }
   }
 
   void _openPendingOrder() {

@@ -1,6 +1,8 @@
 import 'package:get/get.dart';
 
 import '../../../core/state/data_state.dart';
+import '../../../shared/widgets/app_toast.dart';
+import '../../accounts/controllers/accounts_controller.dart';
 import '../../accounts/models/accounts_models.dart';
 import '../../accounts/repositories/accounts_repository.dart';
 import '../../home/controllers/home_controller.dart';
@@ -91,12 +93,29 @@ class PositionsController extends GetxController {
   /// Kept in ONE place so it's trivial to swap once tenax adds a global
   /// active-account singleton.
   Future<void> _resolveAccount() async {
+    final loadedRows = _loadedAccountRows();
+    if (loadedRows != null) {
+      _selectAccount(loadedRows);
+      return;
+    }
+
     final res = await _accountsRepository.getAccounts();
     if (isClosed) return;
     final data = res.data;
     if (!res.success || data == null || data.accounts.isEmpty) return;
-    final rows = data.accounts;
+    _selectAccount(data.accounts);
+  }
 
+  List<AccountRow>? _loadedAccountRows() {
+    if (!Get.isRegistered<AccountsController>()) return null;
+    final state = Get.find<AccountsController>().state;
+    if (state is! DataSuccess<AccountsData> || state.data.accounts.isEmpty) {
+      return null;
+    }
+    return state.data.accounts;
+  }
+
+  void _selectAccount(List<AccountRow> rows) {
     final focusId = _focusedAccountId();
     if (focusId != null) {
       final match = rows.where((a) => a.id == focusId);
@@ -130,6 +149,33 @@ class PositionsController extends GetxController {
     _accountWs.switchAccount(account);
   }
 
+  /// Places a Buy/Sell market order for the currently focused trading account.
+  Future<bool> placeMarketOrder({
+    required String symbol,
+    required double volume,
+    required OrderType orderType,
+  }) async {
+    if (busy.value || symbol.isEmpty || volume <= 0) return false;
+    busy.value = true;
+    try {
+      await _resolveAccount();
+      if (tradingAccount.value.isEmpty) {
+        AppToast.error('positions.account_unavailable'.tr);
+        return false;
+      }
+
+      final response = await _repository.placeMarketOrder(
+        symbol: symbol,
+        volume: volume,
+        type: orderType.apiString,
+        tradingAccount: tradingAccount.value,
+      );
+      return response.success;
+    } finally {
+      if (!isClosed) busy.value = false;
+    }
+  }
+
   /// Closes one open position. For a FULL close (volume null) the row is removed
   /// optimistically; a PARTIAL close ([volume] set) keeps the row so the socket
   /// can update its remaining lots. Returns true on success.
@@ -150,13 +196,30 @@ class PositionsController extends GetxController {
     return res.success;
   }
 
-  /// Closes ALL open positions.
-  Future<void> closeAll() async {
-    if (busy.value || _positionsWs.openPositions.isEmpty) return;
+  /// Closes the selected group of positions from the Close All sheet.
+  Future<void> closePositions(List<TradePosition> positions) async {
+    if (busy.value || positions.isEmpty) return;
     busy.value = true;
-    _positionsWs.openPositions.clear();
-    await _repository.closeAllPositions(tradingAccount: tradingAccount.value);
-    if (!isClosed) busy.value = false;
+    try {
+      if (positions.length == _positionsWs.openPositions.length) {
+        await _repository.closeAllPositions(tradingAccount: tradingAccount.value);
+        return;
+      }
+
+      for (final position in positions) {
+        final response = await _repository.closePositionByPositionId(
+          positionId: position.orderId,
+          tradingAccount: position.mt5Account.isNotEmpty
+              ? position.mt5Account
+              : tradingAccount.value,
+          showSuccessToast: false,
+        );
+        if (!response.success) return;
+      }
+      AppToast.success('positions.close_selected_success'.tr);
+    } finally {
+      if (!isClosed) busy.value = false;
+    }
   }
 
   /// Updates take-profit / stop-loss for [position]. Pass `0` to clear a level.

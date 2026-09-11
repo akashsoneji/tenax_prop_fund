@@ -7,6 +7,7 @@ import '../../../shared/theme/app_text.dart';
 import '../../../shared/widgets/app_segmented_control.dart';
 import '../controllers/positions_controller.dart';
 import '../widgets/account_summary_grid.dart';
+import '../widgets/close_all_sheet.dart';
 import '../widgets/history_row.dart';
 import '../widgets/position_card.dart';
 
@@ -87,7 +88,32 @@ class _MarketList extends StatelessWidget {
               children: [
                 Obx(
                   () => TextButton(
-                    onPressed: controller.busy.value ? null : controller.closeAll,
+                    onPressed: controller.busy.value
+                        ? null
+                        : () async {
+                            final group = await showCloseAllSheet(
+                              context,
+                              positions: items,
+                            );
+                            if (group == null) return;
+                            await controller.closePositions(
+                              switch (group) {
+                                CloseGroup.all => items,
+                                CloseGroup.profitable => items
+                                    .where((position) => position.profitLoss > 0)
+                                    .toList(),
+                                CloseGroup.losing => items
+                                    .where((position) => position.profitLoss < 0)
+                                    .toList(),
+                                CloseGroup.long => items
+                                    .where((position) => position.isBuy)
+                                    .toList(),
+                                CloseGroup.short => items
+                                    .where((position) => !position.isBuy)
+                                    .toList(),
+                              },
+                            );
+                          },
                     child: Text(
                       'positions.close_all'.tr,
                       style: AppText.subtitle(

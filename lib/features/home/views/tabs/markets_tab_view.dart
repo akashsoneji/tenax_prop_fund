@@ -3,6 +3,8 @@ import 'package:get/get.dart';
 
 import '../../../chart/services/chart_preload_service.dart';
 import '../../../chart/widgets/chart_in_app_webview.dart';
+import '../../../positions/controllers/positions_controller.dart';
+import '../../../positions/models/positions_models.dart';
 import '../../../symbols/services/market_watch_v2_service.dart';
 import '../../widgets/floating_trade_panel.dart';
 
@@ -49,6 +51,15 @@ class MarketsTabView extends StatelessWidget {
               onSymbolSelected: (s) {
                 market.selectSymbol(s);
                 Get.find<ChartPreloadService>().saveSymbol(s);
+              },
+              onSubmit: (ticket) async {
+                await Get.find<PositionsController>().placeMarketOrder(
+                  symbol: ticket.symbol,
+                  volume: ticket.volume,
+                  orderType: ticket.side == TradeSide.buy
+                      ? OrderType.buyMarket
+                      : OrderType.sellMarket,
+                );
               },
             ),
           ],

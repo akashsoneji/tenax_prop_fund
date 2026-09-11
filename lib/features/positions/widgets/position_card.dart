@@ -70,37 +70,40 @@ class PositionCard extends StatelessWidget {
                 ),
               ),
               SizedBox(width: 8.w),
-              Flexible(
-                child: Text(
-                  position.symbol,
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                  style: TextStyle(
-                    color: scheme.onSurface,
-                    fontSize: 14.sp,
-                    fontWeight: FontWeight.w700,
-                  ),
+              Expanded(
+                child: Row(
+                  children: [
+                    Flexible(
+                      child: Text(
+                        position.symbol,
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: TextStyle(
+                          color: scheme.onSurface,
+                          fontSize: 14.sp,
+                          fontWeight: FontWeight.w700,
+                        ),
+                      ),
+                    ),
+                    SizedBox(width: 8.w),
+                    Text(
+                      position.volume.toString(),
+                      style: TextStyle(
+                        color: scheme.onSurfaceVariant,
+                        fontSize: 12.sp,
+                        fontWeight: FontWeight.w500,
+                      ),
+                    ),
+                  ],
                 ),
               ),
               SizedBox(width: 8.w),
               Text(
-                position.volume.toString(),
+                '${isPositive ? '' : '-'}\$${position.profitLoss.abs().toStringAsFixed(2)}',
                 style: TextStyle(
-                  color: scheme.onSurfaceVariant,
-                  fontSize: 12.sp,
-                  fontWeight: FontWeight.w500,
-                ),
-              ),
-              const Spacer(),
-              Padding(
-                padding: EdgeInsets.only(left: 75.w),
-                child: Text(
-                  '${isPositive ? '' : '-'}\$${position.profitLoss.abs().toStringAsFixed(2)}',
-                  style: TextStyle(
-                    color: isPositive ? green : red,
-                    fontSize: 14.sp,
-                    fontWeight: FontWeight.w700,
-                  ),
+                  color: isPositive ? green : red,
+                  fontSize: 14.sp,
+                  fontWeight: FontWeight.w700,
                 ),
               ),
             ],
