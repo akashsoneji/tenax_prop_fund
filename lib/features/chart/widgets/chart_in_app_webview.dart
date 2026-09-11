@@ -62,8 +62,10 @@ class _ChartInAppWebViewState extends State<ChartInAppWebView> {
     String? warmSymbol;
     if (Get.isRegistered<ChartPreloadService>()) {
       final service = Get.find<ChartPreloadService>();
-      _headlessWebView = service.headlessWebView;
-      if (service.isReady) {
+      // Only ONE on-screen webview can host the warm instance; a second screen
+      // gets null here and loads its own from cache.
+      _headlessWebView = service.claim();
+      if (_headlessWebView != null && service.isReady) {
         // Preload already settled the headless canvas, so we can reveal on the
         // first check instead of re-polling. NOTE: we deliberately keep the
         // loader UP (do NOT clear _isLoading here) — attaching the headless
@@ -115,6 +117,9 @@ class _ChartInAppWebViewState extends State<ChartInAppWebView> {
     _pendingSymbolTimer?.cancel();
     // Intentionally NOT disposing the headless webview — it is owned by
     // ChartPreloadService and kept warm for the next open.
+    if (_headlessWebView != null && Get.isRegistered<ChartPreloadService>()) {
+      Get.find<ChartPreloadService>().release();
+    }
     super.dispose();
   }
 

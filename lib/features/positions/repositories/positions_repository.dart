@@ -16,12 +16,16 @@ class PositionsRepository {
 
   final ApiClient _api;
 
-  /// Places a market order on the web trade host.
+  /// Places a market order on the web trade host. [takeProfit] / [stopLoss] are
+  /// independent — sending only one is valid and the host leaves the other
+  /// level unset.
   Future<ApiResponse<bool>> placeMarketOrder({
     required String symbol,
     required double volume,
     required String type,
     required String tradingAccount,
+    double? takeProfit,
+    double? stopLoss,
   }) {
     return ApiEnvelope.guard<bool>(
       () => _api.postWeb<Map<String, dynamic>>(
@@ -31,6 +35,50 @@ class PositionsRepository {
           'volume': volume,
           'type': type,
           'mt5_account': tradingAccount,
+          // The web client sends both spellings per level; mirror it exactly.
+          if (takeProfit != null) ...{
+            'tp': takeProfit,
+            'take_profit': takeProfit,
+          },
+          if (stopLoss != null) ...{'sl': stopLoss, 'stop_loss': stopLoss},
+        },
+      ),
+      (_) => true,
+      successMessage: 'positions.order_success'.tr,
+    );
+  }
+
+  /// Places a pending (limit/stop) order on the web trade host. Same endpoint
+  /// as [placeMarketOrder]; pending types additionally carry the trigger
+  /// [price] and the optional TP/SL levels.
+  Future<ApiResponse<bool>> placePendingOrder({
+    required String symbol,
+    required double volume,
+    required String type,
+    required double price,
+    required String tradingAccount,
+    double? limitPrice,
+    double? takeProfit,
+    double? stopLoss,
+  }) {
+    return ApiEnvelope.guard<bool>(
+      () => _api.postWeb<Map<String, dynamic>>(
+        ApiEndpoints.placeOrder,
+        data: {
+          'symbol': symbol,
+          'volume': volume,
+          'type': type,
+          'price': price,
+          'mt5_account': tradingAccount,
+          // Stop-limit types rest at a second level once the stop is hit.
+          if (limitPrice != null) 'stop_limit_price': limitPrice,
+          // The web client sends BOTH spellings for each level; the trade host
+          // only honours the short key on some builds, so mirror it exactly.
+          if (takeProfit != null) ...{
+            'tp': takeProfit,
+            'take_profit': takeProfit,
+          },
+          if (stopLoss != null) ...{'sl': stopLoss, 'stop_loss': stopLoss},
         },
       ),
       (_) => true,
@@ -111,6 +159,33 @@ class PositionsRepository {
           'position_id': int.tryParse(positionId) ?? positionId,
           if (takeProfit != null) 'take_profit': takeProfit,
           if (stopLoss != null) 'stop_loss': stopLoss,
+        },
+      ),
+      (_) => true,
+      successMessage: 'positions.tpsl_success'.tr,
+    );
+  }
+
+  /// Updates take-profit / stop-loss for a PENDING order. The host uses a
+  /// different route and body than [updateTPSL]: `{ mt5_account, order_id,
+  /// price, stop_loss, take_profit }`, where an unset level is sent as `null`
+  /// (not omitted) so the engine clears it.
+  Future<ApiResponse<bool>> updatePendingOrderTPSL({
+    required String tradingAccount,
+    required String orderId,
+    required num price,
+    num? takeProfit,
+    num? stopLoss,
+  }) {
+    return ApiEnvelope.guard<bool>(
+      () => _api.postWeb<Map<String, dynamic>>(
+        ApiEndpoints.updatePendingOrderTPSL,
+        data: {
+          'mt5_account': tradingAccount,
+          'order_id': int.tryParse(orderId) ?? orderId,
+          'price': price,
+          'stop_loss': stopLoss,
+          'take_profit': takeProfit,
         },
       ),
       (_) => true,

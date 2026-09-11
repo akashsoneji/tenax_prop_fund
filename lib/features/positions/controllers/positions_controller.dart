@@ -150,10 +150,13 @@ class PositionsController extends GetxController {
   }
 
   /// Places a Buy/Sell market order for the currently focused trading account.
+  /// [takeProfit] and [stopLoss] are independent — pass either, both, or none.
   Future<bool> placeMarketOrder({
     required String symbol,
     required double volume,
     required OrderType orderType,
+    double? takeProfit,
+    double? stopLoss,
   }) async {
     if (busy.value || symbol.isEmpty || volume <= 0) return false;
     busy.value = true;
@@ -169,6 +172,44 @@ class PositionsController extends GetxController {
         volume: volume,
         type: orderType.apiString,
         tradingAccount: tradingAccount.value,
+        takeProfit: takeProfit,
+        stopLoss: stopLoss,
+      );
+      return response.success;
+    } finally {
+      if (!isClosed) busy.value = false;
+    }
+  }
+
+  /// Places a pending (limit/stop) order for the currently focused trading
+  /// account. [price] is the trigger level; TP/SL are sent only when set.
+  Future<bool> placePendingOrder({
+    required String symbol,
+    required double volume,
+    required OrderType orderType,
+    required double price,
+    double? limitPrice,
+    double? takeProfit,
+    double? stopLoss,
+  }) async {
+    if (busy.value || symbol.isEmpty || volume <= 0 || price <= 0) return false;
+    busy.value = true;
+    try {
+      await _resolveAccount();
+      if (tradingAccount.value.isEmpty) {
+        AppToast.error('positions.account_unavailable'.tr);
+        return false;
+      }
+
+      final response = await _repository.placePendingOrder(
+        symbol: symbol,
+        volume: volume,
+        type: orderType.apiString,
+        price: price,
+        limitPrice: limitPrice,
+        tradingAccount: tradingAccount.value,
+        takeProfit: takeProfit,
+        stopLoss: stopLoss,
       );
       return response.success;
     } finally {
@@ -224,22 +265,53 @@ class PositionsController extends GetxController {
 
   /// Updates take-profit / stop-loss for [position]. Pass `0` to clear a level.
   /// Returns true on success so the caller can close the edit sheet.
+  ///
+  /// A PENDING row goes to the pending-order route (keyed by `order_id` and
+  /// carrying the untouched trigger `price`); an open position goes to the
+  /// position route. [isPending] defaults to whichever list the row is in, so
+  /// existing Market-tab call sites keep their behaviour.
   Future<bool> updateTPSL(
     TradePosition position, {
     num? takeProfit,
     num? stopLoss,
+    bool? isPending,
   }) async {
     if (busy.value) return false;
     busy.value = true;
-    final res = await _repository.updateTPSL(
-      tradingAccount:
-          position.mt5Account.isNotEmpty ? position.mt5Account : tradingAccount.value,
-      positionId: position.orderId,
-      takeProfit: takeProfit,
-      stopLoss: stopLoss,
-    );
+    final account = position.mt5Account.isNotEmpty
+        ? position.mt5Account
+        : tradingAccount.value;
+    final pending = isPending ?? _isPendingRow(position.orderId);
+
+    final res = pending
+        ? await _repository.updatePendingOrderTPSL(
+            tradingAccount: account,
+            orderId: position.orderId,
+            price: _pendingTriggerPrice(position),
+            // The pending route clears a level with an explicit null; `0` is
+            // how the position route spells the same thing.
+            takeProfit: (takeProfit ?? 0) == 0 ? null : takeProfit,
+            stopLoss: (stopLoss ?? 0) == 0 ? null : stopLoss,
+          )
+        : await _repository.updateTPSL(
+            tradingAccount: account,
+            positionId: position.orderId,
+            takeProfit: takeProfit,
+            stopLoss: stopLoss,
+          );
     if (!isClosed) busy.value = false;
     return res.success;
+  }
+
+  bool _isPendingRow(String orderId) =>
+      rawPending.any((o) => o.order.toString() == orderId);
+
+  /// The pending route requires the order's trigger price unchanged; prefer the
+  /// live socket row and fall back to the card's own entry price.
+  num _pendingTriggerPrice(TradePosition position) {
+    final match = rawPending.where((o) => o.order.toString() == position.orderId);
+    if (match.isNotEmpty) return match.first.priceOrder;
+    return num.tryParse(position.entryPrice.replaceAll(',', '')) ?? 0;
   }
 
   /// Cancels a pending order.

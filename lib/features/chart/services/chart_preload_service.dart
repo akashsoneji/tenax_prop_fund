@@ -31,6 +31,22 @@ class ChartPreloadService extends GetxService {
   HeadlessInAppWebView? headlessWebView;
   bool isReady = false;
 
+  /// True while an on-screen webview has the warm instance attached. A
+  /// [HeadlessInAppWebView] can only back ONE [InAppWebView] at a time, so a
+  /// second screen must fall back to its own (cache-backed) webview instead of
+  /// stealing the instance out from under the first one.
+  bool _claimed = false;
+
+  /// Hands the warm instance to a caller, or null when it is already in use.
+  HeadlessInAppWebView? claim() {
+    if (headlessWebView == null || _claimed) return null;
+    _claimed = true;
+    return headlessWebView;
+  }
+
+  /// Returns the warm instance to the pool when a screen is disposed.
+  void release() => _claimed = false;
+
   /// Default symbol the Markets tab opens on when nothing was persisted (e.g.
   /// a logged-out or first-run user).
   static const defaultSymbol = 'XAUUSD';

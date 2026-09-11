@@ -272,12 +272,109 @@ class PositionsWsService extends GetxService with WidgetsBindingObserver {
   }
 
   void _onPoFrame(dynamic decoded) {
-    if (decoded is! Map) return;
-    final map = decoded.cast<String, dynamic>();
-    final po = map['pendingOrders'] ?? map['pending_orders'];
-    if (po is! Map) return;
-    final data = PendingOrdersData.fromJson(po.cast<String, dynamic>());
-    pendingOrders.assignAll(data.pendingOrders);
+    // Format A — Map envelope: `{ pendingOrders: { pendingOrders: [...] } }`.
+    if (decoded is Map) {
+      final map = decoded.cast<String, dynamic>();
+      final po = map['pendingOrders'] ?? map['pending_orders'];
+      if (po is Map) {
+        final data = PendingOrdersData.fromJson(po.cast<String, dynamic>());
+        pendingOrders.assignAll(data.pendingOrders);
+        return;
+      }
+      // Full snapshot chunk: `{ type: 'pending_orders_init', chunk: [[...]] }`.
+      final chunk = map['chunk'];
+      if (chunk is List) {
+        final parsed = <PendingOrder>[];
+        for (final row in chunk) {
+          final order = _pendingFromPoArray(row);
+          if (order != null) parsed.add(order);
+        }
+        pendingOrders.assignAll(parsed);
+      }
+      return;
+    }
+    // Format B — prefixed array(s), the shape the self-hosted engine streams:
+    // `[["a","po", ...], ["u","po", ...]]` or a single bare row.
+    if (decoded is List && decoded.isNotEmpty) {
+      if (decoded.first is List) {
+        for (final row in decoded) {
+          _applyPoRow(row);
+        }
+      } else {
+        _applyPoRow(decoded);
+      }
+    }
+  }
+
+  /// Applies one `/po` row: `["a"|"u","po", ...]` upserts, `["r","po", id]`
+  /// removes the cancelled/filled order.
+  void _applyPoRow(dynamic row) {
+    if (row is! List || row.isEmpty) return;
+    if (row[0].toString() == 'r') {
+      final id = row.last.toString();
+      pendingOrders.removeWhere((o) => o.order.toString() == id);
+      return;
+    }
+    final order = _pendingFromPoArray(row);
+    if (order == null) return;
+    final idx = pendingOrders.indexWhere((o) => o.order == order.order);
+    if (idx >= 0) {
+      pendingOrders[idx] = order;
+    } else {
+      pendingOrders.add(order);
+    }
+  }
+
+  /// Parses a prefixed `/po` array into a [PendingOrder]. Stripped layout:
+  /// [0]orderId [1]mt5Account [2]symbol [3]type(0=buy_limit,1=sell_limit,
+  /// 2=buy_stop,3=sell_stop) [4]volume [5]priceOrder [6]priceCurrent [7]SL
+  /// [8]TP [9]serverType [10]timeCreate(unix s) [11]state [12]digits.
+  PendingOrder? _pendingFromPoArray(dynamic row) {
+    if (row is! List) return null;
+    final hasPrefix = row.isNotEmpty && row[0] is String;
+    final f = hasPrefix && row.length > 2 && row[1].toString() == 'po'
+        ? row.sublist(2)
+        : row;
+    if (f.length < 7) return null;
+    double toD(int i) =>
+        i < f.length ? (double.tryParse(f[i].toString()) ?? 0.0) : 0.0;
+    int toI(int i) => i < f.length ? (int.tryParse(f[i].toString()) ?? 0) : 0;
+
+    final timeCreate = toI(10);
+    final digits = f.length > 12 ? toI(12) : 5;
+    return PendingOrder(
+      mt5Account: toI(1),
+      order: toI(0),
+      action: _pendingActionOf(toI(3)),
+      symbol: f.length > 2 ? f[2].toString() : '',
+      priceOrder: toD(5),
+      priceCurrent: toD(6),
+      volume: toD(4),
+      priceSL: toD(7),
+      priceTP: toD(8),
+      timeCreate: timeCreate > 0
+          ? DateTime.fromMillisecondsSinceEpoch(timeCreate * 1000, isUtc: true)
+              .toIso8601String()
+          : '',
+      state: f.length > 11 ? f[11].toString() : '',
+      logo: '',
+      digits: digits > 0 ? digits : 5,
+    );
+  }
+
+  /// Maps the numeric pending type the engine sends to the label
+  /// [PendingOrder.toTradePosition] expects (it only checks for "Buy").
+  String _pendingActionOf(int type) {
+    switch (type) {
+      case 1:
+        return 'Sell Limit';
+      case 2:
+        return 'Buy Stop';
+      case 3:
+        return 'Sell Stop';
+      default:
+        return 'Buy Limit';
+    }
   }
 
   /// Optimistically drop a position id from the open list (used right after a

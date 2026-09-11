@@ -6,9 +6,11 @@ import 'package:get/get.dart';
 import 'dart:math';
 
 import '../../../shared/theme/app_colors.dart';
+import '../../../shared/theme/app_theme.dart';
 import '../../symbols/services/market_watch_v2_service.dart';
 import '../views/pending_order_view.dart';
 import 'notifications_sheet.dart';
+import 'pending_order_widgets.dart';
 
 /// A docked trading order ticket shown below the Markets chart and above the
 /// bottom navigation bar. It exposes Buy / Sell, live spread, order type
@@ -66,6 +68,7 @@ enum TradeSide { buy, sell }
 class _FloatingTradePanelState extends State<FloatingTradePanel> {
   double _volume = 0.01;
   bool _tpSlEnabled = false;
+
   double? _takeProfit;
   double? _stopLoss;
   bool _isSubmitting = false;
@@ -77,12 +80,39 @@ class _FloatingTradePanelState extends State<FloatingTradePanel> {
   /// they line up on one row.
   static final double _controlHeight = 44.w;
 
+  /// Compact height for the TP/SL price pills — deliberately shorter than
+  /// [_controlHeight] so turning TP/SL on doesn't push the chart off-screen.
+  static final double _levelHeight = 34.h;
+
   final _volumeCtrl = TextEditingController(text: '0.01');
+  final _tpCtrl = TextEditingController();
+  final _slCtrl = TextEditingController();
+
+  @override
+  void didUpdateWidget(covariant FloatingTradePanel oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    // Levels are absolute prices, so they are meaningless on a new instrument
+    // (XAUUSD 4372.31 on EURUSD). Drop them and re-seed from the new quote.
+    if (oldWidget.symbol != widget.symbol) {
+      _takeProfit = null;
+      _stopLoss = null;
+      _tpCtrl.clear();
+      _slCtrl.clear();
+      if (_tpSlEnabled) _seedDefaultTpSl();
+    }
+  }
 
   @override
   void dispose() {
     _volumeCtrl.dispose();
+    _tpCtrl.dispose();
+    _slCtrl.dispose();
     super.dispose();
+  }
+
+  /// Mirrors a level into its text field after a stepper tap or a re-seed.
+  void _syncLevelText(TextEditingController controller, double? value) {
+    controller.text = value == null ? '' : value.toStringAsFixed(_priceDigits);
   }
 
   void _bumpVolume(double delta) {
@@ -144,6 +174,8 @@ class _FloatingTradePanelState extends State<FloatingTradePanel> {
     final offset = 100 * _pipSize;
     _takeProfit ??= entry + offset;
     _stopLoss ??= entry - offset;
+    if (_tpCtrl.text.isEmpty) _syncLevelText(_tpCtrl, _takeProfit);
+    if (_slCtrl.text.isEmpty) _syncLevelText(_slCtrl, _stopLoss);
   }
 
   void _bumpTakeProfit(double delta) {
@@ -151,6 +183,7 @@ class _FloatingTradePanelState extends State<FloatingTradePanel> {
       final base = _takeProfit ?? (_quote.ask > 0 ? _quote.ask : 0);
       final next = (base + delta).clamp(0.0, double.infinity);
       _takeProfit = next <= 0 ? null : next;
+      _syncLevelText(_tpCtrl, _takeProfit);
     });
   }
 
@@ -159,6 +192,7 @@ class _FloatingTradePanelState extends State<FloatingTradePanel> {
       final base = _stopLoss ?? (_quote.bid > 0 ? _quote.bid : 0);
       final next = (base + delta).clamp(0.0, double.infinity);
       _stopLoss = next <= 0 ? null : next;
+      _syncLevelText(_slCtrl, _stopLoss);
     });
   }
 
@@ -206,10 +240,12 @@ class _FloatingTradePanelState extends State<FloatingTradePanel> {
             ),
           ),
         ),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
+        child: SingleChildScrollView(
+          physics: const BouncingScrollPhysics(),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
             _header(scheme),
             SizedBox(height: 8.h),
             _volumeStepper(scheme),
@@ -218,26 +254,39 @@ class _FloatingTradePanelState extends State<FloatingTradePanel> {
             SizedBox(height: 8.h),
             _tpSlSection(scheme),
             SizedBox(height: 8.h),
-            Row(
-              children: [
-                Expanded(
-                  child: _SideButton(
-                    label: 'trade.sell'.tr,
-                    color: AppColors.danger,
-                    onTap: () => _submit(TradeSide.sell),
+            Obx(() {
+              final quote = Get.find<MarketWatchV2Service>()
+                  .priceOf(widget.symbol)
+                  .value;
+              final digits = quote.digits.clamp(0, 8);
+              return Row(
+                children: [
+                  Expanded(
+                    child: _SideButton(
+                      label: 'trade.sell'.tr,
+                      price: quote.bid > 0
+                          ? quote.bid.toStringAsFixed(digits)
+                          : null,
+                      color: AppColors.danger,
+                      onTap: () => _submit(TradeSide.sell),
+                    ),
                   ),
-                ),
-                _spreadBadge(scheme),
-                Expanded(
-                  child: _SideButton(
-                    label: 'trade.buy'.tr,
-                    color: AppColors.success,
-                    onTap: () => _submit(TradeSide.buy),
+                  _spreadBadge(scheme),
+                  Expanded(
+                    child: _SideButton(
+                      label: 'trade.buy'.tr,
+                      price: quote.ask > 0
+                          ? quote.ask.toStringAsFixed(digits)
+                          : null,
+                      color: AppColors.success,
+                      onTap: () => _submit(TradeSide.buy),
+                    ),
                   ),
-                ),
-              ],
-            ),
-          ],
+                ],
+              );
+            }),
+            ],
+          ),
         ),
       ),
     );
@@ -309,14 +358,28 @@ class _FloatingTradePanelState extends State<FloatingTradePanel> {
                   ),
                 ),
               ),
-              for (final s in widget.symbols)
-                ListTile(
-                  title: Text(s),
-                  trailing: s == widget.symbol
-                      ? Icon(Icons.check, color: scheme.primary)
-                      : null,
-                  onTap: () => Navigator.of(context).pop(s),
+              Flexible(
+                child: ListView.builder(
+                  shrinkWrap: true,
+                  physics: const BouncingScrollPhysics(),
+                  padding: EdgeInsets.zero,
+                  itemCount: widget.symbols.length,
+                  itemBuilder: (context, i) {
+                    final s = widget.symbols[i];
+                    return ListTile(
+                      title: Text(
+                        s,
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                      trailing: s == widget.symbol
+                          ? Icon(Icons.check, color: scheme.primary)
+                          : null,
+                      onTap: () => Navigator.of(context).pop(s),
+                    );
+                  },
                 ),
+              ),
             ],
           ),
         );
@@ -412,13 +475,13 @@ class _FloatingTradePanelState extends State<FloatingTradePanel> {
       onTap: onTap,
       borderRadius: BorderRadius.circular(10.r),
       child: Container(
-        width: _controlHeight,
+        width: _controlHeight - 10 %10,
         height: _controlHeight,
         decoration: BoxDecoration(
-          color: scheme.surfaceContainerHighest,
+          gradient: AppTheme.brandGradient(scheme),
           borderRadius: BorderRadius.circular(10.r),
         ),
-        child: Icon(icon, size: 18.w, color: scheme.onSurface),
+        child: Icon(icon, size: 18.w, color: AppColors.white),
       ),
     );
   }
@@ -449,6 +512,8 @@ class _FloatingTradePanelState extends State<FloatingTradePanel> {
             Expanded(
               child: Text(
                 'trade.tp_sl'.tr,
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
                 style: TextStyle(
                   fontSize: 13.sp,
                   fontWeight: FontWeight.w700,
@@ -456,10 +521,14 @@ class _FloatingTradePanelState extends State<FloatingTradePanel> {
                 ),
               ),
             ),
-            Switch.adaptive(
-              value: _tpSlEnabled,
-              activeThumbColor: scheme.primary,
-              onChanged: _toggleTpSl,
+            Transform.scale(
+              scale: 0.85,
+              child: Switch.adaptive(
+                value: _tpSlEnabled,
+                activeThumbColor: scheme.primary,
+                onChanged: _toggleTpSl,
+                materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
+              ),
             ),
           ],
         ),
@@ -468,26 +537,36 @@ class _FloatingTradePanelState extends State<FloatingTradePanel> {
           curve: Curves.easeOutCubic,
           alignment: Alignment.topCenter,
           child: _tpSlEnabled
-              ? Column(
-                  crossAxisAlignment: CrossAxisAlignment.stretch,
-                  children: [
-                    SizedBox(height: 8.h),
-                    _priceField(
-                      scheme,
-                      label: 'trade.take_profit'.tr,
-                      value: _takeProfit,
-                      onDec: () => _bumpTakeProfit(-_pipSize),
-                      onInc: () => _bumpTakeProfit(_pipSize),
-                    ),
-                    SizedBox(height: 10.h),
-                    _priceField(
-                      scheme,
-                      label: 'trade.stop_loss'.tr,
-                      value: _stopLoss,
-                      onDec: () => _bumpStopLoss(-_pipSize),
-                      onInc: () => _bumpStopLoss(_pipSize),
-                    ),
-                  ],
+              ? Padding(
+                  padding: EdgeInsets.only(top: 6.h),
+                  child: Row(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Expanded(
+                        child: _levelField(
+                          scheme,
+                          label: 'trade.take_profit'.tr,
+                          controller: _tpCtrl,
+                          onDec: () => _bumpTakeProfit(-_pipSize),
+                          onInc: () => _bumpTakeProfit(_pipSize),
+                          onChanged: (raw) =>
+                              _takeProfit = double.tryParse(raw.trim()),
+                        ),
+                      ),
+                      SizedBox(width: 8.w),
+                      Expanded(
+                        child: _levelField(
+                          scheme,
+                          label: 'trade.stop_loss'.tr,
+                          controller: _slCtrl,
+                          onDec: () => _bumpStopLoss(-_pipSize),
+                          onInc: () => _bumpStopLoss(_pipSize),
+                          onChanged: (raw) =>
+                              _stopLoss = double.tryParse(raw.trim()),
+                        ),
+                      ),
+                    ],
+                  ),
                 )
               : const SizedBox(width: double.infinity),
         ),
@@ -495,59 +574,92 @@ class _FloatingTradePanelState extends State<FloatingTradePanel> {
     );
   }
 
-  Widget _priceField(
+  /// Compact TP/SL cell: tiny caption above a short pill holding −, the typed
+  /// price and +. Two of these fit one row so the chart stays visible.
+  Widget _levelField(
     ColorScheme scheme, {
     required String label,
-    required double? value,
+    required TextEditingController controller,
     required VoidCallback onDec,
     required VoidCallback onInc,
+    required ValueChanged<String> onChanged,
   }) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
+      mainAxisSize: MainAxisSize.min,
       children: [
         Text(
           label,
+          maxLines: 1,
+          overflow: TextOverflow.ellipsis,
           style: TextStyle(
-            fontSize: 11.sp,
+            fontSize: 10.sp,
             fontWeight: FontWeight.w600,
             color: scheme.onSurfaceVariant,
           ),
         ),
-        SizedBox(height: 6.h),
+        SizedBox(height: 4.h),
         Container(
-          height: _controlHeight,
+          height: _levelHeight,
           decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(12.r),
-            border: Border.all(
-              color: scheme.outline.withValues(alpha: 0.4),
-            ),
+            color: scheme.surfaceContainerHighest,
+            borderRadius: BorderRadius.circular(10.r),
           ),
           child: Row(
             children: [
-              _stepBtn(scheme, Icons.remove, onDec),
+              _levelStepBtn(scheme, Icons.remove, onDec),
               Expanded(
-                child: Center(
-                  child: Text(
-                    value == null
-                        ? 'trade.not_set'.tr
-                        : value.toStringAsFixed(_priceDigits),
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                    style: TextStyle(
-                      fontSize: 15.sp,
-                      fontWeight: FontWeight.w700,
-                      color: value == null
-                          ? scheme.onSurfaceVariant
-                          : scheme.onSurface,
+                child: TextField(
+                  controller: controller,
+                  keyboardType:
+                      const TextInputType.numberWithOptions(decimal: true),
+                  // Precision follows the live quote, so a 2-digit symbol
+                  // accepts 4338.70 and a 5-digit one accepts 1.15505.
+                  inputFormatters: [DecimalPrecisionFormatter(_priceDigits)],
+                  textAlign: TextAlign.center,
+                  textAlignVertical: TextAlignVertical.center,
+                  onChanged: onChanged,
+                  style: TextStyle(
+                    fontSize: 13.sp,
+                    fontWeight: FontWeight.w700,
+                    color: scheme.onSurface,
+                  ),
+                  decoration: InputDecoration(
+                    hintText: 'trade.not_set'.tr,
+                    hintStyle: TextStyle(
+                      fontSize: 12.sp,
+                      color: scheme.onSurfaceVariant,
                     ),
+                    isCollapsed: true,
+                    filled: false,
+                    border: InputBorder.none,
+                    enabledBorder: InputBorder.none,
+                    focusedBorder: InputBorder.none,
+                    contentPadding: EdgeInsets.symmetric(horizontal: 2.w),
                   ),
                 ),
               ),
-              _stepBtn(scheme, Icons.add, onInc),
+              _levelStepBtn(scheme, Icons.add, onInc),
             ],
           ),
         ),
       ],
+    );
+  }
+
+  Widget _levelStepBtn(ColorScheme scheme, IconData icon, VoidCallback onTap) {
+    return InkWell(
+      onTap: onTap,
+      borderRadius: BorderRadius.circular(10.r),
+      child: Container(
+        width: _levelHeight,
+        height: _levelHeight,
+        decoration: BoxDecoration(
+          gradient: AppTheme.brandGradient(scheme),
+          borderRadius: BorderRadius.circular(10.r),
+        ),
+        child: Icon(icon, size: 15.w, color: AppColors.white),
+      ),
     );
   }
 
@@ -611,11 +723,15 @@ class _SideButton extends StatelessWidget {
     required this.label,
     required this.color,
     required this.onTap,
+    this.price,
   });
 
   final String label;
   final Color color;
   final VoidCallback onTap;
+
+  /// Live side price shown under the label — bid for Sell, ask for Buy.
+  final String? price;
 
   @override
   Widget build(BuildContext context) {
@@ -626,16 +742,34 @@ class _SideButton extends StatelessWidget {
         onTap: onTap,
         borderRadius: BorderRadius.circular(14.r),
         child: SizedBox(
-          height: 48.h,
-          child: Center(
-            child: Text(
-              label,
-              style: TextStyle(
-                color: AppColors.white,
-                fontSize: 15.sp,
-                fontWeight: FontWeight.w700,
+          height: 52.h,
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Text(
+                label,
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+                style: TextStyle(
+                  color: AppColors.white,
+                  fontSize: 15.sp,
+                  fontWeight: FontWeight.w700,
+                  height: 1.1,
+                ),
               ),
-            ),
+              if (price != null)
+                Text(
+                  price!,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: TextStyle(
+                    color: AppColors.white.withValues(alpha: 0.9),
+                    fontSize: 12.sp,
+                    fontWeight: FontWeight.w600,
+                    height: 1.2,
+                  ),
+                ),
+            ],
           ),
         ),
       ),

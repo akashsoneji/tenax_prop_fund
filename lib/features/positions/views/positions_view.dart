@@ -37,9 +37,9 @@ class PositionsView extends GetView<PositionsController> {
               child: Obx(
                 () => AppSegmentedControl(
                   labels: [
-                    'positions.market'.tr,
-                    'positions.pending'.tr,
-                    'positions.history'.tr,
+                    '${'positions.market'.tr} (${controller.openPositions.length})',
+                    '${'positions.pending'.tr} (${controller.pendingOrders.length})',
+                    '${'positions.history'.tr} (${controller.history.length})',
                   ],
                   selected: controller.selectedTab.value.index,
                   onChanged: (i) =>

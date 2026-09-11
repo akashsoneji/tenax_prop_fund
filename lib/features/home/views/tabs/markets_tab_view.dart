@@ -59,6 +59,8 @@ class MarketsTabView extends StatelessWidget {
                   orderType: ticket.side == TradeSide.buy
                       ? OrderType.buyMarket
                       : OrderType.sellMarket,
+                  takeProfit: ticket.takeProfit,
+                  stopLoss: ticket.stopLoss,
                 );
               },
             ),
