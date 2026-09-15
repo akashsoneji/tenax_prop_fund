@@ -2,53 +2,54 @@ import '../../../core/network/api_client.dart';
 import '../../../core/network/api_response.dart';
 import '../models/reward_models.dart';
 
-/// Single source of truth for rewards data. Returns static demo data so the
-/// Rewards screen renders without a network call. The controller and view are
-/// unchanged.
+/// Loads reward balances, eligibility, accounts, and payout history from the
+/// live finance API.
 class RewardsRepository {
   RewardsRepository(this._api);
 
-  // ignore: unused_field
   final ApiClient _api;
 
-  Future<ApiResponse<RewardsData>> getRewards() {
-    return Future.value(ApiResponse.success(_demoRewards));
+  Future<ApiResponse<RewardsData>> getRewards({String status = ''}) async {
+    final response = await _api.get<dynamic>(
+      '/finance/rewards',
+      query: {'status': status},
+    );
+    final body = response.data;
+    if (body is! Map<String, dynamic>) {
+      return ApiResponse.failure('Unable to load rewards');
+    }
+    if (body['success'] != true || body['data'] == null) {
+      return ApiResponse.failure(
+        body['message']?.toString() ?? 'Unable to load rewards',
+      );
+    }
+    return ApiResponse.success(RewardsData.fromJson(body['data']));
   }
 
-  static const RewardsData _demoRewards = RewardsData(
-    withdrawable: MoneySnapshot(amountUsd: '\$1,250', tone: StatTone.green),
-    pending: MoneySnapshot(amountUsd: '\$320', tone: StatTone.amber),
-    paidOut: MoneySnapshot(amountUsd: '\$4,875', tone: StatTone.purple),
-    yourShare: ShareSnapshot(percent: 80),
-    requirements: [
-      PayoutRequirement(
-        label: 'KYC verified',
-        value: 'Verified',
-        status: RequirementStatus.pass,
-      ),
-      PayoutRequirement(
-        label: 'Payout method saved',
-        value: 'Saved',
-        status: RequirementStatus.pass,
-      ),
-      PayoutRequirement(
-        label: 'Minimum payout',
-        value: '\$50',
-        status: RequirementStatus.pass,
-      ),
-    ],
-    accounts: [
-      RewardAccount(
-        id: '1',
-        label: '#2000000 · funded',
-        status: AccountStatus.funded,
-      ),
-      RewardAccount(
-        id: '2',
-        label: '#2000042 · evaluation',
-        status: AccountStatus.evaluation,
-      ),
-    ],
-    payoutMethods: ['Bank Transfer', 'Crypto (USDT)'],
-  );
+  Future<ApiResponse<void>> requestPayout({
+    required double amount,
+    required String currency,
+    required String payoutMethodId,
+    required String tradingAccountId,
+  }) async {
+    final response = await _api.post<dynamic>(
+      '/finance/payouts',
+      data: {
+        'amount': amount,
+        'currency': currency,
+        'payout_method_id': int.tryParse(payoutMethodId) ?? payoutMethodId,
+        'trading_account_id':
+            int.tryParse(tradingAccountId) ?? tradingAccountId,
+      },
+    );
+    final body = response.data;
+    if (body is Map<String, dynamic> && body['success'] == true) {
+      return ApiResponse.success(null);
+    }
+    final message = body is Map<String, dynamic>
+        ? body['message']?.toString()
+        : null;
+    return ApiResponse.failure(message ?? 'Unable to request payout');
+  }
+
 }

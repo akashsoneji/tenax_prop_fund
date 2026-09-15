@@ -25,6 +25,7 @@ import '../../features/certificates/bindings/certificates_binding.dart';
 import '../../features/certificates/views/certificates_view.dart';
 import '../../features/challenge/bindings/challenge_binding.dart';
 import '../../features/challenge/views/challenge_view.dart';
+import '../../features/challenge/views/challenge_compare_view.dart';
 import '../../features/competitions/bindings/competitions_binding.dart';
 import '../../features/competitions/views/competitions_view.dart';
 import '../../features/configure/bindings/configure_binding.dart';
@@ -166,6 +167,11 @@ class AppPages {
     GetPage(
       name: AppRoutes.challenge,
       page: () => const ChallengeView(),
+      binding: ChallengeBinding(),
+    ),
+    GetPage(
+      name: AppRoutes.challengeCompare,
+      page: () => const ChallengeCompareView(),
       binding: ChallengeBinding(),
     ),
     GetPage(

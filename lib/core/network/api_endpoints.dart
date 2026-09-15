@@ -40,6 +40,9 @@ abstract class ApiEndpoints {
   /// Inertia `/app/...` routes or static demo data.
   static const dashboard = '/dashboard';
 
+  static const challenges = '/challenges';
+  static const challengeCompare = '/challenges/compare';
+
   /// Referral summary for the Home "Refer & earn" card. Standard
   /// `{success, message, data}` envelope where `data` nests `referral`
   /// (code/share_url) and `stats` (referrals count, to_be_paid).
@@ -71,6 +74,8 @@ abstract class ApiEndpoints {
 
 
   /// Live tradable instruments list (parsed into `Instrument`s).
+  static const calculators = '/tools/calculators';
+
   static const instruments = '/instruments';
 
   /// Instruments scoped to a single trading [account].

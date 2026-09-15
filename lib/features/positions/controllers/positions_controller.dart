@@ -16,6 +16,30 @@ import '../services/positions_ws_service.dart';
 /// The three tabs of the Positions screen.
 enum PositionsTab { market, pending, history }
 
+enum HistoryDirection { all, buy, sell }
+enum HistoryProfitFilter { all, profitable, losing }
+
+/// Date-range presets for the History tab filter.
+enum HistoryRange {
+  today,
+  lastWeek,
+  lastMonth,
+  last3Months,
+  last6Months,
+  lastYear,
+  custom;
+
+  String get labelKey => switch (this) {
+        HistoryRange.today => 'positions.range_today',
+        HistoryRange.lastWeek => 'positions.range_last_week',
+        HistoryRange.lastMonth => 'positions.range_last_month',
+        HistoryRange.last3Months => 'positions.range_last_3_months',
+        HistoryRange.last6Months => 'positions.range_last_6_months',
+        HistoryRange.lastYear => 'positions.range_last_year',
+        HistoryRange.custom => 'positions.range_custom',
+      };
+}
+
 /// Drives the Positions/Trade screen: the Market/Pending/History switch, the
 /// live open positions + pending orders (from [PositionsWsService]), the live
 /// account summary (from [AccountWsService]), and the REST-backed close / cancel
@@ -47,6 +71,40 @@ class PositionsController extends GetxController {
   final history = <HistoryEntry>[].obs;
   final historyLoading = false.obs;
   final historyError = RxnString();
+  final historyLoadingMore = false.obs;
+  final historyPage = 1.obs;
+  final historyHasMore = false.obs;
+  final historyTotal = 0.obs;
+  final historyProfit = 0.0.obs;
+  final historySwap = 0.0.obs;
+  final historyCommission = 0.0.obs;
+  final historySymbol = ''.obs;
+  final historyDirection = HistoryDirection.all.obs;
+  final historyProfitFilter = HistoryProfitFilter.all.obs;
+
+  List<HistoryEntry> get filteredHistory => history.where((entry) {
+        final symbolMatches = historySymbol.value.isEmpty ||
+            entry.symbol.toUpperCase() == historySymbol.value.toUpperCase();
+        final directionMatches = switch (historyDirection.value) {
+          HistoryDirection.all => true,
+          HistoryDirection.buy => entry.isBuy,
+          HistoryDirection.sell => !entry.isBuy,
+        };
+        final profitMatches = switch (historyProfitFilter.value) {
+          HistoryProfitFilter.all => true,
+          HistoryProfitFilter.profitable => entry.profit > 0,
+          HistoryProfitFilter.losing => entry.profit < 0,
+        };
+        return symbolMatches && directionMatches && profitMatches;
+      }).toList(growable: false);
+
+  double get filteredHistoryProfit =>
+      filteredHistory.fold<double>(0, (sum, entry) => sum + entry.profit);
+
+  /// Active date-range filter for the History tab.
+  final historyRange = HistoryRange.today.obs;
+  final customFrom = Rxn<DateTime>();
+  final customTo = Rxn<DateTime>();
   bool _historyLoaded = false;
 
   /// True while a close/cancel request is in flight (disables the buttons).
@@ -326,21 +384,99 @@ class PositionsController extends GetxController {
     if (!isClosed) busy.value = false;
   }
 
-  /// Loads closed-trade history for the current account (History tab).
+  /// Applies a date-range filter and reloads history from page 1.
+  void applyHistoryFilters({
+    required String symbol,
+    required HistoryDirection direction,
+    required HistoryProfitFilter profitFilter,
+  }) {
+    historySymbol.value = symbol;
+    historyDirection.value = direction;
+    historyProfitFilter.value = profitFilter;
+  }
+
+  void applyHistoryFilter(HistoryRange range, {DateTime? from, DateTime? to}) {
+    historyRange.value = range;
+    if (range == HistoryRange.custom) {
+      if (from == null || to == null) return;
+      customFrom.value = from;
+      customTo.value = to;
+    }
+    loadHistory();
+  }
+
+  /// `from`/`to` for the current filter, formatted as `yyyy-MM-dd`.
+  (String, String) get _historyDates {
+    final now = DateTime.now();
+    final today = DateTime(now.year, now.month, now.day);
+    final from = switch (historyRange.value) {
+      HistoryRange.today => today,
+      HistoryRange.lastWeek => today.subtract(const Duration(days: 7)),
+      HistoryRange.lastMonth => DateTime(today.year, today.month, 1),
+      HistoryRange.last3Months => DateTime(today.year, today.month - 2, 1),
+      HistoryRange.last6Months => DateTime(today.year, today.month - 5, 1),
+      HistoryRange.lastYear => DateTime(today.year - 1, today.month, 1),
+      HistoryRange.custom => customFrom.value ?? today,
+    };
+    final to = historyRange.value == HistoryRange.custom
+        ? (customTo.value ?? today)
+        : today;
+    return (_ymd(from), _ymd(to));
+  }
+
+  static String _ymd(DateTime d) =>
+      '${d.year.toString().padLeft(4, '0')}-'
+      '${d.month.toString().padLeft(2, '0')}-'
+      '${d.day.toString().padLeft(2, '0')}';
+
+  /// Loads the FIRST page of closed-trade history for the current filter.
   Future<void> loadHistory() async {
     historyLoading.value = true;
     historyError.value = null;
-    final res = await _repository.getTradeHistory(
-      tradingAccount: tradingAccount.value,
-    );
+    final page = await _fetchHistoryPage(1);
     if (isClosed) return;
     _historyLoaded = true;
     historyLoading.value = false;
-    if (res.success && res.data != null) {
-      history.assignAll(res.data!);
-    } else {
-      historyError.value = res.message ?? 'state.error_title'.tr;
+    if (page == null) return;
+    history.assignAll(page.entries);
+  }
+
+  /// Loads the NEXT page and appends it (infinite scroll).
+  Future<void> loadMoreHistory() async {
+    if (historyLoading.value || historyLoadingMore.value || !historyHasMore.value) {
+      return;
     }
+    historyLoadingMore.value = true;
+    final page = await _fetchHistoryPage(historyPage.value + 1);
+    if (isClosed) return;
+    historyLoadingMore.value = false;
+    if (page == null) return;
+    history.addAll(page.entries);
+  }
+
+  /// Shared fetch: runs the request, stores pagination/summary, and surfaces the
+  /// error message. Returns null on failure.
+  Future<HistoryPage?> _fetchHistoryPage(int page) async {
+    final (from, to) = _historyDates;
+    final res = await _repository.getTradeHistory(
+      tradingAccount: tradingAccount.value,
+      page: page,
+      from: from,
+      to: to,
+    );
+    if (isClosed) return null;
+    final data = res.data;
+    if (!res.success || data == null) {
+      historyError.value = res.message ?? 'state.error_title'.tr;
+      return null;
+    }
+    historyPage.value = data.currentPage;
+    historyHasMore.value = data.hasMore;
+    historyTotal.value = data.total;
+    historyProfit.value = data.profit;
+    historySwap.value = data.swap;
+    historyCommission.value = data.commission;
+    return data;
   }
 
   /// Ensures the symbol of every open/pending row is subscribed on the shared

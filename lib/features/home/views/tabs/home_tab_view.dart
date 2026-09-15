@@ -48,7 +48,7 @@ class HomeTabView extends GetView<HomeController> {
                     child: ListView(
                       physics: const AlwaysScrollableScrollPhysics(
                           parent: BouncingScrollPhysics()),
-                      padding: EdgeInsets.fromLTRB(16.w, 6.h, 16.w, 24.h),
+                      padding: EdgeInsets.fromLTRB(10.w, 6.h, 10.w, 24.h),
                       children: [
                         _EquityHero(data: data),
                         if (data.kpis.isNotEmpty) ...[

@@ -2,6 +2,7 @@ import 'package:flutter/widgets.dart';
 import 'package:get/get.dart';
 
 import '../../../app/flavor/flavor_resolver.dart';
+import '../../challenge/models/challenge_models.dart';
 import '../models/configure_models.dart';
 
 /// Owns all Configure-screen state: selected platform, swap option, the set of
@@ -12,6 +13,16 @@ import '../models/configure_models.dart';
 /// Prices are demo values; the base plan price is passed in via [seed] from the
 /// previous screen (or defaults to the $100K 2-Step).
 class ConfigureController extends GetxController {
+  ConfigureController({ChallengePlan? plan}) : selectedPlan = plan ?? _argumentPlan();
+
+  static ChallengePlan? _argumentPlan() {
+    final arguments = Get.arguments;
+    return arguments is ChallengePlan ? arguments : null;
+  }
+
+  final ChallengePlan? selectedPlan;
+  final selectedPlatformId = Rxn<Object>();
+  final selectedPaymentMethodId = Rxn<Object>();
   // Selections.
   final platform = 1.obs; // index into platforms
   final swap = 0.obs; // 0 = Swap, 1 = Swap-Free +10%
@@ -23,9 +34,13 @@ class ConfigureController extends GetxController {
   static const platforms = ['MetaTrader 4', 'MetaTrader 5', 'cTrader +\$25'];
 
   // Base plan (demo — the 2-Step $100K from the design).
-  final String planName = '${FlavorResolver.appName} 2-Step';
-  final String accountSize = r'$100K';
-  static const int basePrice = 335;
+  String get planName => selectedPlan == null
+      ? '${FlavorResolver.appName} 2-Step'
+      : '${FlavorResolver.appName} ${selectedPlan!.name}';
+  String get accountSize => selectedPlan?.size ?? r'$100K';
+  int get basePrice => _minorToDollars(selectedPlan?.defaultVersion?.displayedPriceMinor ?? 0);
+
+  static int _minorToDollars(int minor) => (minor / 100).round();
 
   static const addons = <Addon>[
     Addon(

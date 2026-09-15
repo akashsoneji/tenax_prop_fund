@@ -22,7 +22,7 @@ class RewardsData {
   final ShareSnapshot yourShare;
   final List<PayoutRequirement> requirements;
   final List<RewardAccount> accounts;
-  final List<String> payoutMethods;
+  final List<RewardPayoutMethod> payoutMethods;
 
   bool get isEmpty => requirements.isEmpty && accounts.isEmpty;
 
@@ -41,12 +41,10 @@ class RewardsData {
             : fallback;
 
     final methods = (map['methods'] as List?)
-            ?.map((m) => m is Map<String, dynamic>
-                ? (m['label'] ?? m['name'] ?? m['type'])?.toString()
-                : m?.toString())
-            .whereType<String>()
+            ?.whereType<Map<String, dynamic>>()
+            .map(RewardPayoutMethod.fromJson)
             .toList() ??
-        <String>[];
+        <RewardPayoutMethod>[];
 
     final accounts = (map['accounts'] as List?)
             ?.whereType<Map<String, dynamic>>()
@@ -106,6 +104,20 @@ class MoneySnapshot {
 class ShareSnapshot {
   const ShareSnapshot({required this.percent});
   final int percent;
+}
+
+class RewardPayoutMethod {
+  const RewardPayoutMethod({required this.id, required this.label});
+
+  final String id;
+  final String label;
+
+  factory RewardPayoutMethod.fromJson(Map<String, dynamic> json) {
+    return RewardPayoutMethod(
+      id: json['id']?.toString() ?? '',
+      label: (json['label'] ?? json['name'] ?? json['type'] ?? 'Payout method').toString(),
+    );
+  }
 }
 
 /// A single payout-requirement row in the "What stands between you and a

@@ -68,18 +68,20 @@ class CalcSymbolDropdown extends StatelessWidget {
     required this.value,
     required this.items,
     required this.onChanged,
+    this.label,
   });
 
   final String value;
   final List<String> items;
   final ValueChanged<String> onChanged;
+  final String? label;
 
   @override
   Widget build(BuildContext context) {
     final scheme = Theme.of(context).colorScheme;
     return InputDecorator(
       decoration: InputDecoration(
-        labelText: 'calculators.symbol'.tr,
+        labelText: label ?? 'calculators.symbol'.tr,
         floatingLabelBehavior: FloatingLabelBehavior.always,
         filled: false,
         contentPadding:

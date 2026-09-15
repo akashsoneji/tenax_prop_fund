@@ -287,8 +287,8 @@ class _MethodPicker extends StatelessWidget {
             items: [
               for (final m in data.payoutMethods)
                 DropdownMenuItem(
-                  value: m,
-                  child: Text(m,
+                  value: m.id,
+                  child: Text(m.label,
                       style: GoogleFonts.beVietnamPro(
                           fontSize: 14.sp, fontWeight: FontWeight.w600)),
                 ),
@@ -318,8 +318,8 @@ class _SubmitButton extends StatelessWidget {
     return AppGradientButton(
       label: 'rewards.request_payout_button'.tr,
       icon: Icons.lock_open_rounded,
-      onPressed: () {
-        final result = controller.submitRequest(data);
+      onPressed: () async {
+        final result = await controller.submitRequest(data);
         if (result.isSuccess) {
           Get.back();
           onSubmitted();

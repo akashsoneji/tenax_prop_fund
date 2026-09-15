@@ -35,6 +35,9 @@ class ChallengePlan {
   final List<ChallengeRule> challengeRules;
   final List<ChallengeRule> fundedRules;
 
+  ChallengeVersion? get defaultVersion =>
+      versions.isEmpty ? null : versions.first;
+
   factory ChallengePlan.fromJson(Map<String, dynamic> json) {
     final meta = _map(json['meta']);
     final versions = _maps(json['versions'])
@@ -103,6 +106,8 @@ class ChallengeVersion {
   final int leverage;
   final ChallengeVersionRules rules;
   final List<ChallengeStage> stages;
+
+  int get displayedPriceMinor => salePriceMinor > 0 ? salePriceMinor : priceMinor;
 
   factory ChallengeVersion.fromJson(Map<String, dynamic> json) {
     return ChallengeVersion(

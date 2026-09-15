@@ -57,6 +57,15 @@ class HistoryRow extends StatelessWidget {
                   overflow: TextOverflow.ellipsis,
                   style: AppText.label(color: muted),
                 ),
+                if (entry.closeTime.isNotEmpty) ...[
+                  SizedBox(height: 3.h),
+                  Text(
+                    entry.closeTime,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: AppText.label(color: muted, fontSize: 11.sp),
+                  ),
+                ],
               ],
             ),
           ),

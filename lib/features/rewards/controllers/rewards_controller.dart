@@ -17,12 +17,23 @@ class RewardsController extends BaseController<RewardsData> {
 
   // Sheet state (UI-only).
   final isSheetOpen = false.obs;
-  final selectedAccountId = '100311'.obs;
-  final selectedMethod = 'Bank Transfer'.obs;
+  final selectedAccountId = RxnString();
+  final selectedMethod = RxnString();
   final amountController = ''.obs;
+  final isSubmitting = false.obs;
 
   @override
-  Future<ApiResponse<RewardsData>> fetch() => _repository.getRewards();
+  Future<ApiResponse<RewardsData>> fetch() async {
+    final response = await _repository.getRewards();
+    final data = response.data;
+    if (data != null) {
+      selectedAccountId.value ??= data.accounts.firstOrNull?.id;
+      if (data.payoutMethods.isNotEmpty) {
+        selectedMethod.value ??= data.payoutMethods.first.id;
+      }
+    }
+    return response;
+  }
 
   @override
   bool isEmpty(RewardsData data) => data.isEmpty;
@@ -48,19 +59,37 @@ class RewardsController extends BaseController<RewardsData> {
 
   /// Submits the payout request. Returns a [PayoutSubmitResult] so the view
   /// can show either a success toast or an inline error.
-  PayoutSubmitResult submitRequest(RewardsData data) {
+  Future<PayoutSubmitResult> submitRequest(RewardsData data) async {
     final raw = amountController.value.trim();
     final parsed = double.tryParse(raw.replaceAll(RegExp(r'[^0-9.]'), ''));
+    final accountId = selectedAccountId.value;
+    final methodId = selectedMethod.value;
     if (parsed == null || parsed <= 0) {
       return const PayoutSubmitResult.failure('Enter a valid amount.');
     }
-    if (blockingCount(data) > 0) {
+    if (blockingCount(data) > 0 || accountId == null || methodId == null) {
       return const PayoutSubmitResult.failure(
         'Complete KYC and add a payout method first.',
       );
     }
-    // In a real impl, this would hit the API. We simulate a success path.
-    return const PayoutSubmitResult.success();
+    if (isSubmitting.value) {
+      return const PayoutSubmitResult.failure('Request already submitting.');
+    }
+
+    isSubmitting.value = true;
+    try {
+      final response = await _repository.requestPayout(
+        amount: parsed,
+        currency: 'USD',
+        payoutMethodId: methodId,
+        tradingAccountId: accountId,
+      );
+      return response.success
+          ? const PayoutSubmitResult.success()
+          : PayoutSubmitResult.failure(response.message ?? 'Unable to request payout.');
+    } finally {
+      isSubmitting.value = false;
+    }
   }
 }
 

@@ -195,25 +195,27 @@ class PositionsRepository {
 
   /// Fetches closed-trade history. white_label GET with query
   /// `{ trading_account, page, ... }`; response `data` may be flat or nested.
-  Future<ApiResponse<List<HistoryEntry>>> getTradeHistory({
+  Future<ApiResponse<HistoryPage>> getTradeHistory({
     required String tradingAccount,
     int page = 1,
     int perPage = 10,
     String? from,
     String? to,
   }) {
-    return ApiEnvelope.guard<List<HistoryEntry>>(
+    return ApiEnvelope.guardBody<HistoryPage>(
       () => _api.getWeb<Map<String, dynamic>>(
         ApiEndpoints.tradeHistory,
         query: {
           'mt5_account': tradingAccount,
           'page': page,
           'per_page': perPage,
+          if (page > 1) 'append': true,
           if (from != null) 'from': from,
           if (to != null) 'to': to,
+          '_t': DateTime.now().millisecondsSinceEpoch,
         },
       ),
-      parseHistory,
+      HistoryPage.fromBody,
     );
   }
 }

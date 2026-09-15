@@ -30,7 +30,7 @@ class BillingData {
       final minor = (rows[i]['total_minor'] as num?)?.toInt() ?? 0;
       if (txns[i].status == BillingStatus.refunded) {
         refunded += minor;
-      } else {
+      } else if (txns[i].status == BillingStatus.paid) {
         paid += minor;
       }
     }
@@ -129,6 +129,10 @@ class BillingTransaction {
     switch (raw) {
       case 'refunded':
         return BillingStatus.refunded;
+      case 'awaiting_payment':
+      case 'awaiting_proof':
+      case 'pending':
+        return BillingStatus.awaitingPayment;
       default:
         return BillingStatus.paid;
     }
@@ -156,13 +160,15 @@ class BillingTransaction {
       : Icons.credit_card_rounded;
 }
 
-enum BillingStatus { paid, refunded }
+enum BillingStatus { paid, awaitingPayment, refunded }
 
 extension BillingStatusX on BillingStatus {
   String get label {
     switch (this) {
       case BillingStatus.paid:
         return 'Paid';
+      case BillingStatus.awaitingPayment:
+        return 'Awaiting payment';
       case BillingStatus.refunded:
         return 'Refunded';
     }
@@ -172,6 +178,8 @@ extension BillingStatusX on BillingStatus {
     switch (this) {
       case BillingStatus.paid:
         return AppColors.inkMutedLight;
+      case BillingStatus.awaitingPayment:
+        return AppColors.amber;
       case BillingStatus.refunded:
         return AppColors.success;
     }

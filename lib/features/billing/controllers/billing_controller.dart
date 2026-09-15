@@ -17,11 +17,29 @@ class BillingController extends BaseController<BillingData> {
 
   /// The active filter tab.
   final filter = BillingFilter.all.obs;
+  final isExporting = false.obs;
 
-  void setFilter(BillingFilter f) => filter.value = f;
+  Future<void> setFilter(BillingFilter f) async {
+    if (filter.value == f) return;
+    filter.value = f;
+    await load();
+  }
 
   @override
-  Future<ApiResponse<BillingData>> fetch() => _repository.getBilling();
+  Future<ApiResponse<BillingData>> fetch() =>
+      _repository.getBilling(filter: filter.value);
+
+  Future<ApiResponse<String>> exportBilling() async {
+    if (isExporting.value) {
+      return ApiResponse.failure('Export already in progress.');
+    }
+    isExporting.value = true;
+    try {
+      return await _repository.exportBilling();
+    } finally {
+      isExporting.value = false;
+    }
+  }
 
   @override
   bool isEmpty(BillingData data) => data.isEmpty;

@@ -478,3 +478,57 @@ List<HistoryEntry> parseHistory(dynamic data) {
       if (r is Map) HistoryEntry.fromJson(r.cast<String, dynamic>()),
   ];
 }
+
+/// One page of closed-trade history plus the `pagination` / `summary` blocks the
+/// `tradehistory` endpoint returns alongside `data`.
+class HistoryPage {
+  const HistoryPage({
+    required this.entries,
+    required this.currentPage,
+    required this.lastPage,
+    required this.total,
+    required this.profit,
+    required this.swap,
+    required this.commission,
+  });
+
+  final List<HistoryEntry> entries;
+  final int currentPage;
+  final int lastPage;
+  final int total;
+  final double profit;
+  final double swap;
+  final double commission;
+
+  bool get hasMore => currentPage < lastPage;
+
+  static const empty = HistoryPage(
+    entries: [],
+    currentPage: 1,
+    lastPage: 1,
+    total: 0,
+    profit: 0,
+    swap: 0,
+    commission: 0,
+  );
+
+  /// Parses the FULL response body (not just `data`) because `pagination` and
+  /// `summary` sit next to `data`, not inside it.
+  factory HistoryPage.fromBody(Map<String, dynamic> body) {
+    final pagination = body['pagination'];
+    final summary = body['summary'] ?? body['totals'];
+    Map<String, dynamic> asMap(dynamic v) =>
+        v is Map ? v.cast<String, dynamic>() : const <String, dynamic>{};
+    final page = asMap(pagination);
+    final sum = asMap(summary);
+    return HistoryPage(
+      entries: parseHistory(body['data']),
+      currentPage: _toInt(page['current_page']) == 0 ? 1 : _toInt(page['current_page']),
+      lastPage: _toInt(page['last_page']) == 0 ? 1 : _toInt(page['last_page']),
+      total: _toInt(page['total']),
+      profit: _toDouble(sum['profit']),
+      swap: _toDouble(sum['swap']),
+      commission: _toDouble(sum['commission']),
+    );
+  }
+}

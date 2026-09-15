@@ -79,6 +79,35 @@ class ApiEnvelope {
     }
   }
 
+  /// Same as [guard] but [parse] receives the WHOLE envelope body, for endpoints
+  /// whose pagination/summary blocks sit NEXT TO `data` instead of inside it.
+  static Future<ApiResponse<T>> guardBody<T>(
+    Future<Response<dynamic>> Function() request,
+    T Function(Map<String, dynamic> body) parse, {
+    bool showErrorToast = true,
+  }) async {
+    try {
+      final res = await request();
+      final body = res.data;
+      if (body is! Map<String, dynamic>) {
+        return _fail('Unexpected server response.', showErrorToast);
+      }
+      final success =
+          (body['success'] as bool?) ?? (body['status'] as bool?) ?? false;
+      if (!success) {
+        return _fail(
+          body['message'] as String? ?? 'Something went wrong.',
+          showErrorToast,
+        );
+      }
+      return ApiResponse.success(parse(body));
+    } on DioException catch (e) {
+      return _fail(_dioMessage(e), showErrorToast);
+    } catch (_) {
+      return _fail('Something went wrong. Please try again.', showErrorToast);
+    }
+  }
+
   static ApiResponse<T> _fail<T>(String message, bool showToast) {
     if (showToast) AppToast.error(message);
     return ApiResponse.failure(message);
