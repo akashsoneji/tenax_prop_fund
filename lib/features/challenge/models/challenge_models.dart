@@ -1,143 +1,416 @@
 import 'package:flutter/foundation.dart';
 
-/// Top-level mode toggle on the Choose-a-challenge screen.
 enum ChallengeMode { paid, freeTrial }
-
-/// The evaluation step type (Paid mode sub-tabs).
 enum ChallengeStep { twoStep, oneStep, instant }
 
-/// A single account-size price card in the Paid grid.
 @immutable
 class ChallengePlan {
   const ChallengePlan({
+    required this.id,
+    required this.name,
+    required this.slug,
+    required this.format,
     required this.size,
     required this.price,
     required this.original,
     required this.discountLabel,
+    required this.currency,
+    required this.versions,
+    required this.ruleBoxes,
+    required this.challengeRules,
+    required this.fundedRules,
   });
 
+  final int id;
+  final String name;
+  final String slug;
+  final String format;
   final String size;
   final String price;
   final String original;
   final String discountLabel;
+  final String currency;
+  final List<ChallengeVersion> versions;
+  final List<ChallengeRuleBox> ruleBoxes;
+  final List<ChallengeRule> challengeRules;
+  final List<ChallengeRule> fundedRules;
 
-  /// Builds one price card from a plan `version`. `[discountPercent]` comes from
-  /// the plan's `meta.discount_percent`; when > 0 the pre-sale price is shown as
-  /// the struck-through original.
-  factory ChallengePlan.fromJson(
-    Map<String, dynamic> json,
-    dynamic discountPercent,
-  ) {
-    final sizeMinor = (json['account_size_minor'] as num?)?.toInt() ?? 0;
-    final priceMinor = (json['sale_price_minor'] as num?)?.toInt() ??
-        (json['price_minor'] as num?)?.toInt() ??
-        0;
-    final origMinor = (json['price_minor'] as num?)?.toInt() ?? priceMinor;
-    final discount = (discountPercent as num?)?.toInt() ?? 0;
+  factory ChallengePlan.fromJson(Map<String, dynamic> json) {
+    final meta = _map(json['meta']);
+    final versions = _maps(json['versions'])
+        .map(ChallengeVersion.fromJson)
+        .toList(growable: false);
+    final firstVersion = versions.isNotEmpty ? versions.first : null;
+    final priceMinor = firstVersion?.salePriceMinor ??
+        (json['from_price_minor'] as num?)?.toInt() ?? 0;
+    final originalMinor = firstVersion?.priceMinor ?? priceMinor;
+    final discount = (meta['discount_percent'] as num?)?.toInt() ?? 0;
+    final rows = _map(json['rule_rows']);
+
     return ChallengePlan(
-      size: _sizeLabel(sizeMinor),
+      id: (json['id'] as num?)?.toInt() ?? 0,
+      name: json['name'] as String? ?? '',
+      slug: json['slug'] as String? ?? '',
+      format: meta['format'] as String? ?? json['short'] as String? ?? '',
+      size: _sizeLabel(json['popular_size_minor'] ?? 0),
       price: _money(priceMinor),
-      original: origMinor > priceMinor ? _money(origMinor) : '',
+      original: originalMinor > priceMinor ? _money(originalMinor) : '',
       discountLabel: discount > 0 ? '$discount% OFF' : '',
+      currency: json['currency'] as String? ?? 'USD',
+      versions: versions,
+      ruleBoxes: _maps(rows['boxes'])
+          .map(ChallengeRuleBox.fromJson)
+          .toList(growable: false),
+      challengeRules: _rules(rows['challenge']),
+      fundedRules: _rules(rows['funded']),
     );
   }
 
-  /// `500000` cents -> `$5K`, `10000000` -> `$100K`.
-  static String _sizeLabel(int minor) {
-    final dollars = minor ~/ 100;
+  static List<ChallengeRule> _rules(dynamic value) => _maps(value)
+      .map(ChallengeRule.fromJson)
+      .toList(growable: false);
+
+  static String _sizeLabel(dynamic minorValue) {
+    final dollars = ((minorValue as num?)?.toInt() ?? 0) ~/ 100;
     if (dollars >= 1000) {
       final k = dollars / 1000;
-      final text = k == k.roundToDouble() ? k.toStringAsFixed(0) : '$k';
-      return '\$${text}K';
+      return '\$${k == k.roundToDouble() ? k.toStringAsFixed(0) : k}K';
     }
     return '\$$dollars';
   }
 
-  /// `4900` cents -> `$49`.
   static String _money(int minor) => '\$${minor ~/ 100}';
 }
 
-/// A label/value rule row used in the Challenge-rules and Funded-rules cards.
 @immutable
-class ChallengeRule {
-  const ChallengeRule(this.label, this.value);
-  final String label;
-  final String value;
+class ChallengeVersion {
+  const ChallengeVersion({
+    required this.id,
+    required this.accountSizeMinor,
+    required this.priceMinor,
+    required this.salePriceMinor,
+    required this.currency,
+    required this.leverage,
+    required this.rules,
+    required this.stages,
+  });
 
-  /// Builds a rule row. The value is `text` when present, else `pct`% .
-  factory ChallengeRule.fromJson(Map<String, dynamic> json) {
-    final label = json['label'] as String? ?? '';
-    final text = json['text'] as String?;
-    if (text != null && text.isNotEmpty) return ChallengeRule(label, text);
-    final pct = json['pct'];
-    if (pct is num) return ChallengeRule(label, '$pct%');
-    return ChallengeRule(label, '');
+  final int id;
+  final int accountSizeMinor;
+  final int priceMinor;
+  final int salePriceMinor;
+  final String currency;
+  final int leverage;
+  final ChallengeVersionRules rules;
+  final List<ChallengeStage> stages;
+
+  factory ChallengeVersion.fromJson(Map<String, dynamic> json) {
+    return ChallengeVersion(
+      id: (json['id'] as num?)?.toInt() ?? 0,
+      accountSizeMinor: (json['account_size_minor'] as num?)?.toInt() ?? 0,
+      priceMinor: (json['price_minor'] as num?)?.toInt() ?? 0,
+      salePriceMinor: (json['sale_price_minor'] as num?)?.toInt() ?? 0,
+      currency: json['currency'] as String? ?? 'USD',
+      leverage: (json['leverage'] as num?)?.toInt() ?? 0,
+      rules: ChallengeVersionRules.fromJson(_map(json['rules'])),
+      stages: _maps(json['stages'])
+          .map(ChallengeStage.fromJson)
+          .toList(growable: false),
+    );
   }
 }
 
-/// The fetched payload for the Choose-a-challenge screen: the price-card plans
-/// plus the three rule sections. Selection state (mode / step / selected plan)
-/// is NOT here — it lives on the controller as UI state.
 @immutable
-class ChallengeData {
-  const ChallengeData({
-    required this.plans,
-    required this.challengeRules,
-    required this.fundedRules,
-    required this.trialRules,
+class ChallengeVersionRules {
+  const ChallengeVersionRules({
+    required this.drawdownType,
+    required this.rewardShareBps,
+    required this.consistencyBps,
+    required this.perTradeLossBps,
+    required this.firstRewardDays,
+    required this.refundPolicy,
+    required this.maxLotPerTrade,
+    required this.maxTotalOpenLots,
+    required this.maxOpenPositions,
+    required this.dailyResetHour,
+    required this.dailyResetTimezone,
+    required this.inactivityWarnDays,
   });
 
+  final String drawdownType;
+  final int rewardShareBps;
+  final int consistencyBps;
+  final int perTradeLossBps;
+  final int firstRewardDays;
+  final String refundPolicy;
+  final double? maxLotPerTrade;
+  final double? maxTotalOpenLots;
+  final int? maxOpenPositions;
+  final int? dailyResetHour;
+  final String dailyResetTimezone;
+  final int? inactivityWarnDays;
+
+  factory ChallengeVersionRules.fromJson(Map<String, dynamic> json) {
+    return ChallengeVersionRules(
+      drawdownType: json['drawdown_type'] as String? ?? '',
+      rewardShareBps: (json['reward_share_bps'] as num?)?.toInt() ?? 0,
+      consistencyBps: (json['consistency_bps'] as num?)?.toInt() ?? 0,
+      perTradeLossBps: (json['per_trade_loss_bps'] as num?)?.toInt() ?? 0,
+      firstRewardDays: (json['first_reward_days'] as num?)?.toInt() ?? 0,
+      refundPolicy: json['refund_policy'] as String? ?? '',
+      maxLotPerTrade: (json['max_lot_per_trade'] as num?)?.toDouble(),
+      maxTotalOpenLots: (json['max_total_open_lots'] as num?)?.toDouble(),
+      maxOpenPositions: (json['max_open_positions'] as num?)?.toInt(),
+      dailyResetHour: (json['daily_reset_hour'] as num?)?.toInt(),
+      dailyResetTimezone: json['daily_reset_timezone'] as String? ?? 'UTC',
+      inactivityWarnDays: (json['inactivity_warn_days'] as num?)?.toInt(),
+    );
+  }
+}
+
+@immutable
+class ChallengeStage {
+  const ChallengeStage({required this.name, required this.kind, required this.rows});
+  final String name;
+  final String kind;
+  final List<ChallengeRule> rows;
+
+  factory ChallengeStage.fromJson(Map<String, dynamic> json) {
+    return ChallengeStage(
+      name: json['name'] as String? ?? '',
+      kind: json['kind'] as String? ?? '',
+      rows: [
+        if (json['profit_target_bps'] != null)
+          ChallengeRule('Profit target', '${(json['profit_target_bps'] as num).toInt() / 100}%'),
+        if (json['max_daily_loss_bps'] != null)
+          ChallengeRule('Daily loss limit', '${(json['max_daily_loss_bps'] as num).toInt() / 100}%'),
+        if (json['max_total_loss_bps'] != null)
+          ChallengeRule('Maximum loss limit', '${(json['max_total_loss_bps'] as num).toInt() / 100}%'),
+        if (json['min_trading_days'] != null)
+          ChallengeRule('Minimum trading days', '${json['min_trading_days']} days'),
+      ],
+    );
+  }
+}
+
+@immutable
+class ChallengeRule {
+  const ChallengeRule(this.label, this.value, {this.tip = '', this.tone});
+  final String label;
+  final String value;
+  final String tip;
+  final String? tone;
+
+  factory ChallengeRule.fromJson(Map<String, dynamic> json) {
+    final text = json['text'] as String?;
+    final pct = json['pct'];
+    return ChallengeRule(
+      json['label'] as String? ?? '',
+      text?.isNotEmpty == true ? text! : pct is num ? '${pct.toInt()}%' : '',
+      tip: json['tip'] as String? ?? '',
+      tone: json['tone'] as String?,
+    );
+  }
+}
+
+@immutable
+class ChallengeRuleBox {
+  const ChallengeRuleBox({required this.title, required this.caption, required this.wide, required this.rows});
+  final String title;
+  final String caption;
+  final bool wide;
+  final List<ChallengeRule> rows;
+
+  factory ChallengeRuleBox.fromJson(Map<String, dynamic> json) => ChallengeRuleBox(
+        title: json['title'] as String? ?? '',
+        caption: json['caption'] as String? ?? '',
+        wide: json['wide'] as bool? ?? false,
+        rows: _maps(json['rows']).map(ChallengeRule.fromJson).toList(growable: false),
+      );
+}
+
+@immutable
+class ChallengeAddon {
+  const ChallengeAddon({required this.id, required this.name, required this.description, required this.priceMinor, required this.percentOfFee, required this.currency});
+
+  final int id;
+  final String name;
+  final String description;
+  final int priceMinor;
+  final int percentOfFee;
+  final String currency;
+
+  factory ChallengeAddon.fromJson(Map<String, dynamic> json) => ChallengeAddon(
+        id: (json['id'] as num?)?.toInt() ?? 0,
+        name: json['name'] as String? ?? '',
+        description: json['description'] as String? ?? '',
+        priceMinor: (json['price_minor'] as num?)?.toInt() ?? 0,
+        percentOfFee: (json['percent_of_fee'] as num?)?.toInt() ?? 0,
+        currency: json['currency'] as String? ?? 'USD',
+      );
+}
+
+@immutable
+class ChallengePlatform {
+  const ChallengePlatform({required this.id, required this.value, required this.label, required this.isDefault, required this.feeMinor});
+  final int id;
+  final String value;
+  final String label;
+  final bool isDefault;
+  final int feeMinor;
+
+  factory ChallengePlatform.fromJson(Map<String, dynamic> json) => ChallengePlatform(
+        id: (json['id'] as num?)?.toInt() ?? 0,
+        value: json['value'] as String? ?? '',
+        label: json['label'] as String? ?? '',
+        isDefault: json['default'] as bool? ?? false,
+        feeMinor: (json['fee_minor'] as num?)?.toInt() ?? 0,
+      );
+}
+
+@immutable
+class ChallengeTrial {
+  const ChallengeTrial({required this.enabled, required this.name, required this.accountSizeMinor, required this.days, required this.profitTargetPercent, required this.dailyLossPercent, required this.maxLossPercent, required this.minTradingDays, required this.passRewardPercent, required this.couponCode, required this.requiresKyc});
+  final bool enabled;
+  final String name;
+  final int accountSizeMinor;
+  final int days;
+  final num profitTargetPercent;
+  final num dailyLossPercent;
+  final num maxLossPercent;
+  final int minTradingDays;
+  final num passRewardPercent;
+  final String couponCode;
+  final bool requiresKyc;
+
+  factory ChallengeTrial.fromJson(Map<String, dynamic> json) => ChallengeTrial(
+        enabled: json['enabled'] as bool? ?? false,
+        name: json['name'] as String? ?? '',
+        accountSizeMinor: (json['account_size_minor'] as num?)?.toInt() ?? 0,
+        days: (json['days'] as num?)?.toInt() ?? 0,
+        profitTargetPercent: json['profit_target_percent'] as num? ?? 0,
+        dailyLossPercent: json['daily_loss_percent'] as num? ?? 0,
+        maxLossPercent: json['max_loss_percent'] as num? ?? 0,
+        minTradingDays: (json['min_trading_days'] as num?)?.toInt() ?? 0,
+        passRewardPercent: json['pass_reward_percent'] as num? ?? 0,
+        couponCode: json['pass_coupon_code'] as String? ?? '',
+        requiresKyc: json['requires_kyc'] as bool? ?? false,
+      );
+}
+
+@immutable
+class ChallengeData {
+  const ChallengeData({required this.plans, required this.challengeRules, required this.fundedRules, required this.trialRules, required this.addons, required this.platforms, required this.paymentMethods, required this.trial, required this.currency});
   final List<ChallengePlan> plans;
   final List<ChallengeRule> challengeRules;
   final List<ChallengeRule> fundedRules;
   final List<ChallengeRule> trialRules;
+  final List<ChallengeAddon> addons;
+  final List<ChallengePlatform> platforms;
+  final List<String> paymentMethods;
+  final ChallengeTrial? trial;
+  final String currency;
 
-  bool get isEmpty => plans.isEmpty;
+  bool get isEmpty => plans.isEmpty && trial == null;
 
-  /// Builds from the `GET /challenges` envelope. The size cards come from the
-  /// first plan's `versions`; the rule sections come from that plan's
-  /// `rule_rows`. `*_minor` fields are integer cents; `pct` rule values are
-  /// already whole percents.
   factory ChallengeData.fromJson(Map<String, dynamic> json) {
-    final plans = (json['plans'] as List<dynamic>?) ?? const [];
-    final planMaps = plans.whereType<Map<String, dynamic>>().toList();
-    if (planMaps.isEmpty) {
-      return const ChallengeData(
-        plans: [],
-        challengeRules: [],
-        fundedRules: [],
-        trialRules: [],
-      );
-    }
-    final first = planMaps.first;
-    final versions = (first['versions'] as List<dynamic>?) ?? const [];
-    final discount =
-        (first['meta'] as Map<String, dynamic>?)?['discount_percent'];
-    final cards = versions
-        .whereType<Map<String, dynamic>>()
-        .map((v) => ChallengePlan.fromJson(v, discount))
-        .toList();
-
-    final ruleRows = first['rule_rows'] as Map<String, dynamic>? ?? const {};
-    final trial = json['trial'] as Map<String, dynamic>?;
-    final trialRows = trial?['rule_rows'] as Map<String, dynamic>? ?? const {};
-
+    final plans = _maps(json['plans']).map(ChallengePlan.fromJson).toList(growable: false);
+    final first = plans.isNotEmpty ? plans.first : null;
+    final trial = json['trial'] is Map<String, dynamic> ? ChallengeTrial.fromJson(json['trial'] as Map<String, dynamic>) : null;
     return ChallengeData(
-      plans: cards,
-      challengeRules: _rules(ruleRows['challenge']),
-      fundedRules: _rules(ruleRows['funded']),
-      trialRules: _rules(trialRows['challenge']),
+      plans: plans,
+      challengeRules: first?.challengeRules ?? const [],
+      fundedRules: first?.fundedRules ?? const [],
+      trialRules: const [],
+      addons: _maps(json['addons']).map(ChallengeAddon.fromJson).toList(growable: false),
+      platforms: _maps(json['platforms']).map(ChallengePlatform.fromJson).toList(growable: false),
+      paymentMethods: _maps(json['paymentMethods']).map((item) => item['name'] as String? ?? '').toList(growable: false),
+      trial: trial,
+      currency: json['currency'] as String? ?? 'USD',
     );
   }
-
-  static List<ChallengeRule> _rules(dynamic rows) {
-    if (rows is! List) return const [];
-    return rows
-        .whereType<Map<String, dynamic>>()
-        .map(ChallengeRule.fromJson)
-        .toList();
-  }
 }
+
+List<Map<String, dynamic>> _maps(dynamic value) => value is List
+    ? value.whereType<Map<String, dynamic>>().toList()
+    : const [];
+Map<String, dynamic> _map(dynamic value) => value is Map<String, dynamic> ? value : const {};
+
+@immutable
+class ChallengeQuote {
+  const ChallengeQuote({
+    required this.subtotalMinor,
+    required this.discountMinor,
+    required this.totalMinor,
+    required this.currency,
+    required this.quantity,
+    required this.planUnitMinor,
+    required this.planNetMinor,
+    required this.addonsMinor,
+    required this.addonsNetMinor,
+    required this.swapFeeMinor,
+    required this.swapNetMinor,
+    required this.swapQuoteMinor,
+    required this.swapPercent,
+    required this.platformFeeMinor,
+    required this.platformNetMinor,
+    required this.addonPrices,
+  });
+
+  final int subtotalMinor;
+  final int discountMinor;
+  final int totalMinor;
+  final String currency;
+  final int quantity;
+  final int planUnitMinor;
+  final int planNetMinor;
+  final int addonsMinor;
+  final int addonsNetMinor;
+  final int swapFeeMinor;
+  final int swapNetMinor;
+  final int swapQuoteMinor;
+  final num swapPercent;
+  final int platformFeeMinor;
+  final int platformNetMinor;
+  final Map<String, ChallengeQuoteAddon> addonPrices;
+
+  factory ChallengeQuote.fromJson(Map<String, dynamic> json) => ChallengeQuote(
+        subtotalMinor: _minor(json['subtotal_minor']),
+        discountMinor: _minor(json['discount_minor']),
+        totalMinor: _minor(json['total_minor']),
+        currency: json['currency'] as String? ?? 'USD',
+        quantity: (json['quantity'] as num?)?.toInt() ?? 1,
+        planUnitMinor: _minor(json['plan_unit_minor']),
+        planNetMinor: _minor(json['plan_net_minor']),
+        addonsMinor: _minor(json['addons_minor']),
+        addonsNetMinor: _minor(json['addons_net_minor']),
+        swapFeeMinor: _minor(json['swap_fee_minor']),
+        swapNetMinor: _minor(json['swap_net_minor']),
+        swapQuoteMinor: _minor(json['swap_quote_minor']),
+        swapPercent: json['swap_pct'] as num? ?? 0,
+        platformFeeMinor: _minor(json['platform_fee_minor']),
+        platformNetMinor: _minor(json['platform_net_minor']),
+        addonPrices: _map(json['addon_prices']).map(
+          (key, value) => MapEntry(key, ChallengeQuoteAddon.fromJson(_map(value))),
+        ),
+      );
+
+  String get totalLabel => '\$${(totalMinor / 100).toStringAsFixed(2)}';
+}
+
+@immutable
+class ChallengeQuoteAddon {
+  const ChallengeQuoteAddon({required this.unitMinor, required this.netMinor});
+  final int unitMinor;
+  final int netMinor;
+
+  factory ChallengeQuoteAddon.fromJson(Map<String, dynamic> json) => ChallengeQuoteAddon(
+        unitMinor: _minor(json['unit_minor']),
+        netMinor: _minor(json['net_minor']),
+      );
+}
+
+int _minor(dynamic value) => (value as num?)?.toInt() ?? 0;
 
 extension ChallengeStepLabel on ChallengeStep {
   String get label {

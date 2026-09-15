@@ -1,0 +1,72 @@
+{
+  "info": {
+    "name": "Tenax Prop API — Called vs Not Called",
+    "description": "Current Flutter API audit. [CALLED BY APP] has an active repository/service call-site. [NOT CALLED BY APP] exists in ApiEndpoints/docs but no current Flutter call-site was found. Import into Postman and run Auth > Login first.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "auth": { "type": "bearer", "bearer": [{ "key": "token", "value": "{{access_token}}", "type": "string" }] },
+  "variable": [
+    { "key": "api_base_url", "value": "https://pipzefunded.com/api/v1" },
+    { "key": "web_base_url", "value": "https://pipzefunded.com" },
+    { "key": "access_token", "value": "" },
+    { "key": "account_id", "value": "3" },
+    { "key": "account_login", "value": "2000015" },
+    { "key": "mt5_account", "value": "2000015" },
+    { "key": "position_id", "value": "12345" },
+    { "key": "order_id", "value": "12345" }
+  ],
+  "event": [{ "listen": "test", "script": { "type": "text/javascript", "exec": ["const body = (() => { try { return pm.response.json(); } catch (_) { return null; } })();", "if (body?.data?.access_token) pm.collectionVariables.set('access_token', body.data.access_token);"] } }],
+  "item": [
+    {
+      "name": "[CALLED BY APP] Auth",
+      "item": [
+        { "name": "Login — POST /auth/login", "request": { "auth": { "type": "noauth" }, "method": "POST", "header": [{ "key": "Content-Type", "value": "application/json" }, { "key": "Accept", "value": "application/json" }], "body": { "mode": "raw", "options": { "raw": { "language": "json" } }, "raw": "{\n  \"email\": \"rahul@example.com\",\n  \"password\": \"Secret@123\",\n  \"device_name\": \"flutter-app\"\n}" }, "url": "{{api_base_url}}/auth/login" } },
+        { "name": "Register — POST /auth/register", "request": { "auth": { "type": "noauth" }, "method": "POST", "header": [{ "key": "Content-Type", "value": "application/json" }, { "key": "Accept", "value": "application/json" }], "body": { "mode": "raw", "options": { "raw": { "language": "json" } }, "raw": "{\n  \"first_name\": \"Rahul\",\n  \"last_name\": \"Sharma\",\n  \"email\": \"rahul@example.com\",\n  \"password\": \"Secret@123\",\n  \"password_confirmation\": \"Secret@123\",\n  \"country_code\": \"IN\",\n  \"phone\": \"9876543210\"\n}" }, "url": "{{api_base_url}}/auth/register" } },
+        { "name": "Forgot Password — POST /auth/forgot-password", "request": { "auth": { "type": "noauth" }, "method": "POST", "header": [{ "key": "Content-Type", "value": "application/json" }, { "key": "Accept", "value": "application/json" }], "body": { "mode": "raw", "options": { "raw": { "language": "json" } }, "raw": "{\"email\":\"rahul@example.com\"}" }, "url": "{{api_base_url}}/auth/forgot-password" } },
+        { "name": "Logout — POST /auth/logout", "request": { "method": "POST", "header": [{ "key": "Accept", "value": "application/json" }], "url": "{{api_base_url}}/auth/logout" } }
+      ]
+    },
+    {
+      "name": "[CALLED BY APP] Home, Profile & Referral",
+      "item": [
+        { "name": "Dashboard — GET /dashboard", "request": { "method": "GET", "header": [{ "key": "Accept", "value": "application/json" }], "url": "{{api_base_url}}/dashboard" } },
+        { "name": "Get Profile — GET /profile", "request": { "method": "GET", "header": [{ "key": "Accept", "value": "application/json" }], "url": "{{api_base_url}}/profile" } },
+        { "name": "Referral Summary — GET /growth/referrals", "request": { "method": "GET", "header": [{ "key": "Accept", "value": "application/json" }], "url": "{{api_base_url}}/growth/referrals" } }
+      ]
+    },
+    {
+      "name": "[CALLED BY APP] Accounts",
+      "item": [
+        { "name": "List Accounts — GET /accounts", "request": { "method": "GET", "header": [{ "key": "Accept", "value": "application/json" }], "url": { "raw": "{{api_base_url}}/accounts?status=all&phase=all&page=1&per_page=20", "host": ["{{api_base_url}}"], "path": ["accounts"], "query": [{ "key": "status", "value": "all", "description": "all | active | breached | passed | raw status" }, { "key": "phase", "value": "all", "description": "all | evaluation | verification | funded | breached" }, { "key": "page", "value": "1" }, { "key": "per_page", "value": "20" }] } } },
+        { "name": "Overview — GET /accounts/{id}/overview", "request": { "method": "GET", "header": [{ "key": "Accept", "value": "application/json" }], "url": "{{api_base_url}}/accounts/{{account_id}}/overview" } },
+        { "name": "Platform — GET /accounts/{id}/platform", "request": { "method": "GET", "header": [{ "key": "Accept", "value": "application/json" }], "url": { "raw": "{{api_base_url}}/accounts/{{account_id}}/platform?reveal=false", "host": ["{{api_base_url}}"], "path": ["accounts", "{{account_id}}", "platform"], "query": [{ "key": "reveal", "value": "false", "description": "true unmasks credentials; false keeps them masked" }] } } },
+        { "name": "Reset Quote — GET /accounts/{id}/reset", "request": { "method": "GET", "header": [{ "key": "Accept", "value": "application/json" }], "url": "{{api_base_url}}/accounts/{{account_id}}/reset" } }
+      ]
+    },
+    {
+      "name": "[CALLED BY APP] Instruments",
+      "item": [
+        { "name": "All Instruments — GET /instruments", "request": { "method": "GET", "header": [{ "key": "Accept", "value": "application/json" }], "url": "{{api_base_url}}/instruments" } },
+        { "name": "Account Instruments — GET /instruments/{account}", "request": { "method": "GET", "header": [{ "key": "Accept", "value": "application/json" }], "url": "{{api_base_url}}/instruments/{{account_login}}" } }
+      ]
+    },
+    {
+      "name": "[CALLED BY APP] Trading — web_base_url",
+      "description": "These use web_base_url through ApiClient.postWeb/getWeb, not api_base_url.",
+      "item": [
+        { "name": "Market Order — POST /api/user/trade/new-order", "request": { "method": "POST", "header": [{ "key": "Content-Type", "value": "application/json" }, { "key": "Accept", "value": "application/json" }], "body": { "mode": "raw", "options": { "raw": { "language": "json" } }, "raw": "{\n  \"symbol\": \"XAUUSD\",\n  \"volume\": 0.01,\n  \"type\": \"buy\",\n  \"mt5_account\": \"{{mt5_account}}\",\n  \"tp\": 2350.0,\n  \"take_profit\": 2350.0,\n  \"sl\": 2280.0,\n  \"stop_loss\": 2280.0\n}" }, "url": "{{web_base_url}}/api/user/trade/new-order" } },
+        { "name": "Pending Order — POST /api/user/trade/new-order", "request": { "method": "POST", "header": [{ "key": "Content-Type", "value": "application/json" }, { "key": "Accept", "value": "application/json" }], "body": { "mode": "raw", "options": { "raw": { "language": "json" } }, "raw": "{\n  \"symbol\": \"XAUUSD\",\n  \"volume\": 0.01,\n  \"type\": \"buy_limit\",\n  \"price\": 2300.0,\n  \"mt5_account\": \"{{mt5_account}}\",\n  \"stop_limit_price\": null,\n  \"tp\": null,\n  \"take_profit\": null,\n  \"sl\": null,\n  \"stop_loss\": null\n}" }, "url": "{{web_base_url}}/api/user/trade/new-order" } },
+        { "name": "Close Position — POST /closePositionByPositionId", "request": { "method": "POST", "header": [{ "key": "Content-Type", "value": "application/json" }, { "key": "Accept", "value": "application/json" }], "body": { "mode": "raw", "options": { "raw": { "language": "json" } }, "raw": "{\"position_id\":\"{{position_id}}\",\"mt5_account\":\"{{mt5_account}}\",\"volume\":null}" }, "url": "{{web_base_url}}/api/user/trade/closePositionByPositionId" } },
+        { "name": "Close All — POST /closePositions", "request": { "method": "POST", "header": [{ "key": "Content-Type", "value": "application/json" }, { "key": "Accept", "value": "application/json" }], "body": { "mode": "raw", "options": { "raw": { "language": "json" } }, "raw": "{\"mt5_account\":\"{{mt5_account}}\"}" }, "url": "{{web_base_url}}/api/user/trade/closePositions" } },
+        { "name": "Cancel Pending — POST /closePendingOrder", "request": { "method": "POST", "header": [{ "key": "Content-Type", "value": "application/json" }, { "key": "Accept", "value": "application/json" }], "body": { "mode": "raw", "options": { "raw": { "language": "json" } }, "raw": "{\"order_id\":\"{{order_id}}\",\"mt5_account\":\"{{mt5_account}}\"}" }, "url": "{{web_base_url}}/api/user/trade/closePendingOrder" } },
+        { "name": "Update Position TP/SL — POST /update-tp-sl", "request": { "method": "POST", "header": [{ "key": "Content-Type", "value": "application/json" }, { "key": "Accept", "value": "application/json" }], "body": { "mode": "raw", "options": { "raw": { "language": "json" } }, "raw": "{\"mt5_account\":\"{{mt5_account}}\",\"position_id\":\"{{position_id}}\",\"take_profit\":2350.0,\"stop_loss\":2280.0}" }, "url": "{{web_base_url}}/api/user/trade/update-tp-sl" } },
+        { "name": "Update Pending TP/SL — POST /update-pending-order-tp-sl", "request": { "method": "POST", "header": [{ "key": "Content-Type", "value": "application/json" }, { "key": "Accept", "value": "application/json" }], "body": { "mode": "raw", "options": { "raw": { "language": "json" } }, "raw": "{\"mt5_account\":\"{{mt5_account}}\",\"order_id\":\"{{order_id}}\",\"price\":2300.0,\"stop_loss\":null,\"take_profit\":null}" }, "url": "{{web_base_url}}/api/user/trade/update-pending-order-tp-sl" } },
+        { "name": "Trade History — GET /tradehistory", "request": { "method": "GET", "header": [{ "key": "Accept", "value": "application/json" }], "url": { "raw": "{{web_base_url}}/api/user/trade/tradehistory?mt5_account={{mt5_account}}&page=1&per_page=10&from=&to=", "host": ["{{web_base_url}}"], "path": ["api", "user", "trade", "tradehistory"], "query": [{ "key": "mt5_account", "value": "{{mt5_account}}" }, { "key": "page", "value": "1" }, { "key": "per_page", "value": "10" }, { "key": "from", "value": "", "description": "optional" }, { "key": "to", "value": "", "description": "optional" }] } } }
+      ]
+    },
+    {
+      "name": "[CALLED BY APP] WebSocket Auth",
+      "item": [{ "name": "Broadcasting Auth — POST /api/broadcasting/auth", "request": { "method": "POST", "header": [{ "key": "Content-Type", "value": "application/x-www-form-urlencoded" }, { "key": "Accept", "value": "application/json" }], "body": { "mode": "urlencoded", "urlencoded": [{ "key": "socket_id", "value": "12345.67890", "type": "text" }, { "key": "channel_name", "value": "private-trader.{{account_login}}.accounts", "type": "text" }] }, "url": "{{web_base_url}}/api/broadcasting/auth" } }]
+    }
+  ]
+}

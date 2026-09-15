@@ -63,14 +63,29 @@ class ChallengeView extends StatelessWidget {
           planName: isPaid
               ? '${FlavorResolver.appName} ${c.step.value.label} · ${plan.size}'
               : '${FlavorResolver.appName} Free Trial · \$10K',
-          price: isPaid ? plan.price : r'$0',
+          price: isPaid ? plan.price : r'\$0',
           strikePrice: isPaid ? plan.original : null,
           actionLabel: 'challenge.configure'.tr,
-          onAction: () => Get.toNamed(AppRoutes.configure),
+          onAction: () => _continueToConfigure(c, data),
         );
       }),
     );
   }
+}
+
+Future<void> _continueToConfigure(
+  ChallengeController controller,
+  ChallengeData data,
+) async {
+  final plan = controller.currentPlan(data);
+  if (plan.versions.isEmpty) return;
+  final version = plan.versions.first;
+  final addonIds = data.addons.map<int>((addon) => addon.id).toList();
+  final quoted = await controller.loadQuote(
+    planVersionId: version.id,
+    addonIds: addonIds,
+  );
+  if (quoted) Get.toNamed(AppRoutes.configure);
 }
 
 // ---------------------------------------------------------------------------
@@ -193,7 +208,41 @@ class _PaidBody extends StatelessWidget {
               ),
           ],
         ),
+        if (data.plans.isNotEmpty) ...[
+          SizedBox(height: 26.h),
+          for (final box in data.plans.first.ruleBoxes) ...[
+            SectionHeader(box.title),
+            _RuleBoxCard(box: box),
+            SizedBox(height: 16.h),
+          ],
+        ],
       ],
+    );
+  }
+}
+
+class _RuleBoxCard extends StatelessWidget {
+  const _RuleBoxCard({required this.box});
+
+  final ChallengeRuleBox box;
+
+  @override
+  Widget build(BuildContext context) {
+    final scheme = Theme.of(context).colorScheme;
+    return Container(
+      padding: EdgeInsets.all(12.w),
+      decoration: AppTheme.surfaceCard(scheme, radius: 16.r),
+      child: Column(
+        children: [
+          for (var i = 0; i < box.rows.length; i++)
+            KeyValueRow(
+              label: box.rows[i].label,
+              value: box.rows[i].value,
+              showInfo: box.rows[i].tip.isNotEmpty,
+              showDivider: i != box.rows.length - 1,
+            ),
+        ],
+      ),
     );
   }
 }
@@ -285,7 +334,7 @@ class _TrialBody extends StatelessWidget {
                     ),
                     SizedBox(height: 3.h),
                     Text(
-                      r'$10K account, free for 7 days',
+                      _trialDescription(data),
                       style: GoogleFonts.beVietnamPro(
                         fontSize: 13.sp,
                         color: scheme.onSurface.withValues(alpha: 0.6),
@@ -339,13 +388,30 @@ class _TrialBody extends StatelessWidget {
   }
 }
 
+String _trialDescription(ChallengeData data) {
+  final trial = data.trial;
+  if (trial == null) return 'challenge.free_trial'.tr;
+  final size = trial.accountSizeMinor ~/ 100;
+  return '\$$size account, free for ${trial.days} days';
+}
+
 class _TrialStatGrid extends StatelessWidget {
   const _TrialStatGrid({required this.data});
   final ChallengeData data;
 
   @override
   Widget build(BuildContext context) {
-    final rules = data.trialRules;
+          final trial = data.trial;
+          final rules = data.trialRules.isNotEmpty
+              ? data.trialRules
+              : [
+                  ChallengeRule('Account size', '\$${(trial?.accountSizeMinor ?? 0) ~/ 100}'),
+                  ChallengeRule('Profit target', '${trial?.profitTargetPercent ?? 0}%'),
+                  ChallengeRule('Daily loss limit', '${trial?.dailyLossPercent ?? 0}%'),
+                  ChallengeRule('Maximum loss', '${trial?.maxLossPercent ?? 0}%'),
+                  ChallengeRule('Minimum trading days', '${trial?.minTradingDays ?? 0}'),
+                  ChallengeRule('Expires after', '${trial?.days ?? 0} days'),
+                ];
     return GridView.builder(
       shrinkWrap: true,
       physics: const NeverScrollableScrollPhysics(),
@@ -354,7 +420,7 @@ class _TrialStatGrid extends StatelessWidget {
         crossAxisCount: 2,
         mainAxisSpacing: 12.w,
         crossAxisSpacing: 12.w,
-        childAspectRatio: 2.3,
+        childAspectRatio: 2.0,
       ),
       itemBuilder: (context, i) => _TrialStatTile(rule: rules[i]),
     );
