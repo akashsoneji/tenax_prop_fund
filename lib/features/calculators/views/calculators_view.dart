@@ -62,44 +62,64 @@ class _CalculatorForm extends StatelessWidget {
   const _CalculatorForm({required this.definition});
   final CalculatorDefinition definition;
 
-  @override
+    @override
   Widget build(BuildContext context) {
     final c = Get.find<CalculatorsController>();
+    final scheme = Theme.of(context).colorScheme;
     return Obx(() {
       final fields = definition.fields;
       return Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          if (definition.note.isNotEmpty) ...[
-            Text(definition.note, style: Theme.of(context).textTheme.bodyMedium),
-            SizedBox(height: 14.h),
-          ],
-          for (final field in fields) ...[
-            if (field.key == 'side' || field.key == 'direction')
-              CalcSymbolDropdown(
-                value: c.field(field.key).isEmpty ? field.options.first : c.field(field.key),
-                items: field.options,
-                onChanged: (value) => c.setField(field.key, value),
-                label: field.label,
-              )
-            else if (field.isSelect)
-              CalcSymbolDropdown(
-                value: c.field(field.key).isEmpty ? field.options.first : c.field(field.key),
-                items: field.options,
-                onChanged: (value) => c.setField(field.key, value),
-                label: field.label,
-              )
-            else
-              CalcInputField(
-                label: field.label,
-                value: c.field(field.key),
-                onChanged: (value) => c.setField(field.key, value),
-              ),
-            SizedBox(height: 14.h),
-          ],
-          ElevatedButton(
-            onPressed: () {},
-            child: const Text('Calculate'),
+          Container(
+            padding: EdgeInsets.fromLTRB(16.w, 18.h, 16.w, 16.h),
+            decoration: BoxDecoration(
+              color: scheme.surface,
+              borderRadius: BorderRadius.circular(22.r),
+              border: Border.all(color: scheme.outlineVariant),
+              boxShadow: [
+                BoxShadow(
+                  color: scheme.shadow.withValues(alpha: 0.06),
+                  blurRadius: 18.r,
+                  offset: Offset(0, 8.h),
+                ),
+              ],
+            ),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                if (definition.note.isNotEmpty) ...[
+                  Text(definition.note, style: Theme.of(context).textTheme.bodyMedium),
+                  SizedBox(height: 14.h),
+                ],
+                for (final field in fields) ...[
+                  if (field.isSelect)
+                    CalcSymbolDropdown(
+                      value: c.field(field.key).isEmpty ? field.options.first : c.field(field.key),
+                      items: field.options,
+                      onChanged: (value) => c.setField(field.key, value),
+                      label: field.label,
+                    )
+                  else
+                    CalcInputField(
+                      label: field.label,
+                      value: c.field(field.key),
+                      onChanged: (value) => c.setField(field.key, value),
+                    ),
+                  SizedBox(height: 14.h),
+                ],
+                SizedBox(
+                  height: 52.h,
+                  child: ElevatedButton(
+                    onPressed: () => c.setField('_calculated', DateTime.now().toIso8601String()),
+                    child: Text(
+                      'Calculate',
+                      style: TextStyle(fontSize: 16.sp, fontWeight: FontWeight.w700),
+                    ),
+                  ),
+                ),
+              ],
+            ),
           ),
           SizedBox(height: 18.h),
           CalcResultCard(

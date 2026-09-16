@@ -3,8 +3,8 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
 
+import '../../../shared/theme/app_colors.dart';
 import '../../../shared/theme/app_theme.dart';
-import '../../../shared/widgets/app_info_banner.dart';
 import '../../../shared/widgets/app_segmented_control.dart';
 import '../../../shared/widgets/app_text_field.dart';
 import '../../../shared/widgets/key_value_row.dart';
@@ -38,20 +38,18 @@ class ConfigureView extends StatelessWidget {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
-                  AppInfoBanner(
-                    tone: BannerTone.warning,
-                    icon: Icons.bolt_rounded,
-                    title: 'configure.trial_summary'.tr,
-                    body: 'configure.trial_note'.tr,
-                  ),
+                  _SelectedPlanHeader(c: c),
                   SizedBox(height: 22.h),
-                  SectionHeader('configure.platform'.tr),
-                  Obx(() => AppSegmentedControl(
-                        labels: ConfigureController.platforms,
-                        selected: c.platform.value,
-                        onChanged: c.setPlatform,
-                      )),
-                  SizedBox(height: 20.h),
+                  if (c.availablePlatforms.isNotEmpty) ...[
+                    SectionHeader('configure.platform'.tr),
+                    Obx(() => AppSegmentedControl(
+                          labels: c.availablePlatforms,
+                          selected: c.platform.value.clamp(
+                              0, c.availablePlatforms.length - 1),
+                          onChanged: c.setPlatform,
+                        )),
+                    SizedBox(height: 20.h),
+                  ],
                   SectionHeader('configure.swap'.tr),
                   Obx(() => AppSegmentedControl(
                         labels: [
@@ -66,25 +64,46 @@ class ConfigureView extends StatelessWidget {
                   Obx(() => RulesCard(
                         children: [
                           for (var i = 0;
-                              i < ConfigureController.addons.length;
+                              i < c.availableAddons.length;
                               i++)
                             AddonTile(
-                              addon: ConfigureController.addons[i],
+                              addon: c.availableAddons[i],
                               selected: c.isAddonSelected(
-                                  ConfigureController.addons[i].id),
+                                  c.availableAddons[i].id),
                               onTap: () => c.toggleAddon(
-                                  ConfigureController.addons[i].id),
+                                  c.availableAddons[i].id),
                               showDivider:
-                                  i != ConfigureController.addons.length - 1,
+                                  i != c.availableAddons.length - 1,
                             ),
                         ],
                       )),
+                  if (c.availablePaymentMethods.isNotEmpty) ...[
+                    SizedBox(height: 22.h),
+                    SectionHeader('Payment method'),
+                    Obx(() => AppSegmentedControl(
+                          labels: c.availablePaymentMethods,
+                          selected: c.paymentMethod.value.clamp(
+                              0, c.availablePaymentMethods.length - 1),
+                          onChanged: c.setPaymentMethod,
+                        )),
+                  ],
                   SizedBox(height: 22.h),
                   SectionHeader('configure.quantity'.tr),
                   _QuantityRow(c: c),
                   SizedBox(height: 22.h),
-                  SectionHeader('configure.your_details'.tr),
-                  _CreateAccountCard(c: c),
+                  SectionHeader('Coupon code'),
+                  TextField(
+                    controller: c.couponCode,
+                    textInputAction: TextInputAction.done,
+                    decoration: InputDecoration(
+                      hintText: 'Enter coupon code',
+                      filled: true,
+                      fillColor: scheme.surface,
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(14.r),
+                      ),
+                    ),
+                  ),
                   SizedBox(height: 22.h),
                   SectionHeader('configure.summary'.tr),
                   Obx(() {
@@ -111,11 +130,79 @@ class ConfigureView extends StatelessWidget {
       ),
       bottomNavigationBar: Obx(() => ChallengeBottomBar(
             planName: '${c.planName} · ${c.accountSize}',
-            price: '\$${c.total}',
-            strikePrice: r'$479',
-            actionLabel: 'configure.title'.tr,
+            price: '${c.currency} ${c.total}',
+            strikePrice: c.originalPrice > c.total
+                ? '${c.currency} ${c.originalPrice}'
+                : null,
+            actionLabel: 'Continue',
             onAction: () {},
           )),
+    );
+  }
+}
+
+// ---------------------------------------------------------------------------
+// Selected plan summary
+// ---------------------------------------------------------------------------
+
+class _SelectedPlanHeader extends StatelessWidget {
+  const _SelectedPlanHeader({required this.c});
+  final ConfigureController c;
+
+  @override
+  Widget build(BuildContext context) {
+    final scheme = Theme.of(context).colorScheme;
+    return Container(
+      padding: EdgeInsets.all(18.w),
+      decoration: BoxDecoration(
+        gradient: AppTheme.brandGradient(scheme),
+        borderRadius: BorderRadius.circular(20.r),
+        boxShadow: [
+          BoxShadow(
+            color: scheme.primary.withValues(alpha: 0.20),
+            blurRadius: 18.r,
+            offset: Offset(0, 8.h),
+          ),
+        ],
+      ),
+      child: Row(
+        children: [
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  c.planName,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: GoogleFonts.beVietnamPro(
+                    color: Colors.white,
+                    fontSize: 18.sp,
+                    fontWeight: FontWeight.w800,
+                  ),
+                ),
+                SizedBox(height: 5.h),
+                Text(
+                  'Account size: ${c.accountSize}',
+                  style: GoogleFonts.beVietnamPro(
+                    color: Colors.white.withValues(alpha: 0.82),
+                    fontSize: 13.sp,
+                  ),
+                ),
+              ],
+            ),
+          ),
+          SizedBox(width: 12.w),
+          Text(
+            '\$${c.basePrice}',
+            style: GoogleFonts.beVietnamPro(
+              color: AppColors.accent,
+              fontSize: 24.sp,
+              fontWeight: FontWeight.w800,
+            ),
+          ),
+        ],
+      ),
     );
   }
 }
@@ -190,134 +277,3 @@ class _StepButton extends StatelessWidget {
 // Create account form
 // ---------------------------------------------------------------------------
 
-class _CreateAccountCard extends StatelessWidget {
-  const _CreateAccountCard({required this.c});
-  final ConfigureController c;
-
-  @override
-  Widget build(BuildContext context) {
-    final scheme = Theme.of(context).colorScheme;
-    return Container(
-      padding: EdgeInsets.all(16.w),
-      decoration: AppTheme.surfaceCard(scheme, radius: 16.r),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
-          Row(
-            children: [
-              Expanded(
-                child: Text(
-                  'configure.create_account'.tr,
-                  style: GoogleFonts.beVietnamPro(
-                    fontSize: 16.sp,
-                    fontWeight: FontWeight.w800,
-                    color: scheme.onSurface,
-                  ),
-                ),
-              ),
-              TextButton(
-                onPressed: () {},
-                style: TextButton.styleFrom(
-                  padding: EdgeInsets.zero,
-                  minimumSize: const Size(0, 0),
-                  tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                ),
-                child: Text('configure.sign_in'.tr),
-              ),
-            ],
-          ),
-          SizedBox(height: 6.h),
-          Text(
-            'configure.details_note'.tr,
-            style: GoogleFonts.beVietnamPro(
-              fontSize: 12.5.sp,
-              height: 1.4,
-              color: scheme.onSurface.withValues(alpha: 0.6),
-            ),
-          ),
-          SizedBox(height: 16.h),
-          Row(
-            children: [
-              Expanded(
-                child: AppTextField(
-                  controller: c.firstName,
-                  label: 'configure.first_name'.tr,
-                  hint: 'configure.first_name_hint'.tr,
-                ),
-              ),
-              SizedBox(width: 12.w),
-              Expanded(
-                child: AppTextField(
-                  controller: c.lastName,
-                  label: 'configure.last_name'.tr,
-                  hint: 'configure.last_name_hint'.tr,
-                ),
-              ),
-            ],
-          ),
-          SizedBox(height: 12.h),
-          AppTextField(
-            controller: c.email,
-            label: 'configure.email'.tr,
-            hint: 'configure.email_hint'.tr,
-            keyboardType: TextInputType.emailAddress,
-          ),
-          SizedBox(height: 12.h),
-          Obx(() => AppTextField(
-                controller: c.password,
-                label: 'configure.password'.tr,
-                hint: 'configure.password_hint'.tr,
-                obscureText: c.obscurePassword.value,
-                suffixIcon: IconButton(
-                  icon: Icon(
-                    c.obscurePassword.value
-                        ? Icons.visibility_outlined
-                        : Icons.visibility_off_outlined,
-                    color: scheme.onSurface.withValues(alpha: 0.5),
-                  ),
-                  onPressed: c.togglePasswordVisibility,
-                ),
-              )),
-          SizedBox(height: 12.h),
-          AppTextField(
-            controller: c.phone,
-            label: 'configure.mobile'.tr,
-            hint: 'configure.mobile_hint'.tr,
-            keyboardType: TextInputType.phone,
-          ),
-          SizedBox(height: 12.h),
-          Obx(() => InkWell(
-                onTap: () => c.setAccepted(!c.acceptedTerms.value),
-                borderRadius: BorderRadius.circular(8.r),
-                child: Row(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Checkbox(
-                      value: c.acceptedTerms.value,
-                      onChanged: (v) => c.setAccepted(v ?? false),
-                      visualDensity: VisualDensity.compact,
-                      materialTapTargetSize:
-                          MaterialTapTargetSize.shrinkWrap,
-                    ),
-                    SizedBox(width: 6.w),
-                    Expanded(
-                      child: Padding(
-                        padding: EdgeInsets.only(top: 10.h),
-                        child: Text(
-                          'configure.accept_terms'.tr,
-                          style: GoogleFonts.beVietnamPro(
-                            fontSize: 12.5.sp,
-                            height: 1.4,
-                            color: scheme.onSurface.withValues(alpha: 0.65),
-                          ),
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-              )),
-        ],
-      ),
-    );
-  }
-}

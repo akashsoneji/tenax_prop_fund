@@ -23,9 +23,12 @@ class ChallengePlanCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final scheme = Theme.of(context).colorScheme;
-    return GestureDetector(
-      onTap: onTap,
-      child: AnimatedContainer(
+    return Material(
+      color: Colors.transparent,
+      child: InkWell(
+        onTap: onTap,
+        borderRadius: BorderRadius.circular(14.r),
+        child: AnimatedContainer(
         duration: AppMotion.fast,
         curve: AppMotion.enter,
         padding: EdgeInsets.symmetric(horizontal: 14.w, vertical: 14.h),
@@ -53,15 +56,19 @@ class ChallengePlanCard extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text(
-              plan.discountLabel,
-              style: GoogleFonts.beVietnamPro(
-                fontSize: 11.5.sp,
-                fontWeight: FontWeight.w600,
-                color: scheme.onSurface.withValues(alpha: 0.5),
+            if (plan.discountLabel.isNotEmpty) ...[
+              Text(
+                plan.discountLabel,
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+                style: GoogleFonts.beVietnamPro(
+                  fontSize: 11.5.sp,
+                  fontWeight: FontWeight.w600,
+                  color: scheme.onSurface.withValues(alpha: 0.5),
+                ),
               ),
-            ),
-            SizedBox(height: 4.h),
+              SizedBox(height: 4.h),
+            ],
             Text(
               plan.size,
               style: GoogleFonts.beVietnamPro(
@@ -74,12 +81,16 @@ class ChallengePlanCard extends StatelessWidget {
             Row(
               crossAxisAlignment: CrossAxisAlignment.end,
               children: [
-                Text(
-                  plan.price,
-                  style: GoogleFonts.beVietnamPro(
-                    fontSize: 16.sp,
-                    fontWeight: FontWeight.w800,
-                    color: scheme.primary,
+                Flexible(
+                  child: Text(
+                    plan.price,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: GoogleFonts.beVietnamPro(
+                      fontSize: 16.sp,
+                      fontWeight: FontWeight.w800,
+                      color: scheme.primary,
+                    ),
                   ),
                 ),
                 SizedBox(width: 6.w),
@@ -97,6 +108,7 @@ class ChallengePlanCard extends StatelessWidget {
               ],
             ),
           ],
+        ),
         ),
       ),
     );

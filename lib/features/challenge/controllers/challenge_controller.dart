@@ -20,16 +20,40 @@ class ChallengeController extends BaseController<ChallengeData> {
   final actionError = RxnString();
 
   void setMode(ChallengeMode value) => mode.value = value;
-  void setStep(ChallengeStep value) => step.value = value;
+
+  void setStep(ChallengeStep value) {
+    step.value = value;
+    selectedPlan.value = 0;
+  }
+
+  List<ChallengePlan> plansForStep(ChallengeData data) {
+    final format = switch (step.value) {
+      ChallengeStep.oneStep => '1-step',
+      ChallengeStep.twoStep => '2-step',
+      ChallengeStep.instant => 'instant',
+    };
+    return data.plans.where((plan) {
+      final planFormat = plan.format
+          .trim()
+          .toLowerCase()
+          .replaceAll('_', '-')
+          .replaceAll(' ', '-');
+      return planFormat == format;
+    }).toList();
+  }
 
   void selectPlan(int index) {
-    final plans = state.valueOrNull?.plans ?? const <ChallengePlan>[];
+    final plans = state.valueOrNull == null
+        ? const <ChallengePlan>[]
+        : plansForStep(state.valueOrNull!);
     if (index >= 0 && index < plans.length) selectedPlan.value = index;
   }
 
   ChallengePlan currentPlan(ChallengeData data) {
-    assert(data.plans.isNotEmpty, 'currentPlan requires at least one plan');
-    return data.plans[selectedPlan.value.clamp(0, data.plans.length - 1)];
+    final plans = plansForStep(data);
+    final safePlans = plans.isNotEmpty ? plans : data.plans;
+    assert(safePlans.isNotEmpty, 'currentPlan requires at least one plan');
+    return safePlans[selectedPlan.value.clamp(0, safePlans.length - 1)];
   }
 
   Future<void> loadComparison() async {
@@ -61,9 +85,10 @@ class ChallengeController extends BaseController<ChallengeData> {
   }
 
   void onDataLoaded(ChallengeData data) {
-    selectedPlan.value = data.plans.isEmpty
+    final plans = plansForStep(data);
+    selectedPlan.value = plans.isEmpty
         ? 0
-        : selectedPlan.value.clamp(0, data.plans.length - 1);
+        : selectedPlan.value.clamp(0, plans.length - 1);
   }
 
   @override

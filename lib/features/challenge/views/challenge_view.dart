@@ -58,13 +58,21 @@ class ChallengeView extends StatelessWidget {
         final data = c.state.valueOrNull;
         if (data == null) return const SizedBox.shrink();
         final isPaid = c.mode.value == ChallengeMode.paid;
-        final plan = c.currentPlan(data);
+        if (!isPaid) {
+          return ChallengeBottomBar(
+            planName: '${FlavorResolver.appName} Free Trial · \$10K',
+            price: r'\$0',
+            actionLabel: 'challenge.configure'.tr,
+            onAction: () => _continueToConfigure(c, data),
+          );
+        }
+        final plans = c.plansForStep(data);
+        if (plans.isEmpty) return const SizedBox.shrink();
+        final plan = plans[c.selectedPlan.value.clamp(0, plans.length - 1)];
         return ChallengeBottomBar(
-          planName: isPaid
-              ? '${FlavorResolver.appName} ${c.step.value.label} · ${plan.size}'
-              : '${FlavorResolver.appName} Free Trial · \$10K',
-          price: isPaid ? plan.price : r'\$0',
-          strikePrice: isPaid ? plan.original : null,
+          planName: '${plan.name} · ${plan.size}',
+          price: plan.price,
+          strikePrice: plan.original,
           actionLabel: 'challenge.configure'.tr,
           onAction: () => _continueToConfigure(c, data),
         );
@@ -80,12 +88,19 @@ Future<void> _continueToConfigure(
   final plan = controller.currentPlan(data);
   if (plan.versions.isEmpty) return;
   final version = plan.versions.first;
-  final addonIds = data.addons.map<int>((addon) => addon.id).toList();
-  final quoted = await controller.loadQuote(
-    planVersionId: version.id,
-    addonIds: addonIds,
+  controller.loadQuote(planVersionId: version.id);
+  Get.toNamed(
+    AppRoutes.configure,
+    arguments: <String, Object?>{
+      'plan': plan,
+      'plans': data.plans,
+      'addons': data.addons,
+      'platforms': data.platforms,
+      'paymentMethods': data.paymentMethods,
+      'currency': data.currency,
+      'quote': controller.quote.value,
+    },
   );
-  if (quoted) Get.toNamed(AppRoutes.configure);
 }
 
 // ---------------------------------------------------------------------------
@@ -100,6 +115,8 @@ class _ChallengeBody extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Obx(() {
+      c.selectedPlan.value;
+      c.step.value;
       return Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
@@ -170,6 +187,24 @@ class _PaidBody extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final plans = c.plansForStep(data);
+    if (plans.isEmpty) {
+      return Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          _CompareLink(),
+          SizedBox(height: 14.h),
+          AppSegmentedControl(
+            labels: ChallengeStep.values.map((s) => s.label).toList(),
+            selected: c.step.value.index,
+            onChanged: (i) => c.setStep(ChallengeStep.values[i]),
+          ),
+          SizedBox(height: 28.h),
+          const _NoPlansState(),
+        ],
+      );
+    }
+    final selectedPlan = plans[c.selectedPlan.value.clamp(0, plans.length - 1)];
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
@@ -186,12 +221,12 @@ class _PaidBody extends StatelessWidget {
         SectionHeader('challenge.challenge_rules'.tr),
         RulesCard(
           children: [
-            for (var i = 0; i < data.challengeRules.length; i++)
+            for (var i = 0; i < selectedPlan.challengeRules.length; i++)
               KeyValueRow(
-                label: data.challengeRules[i].label,
-                value: data.challengeRules[i].value,
+                label: selectedPlan.challengeRules[i].label,
+                value: selectedPlan.challengeRules[i].value,
                 showInfo: true,
-                showDivider: i != data.challengeRules.length - 1,
+                showDivider: i != selectedPlan.challengeRules.length - 1,
               ),
           ],
         ),
@@ -199,24 +234,61 @@ class _PaidBody extends StatelessWidget {
         SectionHeader('challenge.funded_reward_rules'.tr),
         RulesCard(
           children: [
-            for (var i = 0; i < data.fundedRules.length; i++)
+            for (var i = 0; i < selectedPlan.fundedRules.length; i++)
               KeyValueRow(
-                label: data.fundedRules[i].label,
-                value: data.fundedRules[i].value,
+                label: selectedPlan.fundedRules[i].label,
+                value: selectedPlan.fundedRules[i].value,
                 showInfo: true,
-                showDivider: i != data.fundedRules.length - 1,
+                showDivider: i != selectedPlan.fundedRules.length - 1,
               ),
           ],
         ),
         if (data.plans.isNotEmpty) ...[
           SizedBox(height: 26.h),
-          for (final box in data.plans.first.ruleBoxes) ...[
+          for (final box in selectedPlan.ruleBoxes) ...[
             SectionHeader(box.title),
             _RuleBoxCard(box: box),
             SizedBox(height: 16.h),
           ],
         ],
       ],
+    );
+  }
+}
+
+class _NoPlansState extends StatelessWidget {
+  const _NoPlansState();
+
+  @override
+  Widget build(BuildContext context) {
+    final scheme = Theme.of(context).colorScheme;
+    return Container(
+      padding: EdgeInsets.symmetric(horizontal: 20.w, vertical: 28.h),
+      decoration: AppTheme.surfaceCard(scheme, radius: 18.r),
+      child: Column(
+        children: [
+          Icon(Icons.hourglass_empty_rounded, size: 42.sp, color: scheme.primary),
+          SizedBox(height: 12.h),
+          Text(
+            'No plans available',
+            textAlign: TextAlign.center,
+            style: GoogleFonts.beVietnamPro(
+              fontSize: 17.sp,
+              fontWeight: FontWeight.w800,
+              color: scheme.onSurface,
+            ),
+          ),
+          SizedBox(height: 6.h),
+          Text(
+            'Please choose another challenge type.',
+            textAlign: TextAlign.center,
+            style: GoogleFonts.beVietnamPro(
+              fontSize: 13.sp,
+              color: scheme.onSurface.withValues(alpha: 0.6),
+            ),
+          ),
+        ],
+      ),
     );
   }
 }
@@ -275,7 +347,7 @@ class _PlanGrid extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final plans = data.plans;
+    final plans = c.plansForStep(data);
     return GridView.builder(
       shrinkWrap: true,
       physics: const NeverScrollableScrollPhysics(),
@@ -284,7 +356,7 @@ class _PlanGrid extends StatelessWidget {
         crossAxisCount: 2,
         mainAxisSpacing: 12.w,
         crossAxisSpacing: 12.w,
-        childAspectRatio: 1.7,
+        mainAxisExtent: 92.h,
       ),
       itemBuilder: (context, i) => ChallengePlanCard(
         plan: plans[i],
@@ -294,6 +366,7 @@ class _PlanGrid extends StatelessWidget {
     );
   }
 }
+
 
 // ---------------------------------------------------------------------------
 // Free-trial body

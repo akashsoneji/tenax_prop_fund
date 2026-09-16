@@ -85,6 +85,10 @@ class ChallengePlan {
   static String _money(int minor) => '\$${minor ~/ 100}';
 }
 
+String _formatNumber(num value) => value % 1 == 0
+    ? value.toInt().toString()
+    : value.toString();
+
 @immutable
 class ChallengeVersion {
   const ChallengeVersion({
@@ -211,7 +215,7 @@ class ChallengeRule {
     final pct = json['pct'];
     return ChallengeRule(
       json['label'] as String? ?? '',
-      text?.isNotEmpty == true ? text! : pct is num ? '${pct.toInt()}%' : '',
+      text?.isNotEmpty == true ? text! : pct is num ? '${_formatNumber(pct)}%' : '',
       tip: json['tip'] as String? ?? '',
       tone: json['tone'] as String?,
     );

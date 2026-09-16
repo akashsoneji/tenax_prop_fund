@@ -29,6 +29,17 @@ class _CalcInputFieldState extends State<CalcInputField> {
       TextEditingController(text: widget.value);
 
   @override
+  void didUpdateWidget(covariant CalcInputField oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.value != widget.value && _controller.text != widget.value) {
+      _controller.value = TextEditingValue(
+        text: widget.value,
+        selection: TextSelection.collapsed(offset: widget.value.length),
+      );
+    }
+  }
+
+  @override
   void dispose() {
     _controller.dispose();
     super.dispose();
@@ -41,9 +52,18 @@ class _CalcInputFieldState extends State<CalcInputField> {
     return TextField(
       controller: _controller,
       onChanged: widget.onChanged,
-      keyboardType: const TextInputType.numberWithOptions(decimal: true),
+      keyboardType: const TextInputType.numberWithOptions(
+        decimal: true,
+        signed: true,
+      ),
       inputFormatters: [
-        FilteringTextInputFormatter.allow(RegExp(r'[0-9.]')),
+        TextInputFormatter.withFunction((oldValue, newValue) {
+          final text = newValue.text;
+          if (text.isEmpty || RegExp(r'^-?(?:\d+)?(?:\.\d*)?$').hasMatch(text)) {
+            return newValue;
+          }
+          return oldValue;
+        }),
       ],
       style: GoogleFonts.beVietnamPro(
         fontSize: 18.sp,
@@ -53,7 +73,8 @@ class _CalcInputFieldState extends State<CalcInputField> {
       decoration: InputDecoration(
         labelText: widget.label,
         floatingLabelBehavior: FloatingLabelBehavior.always,
-        filled: false,
+        filled: true,
+        fillColor: scheme.surface,
         contentPadding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 18.h),
       ),
     );

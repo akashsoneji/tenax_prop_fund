@@ -9,6 +9,7 @@ class Addon {
     required this.description,
     required this.priceLabel,
     required this.tagLabel,
+    this.priceMinor = 0,
   });
 
   final String id;
@@ -16,6 +17,7 @@ class Addon {
   final String description;
   final String priceLabel;
   final String tagLabel;
+  final int priceMinor;
 }
 
 /// A row in the Configure "Summary" card.

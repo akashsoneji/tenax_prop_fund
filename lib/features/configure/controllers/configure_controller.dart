@@ -13,34 +13,107 @@ import '../models/configure_models.dart';
 /// Prices are demo values; the base plan price is passed in via [seed] from the
 /// previous screen (or defaults to the $100K 2-Step).
 class ConfigureController extends GetxController {
-  ConfigureController({ChallengePlan? plan}) : selectedPlan = plan ?? _argumentPlan();
+  ConfigureController({ChallengePlan? plan})
+      : selectedPlan = plan ?? _argumentPlan(),
+        availableAddons = _argumentAddons(),
+        availablePlatforms = _argumentPlatforms(),
+        availablePaymentMethods = _argumentPaymentMethods(),
+        currency = _argumentCurrency();
 
   static ChallengePlan? _argumentPlan() {
     final arguments = Get.arguments;
-    return arguments is ChallengePlan ? arguments : null;
+    if (arguments is ChallengePlan) return arguments;
+    if (arguments is Map && arguments['plan'] is ChallengePlan) {
+      return arguments['plan'] as ChallengePlan;
+    }
+    return null;
   }
 
   final ChallengePlan? selectedPlan;
+  final List<Addon> availableAddons;
+  final List<String> availablePlatforms;
+  final List<String> availablePaymentMethods;
+  final String currency;
   final selectedPlatformId = Rxn<Object>();
   final selectedPaymentMethodId = Rxn<Object>();
   // Selections.
-  final platform = 1.obs; // index into platforms
+  final platform = 0.obs;
+  final paymentMethod = 0.obs;
   final swap = 0.obs; // 0 = Swap, 1 = Swap-Free +10%
   final selectedAddons = <String>{}.obs;
   final quantity = 1.obs;
   final acceptedTerms = false.obs;
   final obscurePassword = true.obs;
 
-  static const platforms = ['MetaTrader 4', 'MetaTrader 5', 'cTrader +\$25'];
+  static List<String> _argumentPlatforms() {
+    final arguments = Get.arguments;
+    if (arguments is Map && arguments['platforms'] is List) {
+      final values = (arguments['platforms'] as List)
+          .map((item) => item is ChallengePlatform ? item.label : item.toString())
+          .where((value) => value.trim().isNotEmpty)
+          .toList(growable: false);
+      if (values.isNotEmpty) return values;
+    }
+    return const <String>[];
+  }
+
+  static List<String> _argumentPaymentMethods() {
+    final arguments = Get.arguments;
+    if (arguments is Map && arguments['paymentMethods'] is List) {
+      return (arguments['paymentMethods'] as List)
+          .map((item) => item.toString())
+          .where((value) => value.trim().isNotEmpty)
+          .toList(growable: false);
+    }
+    return const <String>[];
+  }
+
+  static String _argumentCurrency() {
+    final arguments = Get.arguments;
+    if (arguments is Map && arguments['currency'] is String) {
+      final value = arguments['currency'] as String;
+      if (value.trim().isNotEmpty) return value;
+    }
+    return 'USD';
+  }
 
   // Base plan (demo — the 2-Step $100K from the design).
   String get planName => selectedPlan == null
       ? '${FlavorResolver.appName} 2-Step'
       : '${FlavorResolver.appName} ${selectedPlan!.name}';
   String get accountSize => selectedPlan?.size ?? r'$100K';
-  int get basePrice => _minorToDollars(selectedPlan?.defaultVersion?.displayedPriceMinor ?? 0);
+  int get basePrice => _minorToDollars(
+        selectedPlan?.defaultVersion?.displayedPriceMinor ?? 0,
+      );
+  int get originalPrice => basePrice;
 
   static int _minorToDollars(int minor) => (minor / 100).round();
+
+  static List<Addon> _argumentAddons() {
+    final arguments = Get.arguments;
+    if (arguments is Map && arguments['addons'] is List) {
+      final serverAddons = (arguments['addons'] as List).whereType<ChallengeAddon>();
+      final converted = serverAddons.map((addon) {
+        final priceLabel = addon.priceMinor > 0
+            ? '+\$${(addon.priceMinor / 100).round()}'
+            : addon.percentOfFee > 0
+                ? '+${addon.percentOfFee}%'
+                : 'Included';
+        return Addon(
+          id: '${addon.id}',
+          title: addon.name,
+          description: addon.description,
+          priceLabel: priceLabel,
+          tagLabel: addon.percentOfFee > 0
+              ? '${addon.percentOfFee}% of plan fee'
+              : 'Server priced',
+          priceMinor: addon.priceMinor,
+        );
+      }).toList(growable: false);
+      return converted;
+    }
+    return const <Addon>[];
+  }
 
   static const addons = <Addon>[
     Addon(
@@ -114,6 +187,7 @@ class ConfigureController extends GetxController {
   }
 
   void setPlatform(int index) => platform.value = index;
+  void setPaymentMethod(int index) => paymentMethod.value = index;
   void setSwap(int index) => swap.value = index;
   void togglePasswordVisibility() =>
       obscurePassword.value = !obscurePassword.value;
@@ -128,7 +202,17 @@ class ConfigureController extends GetxController {
   int get total {
     var sum = basePrice;
     for (final id in selectedAddons) {
-      sum += _addonPrices[id] ?? 0;
+      final serverAddon = availableAddons.firstWhereOrNull((addon) => addon.id == id);
+      if (serverAddon != null) {
+        if (serverAddon.priceMinor > 0) {
+          sum += (serverAddon.priceMinor / 100).round();
+        } else if (serverAddon.tagLabel.contains('% of plan fee')) {
+          final percent = int.tryParse(serverAddon.tagLabel.split('%').first) ?? 0;
+          sum += (basePrice * percent / 100).round();
+        }
+      } else {
+        sum += _addonPrices[id] ?? 0;
+      }
     }
     return sum * quantity.value;
   }
@@ -136,8 +220,12 @@ class ConfigureController extends GetxController {
   List<SummaryRow> get summaryRows => [
         SummaryRow('Plan', planName),
         SummaryRow('Account size', accountSize),
-        SummaryRow('Platform', platforms[platform.value]),
+        if (availablePlatforms.isNotEmpty)
+          SummaryRow('Platform', availablePlatforms[platform.value.clamp(0, availablePlatforms.length - 1)]),
         SummaryRow('Swap', swap.value == 0 ? 'Swap' : 'Swap-Free'),
+        if (availablePaymentMethods.isNotEmpty)
+          SummaryRow('Payment method', availablePaymentMethods[paymentMethod.value.clamp(0, availablePaymentMethods.length - 1)]),
+        SummaryRow('Currency', currency),
         SummaryRow(
           'Add-ons',
           selectedAddons.isEmpty
@@ -153,6 +241,7 @@ class ConfigureController extends GetxController {
   final email = TextEditingController();
   final password = TextEditingController();
   final phone = TextEditingController();
+  final couponCode = TextEditingController();
 
   @override
   void onClose() {
@@ -161,6 +250,7 @@ class ConfigureController extends GetxController {
     email.dispose();
     password.dispose();
     phone.dispose();
+    couponCode.dispose();
     super.onClose();
   }
 }
