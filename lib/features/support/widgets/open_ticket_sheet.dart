@@ -38,7 +38,7 @@ class OpenTicketSheet extends StatelessWidget {
                   children: [
                     Expanded(
                       child: Text(
-                        'Open a ticket',
+                        'support.open_ticket'.tr,
                         style: GoogleFonts.beVietnamPro(
                           fontSize: 18.sp,
                           fontWeight: FontWeight.w800,
@@ -50,21 +50,19 @@ class OpenTicketSheet extends StatelessWidget {
                   ],
                 ),
                 SizedBox(height: 16.h),
-                _Label('Topic'),
-                _SheetDropdown(
-                  options: c.topics,
-                  value: c.selectedTopic,
-                  onChanged: c.selectTopic,
+                _Label('support.field_topic'.tr),
+                _TopicDropdown(c: c),
+                SizedBox(height: 14.h),
+                _Label('support.field_subject'.tr),
+                TextField(
+                  onChanged: c.setSubject,
+                  style: GoogleFonts.beVietnamPro(color: scheme.onSurface),
+                  decoration: InputDecoration(
+                    hintText: 'support.subject_hint'.tr,
+                  ),
                 ),
                 SizedBox(height: 14.h),
-                _Label('Account'),
-                _SheetDropdown(
-                  options: c.accounts,
-                  value: c.selectedAccount,
-                  onChanged: c.selectAccount,
-                ),
-                SizedBox(height: 14.h),
-                _Label('Message'),
+                _Label('support.field_message'.tr),
                 TextField(
                   minLines: 4,
                   maxLines: 6,
@@ -77,10 +75,16 @@ class OpenTicketSheet extends StatelessWidget {
                 SizedBox(height: 16.h),
                 _RuleAnswerBox(),
                 SizedBox(height: 18.h),
-                AppGradientButton(
-                  label: 'Send',
-                  icon: Icons.send_rounded,
-                  onPressed: Get.back,
+                Obx(
+                  () => AppGradientButton(
+                    label: 'support.send'.tr,
+                    icon: Icons.send_rounded,
+                    loading: c.submitting.value,
+                    onPressed: () async {
+                      final ok = await c.submitTicket();
+                      if (ok) Get.back();
+                    },
+                  ),
                 ),
               ],
             ),
@@ -112,24 +116,23 @@ class _Label extends StatelessWidget {
   }
 }
 
-class _SheetDropdown extends StatelessWidget {
-  const _SheetDropdown({
-    required this.options,
-    required this.value,
-    required this.onChanged,
-  });
+class _TopicDropdown extends StatelessWidget {
+  const _TopicDropdown({required this.c});
 
-  final List<String> options;
-  final RxString value;
-  final ValueChanged<String> onChanged;
+  final SupportController c;
 
   @override
   Widget build(BuildContext context) {
     final scheme = Theme.of(context).colorScheme;
-    return Obx(
-      () => DropdownButtonFormField<String>(
-        initialValue: value.value,
+    return Obx(() {
+      final topics = c.topics;
+      final selected = c.selectedTopic.value.isEmpty
+          ? null
+          : c.selectedTopic.value;
+      return DropdownButtonFormField<String>(
+        initialValue: selected,
         isExpanded: true,
+        hint: Text('support.select_topic'.tr),
         borderRadius: BorderRadius.circular(12.r),
         style: GoogleFonts.beVietnamPro(
           fontSize: 14.sp,
@@ -137,14 +140,14 @@ class _SheetDropdown extends StatelessWidget {
           color: scheme.onSurface,
         ),
         items: [
-          for (final o in options)
-            DropdownMenuItem(value: o, child: Text(o)),
+          for (final t in topics)
+            DropdownMenuItem(value: t.value, child: Text(t.label)),
         ],
         onChanged: (v) {
-          if (v != null) onChanged(v);
+          if (v != null) c.selectTopic(v);
         },
-      ),
-    );
+      );
+    });
   }
 }
 
@@ -171,7 +174,7 @@ class _RuleAnswerBox extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  'A written rule answer binds us',
+                  'support.rule_answer_title'.tr,
                   style: GoogleFonts.beVietnamPro(
                     fontSize: 13.5.sp,
                     fontWeight: FontWeight.w800,
@@ -180,8 +183,7 @@ class _RuleAnswerBox extends StatelessWidget {
                 ),
                 SizedBox(height: 3.h),
                 Text(
-                  'If support tells you a strategy is allowed, that answer '
-                  'stands for your account.',
+                  'support.rule_answer_body'.tr,
                   style: GoogleFonts.beVietnamPro(
                     fontSize: 12.5.sp,
                     height: 1.35,

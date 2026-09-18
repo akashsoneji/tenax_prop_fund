@@ -1,5 +1,6 @@
 import 'package:get/get.dart';
 
+import '../../../core/network/api_client.dart';
 import '../controllers/trading_rules_controller.dart';
 import '../repositories/trading_rules_repository.dart';
 
@@ -9,7 +10,9 @@ import '../repositories/trading_rules_repository.dart';
 class TradingRulesBinding extends Bindings {
   @override
   void dependencies() {
-    Get.lazyPut<TradingRulesRepository>(() => TradingRulesRepository());
+    Get.lazyPut<TradingRulesRepository>(
+      () => TradingRulesRepository(Get.find<ApiClient>()),
+    );
     Get.lazyPut<TradingRulesController>(
       () => TradingRulesController(Get.find<TradingRulesRepository>()),
     );

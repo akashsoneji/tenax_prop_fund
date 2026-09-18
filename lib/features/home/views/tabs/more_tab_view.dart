@@ -90,8 +90,9 @@ class MoreTabView extends StatelessWidget {
           'more.sub.calculators', AppRoutes.calculators),
       _Item(Icons.calendar_month_rounded, 'more.item.economic_calendar',
           'more.sub.economic_calendar', AppRoutes.economicCalendar),
-      _Item(Icons.tune_rounded, 'more.item.symbols', 'more.sub.symbols',
-          AppRoutes.symbols),
+      // Symbols specs & utilities — hidden for now, not needed.
+      // _Item(Icons.tune_rounded, 'more.item.symbols', 'more.sub.symbols',
+      //     AppRoutes.symbols),
       _Item(Icons.download_rounded, 'more.item.downloads',
           'more.sub.downloads', AppRoutes.downloads),
     ]),

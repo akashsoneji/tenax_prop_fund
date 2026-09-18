@@ -1,88 +1,105 @@
 import '../../../core/network/api_client.dart';
+import '../../../core/network/api_endpoints.dart';
+import '../../../core/network/api_envelope.dart';
 import '../../../core/network/api_response.dart';
 import '../models/notification_models.dart';
 
-/// Single source of truth for notification data. Currently serves STATIC DEMO
-/// data grouped under date sections ('Today' / 'Yesterday' / 'Earlier').
+/// One page of the notifications feed: the flat, newest-first rows plus the
+/// pagination meta so the controller knows whether more pages exist.
+class NotificationsPage {
+  const NotificationsPage({required this.items, required this.meta});
+
+  final List<AppNotification> items;
+  final PageMeta meta;
+}
+
+/// Single source of truth for notification data. Talks to the live
+/// `/notifications` REST endpoints (standard `{success, message, data, meta}`
+/// envelope). The controller/view never change when the data source does.
 class NotificationsRepository {
   NotificationsRepository(this._api);
 
-  // Retained for DI parity; not used while serving demo data.
-  // ignore: unused_field
   final ApiClient _api;
 
-  /// Returns a static demo feed grouped into date sections.
-  Future<ApiResponse<List<NotificationGroup>>> getNotifications({
-    String filter = 'all',
-    int page = 1,
-  }) {
-    return Future.value(ApiResponse.success(_demoGroups()));
+  /// Paged feed. `data` is a flat, newest-first array; `meta` carries paging.
+  Future<ApiResponse<NotificationsPage>> getNotifications({int page = 1}) {
+    return ApiEnvelope.guardBody<NotificationsPage>(
+      () => _api.get<Map<String, dynamic>>(
+        ApiEndpoints.notifications,
+        query: {'page': page},
+      ),
+      (body) {
+        final list = (body['data'] as List?) ?? const [];
+        final items = list
+            .whereType<Map<String, dynamic>>()
+            .map(AppNotification.fromJson)
+            .toList();
+        final meta = body['meta'] is Map<String, dynamic>
+            ? PageMeta.fromJson(body['meta'] as Map<String, dynamic>)
+            : PageMeta.empty;
+        return NotificationsPage(items: items, meta: meta);
+      },
+    );
   }
 
-  /// Demo unread count (local, no network).
+  /// Unread badge count (`data.count`). Silent — no error toast on a background
+  /// badge poll.
   Future<ApiResponse<int>> getUnreadCount() {
-    return Future.value(ApiResponse.success(2));
+    return ApiEnvelope.guard<int>(
+      () => _api.get<Map<String, dynamic>>(
+        ApiEndpoints.notificationsUnreadCount,
+      ),
+      (data) => (data is Map && data['count'] is num)
+          ? (data['count'] as num).toInt()
+          : 0,
+      showErrorToast: false,
+    );
   }
 
-  /// No-op mark-read (local, no network).
-  Future<ApiResponse<void>> markRead(Object id) {
-    return Future.value(ApiResponse.success(null));
+  /// Marks a single notification read. `data.count` is the new unread total.
+  Future<ApiResponse<int>> markRead(Object id) {
+    return ApiEnvelope.guard<int>(
+      () => _api.post<Map<String, dynamic>>(
+        ApiEndpoints.notificationRead(id),
+      ),
+      (data) => (data is Map && data['count'] is num)
+          ? (data['count'] as num).toInt()
+          : 0,
+      showErrorToast: false,
+    );
   }
 
-  /// No-op mark-all-read (local, no network).
+  /// Marks every notification read.
   Future<ApiResponse<void>> markAllRead() {
-    return Future.value(ApiResponse.success(null));
+    return ApiEnvelope.guard<void>(
+      () => _api.post<Map<String, dynamic>>(
+        ApiEndpoints.notificationsReadAll,
+      ),
+      (_) {},
+    );
   }
 
-  List<NotificationGroup> _demoGroups() {
-    final now = DateTime.now();
-    return [
-      NotificationGroup(
-        label: 'Today',
-        items: [
-          AppNotification(
-            type: NotificationType.success,
-            title: 'Payout approved',
-            subtitle: 'Your \$1,240 payout request has been approved.',
-            time: '2h',
-            createdAt: now.subtract(const Duration(hours: 2)),
-          ),
-          AppNotification(
-            type: NotificationType.warning,
-            title: 'New login detected',
-            subtitle: 'A new sign-in from Chrome on macOS.',
-            time: '5h',
-            createdAt: now.subtract(const Duration(hours: 5)),
-            read: true,
-          ),
-        ],
+  /// Notification channel preferences (catalog + current toggles).
+  Future<ApiResponse<NotificationPreferences>> getPreferences() {
+    return ApiEnvelope.guard<NotificationPreferences>(
+      () => _api.get<Map<String, dynamic>>(
+        ApiEndpoints.notificationPreferences,
       ),
-      NotificationGroup(
-        label: 'Yesterday',
-        items: [
-          AppNotification(
-            type: NotificationType.gift,
-            title: 'Referral reward earned',
-            subtitle: 'You earned \$50 from a friend\'s first challenge.',
-            time: '1d',
-            createdAt: now.subtract(const Duration(days: 1, hours: 3)),
-            read: true,
-          ),
-        ],
+      (data) => NotificationPreferences.fromJson(
+        data is Map<String, dynamic> ? data : const {},
       ),
-      NotificationGroup(
-        label: 'Earlier',
-        items: [
-          AppNotification(
-            type: NotificationType.info,
-            title: 'Challenge started',
-            subtitle: 'Your Pipze 2-Step \$100K challenge is now active.',
-            time: '4d',
-            createdAt: now.subtract(const Duration(days: 4)),
-            read: true,
-          ),
-        ],
+    );
+  }
+
+  /// Persists the full preferences map.
+  Future<ApiResponse<void>> savePreferences(NotificationPreferences prefs) {
+    return ApiEnvelope.guard<void>(
+      () => _api.put<Map<String, dynamic>>(
+        ApiEndpoints.notificationPreferences,
+        data: {'preferences': prefs.toPreferencesMap()},
       ),
-    ];
+      (_) {},
+      successMessage: 'Preferences saved',
+    );
   }
 }

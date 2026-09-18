@@ -1,5 +1,6 @@
 import 'package:get/get.dart';
 
+import '../../../core/network/api_client.dart';
 import '../controllers/support_controller.dart';
 import '../repositories/support_repository.dart';
 
@@ -9,7 +10,9 @@ import '../repositories/support_repository.dart';
 class SupportBinding extends Bindings {
   @override
   void dependencies() {
-    Get.lazyPut<SupportRepository>(() => SupportRepository());
+    Get.lazyPut<SupportRepository>(
+      () => SupportRepository(Get.find<ApiClient>()),
+    );
     Get.lazyPut<SupportController>(
       () => SupportController(Get.find<SupportRepository>()),
     );

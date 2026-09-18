@@ -60,6 +60,19 @@ After creating or editing any UI, re-read the design and confirm it has NO rende
 - Use `const` constructors for static widgets/insets/borders.
 - Run `flutter analyze lib/features/<feature>` and fix everything before saying it's done.
 
+### 6. NEW SCREEN BUILD RECIPE — follow this order every time (no need to ask)
+When asked to build ANY screen / feature / add development, execute these steps in order and deliver ALL of them by default:
+1. Create the feature folder `lib/features/<feature>/` with `bindings/`, `controllers/`, `models/`, `repositories/`, `views/`, `widgets/`. Reuse an existing feature (e.g. `billing/`, `referral/`, `faq/`) as the template.
+2. Model(s) in `models/` with `fromJson` (mirror `dashboard_models.dart` style). No logic in models beyond parsing.
+3. Repository in `repositories/` — all network via `Get.find<ApiClient>()`; paths from `lib/core/network/api_endpoints.dart` (add new paths there, NEVER inline, NEVER `/api/v1`); wrap responses with `ApiEnvelope.guard`.
+4. Controller extends `BaseController<T>`, implements `fetch()`, exposes `Rx<DataState<T>>` — no `BuildContext`/widgets, no Dio.
+5. Binding in `bindings/` wiring repository + controller with `Get.lazyPut`; register route + binding in `lib/app/routes/app_routes.dart` + `app_pages.dart`.
+6. View is `GetView<Controller>` (or `StatelessWidget` + `Get.find`) — pure UI. Wrap body in `DataStateBuilder` with a matching shimmer skeleton composed from `lib/shared/widgets/skeletons/skeletons.dart` (`AppShimmer`/`ShimmerBox`) — never a bare spinner.
+7. Every color from `Theme.of(context).colorScheme` / `AppColors.*`; every text style from `textTheme.*` / `AppText.*`; every user string via `.tr` added to BOTH `en` + `hi` in `app_translations.dart`.
+8. Every dimension in ScreenUtil units (`.w/.h/.sp/.r`) so iOS + Android render identical proportion — zero raw pixels.
+9. Reuse shared widgets (`AppGradientButton`, `AppTextField`, `AppLabeledField`, `AppToast`, `DataStateBuilder`, `PinnedGradientAppBar`, etc.); extract new reusable UI into `widgets/` — keep each widget class under 150 lines.
+10. Run the section-5 render self-check, then `flutter analyze lib/features/<feature>` and fix everything before reporting done.
+
 ## Imported from CLAUDE.md
 
 # CLAUDE CODE INSTRUCTIONS — Tenax Prop Trading App
