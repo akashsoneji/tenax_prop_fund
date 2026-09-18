@@ -16,13 +16,15 @@ class ChallengeBottomBar extends StatelessWidget {
     required this.actionLabel,
     required this.onAction,
     this.strikePrice,
+    this.loading = false,
   });
 
   final String planName;
   final String price;
   final String actionLabel;
-  final VoidCallback onAction;
+  final VoidCallback? onAction;
   final String? strikePrice;
+  final bool loading;
 
   @override
   Widget build(BuildContext context) {
@@ -97,19 +99,29 @@ class ChallengeBottomBar extends StatelessWidget {
                 color: AppColors.white.withValues(alpha: 0.18),
                 borderRadius: BorderRadius.circular(12.r),
                 child: InkWell(
-                  onTap: onAction,
+                  onTap: loading ? null : onAction,
                   borderRadius: BorderRadius.circular(12.r),
                   child: Padding(
                     padding: EdgeInsets.symmetric(
                         horizontal: 22.w, vertical: 12.h),
-                    child: Text(
-                      actionLabel,
-                      style: GoogleFonts.beVietnamPro(
-                        color: AppColors.white,
-                        fontSize: 15.sp,
-                        fontWeight: FontWeight.w700,
-                      ),
-                    ),
+                    child: loading
+                        ? SizedBox(
+                            width: 20.w,
+                            height: 20.w,
+                            child: CircularProgressIndicator(
+                              strokeWidth: 2.2.w,
+                              valueColor:
+                                  const AlwaysStoppedAnimation(AppColors.white),
+                            ),
+                          )
+                        : Text(
+                            actionLabel,
+                            style: GoogleFonts.beVietnamPro(
+                              color: AppColors.white,
+                              fontSize: 15.sp,
+                              fontWeight: FontWeight.w700,
+                            ),
+                          ),
                   ),
                 ),
               ),

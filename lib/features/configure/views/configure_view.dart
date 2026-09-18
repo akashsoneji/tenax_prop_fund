@@ -6,7 +6,6 @@ import 'package:google_fonts/google_fonts.dart';
 import '../../../shared/theme/app_colors.dart';
 import '../../../shared/theme/app_theme.dart';
 import '../../../shared/widgets/app_segmented_control.dart';
-import '../../../shared/widgets/app_text_field.dart';
 import '../../../shared/widgets/key_value_row.dart';
 import '../../../shared/widgets/pinned_gradient_app_bar.dart';
 import '../../../shared/widgets/section_header.dart';
@@ -81,7 +80,7 @@ class ConfigureView extends StatelessWidget {
                     SizedBox(height: 22.h),
                     SectionHeader('Payment method'),
                     Obx(() => AppSegmentedControl(
-                          labels: c.availablePaymentMethods,
+                          labels: c.paymentMethodLabels,
                           selected: c.paymentMethod.value.clamp(
                               0, c.availablePaymentMethods.length - 1),
                           onChanged: c.setPaymentMethod,
@@ -92,18 +91,7 @@ class ConfigureView extends StatelessWidget {
                   _QuantityRow(c: c),
                   SizedBox(height: 22.h),
                   SectionHeader('Coupon code'),
-                  TextField(
-                    controller: c.couponCode,
-                    textInputAction: TextInputAction.done,
-                    decoration: InputDecoration(
-                      hintText: 'Enter coupon code',
-                      filled: true,
-                      fillColor: scheme.surface,
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(14.r),
-                      ),
-                    ),
-                  ),
+                  _CouponField(c: c),
                   SizedBox(height: 22.h),
                   SectionHeader('configure.summary'.tr),
                   Obx(() {
@@ -131,11 +119,12 @@ class ConfigureView extends StatelessWidget {
       bottomNavigationBar: Obx(() => ChallengeBottomBar(
             planName: '${c.planName} · ${c.accountSize}',
             price: '${c.currency} ${c.total}',
-            strikePrice: c.originalPrice > c.total
-                ? '${c.currency} ${c.originalPrice}'
+            strikePrice: c.subtotal > c.total
+                ? '${c.currency} ${c.subtotal}'
                 : null,
             actionLabel: 'Continue',
-            onAction: () {},
+            loading: c.purchasing.value,
+            onAction: c.purchasing.value ? null : c.continuePressed,
           )),
     );
   }
@@ -267,6 +256,149 @@ class _StepButton extends StatelessWidget {
         child: Padding(
           padding: EdgeInsets.all(6.w),
           child: Icon(icon, size: 18.w, color: scheme.primary),
+        ),
+      ),
+    );
+  }
+}
+
+// ---------------------------------------------------------------------------
+// Coupon code field
+// ---------------------------------------------------------------------------
+
+class _CouponField extends StatelessWidget {
+  const _CouponField({required this.c});
+  final ConfigureController c;
+
+  @override
+  Widget build(BuildContext context) {
+    final scheme = Theme.of(context).colorScheme;
+    return Obx(() {
+      final applied = c.appliedCoupon.value != null;
+      final error = c.couponError.value;
+      final loading = c.applyingCoupon.value;
+      final borderColor = applied
+          ? AppColors.success
+          : error != null
+              ? scheme.error
+              : scheme.outline.withValues(alpha: 0.4);
+
+      return Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Container(
+            padding: EdgeInsets.symmetric(horizontal: 14.w, vertical: 4.h),
+            decoration: BoxDecoration(
+              color: scheme.surface,
+              borderRadius: BorderRadius.circular(14.r),
+              border: Border.all(color: borderColor, width: 1.4.w),
+            ),
+            child: Row(
+              children: [
+                Expanded(
+                  child: TextField(
+                    controller: c.couponCode,
+                    enabled: !applied,
+                    textCapitalization: TextCapitalization.characters,
+                    textInputAction: TextInputAction.done,
+                    onSubmitted: (_) => c.applyCoupon(),
+                    style: GoogleFonts.beVietnamPro(
+                      fontSize: 14.sp,
+                      fontWeight: FontWeight.w600,
+                      color: scheme.onSurface,
+                    ),
+                    decoration: InputDecoration(
+                      isCollapsed: true,
+                      border: InputBorder.none,
+                      hintText: 'Enter coupon code',
+                      hintStyle: GoogleFonts.beVietnamPro(
+                        fontSize: 14.sp,
+                        color: scheme.onSurface.withValues(alpha: 0.5),
+                      ),
+                    ),
+                  ),
+                ),
+                SizedBox(width: 8.w),
+                _CouponAction(
+                  applied: applied,
+                  loading: loading,
+                  onApply: c.applyCoupon,
+                  onRemove: c.removeCoupon,
+                ),
+              ],
+            ),
+          ),
+          if (applied) ...[
+            SizedBox(height: 8.h),
+            Text(
+              '${c.appliedCoupon.value} applied — you save \$${c.discount}',
+              style: GoogleFonts.beVietnamPro(
+                fontSize: 12.5.sp,
+                fontWeight: FontWeight.w600,
+                color: AppColors.success,
+              ),
+            ),
+          ] else if (error != null) ...[
+            SizedBox(height: 8.h),
+            Text(
+              error,
+              style: GoogleFonts.beVietnamPro(
+                fontSize: 12.5.sp,
+                fontWeight: FontWeight.w600,
+                color: scheme.error,
+              ),
+            ),
+          ],
+        ],
+      );
+    });
+  }
+}
+
+class _CouponAction extends StatelessWidget {
+  const _CouponAction({
+    required this.applied,
+    required this.loading,
+    required this.onApply,
+    required this.onRemove,
+  });
+  final bool applied;
+  final bool loading;
+  final VoidCallback onApply;
+  final VoidCallback onRemove;
+
+  @override
+  Widget build(BuildContext context) {
+    final scheme = Theme.of(context).colorScheme;
+    if (loading) {
+      return SizedBox(
+        width: 20.w,
+        height: 20.w,
+        child: CircularProgressIndicator(
+          strokeWidth: 2.2.w,
+          valueColor: AlwaysStoppedAnimation(scheme.primary),
+        ),
+      );
+    }
+    if (applied) {
+      return IconButton(
+        onPressed: onRemove,
+        visualDensity: VisualDensity.compact,
+        icon: Icon(Icons.close_rounded, size: 20.w, color: scheme.error),
+      );
+    }
+    return TextButton(
+      onPressed: onApply,
+      style: TextButton.styleFrom(
+        padding: EdgeInsets.symmetric(horizontal: 10.w),
+        minimumSize: Size(0, 36.h),
+      ),
+      child: Text(
+        'Apply',
+        style: GoogleFonts.beVietnamPro(
+          fontSize: 14.sp,
+          fontWeight: FontWeight.w700,
+          color: scheme.primary,
         ),
       ),
     );

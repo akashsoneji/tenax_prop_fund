@@ -50,4 +50,50 @@ class ChallengeRepository {
       ),
     );
   }
+
+  /// Validates a coupon against a plan version and returns the discounted quote.
+  /// The server surfaces an invalid coupon as a top-level `message`, so error
+  /// toasting is disabled here and the caller shows the message inline instead.
+  Future<ApiResponse<ChallengeQuote>> applyCoupon({
+    required int planVersionId,
+    required String couponCode,
+  }) {
+    return ApiEnvelope.guard<ChallengeQuote>(
+      () => _api.post<Map<String, dynamic>>(
+        '/challenges/coupon',
+        data: {
+          'plan_version_id': planVersionId,
+          'coupon_code': couponCode,
+        },
+      ),
+      (data) => ChallengeQuote.fromJson(
+        data is Map<String, dynamic> ? data : const {},
+      ),
+      showErrorToast: false,
+    );
+  }
+
+  /// Creates an order for the configured plan and returns the payment path
+  /// (`free` / `manual` / `gateway`).
+  Future<ApiResponse<PurchaseResult>> purchase({
+    required int planVersionId,
+    List<int> addonIds = const [],
+    String? couponCode,
+    required int paymentMethodId,
+  }) {
+    return ApiEnvelope.guard<PurchaseResult>(
+      () => _api.post<Map<String, dynamic>>(
+        '/challenges/purchase',
+        data: {
+          'plan_version_id': planVersionId,
+          'addon_ids': addonIds,
+          'coupon_code': couponCode,
+          'payment_method_id': paymentMethodId,
+        },
+      ),
+      (data) => PurchaseResult.fromJson(
+        data is Map<String, dynamic> ? data : const {},
+      ),
+    );
+  }
 }

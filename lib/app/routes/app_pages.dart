@@ -30,6 +30,8 @@ import '../../features/competitions/bindings/competitions_binding.dart';
 import '../../features/competitions/views/competitions_view.dart';
 import '../../features/configure/bindings/configure_binding.dart';
 import '../../features/configure/views/configure_view.dart';
+import '../../features/payment/bindings/complete_payment_binding.dart';
+import '../../features/payment/views/complete_payment_view.dart';
 import '../../features/downloads/bindings/downloads_binding.dart';
 import '../../features/downloads/views/downloads_view.dart';
 import '../../features/economic_calendar/bindings/economic_calendar_binding.dart';
@@ -178,6 +180,11 @@ class AppPages {
       name: AppRoutes.configure,
       page: () => const ConfigureView(),
       binding: ConfigureBinding(),
+    ),
+    GetPage(
+      name: AppRoutes.completePayment,
+      page: () => const CompletePaymentView(),
+      binding: CompletePaymentBinding(),
     ),
     GetPage(
       name: AppRoutes.downloads,

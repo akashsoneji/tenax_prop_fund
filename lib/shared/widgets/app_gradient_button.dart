@@ -90,7 +90,7 @@ class _AppGradientButtonState extends State<AppGradientButton>
           borderRadius: BorderRadius.circular(14.r),
           child: Ink(
             decoration: BoxDecoration(
-              gradient: AppTheme.brandGradient(scheme),
+              gradient: AppTheme.heroGradient(scheme),
               borderRadius: BorderRadius.circular(14.r),
               boxShadow: [
                 BoxShadow(

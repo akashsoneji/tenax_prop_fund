@@ -1,8 +1,11 @@
 import 'package:flutter/widgets.dart';
 import 'package:get/get.dart';
 
-import '../../../app/flavor/flavor_resolver.dart';
+import '../../../app/routes/app_routes.dart';
+import '../../../core/network/api_client.dart';
+import '../../../shared/widgets/app_toast.dart';
 import '../../challenge/models/challenge_models.dart';
+import '../../challenge/repositories/challenge_repository.dart';
 import '../models/configure_models.dart';
 
 /// Owns all Configure-screen state: selected platform, swap option, the set of
@@ -32,8 +35,18 @@ class ConfigureController extends GetxController {
   final ChallengePlan? selectedPlan;
   final List<Addon> availableAddons;
   final List<String> availablePlatforms;
-  final List<String> availablePaymentMethods;
+  final List<PaymentMethod> availablePaymentMethods;
   final String currency;
+
+  /// Segmented-control labels for the payment methods.
+  List<String> get paymentMethodLabels =>
+      availablePaymentMethods.map((m) => m.name).toList(growable: false);
+
+  /// The payment method currently selected in the segmented control.
+  PaymentMethod? get selectedPaymentMethod => availablePaymentMethods.isEmpty
+      ? null
+      : availablePaymentMethods[
+          paymentMethod.value.clamp(0, availablePaymentMethods.length - 1)];
   final selectedPlatformId = Rxn<Object>();
   final selectedPaymentMethodId = Rxn<Object>();
   // Selections.
@@ -57,15 +70,14 @@ class ConfigureController extends GetxController {
     return const <String>[];
   }
 
-  static List<String> _argumentPaymentMethods() {
+  static List<PaymentMethod> _argumentPaymentMethods() {
     final arguments = Get.arguments;
     if (arguments is Map && arguments['paymentMethods'] is List) {
       return (arguments['paymentMethods'] as List)
-          .map((item) => item.toString())
-          .where((value) => value.trim().isNotEmpty)
+          .whereType<PaymentMethod>()
           .toList(growable: false);
     }
-    return const <String>[];
+    return const <PaymentMethod>[];
   }
 
   static String _argumentCurrency() {
@@ -77,10 +89,18 @@ class ConfigureController extends GetxController {
     return 'USD';
   }
 
+  late final ChallengeRepository _repository =
+      ChallengeRepository(Get.find<ApiClient>());
+
+  // Coupon state.
+  final applyingCoupon = false.obs;
+  final appliedCoupon = RxnString();
+  final couponError = RxnString();
+  final couponDiscount = 0.obs; // whole dollars, per single account
+
   // Base plan (demo — the 2-Step $100K from the design).
-  String get planName => selectedPlan == null
-      ? '${FlavorResolver.appName} 2-Step'
-      : '${FlavorResolver.appName} ${selectedPlan!.name}';
+  String get planName =>
+      selectedPlan == null ? '2-Step' : selectedPlan!.name;
   String get accountSize => selectedPlan?.size ?? r'$100K';
   int get basePrice => _minorToDollars(
         selectedPlan?.defaultVersion?.displayedPriceMinor ?? 0,
@@ -198,23 +218,124 @@ class ConfigureController extends GetxController {
     if (quantity.value > 1) quantity.value = quantity.value - 1;
   }
 
-  /// Grand total in whole dollars, reactive to every input.
-  int get total {
-    var sum = basePrice;
+  /// Swap-free surcharge: a static 10% of the plan price, applied per account
+  /// when the "Swap-Free" option is selected (mirrors the leverage add-on's
+  /// percent-of-plan-fee handling).
+  static const int swapFreePercent = 10;
+  int get swapFreeFee =>
+      swap.value == 1 ? (basePrice * swapFreePercent / 100).round() : 0;
+
+  /// Per-account price (plan + add-ons + swap-free) before the coupon, in whole
+  /// dollars.
+  int get _unitPrice {
+    var sum = basePrice + swapFreeFee;
     for (final id in selectedAddons) {
-      final serverAddon = availableAddons.firstWhereOrNull((addon) => addon.id == id);
+      final serverAddon =
+          availableAddons.firstWhereOrNull((addon) => addon.id == id);
       if (serverAddon != null) {
         if (serverAddon.priceMinor > 0) {
           sum += (serverAddon.priceMinor / 100).round();
         } else if (serverAddon.tagLabel.contains('% of plan fee')) {
-          final percent = int.tryParse(serverAddon.tagLabel.split('%').first) ?? 0;
+          final percent =
+              int.tryParse(serverAddon.tagLabel.split('%').first) ?? 0;
           sum += (basePrice * percent / 100).round();
         }
       } else {
         sum += _addonPrices[id] ?? 0;
       }
     }
-    return sum * quantity.value;
+    return sum;
+  }
+
+  /// Total discount in whole dollars across every account.
+  int get discount => (couponDiscount.value * quantity.value)
+      .clamp(0, _unitPrice * quantity.value);
+
+  /// Grand total in whole dollars, reactive to every input (coupon applied).
+  int get total => (_unitPrice * quantity.value - discount).clamp(0, 1 << 31);
+
+  /// Total before any coupon discount.
+  int get subtotal => _unitPrice * quantity.value;
+
+  /// Apply the coupon typed into [couponCode] against the current plan version.
+  Future<void> applyCoupon() async {
+    final code = couponCode.text.trim();
+    final versionId = selectedPlan?.defaultVersion?.id;
+    if (code.isEmpty || versionId == null) return;
+
+    applyingCoupon.value = true;
+    couponError.value = null;
+    final res = await _repository.applyCoupon(
+      planVersionId: versionId,
+      couponCode: code,
+    );
+    applyingCoupon.value = false;
+
+    if (res.success && res.data != null) {
+      final quote = res.data!;
+      appliedCoupon.value = quote.couponCode ?? code.toUpperCase();
+      // Discount per single account = subtotal − total from the coupon quote.
+      couponDiscount.value =
+          ((quote.subtotalMinor - quote.totalMinor) / 100).round();
+    } else {
+      couponError.value = res.message ?? 'This coupon code is invalid.';
+    }
+  }
+
+  /// Clears an applied coupon and restores the full price.
+  void removeCoupon() {
+    couponCode.clear();
+    appliedCoupon.value = null;
+    couponError.value = null;
+    couponDiscount.value = 0;
+  }
+
+  // Purchase / checkout.
+  final purchasing = false.obs;
+
+  /// Add-on ids selected on this screen as integers (server add-on ids).
+  List<int> get _selectedAddonIds => selectedAddons
+      .map(int.tryParse)
+      .whereType<int>()
+      .toList(growable: false);
+
+  /// Creates the order and routes by payment path:
+  /// - `manual`  → Complete-payment screen (upload proof)
+  /// - `free`    → success toast (instant provision, no payment)
+  /// - `gateway` → not yet handled here (redirect URL)
+  Future<void> continuePressed() async {
+    final versionId = selectedPlan?.defaultVersion?.id;
+    final method = selectedPaymentMethod;
+    if (versionId == null) {
+      AppToast.error('This plan cannot be purchased right now.');
+      return;
+    }
+    if (method == null) {
+      AppToast.error('Please choose a payment method.');
+      return;
+    }
+
+    purchasing.value = true;
+    final res = await _repository.purchase(
+      planVersionId: versionId,
+      addonIds: _selectedAddonIds,
+      couponCode: appliedCoupon.value,
+      paymentMethodId: method.id,
+    );
+    purchasing.value = false;
+
+    if (!res.success || res.data == null) return; // guard already toasted
+    final result = res.data!;
+
+    if (result.isManual) {
+      Get.toNamed(AppRoutes.completePayment, arguments: result.orderId);
+    } else if (result.isFree) {
+      AppToast.success('Your account is being provisioned.');
+      Get.until((route) => route.settings.name == AppRoutes.home);
+    } else {
+      // Gateway path — a hosted checkout URL would be opened here.
+      AppToast.info('Continue your payment in the opened checkout.');
+    }
   }
 
   List<SummaryRow> get summaryRows => [
@@ -222,9 +343,10 @@ class ConfigureController extends GetxController {
         SummaryRow('Account size', accountSize),
         if (availablePlatforms.isNotEmpty)
           SummaryRow('Platform', availablePlatforms[platform.value.clamp(0, availablePlatforms.length - 1)]),
-        SummaryRow('Swap', swap.value == 0 ? 'Swap' : 'Swap-Free'),
-        if (availablePaymentMethods.isNotEmpty)
-          SummaryRow('Payment method', availablePaymentMethods[paymentMethod.value.clamp(0, availablePaymentMethods.length - 1)]),
+        SummaryRow('Swap',
+            swap.value == 0 ? 'Swap' : 'Swap-Free (+$swapFreePercent%)'),
+        if (selectedPaymentMethod != null)
+          SummaryRow('Payment method', selectedPaymentMethod!.name),
         SummaryRow('Currency', currency),
         SummaryRow(
           'Add-ons',
@@ -233,6 +355,8 @@ class ConfigureController extends GetxController {
               : '${selectedAddons.length} selected',
         ),
         SummaryRow('Quantity', '${quantity.value}'),
+        if (appliedCoupon.value != null)
+          SummaryRow('Discount (${appliedCoupon.value})', '-\$$discount'),
       ];
 
   // Form controllers (disposed with the controller).

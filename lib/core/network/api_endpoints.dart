@@ -42,6 +42,21 @@ abstract class ApiEndpoints {
 
   static const challenges = '/challenges';
   static const challengeCompare = '/challenges/compare';
+  static const challengeCoupon = '/challenges/coupon';
+
+  /// Creates an order for the configured plan (`POST`). Body: `plan_version_id`,
+  /// `addon_ids`, `coupon_code` (nullable), `payment_method_id`. Response
+  /// `data` carries `order_id`, `path` (free | manual | gateway) and an
+  /// optional `gateway_url`.
+  static const challengePurchase = '/challenges/purchase';
+
+  /// Single order snapshot for the Complete-payment screen (`GET`). `data`
+  /// carries `order`, `choices` and `payment_instructions`.
+  static String order(Object id) => '/orders/$id';
+
+  /// Manual payment proof upload (`POST`, multipart). Fields: `proof` (file)
+  /// and optional `reference`.
+  static String orderProof(Object id) => '/orders/$id/proof';
 
   /// Referral summary for the Home "Refer & earn" card. Standard
   /// `{success, message, data}` envelope where `data` nests `referral`
