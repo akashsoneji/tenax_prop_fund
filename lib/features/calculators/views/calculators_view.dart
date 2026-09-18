@@ -3,6 +3,7 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
 
 import '../../../core/state/data_state.dart';
+import '../../../shared/widgets/app_gradient_button.dart';
 import '../../../shared/widgets/pinned_gradient_app_bar.dart';
 import '../controllers/calculators_controller.dart';
 import '../models/calculator_models.dart';
@@ -108,15 +109,10 @@ class _CalculatorForm extends StatelessWidget {
                     ),
                   SizedBox(height: 14.h),
                 ],
-                SizedBox(
+                AppGradientButton(
+                  label: 'Calculate',
                   height: 52.h,
-                  child: ElevatedButton(
-                    onPressed: () => c.setField('_calculated', DateTime.now().toIso8601String()),
-                    child: Text(
-                      'Calculate',
-                      style: TextStyle(fontSize: 16.sp, fontWeight: FontWeight.w700),
-                    ),
-                  ),
+                  onPressed: () => c.setField('_calculated', DateTime.now().toIso8601String()),
                 ),
               ],
             ),

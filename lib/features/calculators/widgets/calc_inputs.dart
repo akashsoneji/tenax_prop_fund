@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
@@ -52,10 +53,16 @@ class _CalcInputFieldState extends State<CalcInputField> {
     return TextField(
       controller: _controller,
       onChanged: widget.onChanged,
-      keyboardType: const TextInputType.numberWithOptions(
-        decimal: true,
-        signed: true,
-      ),
+      // On web a numeric keyboardType renders an <input type="number"> which
+      // adds the browser's up/down spinner. Use a plain text field there
+      // (numeric input is still enforced by the formatter below); keep the
+      // decimal keyboard on mobile.
+      keyboardType: kIsWeb
+          ? TextInputType.text
+          : const TextInputType.numberWithOptions(
+              decimal: true,
+              signed: true,
+            ),
       inputFormatters: [
         TextInputFormatter.withFunction((oldValue, newValue) {
           final text = newValue.text;

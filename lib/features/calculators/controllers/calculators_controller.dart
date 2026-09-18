@@ -82,7 +82,11 @@ class CalculatorsController extends BaseController<CalculatorsData> {
 
   String formatResult() {
     final format = selectedDefinition?.format ?? '0.00';
-    final decimals = format.contains('.') ? format.split('.').last.length : 0;
-    return result.toStringAsFixed(decimals.clamp(0, 8));
+    final formatDecimals =
+        format.contains('.') ? format.split('.').last.length : 0;
+    // Always keep at least 2 decimals so results show as floats (e.g. 3.33,
+    // -19.50) instead of being rounded to whole numbers.
+    final decimals = formatDecimals < 2 ? 2 : formatDecimals;
+    return result.toStringAsFixed(decimals.clamp(2, 8));
   }
 }

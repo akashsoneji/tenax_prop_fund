@@ -28,7 +28,7 @@ class CalcResultCard extends StatelessWidget {
       width: double.infinity,
       padding: EdgeInsets.symmetric(vertical: 26.h, horizontal: 20.w),
       decoration: BoxDecoration(
-        gradient: AppTheme.brandGradient(scheme),
+        gradient: AppTheme.heroGradient(scheme),
         borderRadius: BorderRadius.circular(20.r),
         boxShadow: [
           BoxShadow(

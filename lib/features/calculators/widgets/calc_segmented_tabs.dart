@@ -5,6 +5,15 @@ import 'package:google_fonts/google_fonts.dart';
 import '../../../shared/theme/app_colors.dart';
 import '../../../shared/theme/app_theme.dart';
 
+TextStyle _segmentTextStyle(ColorScheme scheme, {required bool selected}) =>
+    GoogleFonts.beVietnamPro(
+      fontSize: 13.5.sp,
+      fontWeight: FontWeight.w700,
+      color: selected
+          ? scheme.onPrimary
+          : scheme.onSurface.withValues(alpha: 0.7),
+    );
+
 /// Pill-style segmented control
 /// Generic over any label list; the selected segment paints solid primary
 /// with contrasting text, the rest sit on a muted track. Theme-driven.
@@ -27,6 +36,11 @@ class CalcSegmentedTabs extends StatelessWidget {
         ? AppColors.white.withValues(alpha: 0.06)
         : AppColors.track;
 
+    final style = _segmentTextStyle(scheme, selected: true);
+    // Each segment gets width proportional to its own label, so a long label
+    // like "Profit / Loss" is never squeezed into an equal share and clipped.
+    final widths = labels.map((label) => _measure(label, style)).toList();
+
     return Container(
       padding: EdgeInsets.all(5.w),
       decoration: BoxDecoration(
@@ -35,17 +49,29 @@ class CalcSegmentedTabs extends StatelessWidget {
       ),
       child: Row(
         children: [
-          for (var i = 0; i < labels.length; i++)
+          for (var i = 0; i < labels.length; i++) ...[
+            if (i > 0) SizedBox(width: 4.w),
             Expanded(
+              flex: (widths[i] * 100).round().clamp(1, 1 << 20),
               child: _Segment(
                 label: labels[i],
                 selected: i == selectedIndex,
                 onTap: () => onSelected(i),
               ),
             ),
+          ],
         ],
       ),
     );
+  }
+
+  static double _measure(String label, TextStyle style) {
+    final painter = TextPainter(
+      text: TextSpan(text: label, style: style),
+      maxLines: 1,
+      textDirection: TextDirection.ltr,
+    )..layout();
+    return painter.width;
   }
 }
 
@@ -71,20 +97,19 @@ class _Segment extends StatelessWidget {
         curve: AppMotion.enter,
         height: 40.h,
         alignment: Alignment.center,
+        padding: EdgeInsets.symmetric(horizontal: 6.w),
         decoration: BoxDecoration(
           color: selected ? scheme.primary : AppColors.transparent,
           borderRadius: BorderRadius.circular(10.r),
         ),
-        child: Text(
-          label,
-          maxLines: 1,
-          overflow: TextOverflow.ellipsis,
-          style: GoogleFonts.beVietnamPro(
-            fontSize: 13.5.sp,
-            fontWeight: FontWeight.w700,
-            color: selected
-                ? scheme.onPrimary
-                : scheme.onSurface.withValues(alpha: 0.7),
+        child: FittedBox(
+          fit: BoxFit.scaleDown,
+          child: Text(
+            label,
+            maxLines: 1,
+            softWrap: false,
+            textAlign: TextAlign.center,
+            style: _segmentTextStyle(scheme, selected: selected),
           ),
         ),
       ),
