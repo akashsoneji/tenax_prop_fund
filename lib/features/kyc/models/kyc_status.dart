@@ -67,18 +67,54 @@ class KycStatus {
   factory KycStatus.fromJson(dynamic data) {
     if (data is! Map<String, dynamic>) return empty;
 
+    // The live `GET /kyc` envelope puts the real verification state under
+    // `data.submission` (null until the user uploads). `data.documents` at the
+    // top level is only the list of required document *definitions*, not their
+    // status — so it must NOT be read as state.
+    final submission = data['submission'];
+    if (submission is Map) {
+      final overall = kycDocStateFromString(
+        (submission['status'] ?? submission['state'])?.toString(),
+      );
+
+      // A submission carries a single overall status covering every document
+      // it contains. Reflect that status on whichever slots were actually
+      // submitted so the checklist matches the uploaded docs.
+      var identity = KycDocState.notSubmitted;
+      var address = KycDocState.notSubmitted;
+      final docs = submission['documents'];
+      if (docs is List) {
+        for (final entry in docs) {
+          if (entry is! Map) continue;
+          final type =
+              (entry['type'] ?? entry['document_type'] ?? '').toString().toLowerCase();
+          if (type.contains('id') || type.contains('identity')) {
+            identity = overall;
+          } else if (type.contains('address')) {
+            address = overall;
+          }
+        }
+      } else {
+        // No per-document breakdown — apply the overall status to both slots.
+        identity = overall;
+        address = overall;
+      }
+
+      return KycStatus(identity: identity, address: address, overall: overall);
+    }
+
+    // Fallbacks for other envelope shapes the backend might return.
     final overall = data['status'] ?? data['kyc_status'] ?? data['state'];
 
     // Shape A: a `documents` list, each entry carrying `type` + `status`.
     final docs = data['documents'];
-    if (docs is List) {
-      KycDocState identity = KycDocState.notSubmitted;
-      KycDocState address = KycDocState.notSubmitted;
+    if (docs is List && docs.any((e) => e is Map && e['status'] != null)) {
+      var identity = KycDocState.notSubmitted;
+      var address = KycDocState.notSubmitted;
       for (final entry in docs) {
         if (entry is! Map) continue;
-        final type = (entry['type'] ?? entry['document_type'] ?? '')
-            .toString()
-            .toLowerCase();
+        final type =
+            (entry['type'] ?? entry['document_type'] ?? '').toString().toLowerCase();
         final state = kycDocStateFromString(entry['status']?.toString());
         if (type.contains('id') || type.contains('identity')) {
           identity = state;
@@ -89,24 +125,19 @@ class KycStatus {
       return KycStatus(
         identity: identity,
         address: address,
-        overall: overall == null
-            ? null
-            : kycDocStateFromString(overall.toString()),
+        overall: overall == null ? null : kycDocStateFromString(overall.toString()),
       );
     }
 
     // Shape B: flat per-document status fields.
     return KycStatus(
       identity: kycDocStateFromString(
-        (data['id_document'] ?? data['identity'] ?? data['identity_status'])
-            ?.toString(),
+        (data['id_document'] ?? data['identity'] ?? data['identity_status'])?.toString(),
       ),
       address: kycDocStateFromString(
-        (data['proof_of_address'] ?? data['address'] ?? data['address_status'])
-            ?.toString(),
+        (data['proof_of_address'] ?? data['address'] ?? data['address_status'])?.toString(),
       ),
-      overall:
-          overall == null ? null : kycDocStateFromString(overall.toString()),
+      overall: overall == null ? null : kycDocStateFromString(overall.toString()),
     );
   }
 }

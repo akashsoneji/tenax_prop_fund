@@ -53,12 +53,6 @@ class EditProfileView extends GetView<EditProfileController> {
                   ),
                   SizedBox(height: 12.h),
                   AppLabeledField(
-                    controller: controller.dateOfBirth,
-                    label: 'edit_profile.date_of_birth'.tr,
-                    textInputAction: TextInputAction.next,
-                  ),
-                  SizedBox(height: 12.h),
-                  AppLabeledField(
                     controller: controller.country,
                     label: 'edit_profile.country'.tr,
                     textInputAction: TextInputAction.done,

@@ -20,7 +20,6 @@ class EditProfileController extends GetxController {
   late final TextEditingController email;
   late final TextEditingController mobile;
   late final TextEditingController country;
-  late final TextEditingController dateOfBirth;
 
   final saving = false.obs;
 
@@ -31,7 +30,6 @@ class EditProfileController extends GetxController {
     email = TextEditingController(text: _detail('Email'));
     mobile = TextEditingController(text: _detail('Mobile'));
     country = TextEditingController(text: _detail('Country'));
-    dateOfBirth = TextEditingController(text: _detail('Date of birth'));
   }
 
   String _detail(String label) {
@@ -51,8 +49,10 @@ class EditProfileController extends GetxController {
     final firstName = parts.isNotEmpty ? parts.first : '';
     final lastName = parts.length > 1 ? parts.sublist(1).join(' ') : '';
     final res = await _repository.updateProfile({
+      'name': fullName.text.trim(),
       'first_name': firstName,
       'last_name': lastName,
+      'email': email.text.trim(),
       'phone': mobile.text.trim(),
       'country_code': country.text.trim(),
     });
@@ -71,7 +71,6 @@ class EditProfileController extends GetxController {
     email.dispose();
     mobile.dispose();
     country.dispose();
-    dateOfBirth.dispose();
     super.onClose();
   }
 }

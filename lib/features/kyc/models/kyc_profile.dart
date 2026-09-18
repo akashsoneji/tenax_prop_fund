@@ -3,7 +3,22 @@ import 'package:flutter/material.dart';
 import 'kyc_status.dart';
 
 /// Status of a single verification step in the KYC checklist.
-enum KycStepStatus { done, pending }
+enum KycStepStatus { done, inReview, pending }
+
+/// Maps a raw KYC document state onto a checklist step status:
+/// approved → done, pending/submitted → inReview, everything else → pending
+/// (needs upload / re-upload).
+KycStepStatus _stepStatusFrom(KycDocState state) {
+  switch (state) {
+    case KycDocState.approved:
+      return KycStepStatus.done;
+    case KycDocState.pending:
+      return KycStepStatus.inReview;
+    case KycDocState.rejected:
+    case KycDocState.notSubmitted:
+      return KycStepStatus.pending;
+  }
+}
 
 /// One row in the "Verification" checklist (email, identity, address).
 class KycVerificationStep {
@@ -18,6 +33,7 @@ class KycVerificationStep {
   final KycStepStatus status;
 
   bool get isDone => status == KycStepStatus.done;
+  bool get isInReview => status == KycStepStatus.inReview;
 }
 
 /// A labelled row inside the gradient "Personal details" card.
@@ -25,14 +41,6 @@ class KycDetailRow {
   const KycDetailRow({required this.icon, required this.label, required this.value});
 
   final IconData icon;
-  final String label;
-  final String value;
-}
-
-/// A row in the "News alerts" preferences list.
-class KycAlertRow {
-  const KycAlertRow({required this.label, required this.value});
-
   final String label;
   final String value;
 }
@@ -45,7 +53,6 @@ class KycProfile {
     required this.avatarUrl,
     required this.steps,
     required this.details,
-    required this.alerts,
   });
 
   final String name;
@@ -53,14 +60,13 @@ class KycProfile {
   final String avatarUrl;
   final List<KycVerificationStep> steps;
   final List<KycDetailRow> details;
-  final List<KycAlertRow> alerts;
 
   int get doneCount => steps.where((s) => s.isDone).length;
   int get totalCount => steps.length;
 
   /// Maps the live `GET /profile` envelope `data` into the screen model. Fields
-  /// with no API source (avatar, date of birth, identity/address step state,
-  /// news-alert prefs) are defaulted sensibly and preserved for the views.
+  /// with no API source (avatar, identity/address step state) are defaulted
+  /// sensibly and preserved for the views.
   factory KycProfile.fromJson(Map<String, dynamic> json, {KycStatus? kyc}) {
     final name = (json['name'] as String?)?.trim() ?? '';
     final first = (json['first_name'] as String?)?.trim() ?? '';
@@ -86,16 +92,12 @@ class KycProfile {
         KycVerificationStep(
           title: 'Identity document',
           subtitle: 'Passport or national ID',
-          status: kyc?.identity == KycDocState.approved
-              ? KycStepStatus.done
-              : KycStepStatus.pending,
+          status: _stepStatusFrom(kyc?.identity ?? KycDocState.notSubmitted),
         ),
         KycVerificationStep(
           title: 'Proof of address',
           subtitle: 'Bank statement or bill, under 3 months',
-          status: kyc?.address == KycDocState.approved
-              ? KycStepStatus.done
-              : KycStepStatus.pending,
+          status: _stepStatusFrom(kyc?.address ?? KycDocState.notSubmitted),
         ),
       ],
       details: [
@@ -103,23 +105,12 @@ class KycProfile {
             icon: Icons.person_outline_rounded,
             label: 'Full name',
             value: fullName),
-        const KycDetailRow(
-            icon: Icons.calendar_today_outlined,
-            label: 'Date of birth',
-            value: ''),
         KycDetailRow(
             icon: Icons.public_rounded, label: 'Country', value: country),
         KycDetailRow(
             icon: Icons.smartphone_rounded, label: 'Mobile', value: phone),
         KycDetailRow(
             icon: Icons.mail_outline_rounded, label: 'Email', value: email),
-      ],
-      alerts: const [
-        KycAlertRow(label: 'Impact level', value: 'High only'),
-        KycAlertRow(label: 'Currency pairs', value: '5 selected'),
-        KycAlertRow(label: 'Alert timing', value: '15 minutes before'),
-        KycAlertRow(label: 'Channels', value: 'Push and email'),
-        KycAlertRow(label: 'Pause alerts', value: 'Off'),
       ],
     );
   }

@@ -76,8 +76,6 @@ class _KycBody extends StatelessWidget {
           _PersonalDetailsSection(profile: profile),
           SizedBox(height: 14.h),
           const _PayoutNote(),
-          SizedBox(height: 22.h),
-          _NewsAlertsSection(profile: profile),
         ],
       ),
     );
@@ -236,14 +234,21 @@ class _VerificationRow extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final scheme = Theme.of(context).colorScheme;
-    const green = AppColors.success;
-    final actionColor = step.isDone ? green : scheme.error;
+    final actionColor = step.isDone
+        ? AppColors.success
+        : step.isInReview
+            ? AppTheme.accent
+            : scheme.error;
+    final actionLabel = step.isDone
+        ? 'kyc.status_done'.tr
+        : step.isInReview
+            ? 'kyc.status_in_review'.tr
+            : 'kyc.status_upload'.tr;
+    final locked = step.isDone || step.isInReview;
     return Material(
       color: AppColors.transparent,
       child: InkWell(
-        onTap: step.isDone
-            ? null
-            : () => Get.toNamed(AppRoutes.kycDocuments),
+        onTap: locked ? null : () => Get.toNamed(AppRoutes.kycDocuments),
         borderRadius: BorderRadius.circular(18.r),
         child: Padding(
           padding: EdgeInsets.symmetric(horizontal: 14.w, vertical: 14.h),
@@ -264,12 +269,14 @@ class _VerificationRow extends StatelessWidget {
                   ],
                 ),
               ),
-              Text(step.isDone ? 'kyc.status_done'.tr : 'kyc.status_upload'.tr,
+              Text(actionLabel,
                   style: GoogleFonts.beVietnamPro(
                       fontSize: 13.sp,
                       fontWeight: FontWeight.w700,
                       color: actionColor)),
-              Icon(Icons.chevron_right_rounded, size: 20.w, color: actionColor),
+              if (!locked)
+                Icon(Icons.chevron_right_rounded,
+                    size: 20.w, color: actionColor),
             ],
           ),
         ),
@@ -414,81 +421,6 @@ class _PayoutNote extends StatelessWidget {
                   height: 1.35,
                   color: scheme.onSurface.withValues(alpha: 0.7))),
         ],
-      ),
-    );
-  }
-}
-
-// ---------------------------------------------------------------------------
-// News alerts
-// ---------------------------------------------------------------------------
-class _NewsAlertsSection extends StatelessWidget {
-  const _NewsAlertsSection({required this.profile});
-  final KycProfile profile;
-
-  @override
-  Widget build(BuildContext context) {
-    final scheme = Theme.of(context).colorScheme;
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Padding(
-          padding: EdgeInsets.only(left: 4.w, bottom: 10.h),
-          child: Text('kyc.news_alerts'.tr,
-              style: GoogleFonts.beVietnamPro(
-                  fontSize: 17.sp, fontWeight: FontWeight.w700)),
-        ),
-        Container(
-          decoration: AppTheme.surfaceCard(scheme, radius: 18),
-          padding: EdgeInsets.symmetric(horizontal: 14.w),
-          child: Column(
-            children: [
-              for (var i = 0; i < profile.alerts.length; i++) ...[
-                _AlertRow(row: profile.alerts[i]),
-                if (i < profile.alerts.length - 1)
-                  Divider(
-                    height: 1.h,
-                    thickness: 1.h,
-                    color: scheme.onSurface.withValues(alpha: 0.06),
-                  ),
-              ],
-            ],
-          ),
-        ),
-      ],
-    );
-  }
-}
-
-class _AlertRow extends StatelessWidget {
-  const _AlertRow({required this.row});
-  final KycAlertRow row;
-
-  @override
-  Widget build(BuildContext context) {
-    final scheme = Theme.of(context).colorScheme;
-    return Material(
-      color: AppColors.transparent,
-      child: InkWell(
-        onTap: () {},
-        child: Padding(
-          padding: EdgeInsets.symmetric(vertical: 16.h),
-          child: Row(
-            children: [
-              Text(row.label,
-                  style: GoogleFonts.beVietnamPro(
-                      fontSize: 14.sp,
-                      color: scheme.onSurface.withValues(alpha: 0.75))),
-              const Spacer(),
-              Text(row.value,
-                  style: GoogleFonts.beVietnamPro(
-                      fontSize: 14.sp, fontWeight: FontWeight.w700)),
-              SizedBox(width: 4.w),
-              Icon(Icons.chevron_right_rounded,
-                  size: 20.w, color: scheme.onSurface.withValues(alpha: 0.4)),
-            ],
-          ),
-        ),
       ),
     );
   }
