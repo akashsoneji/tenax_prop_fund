@@ -260,6 +260,30 @@ class ChallengeAddon {
 }
 
 @immutable
+class PaymentMethod {
+  const PaymentMethod({
+    required this.id,
+    required this.name,
+    required this.type,
+    required this.isManual,
+    required this.instructions,
+  });
+  final int id;
+  final String name;
+  final String type;
+  final bool isManual;
+  final String instructions;
+
+  factory PaymentMethod.fromJson(Map<String, dynamic> json) => PaymentMethod(
+        id: (json['id'] as num?)?.toInt() ?? 0,
+        name: json['name'] as String? ?? '',
+        type: json['type'] as String? ?? '',
+        isManual: json['is_manual'] as bool? ?? false,
+        instructions: json['instructions'] as String? ?? '',
+      );
+}
+
+@immutable
 class ChallengePlatform {
   const ChallengePlatform({required this.id, required this.value, required this.label, required this.isDefault, required this.feeMinor});
   final int id;
@@ -316,7 +340,7 @@ class ChallengeData {
   final List<ChallengeRule> trialRules;
   final List<ChallengeAddon> addons;
   final List<ChallengePlatform> platforms;
-  final List<String> paymentMethods;
+  final List<PaymentMethod> paymentMethods;
   final ChallengeTrial? trial;
   final String currency;
 
@@ -333,7 +357,7 @@ class ChallengeData {
       trialRules: const [],
       addons: _maps(json['addons']).map(ChallengeAddon.fromJson).toList(growable: false),
       platforms: _maps(json['platforms']).map(ChallengePlatform.fromJson).toList(growable: false),
-      paymentMethods: _maps(json['paymentMethods']).map((item) => item['name'] as String? ?? '').toList(growable: false),
+      paymentMethods: _maps(json['paymentMethods']).map(PaymentMethod.fromJson).toList(growable: false),
       trial: trial,
       currency: json['currency'] as String? ?? 'USD',
     );
@@ -364,6 +388,7 @@ class ChallengeQuote {
     required this.platformFeeMinor,
     required this.platformNetMinor,
     required this.addonPrices,
+    this.couponCode,
   });
 
   final int subtotalMinor;
@@ -382,6 +407,9 @@ class ChallengeQuote {
   final int platformFeeMinor;
   final int platformNetMinor;
   final Map<String, ChallengeQuoteAddon> addonPrices;
+
+  /// Applied coupon code (upper-cased by the server), or null when none.
+  final String? couponCode;
 
   factory ChallengeQuote.fromJson(Map<String, dynamic> json) => ChallengeQuote(
         subtotalMinor: _minor(json['subtotal_minor']),
@@ -402,6 +430,7 @@ class ChallengeQuote {
         addonPrices: _map(json['addon_prices']).map(
           (key, value) => MapEntry(key, ChallengeQuoteAddon.fromJson(_map(value))),
         ),
+        couponCode: _map(json['coupon'])['code'] as String?,
       );
 
   String get totalLabel => '\$${(totalMinor / 100).toStringAsFixed(2)}';
@@ -420,6 +449,30 @@ class ChallengeQuoteAddon {
 }
 
 int _minor(dynamic value) => (value as num?)?.toInt() ?? 0;
+
+/// Outcome of `POST /challenges/purchase`. [path] is `free` (instant, no
+/// payment), `manual` (upload proof) or `gateway` (redirect to [gatewayUrl]).
+@immutable
+class PurchaseResult {
+  const PurchaseResult({
+    required this.orderId,
+    required this.path,
+    required this.gatewayUrl,
+  });
+  final String orderId;
+  final String path;
+  final String? gatewayUrl;
+
+  bool get isManual => path == 'manual';
+  bool get isFree => path == 'free';
+  bool get isGateway => path == 'gateway';
+
+  factory PurchaseResult.fromJson(Map<String, dynamic> json) => PurchaseResult(
+        orderId: '${json['order_id'] ?? ''}',
+        path: json['path'] as String? ?? '',
+        gatewayUrl: json['gateway_url'] as String?,
+      );
+}
 
 extension ChallengeStepLabel on ChallengeStep {
   String get label {
