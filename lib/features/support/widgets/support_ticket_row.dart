@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
 
 import '../../../shared/theme/app_colors.dart';
@@ -12,21 +13,31 @@ class SupportTicketRow extends StatelessWidget {
     super.key,
     required this.ticket,
     this.showDivider = true,
+    this.onTap,
   });
 
   final SupportTicket ticket;
   final bool showDivider;
+  final VoidCallback? onTap;
 
   @override
   Widget build(BuildContext context) {
     final scheme = Theme.of(context).colorScheme;
-    final isOpen = ticket.status == TicketStatus.open;
-    final statusColor =
-        isOpen ? AppColors.warning : scheme.onSurfaceVariant;
+    final statusColor = ticket.status == TicketStatus.closed
+        ? scheme.onSurfaceVariant
+        : AppColors.warning;
+    final statusText = ticket.statusLabel.isNotEmpty
+        ? ticket.statusLabel
+        : (ticket.status == TicketStatus.closed
+            ? 'support.status_closed'.tr
+            : 'support.status_open'.tr);
 
     return Column(
       children: [
-        Padding(
+        InkWell(
+          onTap: onTap,
+          borderRadius: BorderRadius.circular(10.r),
+          child: Padding(
           padding: EdgeInsets.symmetric(vertical: 12.h),
           child: Row(
             children: [
@@ -71,7 +82,7 @@ class SupportTicketRow extends StatelessWidget {
               ),
               SizedBox(width: 8.w),
               Text(
-                isOpen ? 'Open' : 'Closed',
+                statusText,
                 style: GoogleFonts.beVietnamPro(
                   fontSize: 12.5.sp,
                   fontWeight: FontWeight.w700,
@@ -82,6 +93,7 @@ class SupportTicketRow extends StatelessWidget {
               Icon(Icons.chevron_right_rounded,
                   color: scheme.onSurfaceVariant, size: 20.w),
             ],
+          ),
           ),
         ),
         if (showDivider) const Divider(height: 1),

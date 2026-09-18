@@ -76,6 +76,10 @@ abstract class ApiEndpoints {
   /// Live tradable instruments list (parsed into `Instrument`s).
   static const calculators = '/tools/calculators';
 
+  /// Economic calendar. Standard `{success, message, data}` envelope where
+  /// `data` nests `events[]` and `filters`. Query param `currency` (e.g. `ALL`).
+  static const calendar = '/tools/calendar';
+
   static const instruments = '/instruments';
 
   /// Instruments scoped to a single trading [account].
@@ -109,4 +113,49 @@ abstract class ApiEndpoints {
   /// Trade history (GET) on the web host. Standard envelope; `data` may be a
   /// flat list or `{data, pagination, totals, summary}`.
   static const tradeHistory = '/api/user/trade/tradehistory';
+
+  // ---------------------------------------------------------------------------
+  // Notifications
+  // ---------------------------------------------------------------------------
+  /// Paged notifications feed. Standard `{success, message, data[], meta}`
+  /// envelope; each element has `id, type, title, body, event_key, meta,
+  /// read_at, created_at`. Query param `page`.
+  static const notifications = '/notifications';
+
+  /// Unread badge count. `data.count` holds the integer.
+  static const notificationsUnreadCount = '/notifications/unread-count';
+
+  /// Mark ALL notifications read (`POST`).
+  static const notificationsReadAll = '/notifications/read-all';
+
+  /// Mark a single notification read (`POST`). `data.count` returns the new
+  /// unread total.
+  static String notificationRead(Object id) => '/notifications/$id/read';
+
+  /// Notification channel preferences. `GET` returns `{catalog[], preferences}`;
+  /// `PUT` persists the `preferences` map.
+  static const notificationPreferences = '/notifications/preferences';
+
+  // ---------------------------------------------------------------------------
+  // Support / Help
+  // ---------------------------------------------------------------------------
+  /// Trading rules rulebook. `data` is `{tabs[], sections[]}`.
+  static const supportRules = '/support/rules';
+
+  /// FAQ list. `data.items[]` holds `{q, a}` pairs.
+  static const supportFaq = '/support/faq';
+
+  /// Support ticket topics for the "Open a ticket" form. `data.topics[]` holds
+  /// `{value, label}` pairs.
+  static const supportTopics = '/support/topics';
+
+  /// Support tickets list. Standard `{success, data[], meta}` envelope. Query
+  /// param `tab` (open | closed | all). `POST` creates a ticket.
+  static const supportTickets = '/support/tickets';
+
+  /// Single support ticket with its messages thread.
+  static String supportTicketDetail(Object id) => '/support/tickets/$id';
+
+  /// Reply to a support ticket (`POST` with `{message}`).
+  static String supportTicketReply(Object id) => '/support/tickets/$id/reply';
 }

@@ -8,16 +8,20 @@ import '../models/notification_models.dart';
 /// A single notification row: a tinted status icon, a bold title with a
 /// two-line muted subtitle, and a trailing short timestamp.
 class NotificationRow extends StatelessWidget {
-  const NotificationRow({super.key, required this.notification});
+  const NotificationRow({super.key, required this.notification, this.onTap});
 
   final AppNotification notification;
+  final VoidCallback? onTap;
 
   @override
   Widget build(BuildContext context) {
     final scheme = Theme.of(context).colorScheme;
     final visual = _visualFor(notification.type, scheme);
 
-    return Padding(
+    return InkWell(
+      onTap: onTap,
+      borderRadius: BorderRadius.circular(10.r),
+      child: Padding(
       padding: EdgeInsets.symmetric(vertical: 12.h),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -60,15 +64,32 @@ class NotificationRow extends StatelessWidget {
             ),
           ),
           SizedBox(width: 10.w),
-          Text(
-            notification.time,
-            style: GoogleFonts.beVietnamPro(
-              fontSize: 12.sp,
-              fontWeight: FontWeight.w600,
-              color: scheme.onSurfaceVariant,
-            ),
+          Column(
+            crossAxisAlignment: CrossAxisAlignment.end,
+            children: [
+              Text(
+                notification.time,
+                style: GoogleFonts.beVietnamPro(
+                  fontSize: 12.sp,
+                  fontWeight: FontWeight.w600,
+                  color: scheme.onSurfaceVariant,
+                ),
+              ),
+              if (!notification.read) ...[
+                SizedBox(height: 6.h),
+                Container(
+                  width: 8.w,
+                  height: 8.w,
+                  decoration: BoxDecoration(
+                    color: scheme.primary,
+                    shape: BoxShape.circle,
+                  ),
+                ),
+              ],
+            ],
           ),
         ],
+      ),
       ),
     );
   }

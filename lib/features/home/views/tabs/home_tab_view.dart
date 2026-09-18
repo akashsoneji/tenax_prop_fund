@@ -504,47 +504,54 @@ class _AccountPickerSheet extends StatelessWidget {
         child: Material(
           type: MaterialType.transparency,
           child: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Padding(
-              padding: EdgeInsets.fromLTRB(20.w, 12.h, 20.w, 8.h),
-              child: Text(
-                'home.switch_account'.tr,
-                style: TextStyle(
-                    fontSize: 15.sp,
-                    fontWeight: FontWeight.w700,
-                    color: scheme.onSurface),
-              ),
-            ),
-            ...accounts.map((a) {
-              final selected = a.id == selectedId;
-              return ListTile(
-                onTap: () => onSelected(a.id),
-                leading: Icon(
-                  selected
-                      ? Icons.radio_button_checked_rounded
-                      : Icons.radio_button_unchecked_rounded,
-                  color: selected ? scheme.primary : scheme.outline,
-                ),
-                title: Text(
-                  '${'home.account_hash'.tr}${a.id}',
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Padding(
+                padding: EdgeInsets.fromLTRB(20.w, 12.h, 20.w, 8.h),
+                child: Text(
+                  'home.switch_account'.tr,
                   style: TextStyle(
                       fontSize: 15.sp,
-                      fontWeight: FontWeight.w600,
+                      fontWeight: FontWeight.w700,
                       color: scheme.onSurface),
                 ),
-                trailing: Text(
-                  a.currency,
-                  style: TextStyle(
-                      fontSize: 12.5.sp,
-                      fontWeight: FontWeight.w600,
-                      color: scheme.onSurface.withValues(alpha: 0.6)),
+              ),
+              Flexible(
+                child: ListView.builder(
+                  shrinkWrap: true,
+                  itemCount: accounts.length,
+                  itemBuilder: (context, index) {
+                    final a = accounts[index];
+                    final selected = a.id == selectedId;
+                    return ListTile(
+                      onTap: () => onSelected(a.id),
+                      leading: Icon(
+                        selected
+                            ? Icons.radio_button_checked_rounded
+                            : Icons.radio_button_unchecked_rounded,
+                        color: selected ? scheme.primary : scheme.outline,
+                      ),
+                      title: Text(
+                        '${'home.account_hash'.tr}${a.id}',
+                        style: TextStyle(
+                            fontSize: 15.sp,
+                            fontWeight: FontWeight.w600,
+                            color: scheme.onSurface),
+                      ),
+                      trailing: Text(
+                        a.currency,
+                        style: TextStyle(
+                            fontSize: 12.5.sp,
+                            fontWeight: FontWeight.w600,
+                            color: scheme.onSurface.withValues(alpha: 0.6)),
+                      ),
+                    );
+                  },
                 ),
-              );
-            }),
-            SizedBox(height: 4.h),
-          ],
+              ),
+              SizedBox(height: 4.h),
+            ],
           ),
         ),
       ),

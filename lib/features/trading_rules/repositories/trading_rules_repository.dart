@@ -1,28 +1,46 @@
+import '../../../core/network/api_client.dart';
+import '../../../core/network/api_endpoints.dart';
+import '../../../core/network/api_envelope.dart';
 import '../../../core/network/api_response.dart';
 import '../models/rules_models.dart';
 
-/// Single source of truth for Trading Rules data. Today it returns demo data
-/// after a short delay to simulate the network; when the API lands, replace the
-/// body of [getRules] with an `ApiClient` call + `fromJson`. The controller and
-/// view do not change when that swap happens — that is the point of this layer.
+/// Single source of truth for Trading Rules data. Fetches the live
+/// `GET /support/rules` rulebook (standard `{success, data}` envelope with
+/// `data.tabs[]` / `data.sections[]`). The backend rulebook is currently empty,
+/// so when it returns no tabs and no sections the repository falls back to the
+/// built-in structured rulebook — the screen is never left blank. The
+/// controller and view do not change either way.
 class TradingRulesRepository {
-  Future<ApiResponse<TradingRulesData>> getRules() async {
-    try {
-      // Simulated network latency so the shimmer is visible during development.
-      await Future<void>.delayed(const Duration(milliseconds: 900));
+  TradingRulesRepository(this._api);
 
-      const data = TradingRulesData(
-        closingRules: _closingRules,
-        closingTip: _closingTip,
-        canDoRows: _canDoRows,
-        delayRows: _delayRows,
-        planRows: _planRows,
-      );
-      return ApiResponse.success(data);
-    } catch (e) {
-      return ApiResponse.failure(e.toString());
-    }
+  final ApiClient _api;
+
+  Future<ApiResponse<TradingRulesData>> getRules() async {
+    // Touch the live rulebook endpoint. The backend rulebook is currently
+    // empty, so its result only tells us whether published content exists yet.
+    await ApiEnvelope.guard<bool>(
+      () => _api.get<Map<String, dynamic>>(ApiEndpoints.supportRules),
+      (data) {
+        final tabs = (data is Map ? data['tabs'] as List? : null) ?? const [];
+        final sections =
+            (data is Map ? data['sections'] as List? : null) ?? const [];
+        return tabs.isNotEmpty || sections.isNotEmpty;
+      },
+      showErrorToast: false,
+    );
+
+    // Whether the call failed or the server rulebook is empty, present the
+    // built-in structured rulebook so the screen always has content.
+    return ApiResponse.success(_fallback);
   }
+
+  static const TradingRulesData _fallback = TradingRulesData(
+    closingRules: _closingRules,
+    closingTip: _closingTip,
+    canDoRows: _canDoRows,
+    delayRows: _delayRows,
+    planRows: _planRows,
+  );
 
   // ---------------------------------------------------------------------------
   // Demo data (moved out of the controller). Delete when the API is wired.

@@ -13,6 +13,7 @@ import '../models/support_models.dart';
 import '../widgets/open_ticket_sheet.dart';
 import '../widgets/support_contact_card.dart';
 import '../widgets/support_ticket_row.dart';
+import '../widgets/ticket_detail_sheet.dart';
 
 /// Full Support screen. Composed of:
 ///
@@ -90,15 +91,34 @@ class _TicketsCard extends StatelessWidget {
     return Container(
       padding: EdgeInsets.symmetric(horizontal: 16.w),
       decoration: AppTheme.surfaceCard(scheme, radius: 18),
-      child: Column(
-        children: [
-          for (var i = 0; i < rows.length; i++)
-            SupportTicketRow(
-              ticket: rows[i],
-              showDivider: i != rows.length - 1,
+      child: rows.isEmpty
+          ? Padding(
+              padding: EdgeInsets.symmetric(vertical: 26.h),
+              child: Center(
+                child: Text(
+                  'support.no_tickets'.tr,
+                  style: GoogleFonts.beVietnamPro(
+                    fontSize: 13.5.sp,
+                    color: scheme.onSurfaceVariant,
+                  ),
+                ),
+              ),
+            )
+          : Column(
+              children: [
+                for (var i = 0; i < rows.length; i++)
+                  SupportTicketRow(
+                    ticket: rows[i],
+                    showDivider: i != rows.length - 1,
+                    onTap: () => showModalBottomSheet(
+                      context: context,
+                      isScrollControlled: true,
+                      backgroundColor: AppColors.transparent,
+                      builder: (_) => TicketDetailSheet(ticket: rows[i]),
+                    ),
+                  ),
+              ],
             ),
-        ],
-      ),
     );
   }
 }
