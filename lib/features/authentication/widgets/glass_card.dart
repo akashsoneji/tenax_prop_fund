@@ -47,11 +47,14 @@ class _GlassCardState extends State<GlassCard>
     final scheme = Theme.of(context).colorScheme;
     final isDark = Theme.of(context).brightness == Brightness.dark;
 
+    // In dark mode the glass must be a real dark scrim, not a near-transparent
+    // white film — otherwise the amber mesh blobs behind it bleed through and
+    // wash out the fields, killing text contrast. Base it on the dark surface.
     final overlay = isDark
-        ? AppColors.white.withValues(alpha: 0.055)
+        ? scheme.surface.withValues(alpha: 0.72)
         : AppColors.white.withValues(alpha: 0.62);
     final sheenTop = isDark
-        ? AppColors.white.withValues(alpha: 0.10)
+        ? scheme.surface.withValues(alpha: 0.58)
         : AppColors.white.withValues(alpha: 0.55);
 
     final radiusValue = widget.radius ?? 26.r;

@@ -18,7 +18,7 @@ fi
 # `flutter run --flavor client_X` immediately shows a different splash.
 # macOS ships bash 3.2 which lacks associative arrays — use plain vars instead.
 FLAVORS=(tenax client_a client_b client_c)
-SPLASH_TENAX="0D47A1"
+SPLASH_TENAX="5F259E"
 SPLASH_A="1E88E5"
 SPLASH_B="2E7D32"
 SPLASH_C="6A1B9A"

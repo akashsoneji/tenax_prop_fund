@@ -122,7 +122,7 @@ class _ForgotPasswordViewState extends State<ForgotPasswordView> {
                       prefixIcon: const Icon(Icons.alternate_email_rounded),
                       filled: true,
                       fillColor:
-                          scheme.surfaceContainerHighest.withValues(alpha: 0.4),
+                          scheme.surfaceContainerHighest.withValues(alpha: 0.85),
                       contentPadding: EdgeInsets.symmetric(
                           horizontal: 16.w, vertical: 18.h),
                       enabledBorder: OutlineInputBorder(

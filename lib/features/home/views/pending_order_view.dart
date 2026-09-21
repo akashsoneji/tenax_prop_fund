@@ -1,7 +1,6 @@
 import 'dart:math';
 
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
 
@@ -608,7 +607,7 @@ class _PendingOrderViewState extends State<PendingOrderView> {
     return AppGradientButton(
       label: _isPlacing ? 'pending_order.placing'.tr : 'pending_order.place'.tr,
       loading: _isPlacing,
-      height: 52.h,
+      height: 46.h,
       onPressed: canPlace ? _placeOrder : null,
     );
   }

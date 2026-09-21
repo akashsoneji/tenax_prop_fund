@@ -6,11 +6,11 @@ import '../../../shared/theme/app_colors.dart';
 import '../../../shared/theme/app_theme.dart';
 import '../models/accounts_models.dart';
 
-/// One account card, redesigned for mobile. A tone-coloured status rail runs
-/// down the left edge; the header pairs the plan eyebrow + login with a status
-/// pill; a tinted P&L band leads with the number that matters; a 2×2 stat grid
-/// carries Balance / Equity / Days / Leverage; the footer holds the Trade /
-/// Dashboard actions. Fully theme-driven (light/dark).
+/// One account card, redesigned compact for mobile. A tone-coloured status rail
+/// runs down the left edge; the header pairs the plan eyebrow + login with a
+/// status pill and the P&L figure inline; a single divided stat row carries
+/// Balance / Equity / Days / Leverage; a slim footer holds Trade / Dashboard.
+/// Fully theme-driven (light/dark).
 class AccountListCard extends StatelessWidget {
   const AccountListCard({
     super.key,
@@ -39,14 +39,14 @@ class AccountListCard extends StatelessWidget {
       clipBehavior: Clip.antiAlias,
       decoration: BoxDecoration(
         color: isDark ? AppColors.cardDark : AppColors.cardLight,
-        borderRadius: BorderRadius.circular(20.r),
+        borderRadius: BorderRadius.circular(16.r),
         border: Border.all(color: scheme.primary.withValues(alpha: 0.10)),
         boxShadow: [
           if (!isDark)
             BoxShadow(
               color: scheme.primary.withValues(alpha: 0.06),
-              blurRadius: 16.r,
-              offset: Offset(0, 8.h),
+              blurRadius: 14.r,
+              offset: Offset(0, 6.h),
             ),
         ],
       ),
@@ -55,23 +55,23 @@ class AccountListCard extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
             // Tone status rail.
-            Container(width: 4.w, color: tone),
+            Container(width: 3.w, color: tone),
             Expanded(
               child: Padding(
-                padding: EdgeInsets.all(12.w),
+                padding: EdgeInsets.fromLTRB(11.w, 10.h, 11.w, 10.h),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    _Header(account: account, tone: tone),
+                    _Header(account: account),
+                    SizedBox(height: 9.h),
+                    _PnlRow(account: account),
+                    SizedBox(height: 9.h),
+                    _StatStrip(account: account),
                     SizedBox(height: 10.h),
-                    _PnlBand(account: account),
-                    SizedBox(height: 10.h),
-                    _StatGrid(account: account),
-                    SizedBox(height: 12.h),
                     Row(
                       children: [
                         Expanded(child: _TradeButton(onTap: onTrade)),
-                        SizedBox(width: 10.w),
+                        SizedBox(width: 8.w),
                         Expanded(child: _DashboardButton(onTap: onDashboard)),
                       ],
                     ),
@@ -90,9 +90,8 @@ class AccountListCard extends StatelessWidget {
 // Header: plan eyebrow + login on the left, status pill on the right.
 // ---------------------------------------------------------------------------
 class _Header extends StatelessWidget {
-  const _Header({required this.account, required this.tone});
+  const _Header({required this.account});
   final AccountRow account;
-  final Color tone;
 
   @override
   Widget build(BuildContext context) {
@@ -109,19 +108,19 @@ class _Header extends StatelessWidget {
                 maxLines: 1,
                 overflow: TextOverflow.ellipsis,
                 style: TextStyle(
-                  fontSize: 10.5.sp,
+                  fontSize: 9.5.sp,
                   fontWeight: FontWeight.w700,
-                  letterSpacing: 0.8,
+                  letterSpacing: 0.7,
                   color: scheme.onSurfaceVariant,
                 ),
               ),
-              SizedBox(height: 5.h),
+              SizedBox(height: 3.h),
               RichText(
                 maxLines: 1,
                 overflow: TextOverflow.ellipsis,
                 text: TextSpan(
                   style: TextStyle(
-                    fontSize: 16.sp,
+                    fontSize: 15.sp,
                     fontWeight: FontWeight.w800,
                     color: scheme.onSurface,
                   ),
@@ -137,7 +136,7 @@ class _Header extends StatelessWidget {
             ],
           ),
         ),
-        SizedBox(width: 10.w),
+        SizedBox(width: 8.w),
         _StatusPill(label: account.statusLabel, tone: account.tone),
       ],
     );
@@ -145,10 +144,11 @@ class _Header extends StatelessWidget {
 }
 
 // ---------------------------------------------------------------------------
-// P&L band: the headline figure on a tinted surface, with floating note.
+// Compact P&L row: tinted pill leading with the number that matters, plus the
+// floating note trailing when present. Shorter than the old boxed band.
 // ---------------------------------------------------------------------------
-class _PnlBand extends StatelessWidget {
-  const _PnlBand({required this.account});
+class _PnlRow extends StatelessWidget {
+  const _PnlRow({required this.account});
   final AccountRow account;
 
   @override
@@ -156,70 +156,53 @@ class _PnlBand extends StatelessWidget {
     final scheme = Theme.of(context).colorScheme;
     final color = account.pnlNegative ? AppColors.danger : AppColors.success;
     return Container(
-      padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 9.h),
+      padding: EdgeInsets.symmetric(horizontal: 10.w, vertical: 7.h),
       decoration: BoxDecoration(
         color: color.withValues(alpha: 0.10),
-        borderRadius: BorderRadius.circular(12.r),
-        border: Border.all(color: color.withValues(alpha: 0.22)),
+        borderRadius: BorderRadius.circular(10.r),
+        border: Border.all(color: color.withValues(alpha: 0.20)),
       ),
       child: Row(
         children: [
-          Container(
-            width: 32.w,
-            height: 32.h,
-            decoration: BoxDecoration(
-              color: color.withValues(alpha: 0.16),
-              borderRadius: BorderRadius.circular(10.r),
+          Icon(
+            account.pnlNegative
+                ? Icons.trending_down_rounded
+                : Icons.trending_up_rounded,
+            size: 16.w,
+            color: color,
+          ),
+          SizedBox(width: 7.w),
+          Text(
+            'accounts.total_pl'.tr,
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+            style: TextStyle(
+              fontSize: 10.sp,
+              fontWeight: FontWeight.w600,
+              color: scheme.onSurfaceVariant,
             ),
-            child: Icon(
-              account.pnlNegative
-                  ? Icons.trending_down_rounded
-                  : Icons.trending_up_rounded,
-              size: 19.w,
+          ),
+          SizedBox(width: 8.w),
+          Text(
+            account.pnl.isEmpty ? '—' : account.pnl,
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+            style: TextStyle(
+              fontSize: 14.sp,
+              fontWeight: FontWeight.w800,
               color: color,
             ),
           ),
-          SizedBox(width: 12.w),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Text(
-                  'accounts.total_pl'.tr,
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                  style: TextStyle(
-                    fontSize: 10.5.sp,
-                    fontWeight: FontWeight.w600,
-                    color: scheme.onSurfaceVariant,
-                  ),
-                ),
-                SizedBox(height: 2.h),
-                Text(
-                  account.pnl.isEmpty ? '—' : account.pnl,
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                  style: TextStyle(
-                    fontSize: 18.sp,
-                    fontWeight: FontWeight.w800,
-                    color: color,
-                    height: 1.05,
-                  ),
-                ),
-              ],
-            ),
-          ),
           if (account.floatingNote.isNotEmpty) ...[
-            SizedBox(width: 10.w),
-            Flexible(
+            SizedBox(width: 8.w),
+            Expanded(
               child: Text(
                 account.floatingNote,
-                maxLines: 2,
+                maxLines: 1,
                 overflow: TextOverflow.ellipsis,
                 textAlign: TextAlign.right,
                 style: TextStyle(
-                  fontSize: 10.5.sp,
+                  fontSize: 9.5.sp,
                   fontWeight: FontWeight.w600,
                   color: scheme.onSurfaceVariant,
                 ),
@@ -233,113 +216,112 @@ class _PnlBand extends StatelessWidget {
 }
 
 // ---------------------------------------------------------------------------
-// 2×2 stat grid: Balance · Equity · Trading days · Leverage.
+// Single divided stat row: Balance · Equity · Days · Leverage. Replaces the
+// tall 2×2 grid so the card stays short.
 // ---------------------------------------------------------------------------
-class _StatGrid extends StatelessWidget {
-  const _StatGrid({required this.account});
+class _StatStrip extends StatelessWidget {
+  const _StatStrip({required this.account});
   final AccountRow account;
-
-  @override
-  Widget build(BuildContext context) {
-    return Column(
-      children: [
-        Row(
-          children: [
-            Expanded(
-              child: _StatTile(
-                icon: Icons.account_balance_wallet_rounded,
-                label: 'accounts.balance'.tr,
-                value: account.balance,
-              ),
-            ),
-            SizedBox(width: 10.w),
-            Expanded(
-              child: _StatTile(
-                icon: Icons.show_chart_rounded,
-                label: 'accounts.equity'.tr,
-                value: account.equity,
-              ),
-            ),
-          ],
-        ),
-        SizedBox(height: 8.h),
-        Row(
-          children: [
-            Expanded(
-              child: _StatTile(
-                icon: Icons.event_available_rounded,
-                label: 'accounts.trading_days'.tr,
-                value: account.tradingDays,
-              ),
-            ),
-            SizedBox(width: 10.w),
-            Expanded(
-              child: _StatTile(
-                icon: Icons.tune_rounded,
-                label: 'accounts.leverage'.tr,
-                value: account.leverage,
-              ),
-            ),
-          ],
-        ),
-      ],
-    );
-  }
-}
-
-class _StatTile extends StatelessWidget {
-  const _StatTile({
-    required this.icon,
-    required this.label,
-    required this.value,
-  });
-  final IconData icon;
-  final String label;
-  final String value;
 
   @override
   Widget build(BuildContext context) {
     final scheme = Theme.of(context).colorScheme;
     final isDark = scheme.brightness == Brightness.dark;
     return Container(
-      padding: EdgeInsets.symmetric(horizontal: 11.w, vertical: 8.h),
+      padding: EdgeInsets.symmetric(horizontal: 8.w, vertical: 8.h),
       decoration: BoxDecoration(
         color: isDark
             ? AppColors.white.withValues(alpha: 0.04)
             : AppColors.trackSoft,
-        borderRadius: BorderRadius.circular(12.r),
+        borderRadius: BorderRadius.circular(10.r),
       ),
       child: Row(
         children: [
-          Icon(icon, size: 16.w, color: scheme.primary),
-          SizedBox(width: 9.w),
           Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Text(
-                  label,
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                  style: TextStyle(
-                    fontSize: 10.sp,
-                    fontWeight: FontWeight.w600,
-                    color: scheme.onSurfaceVariant,
-                  ),
-                ),
-                SizedBox(height: 2.h),
-                Text(
-                  value.isEmpty ? '—' : value,
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                  style: TextStyle(
-                    fontSize: 13.5.sp,
-                    fontWeight: FontWeight.w800,
-                    color: scheme.onSurface,
-                  ),
-                ),
-              ],
+            child: _StatCell(
+              label: 'accounts.balance'.tr,
+              value: account.balance,
+            ),
+          ),
+          const _CellDivider(),
+          Expanded(
+            child: _StatCell(
+              label: 'accounts.equity'.tr,
+              value: account.equity,
+            ),
+          ),
+          const _CellDivider(),
+          Expanded(
+            child: _StatCell(
+              label: 'accounts.trading_days'.tr,
+              value: account.tradingDays,
+            ),
+          ),
+          const _CellDivider(),
+          Expanded(
+            child: _StatCell(
+              label: 'accounts.leverage'.tr,
+              value: account.leverage,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _CellDivider extends StatelessWidget {
+  const _CellDivider();
+
+  @override
+  Widget build(BuildContext context) {
+    final scheme = Theme.of(context).colorScheme;
+    return Container(
+      width: 1.w,
+      height: 26.h,
+      color: scheme.onSurfaceVariant.withValues(alpha: 0.14),
+    );
+  }
+}
+
+class _StatCell extends StatelessWidget {
+  const _StatCell({required this.label, required this.value});
+  final String label;
+  final String value;
+
+  @override
+  Widget build(BuildContext context) {
+    final scheme = Theme.of(context).colorScheme;
+    return Padding(
+      padding: EdgeInsets.symmetric(horizontal: 4.w),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.center,
+        children: [
+          FittedBox(
+            fit: BoxFit.scaleDown,
+            child: Text(
+              value.isEmpty ? '—' : value,
+              maxLines: 1,
+              style: TextStyle(
+                fontSize: 12.5.sp,
+                fontWeight: FontWeight.w800,
+                color: scheme.onSurface,
+                height: 1.1,
+              ),
+            ),
+          ),
+          SizedBox(height: 3.h),
+          Text(
+            label.toUpperCase(),
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+            textAlign: TextAlign.center,
+            style: TextStyle(
+              fontSize: 8.5.sp,
+              fontWeight: FontWeight.w700,
+              letterSpacing: 0.3,
+              color: scheme.onSurfaceVariant,
             ),
           ),
         ],
@@ -356,23 +338,23 @@ class _TradeButton extends StatelessWidget {
   Widget build(BuildContext context) {
     return Material(
       color: AppColors.accent,
-      borderRadius: BorderRadius.circular(12.r),
+      borderRadius: BorderRadius.circular(11.r),
       child: InkWell(
         onTap: onTap,
-        borderRadius: BorderRadius.circular(12.r),
+        borderRadius: BorderRadius.circular(11.r),
         child: Container(
-          height: 38.h,
+          height: 36.h,
           alignment: Alignment.center,
           child: Row(
             mainAxisSize: MainAxisSize.min,
             children: [
               Icon(Icons.trending_up_rounded,
-                  size: 17.w, color: AppColors.black),
+                  size: 16.w, color: AppColors.black),
               SizedBox(width: 6.w),
               Text(
                 'accounts.trade'.tr,
                 style: TextStyle(
-                  fontSize: 13.5.sp,
+                  fontSize: 13.sp,
                   fontWeight: FontWeight.w700,
                   color: AppColors.black,
                 ),
@@ -395,27 +377,27 @@ class _DashboardButton extends StatelessWidget {
     return DecoratedBox(
       decoration: BoxDecoration(
         gradient: AppTheme.brandGradient(scheme),
-        borderRadius: BorderRadius.circular(12.r),
+        borderRadius: BorderRadius.circular(11.r),
       ),
       child: Material(
         color: Colors.transparent,
-        borderRadius: BorderRadius.circular(12.r),
+        borderRadius: BorderRadius.circular(11.r),
         child: InkWell(
           onTap: onTap,
-          borderRadius: BorderRadius.circular(12.r),
+          borderRadius: BorderRadius.circular(11.r),
           child: Container(
-            height: 38.h,
+            height: 36.h,
             alignment: Alignment.center,
             child: Row(
               mainAxisSize: MainAxisSize.min,
               children: [
                 Icon(Icons.dashboard_rounded,
-                    size: 16.w, color: AppColors.white),
+                    size: 15.w, color: AppColors.white),
                 SizedBox(width: 6.w),
                 Text(
                   'accounts.dashboard'.tr,
                   style: TextStyle(
-                    fontSize: 13.5.sp,
+                    fontSize: 13.sp,
                     fontWeight: FontWeight.w700,
                     color: AppColors.white,
                   ),
@@ -444,25 +426,25 @@ class _StatusPill extends StatelessWidget {
     };
     if (label.isEmpty) return const SizedBox.shrink();
     return Container(
-      padding: EdgeInsets.symmetric(horizontal: 10.w, vertical: 5.h),
+      padding: EdgeInsets.symmetric(horizontal: 9.w, vertical: 4.h),
       decoration: BoxDecoration(
         color: color.withValues(alpha: 0.12),
-        borderRadius: BorderRadius.circular(8.r),
-        border: Border.all(color: color.withValues(alpha: 0.32)),
+        borderRadius: BorderRadius.circular(7.r),
+        border: Border.all(color: color.withValues(alpha: 0.30)),
       ),
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
           Container(
-            width: 6.w,
-            height: 6.h,
+            width: 5.w,
+            height: 5.h,
             decoration: BoxDecoration(color: color, shape: BoxShape.circle),
           ),
-          SizedBox(width: 6.w),
+          SizedBox(width: 5.w),
           Text(
             label,
             style: TextStyle(
-              fontSize: 11.5.sp,
+              fontSize: 10.5.sp,
               fontWeight: FontWeight.w700,
               color: color,
             ),

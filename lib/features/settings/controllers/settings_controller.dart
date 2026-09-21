@@ -8,11 +8,16 @@ class SettingsController extends GetxController {
   static const _themeKey = 'theme_mode';
   static const _localeKey = 'locale_code';
 
-  // Read once at construction; callers should use [Get.find<SettingsController>()].
-  final ThemeMode themeMode;
-  final Locale locale;
+  // Reactive so the Settings screen reflects the active choice immediately.
+  final Rx<ThemeMode> _themeMode;
+  final Rx<Locale> _locale;
 
-  SettingsController._({required this.themeMode, required this.locale});
+  ThemeMode get themeMode => _themeMode.value;
+  Locale get locale => _locale.value;
+
+  SettingsController._({required ThemeMode themeMode, required Locale locale})
+      : _themeMode = Rx<ThemeMode>(themeMode),
+        _locale = Rx<Locale>(locale);
 
   factory SettingsController.load() {
     final box = GetStorage();
@@ -28,6 +33,7 @@ class SettingsController extends GetxController {
   Future<void> setThemeMode(ThemeMode mode) async {
     final box = GetStorage();
     await box.write(_themeKey, _nameFromMode(mode));
+    _themeMode.value = mode;
     Get.changeThemeMode(mode);
     Get.forceAppUpdate();
   }
@@ -35,6 +41,7 @@ class SettingsController extends GetxController {
   Future<void> setLocale(Locale next) async {
     final box = GetStorage();
     await box.write(_localeKey, next.languageCode);
+    _locale.value = next;
     Get.updateLocale(next);
     Get.forceAppUpdate();
   }
