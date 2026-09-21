@@ -41,7 +41,7 @@ class AccountsView extends StatelessWidget {
             PinnedGradientAppBar(title: 'accounts.app_bar'.tr, showBack: false),
             SliverToBoxAdapter(
               child: Padding(
-                padding: EdgeInsets.fromLTRB(16.w, 18.h, 16.w, 32.h),
+                padding: EdgeInsets.fromLTRB(16.w, 14.h, 16.w, 28.h),
                 child: Obx(
                   () => DataStateBuilder<AccountsData>(
                     state: c.state,
@@ -85,7 +85,7 @@ class _AccountsBody extends StatelessWidget {
           onFreeTrial: () => Get.toNamed(AppRoutes.challenge),
           onStartChallenge: () => Get.toNamed(AppRoutes.challenge),
         ),
-        SizedBox(height: 18.h),
+        SizedBox(height: 14.h),
         Obx(
           () => AccountsStatusTabs(
             labels: labels,
@@ -94,7 +94,7 @@ class _AccountsBody extends StatelessWidget {
             onChanged: controller.selectTab,
           ),
         ),
-        SizedBox(height: 14.h),
+        SizedBox(height: 12.h),
         AccountsSearchBar(
           hintText: 'accounts.search_hint'.tr,
           allPlansLabel: 'accounts.all_plans'.tr,
@@ -103,7 +103,7 @@ class _AccountsBody extends StatelessWidget {
           onQueryChanged: controller.setQuery,
           onPlanChanged: controller.setPlanFilter,
         ),
-        SizedBox(height: 18.h),
+        SizedBox(height: 14.h),
         Obx(() {
           final rows = controller.visibleAccounts(data);
           if (rows.isEmpty) return const _NoMatches();
@@ -114,7 +114,7 @@ class _AccountsBody extends StatelessWidget {
                 _Entrance(
                   index: i,
                   child: Padding(
-                    padding: EdgeInsets.only(bottom: 12.h),
+                    padding: EdgeInsets.only(bottom: 10.h),
                     child: AccountListCard(
                       account: rows[i],
                       onTrade: () => Get.toNamed(
@@ -177,16 +177,16 @@ class _AccountsSkeleton extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        HeroSkeleton(height: 180.h),
-        SizedBox(height: 18.h),
-        ShimmerBox(height: 40.h, radius: 22.r),
+        HeroSkeleton(height: 160.h),
         SizedBox(height: 14.h),
-        ShimmerBox(height: 46.h, radius: 14.r),
-        SizedBox(height: 18.h),
-        const AccountCardSkeleton(),
+        ShimmerBox(height: 34.h, radius: 18.r),
         SizedBox(height: 12.h),
+        ShimmerBox(height: 42.h, radius: 12.r),
+        SizedBox(height: 14.h),
         const AccountCardSkeleton(),
-        SizedBox(height: 12.h),
+        SizedBox(height: 10.h),
+        const AccountCardSkeleton(),
+        SizedBox(height: 10.h),
         const AccountCardSkeleton(),
       ],
     );

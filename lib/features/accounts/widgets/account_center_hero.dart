@@ -35,15 +35,15 @@ class AccountCenterHero extends StatelessWidget {
     final text = Theme.of(context).textTheme;
 
     return Container(
-      padding: EdgeInsets.all(14.w),
+      padding: EdgeInsets.all(12.w),
       decoration: BoxDecoration(
         gradient: AppTheme.heroGradient(scheme),
-        borderRadius: BorderRadius.circular(18.r),
+        borderRadius: BorderRadius.circular(16.r),
         boxShadow: [
           BoxShadow(
-            color: scheme.primary.withValues(alpha: 0.28),
-            blurRadius: 18.r,
-            offset: Offset(0, 10.h),
+            color: scheme.primary.withValues(alpha: 0.24),
+            blurRadius: 14.r,
+            offset: Offset(0, 8.h),
           ),
         ],
       ),
@@ -58,7 +58,7 @@ class AccountCenterHero extends StatelessWidget {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     _Eyebrow(label: 'accounts.center'.tr),
-                    SizedBox(height: 8.h),
+                    SizedBox(height: 6.h),
                     Text(
                       'accounts.subtitle'.tr,
                       maxLines: 2,
@@ -72,7 +72,7 @@ class AccountCenterHero extends StatelessWidget {
                   ],
                 ),
               ),
-              SizedBox(width: 12.w),
+              SizedBox(width: 10.w),
               if (trialEnabled)
                 _IconCta(
                   icon: Icons.card_giftcard_rounded,
@@ -81,14 +81,14 @@ class AccountCenterHero extends StatelessWidget {
                 ),
             ],
           ),
-          SizedBox(height: 12.h),
+          SizedBox(height: 10.h),
           _MetricStrip(
             owned: ownedTotal,
             active: active,
             funded: funded,
             provisioning: provisioning,
           ),
-          SizedBox(height: 12.h),
+          SizedBox(height: 10.h),
           _HeroButton(
             label: 'accounts.start_challenge'.tr,
             icon: Icons.rocket_launch_rounded,
@@ -156,10 +156,10 @@ class _MetricStrip extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      padding: EdgeInsets.symmetric(horizontal: 8.w, vertical: 9.h),
+      padding: EdgeInsets.symmetric(horizontal: 8.w, vertical: 8.h),
       decoration: BoxDecoration(
         color: AppColors.white.withValues(alpha: 0.10),
-        borderRadius: BorderRadius.circular(12.r),
+        borderRadius: BorderRadius.circular(10.r),
         border: Border.all(color: AppColors.white.withValues(alpha: 0.14)),
       ),
       child: Row(
@@ -195,7 +195,7 @@ class _StripDivider extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       width: 1.w,
-      height: 30.h,
+      height: 26.h,
       color: AppColors.white.withValues(alpha: 0.14),
     );
   }
@@ -218,13 +218,13 @@ class _Metric extends StatelessWidget {
             maxLines: 1,
             style: TextStyle(
               color: AppColors.white,
-              fontSize: 19.sp,
+              fontSize: 17.sp,
               fontWeight: FontWeight.w800,
               height: 1.1,
             ),
           ),
         ),
-        SizedBox(height: 4.h),
+        SizedBox(height: 3.h),
         Text(
           label.toUpperCase(),
           maxLines: 1,
@@ -264,10 +264,10 @@ class _IconCta extends StatelessWidget {
           customBorder: const CircleBorder(),
           onTap: onTap,
           child: SizedBox(
-            width: 40.w,
-            height: 40.h,
+            width: 36.w,
+            height: 36.h,
             child: Icon(Icons.card_giftcard_rounded,
-                size: 20.w, color: AppColors.white),
+                size: 19.w, color: AppColors.white),
           ),
         ),
       ),
@@ -295,13 +295,13 @@ class _HeroButton extends StatelessWidget {
         onTap: onTap,
         borderRadius: BorderRadius.circular(30.r),
         child: Container(
-          height: 40.h,
+          height: 38.h,
           alignment: Alignment.center,
           child: Row(
             mainAxisSize: MainAxisSize.min,
             children: [
               Icon(icon,
-                  size: 17.w, color: Theme.of(context).colorScheme.primary),
+                  size: 16.w, color: Theme.of(context).colorScheme.primary),
               SizedBox(width: 8.w),
               Text(
                 label,

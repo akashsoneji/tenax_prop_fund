@@ -20,7 +20,7 @@ if [[ -z "$FLAVOR" ]]; then
 fi
 
 case "$FLAVOR" in
-  tenax)    DEFAULT_COLOR="0D47A1" ;;
+  tenax)    DEFAULT_COLOR="5F259E" ;;
   client_a) DEFAULT_COLOR="1E88E5" ;;
   client_b) DEFAULT_COLOR="2E7D32" ;;
   client_c) DEFAULT_COLOR="6A1B9A" ;;

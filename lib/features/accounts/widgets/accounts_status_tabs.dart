@@ -24,12 +24,12 @@ class AccountsStatusTabs extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return SizedBox(
-      height: 40.h,
+      height: 34.h,
       child: ListView.separated(
         scrollDirection: Axis.horizontal,
         physics: const BouncingScrollPhysics(),
         itemCount: AccountTab.values.length,
-        separatorBuilder: (_, _) => SizedBox(width: 10.w),
+        separatorBuilder: (_, _) => SizedBox(width: 8.w),
         itemBuilder: (context, i) {
           final tab = AccountTab.values[i];
           return _Tab(
@@ -68,11 +68,11 @@ class _Tab extends StatelessWidget {
       child: AnimatedContainer(
         duration: const Duration(milliseconds: 200),
         curve: Curves.easeOutCubic,
-        padding: EdgeInsets.symmetric(horizontal: 14.w),
+        padding: EdgeInsets.symmetric(horizontal: 13.w),
         alignment: Alignment.center,
         decoration: BoxDecoration(
           color: selected ? scheme.primary : AppColors.transparent,
-          borderRadius: BorderRadius.circular(22.r),
+          borderRadius: BorderRadius.circular(18.r),
           border: Border.all(
             color: selected
                 ? scheme.primary
@@ -85,14 +85,14 @@ class _Tab extends StatelessWidget {
             Text(
               label,
               style: TextStyle(
-                fontSize: 13.sp,
+                fontSize: 12.5.sp,
                 fontWeight: FontWeight.w700,
                 color: fg,
               ),
             ),
-            SizedBox(width: 8.w),
+            SizedBox(width: 7.w),
             Container(
-              padding: EdgeInsets.symmetric(horizontal: 7.w, vertical: 2.h),
+              padding: EdgeInsets.symmetric(horizontal: 6.w, vertical: 2.h),
               decoration: BoxDecoration(
                 color: selected
                     ? AppColors.white.withValues(alpha: 0.22)
@@ -102,7 +102,7 @@ class _Tab extends StatelessWidget {
               child: Text(
                 '$count',
                 style: TextStyle(
-                  fontSize: 11.5.sp,
+                  fontSize: 11.sp,
                   fontWeight: FontWeight.w800,
                   color: selected ? AppColors.white : scheme.primary,
                 ),

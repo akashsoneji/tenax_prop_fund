@@ -115,8 +115,8 @@ class TenaxApp extends StatelessWidget {
             // but prevents breakage.
             final mq = MediaQuery.of(context);
               final clamped = mq.textScaler.clamp(
-                minScaleFactor: 0.9,
-                maxScaleFactor: 1.0,
+                minScaleFactor: 0.82,
+                maxScaleFactor: 0.90,
               );
             return MediaQuery(
               data: mq.copyWith(textScaler: clamped),

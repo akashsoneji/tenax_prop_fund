@@ -468,14 +468,22 @@ class DashboardAccount {
         baselineMinor: baselineMinor,
       );
 
-  factory DashboardAccount.fromJson(Map<String, dynamic> json) =>
-      DashboardAccount(
-        id: (json['id'] as num?)?.toInt() ?? 0,
-        currency: json['currency'] as String? ?? 'USD',
-        equityMinor: (json['equity_minor'] as num?)?.toInt() ?? 0,
-        balanceMinor: (json['balance_minor'] as num?)?.toInt() ?? 0,
-        baselineMinor: (json['baseline_minor'] as num?)?.toInt() ?? 0,
-      );
+  factory DashboardAccount.fromJson(Map<String, dynamic> json) {
+    final baseline = (json['baseline_minor'] as num?)?.toInt() ?? 0;
+    // The `/dashboard` payload often carries only `baseline_minor`; equity and
+    // balance arrive later over the WebSocket. Seed both from the baseline so
+    // the cards show the account's real starting figure instead of $0.00 until
+    // the first live tick patches them.
+    final equity = (json['equity_minor'] as num?)?.toInt() ?? 0;
+    final balance = (json['balance_minor'] as num?)?.toInt() ?? 0;
+    return DashboardAccount(
+      id: (json['id'] as num?)?.toInt() ?? 0,
+      currency: json['currency'] as String? ?? 'USD',
+      equityMinor: equity != 0 ? equity : baseline,
+      balanceMinor: balance != 0 ? balance : baseline,
+      baselineMinor: baseline,
+    );
+  }
 }
 
 /// A recent-trade row from the dashboard's `trades[]`.

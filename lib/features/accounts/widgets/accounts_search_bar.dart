@@ -54,17 +54,17 @@ class AccountsSearchBar extends StatelessWidget {
                 color: scheme.onSurfaceVariant,
               ),
               contentPadding:
-                  EdgeInsets.symmetric(horizontal: 12.w, vertical: 12.h),
+                  EdgeInsets.symmetric(horizontal: 12.w, vertical: 10.h),
               border: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(14.r),
+                borderRadius: BorderRadius.circular(12.r),
                 borderSide: BorderSide(color: border),
               ),
               enabledBorder: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(14.r),
+                borderRadius: BorderRadius.circular(12.r),
                 borderSide: BorderSide(color: border),
               ),
               focusedBorder: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(14.r),
+                borderRadius: BorderRadius.circular(12.r),
                 borderSide: BorderSide(color: scheme.primary, width: 1.4.w),
               ),
             ),
@@ -74,11 +74,11 @@ class AccountsSearchBar extends StatelessWidget {
         Expanded(
           flex: 2,
           child: Container(
-            height: 46.h,
+            height: 42.h,
             padding: EdgeInsets.symmetric(horizontal: 12.w),
             decoration: BoxDecoration(
               color: fill,
-              borderRadius: BorderRadius.circular(14.r),
+              borderRadius: BorderRadius.circular(12.r),
               border: Border.all(color: border),
             ),
             child: DropdownButtonHideUnderline(

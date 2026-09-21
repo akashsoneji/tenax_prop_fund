@@ -226,7 +226,7 @@ class _RegisterViewState extends State<RegisterView> {
         prefixIcon: Icon(icon),
         suffixIcon: suffix,
         filled: true,
-        fillColor: scheme.surfaceContainerHighest.withValues(alpha: 0.4),
+        fillColor: scheme.surfaceContainerHighest.withValues(alpha: 0.85),
         contentPadding:
             EdgeInsets.symmetric(horizontal: 16.w, vertical: 18.h),
         enabledBorder: border(scheme.outline.withValues(alpha: 0.18), 1),
