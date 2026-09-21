@@ -22,6 +22,7 @@ abstract class AppRoutes {
   static const challengeCompare = '/challenge/compare';
   static const configure = '/configure';
   static const completePayment = '/complete-payment';
+  static const gatewayPayment = '/gateway-payment';
   static const downloads = '/downloads';
   static const economicCalendar = '/economic-calendar';
   static const faq = '/faq';

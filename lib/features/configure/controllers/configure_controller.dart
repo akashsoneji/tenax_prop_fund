@@ -321,6 +321,7 @@ class ConfigureController extends GetxController {
       addonIds: _selectedAddonIds,
       couponCode: appliedCoupon.value,
       paymentMethodId: method.id,
+      isManual: method.isManual,
     );
     purchasing.value = false;
 
@@ -332,9 +333,19 @@ class ConfigureController extends GetxController {
     } else if (result.isFree) {
       AppToast.success('Your account is being provisioned.');
       Get.until((route) => route.settings.name == AppRoutes.home);
+    } else if (result.isGateway &&
+        (result.gatewayUrl?.isNotEmpty ?? false)) {
+      // Hosted checkout — open the gateway URL in an in-app webview so the user
+      // can pay and return to the app via the app bar back button.
+      Get.toNamed(
+        AppRoutes.gatewayPayment,
+        arguments: {
+          'url': result.gatewayUrl,
+          'orderId': result.orderId,
+        },
+      );
     } else {
-      // Gateway path — a hosted checkout URL would be opened here.
-      AppToast.info('Continue your payment in the opened checkout.');
+      AppToast.error('This order could not be started. Please try again.');
     }
   }
 

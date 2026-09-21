@@ -80,6 +80,7 @@ class ChallengeRepository {
     List<int> addonIds = const [],
     String? couponCode,
     required int paymentMethodId,
+    required bool isManual,
   }) {
     return ApiEnvelope.guard<PurchaseResult>(
       () => _api.post<Map<String, dynamic>>(
@@ -89,6 +90,7 @@ class ChallengeRepository {
           'addon_ids': addonIds,
           'coupon_code': couponCode,
           'payment_method_id': paymentMethodId,
+          'is_manual': isManual,
         },
       ),
       (data) => PurchaseResult.fromJson(

@@ -32,6 +32,7 @@ import '../../features/configure/bindings/configure_binding.dart';
 import '../../features/configure/views/configure_view.dart';
 import '../../features/payment/bindings/complete_payment_binding.dart';
 import '../../features/payment/views/complete_payment_view.dart';
+import '../../features/payment/views/gateway_payment_view.dart';
 import '../../features/downloads/bindings/downloads_binding.dart';
 import '../../features/downloads/views/downloads_view.dart';
 import '../../features/economic_calendar/bindings/economic_calendar_binding.dart';
@@ -185,6 +186,10 @@ class AppPages {
       name: AppRoutes.completePayment,
       page: () => const CompletePaymentView(),
       binding: CompletePaymentBinding(),
+    ),
+    GetPage(
+      name: AppRoutes.gatewayPayment,
+      page: () => const GatewayPaymentView(),
     ),
     GetPage(
       name: AppRoutes.downloads,
