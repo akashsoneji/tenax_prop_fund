@@ -1,7 +1,10 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
 
+import '../../accounts/services/primary_account_service.dart';
 import '../../../shared/theme/app_colors.dart';
 import '../../../shared/theme/app_theme.dart';
 import '../../../shared/widgets/app_count_up_text.dart';
@@ -374,6 +377,14 @@ class _Switcher extends StatelessWidget {
         selectedId: currentId,
         onSelected: (id) {
           controller.selectAccount(id);
+          // Persist the choice as the user's active/primary account in the
+          // background — never blocks the UI or the switch. Only when the id
+          // maps to a known MT5 account (avoids writing a wrong primary).
+          if (Get.isRegistered<PrimaryAccountService>()) {
+            final svc = Get.find<PrimaryAccountService>();
+            final known = svc.accounts.any((a) => a.id == id);
+            if (known) unawaited(svc.setPrimary(id));
+          }
           Get.back<void>();
         },
       ),

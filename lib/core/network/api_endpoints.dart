@@ -74,6 +74,15 @@ abstract class ApiEndpoints {
   /// `objectives`, `credentials`, `overview` and `chart`.
   static String accountDetail(Object id) => '/accounts/$id/overview';
 
+  /// MT5 accounts list for the global active/primary-account selector
+  /// (`GET`). Standard envelope; `data.accounts[]` each carry `id`, `login`,
+  /// `is_primary`, `is_active`; `data.primary_account_id` names the active one.
+  static const mt5Accounts = '/mt5accounts/get';
+
+  /// Sets the user's primary (active) MT5 account (`POST`). Body:
+  /// `{account_id}`. Response `data` carries `primary_account_id` and `login`.
+  static const mt5SetPrimary = '/mt5accounts/set-primary';
+
   /// Platform & credentials for a single account. Standard `{success, data}`
   /// envelope; `data.account.credentials` holds login/server/passwords and
   /// `data.platform_locked` flags a locked platform. `reveal=true` unmasks the

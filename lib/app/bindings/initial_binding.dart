@@ -6,6 +6,7 @@ import '../../core/network/api_client.dart';
 import '../../core/websocket/websocket_manager.dart';
 import '../../features/positions/services/account_ws_service.dart';
 import '../../features/positions/services/positions_ws_service.dart';
+import '../../features/accounts/services/primary_account_service.dart';
 import '../../features/symbols/services/favorites_service.dart';
 import '../../features/symbols/services/market_watch_v2_service.dart';
 import '../../features/authentication/repositories/auth_repository.dart';
@@ -74,8 +75,16 @@ class InitialBinding extends Bindings {
     Get.put<AuthRepository>(
       AuthRepository(
         AuthService(Get.find<ApiClient>()),
-        Get.find<FlutterSecureStorage>(),
+      Get.find<FlutterSecureStorage>(),
       ),
+      permanent: true,
+    );
+
+    // App-wide holder of the user's ACTIVE (primary) MT5 account. Its
+    // background fetch runs on demand (post-login / splash) so it never blocks
+    // or alters the main-thread dashboard load.
+    Get.put<PrimaryAccountService>(
+      PrimaryAccountService(Get.find<ApiClient>()),
       permanent: true,
     );
   }

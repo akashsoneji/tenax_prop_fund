@@ -7,6 +7,7 @@ import '../../../core/base/base_controller.dart';
 import '../../../core/network/api_response.dart';
 import '../../../core/state/data_state.dart';
 import '../../../core/websocket/pusher_client.dart';
+import '../../accounts/services/primary_account_service.dart';
 import '../../authentication/repositories/auth_repository.dart';
 import '../models/dashboard_models.dart';
 import '../repositories/home_repository.dart';
@@ -50,6 +51,10 @@ class HomeController extends BaseController<DashboardData>
   /// the hero switcher.
   int? _selectedAccountId;
 
+  /// The user's active/primary account id from `GET /mt5accounts/get`. Used as
+  /// the DEFAULT hero focus until the user manually picks another account.
+  int? _primaryAccountId;
+
   final _wsSubs = <StreamSubscription>[];
 
   void selectTab(int index) => selectedTab.value = index;
@@ -58,12 +63,27 @@ class HomeController extends BaseController<DashboardData>
   /// from that account's current snapshot row so its equity/balance (and any
   /// live tick already applied to it) show immediately.
   void selectAccount(int id) {
+    _selectedAccountId = id;
+    _focusAccount(id);
+  }
+
+  /// Applies the user's primary/active account (from [PrimaryAccountService]) as
+  /// the DEFAULT hero focus. A manual pick always wins, so this is a no-op once
+  /// the user has switched accounts themselves.
+  void applyPrimaryAccount(int id) {
+    _primaryAccountId = id;
+    if (_selectedAccountId != null) return;
+    _focusAccount(id);
+  }
+
+  /// Rebuilds the hero focus from the live-account row with [id], if present in
+  /// the current snapshot. No-op otherwise.
+  void _focusAccount(int id) {
     final current = state;
     if (current is! DataSuccess<DashboardData>) return;
     final data = current.data;
     final account = data.liveAccounts.firstWhereOrNull((a) => a.id == id);
     if (account == null) return;
-    _selectedAccountId = id;
     stateRx.value = DataSuccess(
       data.copyWith(focus: DashboardFocus.fromAccount(account)),
     );
@@ -121,6 +141,7 @@ class HomeController extends BaseController<DashboardData>
     _onSnapshotLoaded();
     _loadReferral();
     _loadUnreadCount();
+    _loadPrimaryAccount();
   }
 
   @override
@@ -129,6 +150,21 @@ class HomeController extends BaseController<DashboardData>
     _loadUnreadCount();
     _onSnapshotLoaded();
     _loadReferral();
+    _loadPrimaryAccount();
+  }
+
+  /// Background-refreshes the active (primary) MT5 account and applies it as the
+  /// default hero focus. Fire-and-forget so it never blocks or alters the
+  /// dashboard load on the main thread; a manual switch still wins.
+  void _loadPrimaryAccount() {
+    if (!Get.isRegistered<PrimaryAccountService>()) return;
+    final svc = Get.find<PrimaryAccountService>();
+    unawaited(() async {
+      await svc.refresh();
+      if (isClosed) return;
+      final id = svc.primaryAccountId.value;
+      if (id != null) applyPrimaryAccount(id);
+    }());
   }
 
   /// Fetches the referral summary from the live `GET /growth/referrals`
@@ -168,8 +204,13 @@ class HomeController extends BaseController<DashboardData>
       _pusher.subscribe(channel);
     }
     // A fresh REST snapshot resets `focus` to the first account; re-apply the
-    // user's picked account so a refresh/tick doesn't yank the hero back.
-    if (_selectedAccountId != null) selectAccount(_selectedAccountId!);
+    // user's picked account (or, absent a manual pick, the primary/active one)
+    // so a refresh/tick doesn't yank the hero back.
+    if (_selectedAccountId != null) {
+      _focusAccount(_selectedAccountId!);
+    } else if (_primaryAccountId != null) {
+      _focusAccount(_primaryAccountId!);
+    }
   }
 
   /// Applies a decoded live account frame to the in-memory snapshot, patching
