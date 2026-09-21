@@ -116,6 +116,8 @@ class _CategoryPills extends StatelessWidget {
   const _CategoryPills({required this.controller});
   final SearchInstrumentsController controller;
 
+  /// Localized labels for the buckets we ship translations for; any other
+  /// category name coming from the API is shown as-is.
   static const _labelKey = {
     InstrumentCategory.all: 'symbols.cat.all',
     InstrumentCategory.currency: 'symbols.cat.currency',
@@ -134,12 +136,13 @@ class _CategoryPills extends StatelessWidget {
           scrollDirection: Axis.horizontal,
           physics: const BouncingScrollPhysics(),
           padding: EdgeInsets.symmetric(horizontal: 16.w),
-          itemCount: InstrumentCategory.filters.length,
-          separatorBuilder: (_, __) => SizedBox(width: 8.w),
+          itemCount: controller.categories.length,
+          separatorBuilder: (_, _) => SizedBox(width: 8.w),
           itemBuilder: (context, i) {
-            final cat = InstrumentCategory.filters[i];
+            final cat = controller.categories[i];
+            final key = _labelKey[cat];
             return _Pill(
-              label: (_labelKey[cat] ?? cat).tr,
+              label: key == null ? cat : key.tr,
               active: controller.selectedCategory.value == cat,
               onTap: () => controller.setCategory(cat),
             );

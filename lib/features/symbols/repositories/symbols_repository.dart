@@ -14,23 +14,35 @@ class SymbolsRepository {
 
   final ApiClient _api;
 
-  /// Live instruments list. Parses the envelope's `data.symbols` array into
-  /// [Instrument]s (code + name + category). Pass [account] to scope to one
-  /// trading account.
-  Future<ApiResponse<List<Instrument>>> getInstruments({String? account}) {
-    final path = account == null || account.isEmpty
-        ? ApiEndpoints.instruments
-        : ApiEndpoints.instrumentsByAccount(account);
-    return ApiEnvelope.guard<List<Instrument>>(
-      () => _api.get<dynamic>(path),
+  /// Live instruments list. Parses the envelope's `data.symbols` into
+  /// [Instrument]s and `data.categories` into the filter pill names. Pass [q]
+  /// to let the API filter server-side.
+  Future<ApiResponse<InstrumentCatalog>> getInstruments({String? q}) {
+    final query = q == null || q.isEmpty ? null : {'q': q};
+    return ApiEnvelope.guard<InstrumentCatalog>(
+      () => _api.get<dynamic>(ApiEndpoints.instruments, query: query),
       (data) {
-        final list = data is Map<String, dynamic> ? data['symbols'] : data;
-        if (list is! List) return const <Instrument>[];
-        return list
-            .whereType<Map<String, dynamic>>()
-            .map(Instrument.fromJson)
-            .where((i) => i.code.isNotEmpty)
-            .toList();
+        if (data is! Map<String, dynamic>) return InstrumentCatalog.empty;
+        final rawSymbols = data['symbols'];
+        final rawCategories = data['categories'];
+        final instruments = rawSymbols is List
+            ? rawSymbols
+                .whereType<Map<String, dynamic>>()
+                .map(Instrument.fromJson)
+                .where((i) => i.code.isNotEmpty)
+                .toList()
+            : <Instrument>[];
+        final categories = rawCategories is List
+            ? rawCategories
+                .whereType<Map<String, dynamic>>()
+                .map((c) => (c['name'] ?? '').toString())
+                .where((name) => name.isNotEmpty)
+                .toList()
+            : <String>[];
+        return InstrumentCatalog(
+          instruments: instruments,
+          categories: categories,
+        );
       },
       showErrorToast: false,
     );

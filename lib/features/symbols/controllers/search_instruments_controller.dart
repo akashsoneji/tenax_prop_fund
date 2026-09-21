@@ -20,6 +20,9 @@ class SearchInstrumentsController extends GetxController {
   final RxString selectedCategory = InstrumentCategory.all.obs;
   final RxList<Instrument> _all = <Instrument>[].obs;
 
+  /// Filter pills: "All" plus the category names the API returned.
+  final RxList<String> categories = <String>[InstrumentCategory.all].obs;
+
   FavoritesService get favorites => _favorites;
 
   @override
@@ -34,7 +37,11 @@ class SearchInstrumentsController extends GetxController {
     final res = await _repository.getInstruments();
     if (isClosed) return;
     if (res.success && res.data != null) {
-      _all.assignAll(res.data!);
+      _all.assignAll(res.data!.instruments);
+      categories.assignAll([InstrumentCategory.all, ...res.data!.categories]);
+      if (!categories.contains(selectedCategory.value)) {
+        selectedCategory.value = InstrumentCategory.all;
+      }
     } else {
       error.value = res.message ?? 'errors.generic'.tr;
     }

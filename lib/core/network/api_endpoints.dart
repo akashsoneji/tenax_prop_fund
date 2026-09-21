@@ -97,18 +97,15 @@ abstract class ApiEndpoints {
 
 
 
-  /// Live tradable instruments list (parsed into `Instrument`s).
   static const calculators = '/tools/calculators';
 
   /// Economic calendar. Standard `{success, message, data}` envelope where
   /// `data` nests `events[]` and `filters`. Query param `currency` (e.g. `ALL`).
   static const calendar = '/tools/calendar';
 
-  static const instruments = '/instruments';
-
-  /// Instruments scoped to a single trading [account].
-  static String instrumentsByAccount(String account) =>
-      '/instruments/$account';
+  /// Live tradable instruments list. Envelope `data` carries `symbols[]` and
+  /// `categories[]`; optional `q` query param filters server-side.
+  static const instruments = '/tools/symbols';
 
   // ---------------------------------------------------------------------------
   // Trade / Positions
