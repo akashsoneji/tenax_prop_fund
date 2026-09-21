@@ -16,11 +16,21 @@ class SymbolsRepository {
 
   /// Live instruments list. Parses the envelope's `data.symbols` into
   /// [Instrument]s and `data.categories` into the filter pill names. Pass [q]
-  /// to let the API filter server-side.
-  Future<ApiResponse<InstrumentCatalog>> getInstruments({String? q}) {
-    final query = q == null || q.isEmpty ? null : {'q': q};
+  /// to let the API filter server-side, and [accountId] to scope the symbols to
+  /// the user's active trading account (omitted when they have none yet).
+  Future<ApiResponse<InstrumentCatalog>> getInstruments({
+    String? q,
+    int? accountId,
+  }) {
+    final query = <String, dynamic>{
+      if (q != null && q.isNotEmpty) 'q': q,
+      'account_id': ?accountId,
+    };
     return ApiEnvelope.guard<InstrumentCatalog>(
-      () => _api.get<dynamic>(ApiEndpoints.instruments, query: query),
+      () => _api.get<dynamic>(
+        ApiEndpoints.instruments,
+        query: query.isEmpty ? null : query,
+      ),
       (data) {
         if (data is! Map<String, dynamic>) return InstrumentCatalog.empty;
         final rawSymbols = data['symbols'];

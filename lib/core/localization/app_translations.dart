@@ -560,6 +560,13 @@ class AppTranslations extends Translations {
     'symbols.watchlist_empty_hint':
         'Add instruments to see their live prices here.',
     'symbols.add_instrument': 'Add instrument',
+    'symbols.search.hint': 'Search instruments',
+    'symbols.cat.all': 'All',
+    'symbols.cat.currency': 'Currency',
+    'symbols.cat.metals': 'Metals',
+    'symbols.cat.crypto': 'Crypto',
+    'symbols.cat.indices': 'Indices',
+    'symbols.cat.shares': 'Shares',
     'offers.title': 'My offers',
     'referral.title': 'Refer & earn',
     'rewards.name_match_id_short': 'The name must match your ID',
@@ -1488,6 +1495,13 @@ We reserve the right to suspend or terminate accounts that violate these terms o
     'symbols.watchlist_empty_hint':
         'लाइव कीमतें देखने के लिए यहाँ इंस्ट्रूमेंट जोड़ें।',
     'symbols.add_instrument': 'इंस्ट्रूमेंट जोड़ें',
+    'symbols.search.hint': 'इंस्ट्रूमेंट खोजें',
+    'symbols.cat.all': 'सभी',
+    'symbols.cat.currency': 'करेंसी',
+    'symbols.cat.metals': 'मेटल्स',
+    'symbols.cat.crypto': 'क्रिप्टो',
+    'symbols.cat.indices': 'इंडाइसेस',
+    'symbols.cat.shares': 'शेयर',
     'offers.title': 'मेरे ऑफ़र',
     'referral.title': 'रेफ़र करें और कमाएँ',
   };

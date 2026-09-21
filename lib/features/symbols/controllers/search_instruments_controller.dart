@@ -1,5 +1,6 @@
 import 'package:get/get.dart';
 
+import '../../accounts/services/primary_account_service.dart';
 import '../models/symbol_models.dart';
 import '../repositories/symbols_repository.dart';
 import '../services/favorites_service.dart';
@@ -25,6 +26,14 @@ class SearchInstrumentsController extends GetxController {
 
   FavoritesService get favorites => _favorites;
 
+  /// The user's active/primary MT5 account id, or `null` when they have no
+  /// accounts yet (fresh registration) or none is marked primary — in that case
+  /// the symbols endpoint is called unscoped.
+  int? get _activeAccountId {
+    if (!Get.isRegistered<PrimaryAccountService>()) return null;
+    return Get.find<PrimaryAccountService>().primaryAccountId.value;
+  }
+
   @override
   void onInit() {
     super.onInit();
@@ -34,7 +43,7 @@ class SearchInstrumentsController extends GetxController {
   Future<void> load() async {
     isLoading.value = true;
     error.value = '';
-    final res = await _repository.getInstruments();
+    final res = await _repository.getInstruments(accountId: _activeAccountId);
     if (isClosed) return;
     if (res.success && res.data != null) {
       _all.assignAll(res.data!.instruments);
