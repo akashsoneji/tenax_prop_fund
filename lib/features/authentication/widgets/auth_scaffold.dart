@@ -135,25 +135,24 @@ class _AuthScaffoldState extends State<AuthScaffold>
                                 .displaySmall
                                 ?.copyWith(
                                   fontWeight: FontWeight.w700,
-                                  height: 1.05,
+                                  height: 2.05,
                                   color: scheme.onSurface,
                                 ),
                           ),
-                          if (widget.heroSubtitle != null) ...[
-                            SizedBox(height: 8.h),
-                            Text(
-                              widget.heroSubtitle!,
-                              textAlign: TextAlign.center,
-                              style: Theme.of(context)
-                                  .textTheme
-                                  .bodyLarge
-                                  ?.copyWith(
-                                    color: scheme.onSurface
-                                        .withValues(alpha: 0.65),
-                                  ),
-                            ),
-                          ],
-                          SizedBox(height: 28.h),
+                          // if (widget.heroSubtitle != null) ...[
+                          //   SizedBox(height: 8.h),
+                          //   Text(
+                          //     widget.heroSubtitle!,
+                          //     textAlign: TextAlign.center,
+                          //     style: Theme.of(context)
+                          //         .textTheme
+                          //         .bodyLarge
+                          //         ?.copyWith(
+                          //           color: scheme.onSurface
+                          //               .withValues(alpha: 0.65),
+                          //         ),
+                          //   ),
+                          // ],
                         ],
                         widget.child,
                       ],

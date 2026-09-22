@@ -35,6 +35,16 @@ class ApiInterceptor extends Interceptor {
     _loaded = true;
   }
 
+  /// Invoked once when any authenticated request comes back `401
+  /// Unauthenticated`. Wired in `InitialBinding` to wipe the session and send
+  /// the user back to the Get Started screen. Kept as a callback so `core/`
+  /// stays independent of the auth feature and the router.
+  static void Function()? onUnauthorized;
+
+  /// Auth endpoints answer 401 for wrong credentials / expired reset links —
+  /// that is a form error, not an expired session.
+  static bool _isAuthPath(String path) => path.contains('/auth/');
+
   @override
   Future<void> onRequest(
     RequestOptions options,
@@ -91,8 +101,26 @@ class ApiInterceptor extends Interceptor {
         'Response: ${_pretty(err.response?.data)}',
       );
     }
+    final isExpiredSession = err.response?.statusCode == 401 &&
+        !_isAuthPath(err.requestOptions.path);
+    if (isExpiredSession) _notifyUnauthorized();
+
     handler.next(err);
   }
+
+  /// Fires [onUnauthorized] at most once per session. A screen usually issues
+  /// several requests in parallel, so without this guard an expired token would
+  /// trigger as many logout + navigation calls as there were in-flight requests.
+  static void _notifyUnauthorized() {
+    if (_handlingUnauthorized) return;
+    _handlingUnauthorized = true;
+    onUnauthorized?.call();
+  }
+
+  /// Cleared on login so the next expired session is handled again.
+  static void resetUnauthorizedGuard() => _handlingUnauthorized = false;
+
+  static bool _handlingUnauthorized = false;
 
   static String _pretty(dynamic data) {
     if (data == null) return '(empty)';

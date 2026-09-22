@@ -63,6 +63,34 @@ abstract class ApiEndpoints {
   /// (code/share_url) and `stats` (referrals count, to_be_paid).
   static const referrals = '/growth/referrals';
 
+  /// Promo vouchers for the "My offers" screen. Standard
+  /// `{success, message, data}` envelope where `data` nests `offers[]` and
+  /// `available_count`.
+  static const offers = '/growth/offers';
+
+  /// Achievement certificates for the "Certificates" screen. Standard
+  /// `{success, message, data}` envelope where `data` nests `certificates[]`
+  /// (each with `criteria[]`, `earned`, `download_url`) and `earned_count`.
+  static const certificates = '/growth/certificates';
+
+  /// Rendered certificate document (`GET`). `data` carries `name`, `holder`,
+  /// `issued_at`, `verification_code`, `format` (`html`) and the `html` body
+  /// the viewer loads into its WebView.
+  static String certificateDownload(Object id) =>
+      '/growth/certificates/$id/download';
+
+  /// Trading competitions for the "Competitions" screen. Standard
+  /// `{success, message, data}` envelope where `data` nests `competitions[]`
+  /// (each with `prizes[]`, `rules[]`, `leaderboard[]`), `competitions_meta`
+  /// (pagination), `accounts[]` (eligible entry accounts) and `stats`
+  /// (`cash_pool`).
+  static const competitions = '/growth/competitions';
+
+  /// Enters a competition with one of the eligible trading accounts (`POST`).
+  /// Body: `{competition_id, trading_account_id}`. Response carries a
+  /// user-facing `message` and a null `data`.
+  static const competitionRegister = '/growth/competitions/register';
+
   /// Trading accounts list for the "Account Center" screen. Standard
   /// `{success, message, data[], meta}` envelope. Query params: `status`
   /// (all | active | breached | passed | raw-status) and `phase`

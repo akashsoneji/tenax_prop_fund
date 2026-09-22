@@ -92,13 +92,6 @@ class _AppGradientButtonState extends State<AppGradientButton>
             decoration: BoxDecoration(
               gradient: AppTheme.heroGradient(scheme),
               borderRadius: BorderRadius.circular(14.r),
-              boxShadow: [
-                BoxShadow(
-                  color: scheme.primary.withValues(alpha: 0.35),
-                  blurRadius: 18.r,
-                  offset: Offset(0, 10.h),
-                ),
-              ],
             ),
             child: SizedBox(
               height: widget.height,

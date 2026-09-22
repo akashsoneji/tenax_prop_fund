@@ -1,5 +1,6 @@
 import 'package:get/get.dart';
 
+import '../../../core/logger/app_logger.dart';
 import '../../../core/state/data_state.dart';
 import '../../../shared/widgets/app_toast.dart';
 import '../../accounts/controllers/accounts_controller.dart';
@@ -225,6 +226,12 @@ class PositionsController extends GetxController {
         return false;
       }
 
+      log.i(
+        'ORDER ▶ MARKET ${orderType.apiString.toUpperCase()} $symbol '
+        'lots=$volume account=${tradingAccount.value} '
+        'tp=${takeProfit ?? '-'} sl=${stopLoss ?? '-'}',
+      );
+
       final response = await _repository.placeMarketOrder(
         symbol: symbol,
         volume: volume,
@@ -233,6 +240,13 @@ class PositionsController extends GetxController {
         takeProfit: takeProfit,
         stopLoss: stopLoss,
       );
+      if (response.success) {
+        log.i('ORDER ✅ MARKET ${orderType.apiString.toUpperCase()} '
+            '$symbol lots=$volume placed');
+      } else {
+        log.e('ORDER ❌ MARKET ${orderType.apiString.toUpperCase()} '
+            '$symbol lots=$volume failed: ${response.message ?? 'unknown error'}');
+      }
       return response.success;
     } finally {
       if (!isClosed) busy.value = false;
@@ -259,6 +273,13 @@ class PositionsController extends GetxController {
         return false;
       }
 
+      log.i(
+        'ORDER ▶ PENDING ${orderType.apiString.toUpperCase()} $symbol '
+        'lots=$volume price=$price limit=${limitPrice ?? '-'} '
+        'account=${tradingAccount.value} '
+        'tp=${takeProfit ?? '-'} sl=${stopLoss ?? '-'}',
+      );
+
       final response = await _repository.placePendingOrder(
         symbol: symbol,
         volume: volume,
@@ -269,6 +290,14 @@ class PositionsController extends GetxController {
         takeProfit: takeProfit,
         stopLoss: stopLoss,
       );
+      if (response.success) {
+        log.i('ORDER ✅ PENDING ${orderType.apiString.toUpperCase()} '
+            '$symbol lots=$volume price=$price placed');
+      } else {
+        log.e('ORDER ❌ PENDING ${orderType.apiString.toUpperCase()} '
+            '$symbol lots=$volume price=$price failed: '
+            '${response.message ?? 'unknown error'}');
+      }
       return response.success;
     } finally {
       if (!isClosed) busy.value = false;

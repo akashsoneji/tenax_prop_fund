@@ -3,6 +3,7 @@ import 'package:get/get.dart';
 import 'package:get_storage/get_storage.dart';
 
 import '../../core/network/api_client.dart';
+import '../../core/network/api_interceptor.dart';
 import '../../core/websocket/websocket_manager.dart';
 import '../../features/positions/services/account_ws_service.dart';
 import '../../features/positions/services/positions_ws_service.dart';
@@ -12,6 +13,7 @@ import '../../features/symbols/services/market_watch_v2_service.dart';
 import '../../features/authentication/repositories/auth_repository.dart';
 import '../../features/authentication/services/auth_service.dart';
 import '../flavor/flavor_config.dart';
+import '../routes/app_routes.dart';
 
 /// Registers app-wide singletons before any route loads. Feature-specific
 /// dependencies are registered by their own bindings.
@@ -87,5 +89,16 @@ class InitialBinding extends Bindings {
       PrimaryAccountService(Get.find<ApiClient>()),
       permanent: true,
     );
+
+    // Expired/revoked token on ANY authenticated request: wipe the session and
+    // send the user back to Get Started. Registered here (not in core/) so the
+    // network layer stays free of auth + routing dependencies.
+    ApiInterceptor.onUnauthorized = _handleUnauthorized;
+  }
+
+  Future<void> _handleUnauthorized() async {
+    await Get.find<AuthRepository>().clearSession();
+    if (Get.currentRoute == AppRoutes.getStarted) return;
+    Get.offAllNamed(AppRoutes.getStarted);
   }
 }

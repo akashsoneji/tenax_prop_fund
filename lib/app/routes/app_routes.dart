@@ -16,8 +16,10 @@ abstract class AppRoutes {
   static const account = '/account';
   static const billing = '/billing';
   static const certificates = '/certificates';
+  static const certificateViewer = '/certificates/viewer';
   static const calculators = '/calculators';
   static const competitions = '/competitions';
+  static const competitionDetail = '/competitions/detail';
   static const challenge = '/challenge';
   static const challengeCompare = '/challenge/compare';
   static const configure = '/configure';

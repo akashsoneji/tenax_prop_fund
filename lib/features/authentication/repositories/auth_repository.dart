@@ -27,6 +27,7 @@ class AuthRepository {
       await _storage.write(key: ApiInterceptor.tokenKey, value: user.token);
       await _storage.write(key: _userKey, value: jsonEncode(user.toJson()));
       ApiInterceptor.updateCachedToken(user.token);
+      ApiInterceptor.resetUnauthorizedGuard();
       return ApiResponse.success(user);
     } catch (e) {
       return ApiResponse.failure('Login failed. Please try again.');
@@ -55,6 +56,7 @@ class AuthRepository {
       await _storage.write(key: ApiInterceptor.tokenKey, value: user.token);
       await _storage.write(key: _userKey, value: jsonEncode(user.toJson()));
       ApiInterceptor.updateCachedToken(user.token);
+      ApiInterceptor.resetUnauthorizedGuard();
       return ApiResponse.success(user);
     } catch (e) {
       return ApiResponse.failure(_messageFrom(e));
@@ -96,6 +98,13 @@ class AuthRepository {
     } catch (_) {
       // Ignore — we always clear the local session below.
     }
+    await clearSession();
+  }
+
+  /// Wipes the local session WITHOUT calling `/auth/logout` — used when the
+  /// server has already rejected the token (401), where the revoke call would
+  /// only fail again.
+  Future<void> clearSession() async {
     await _storage.delete(key: ApiInterceptor.tokenKey);
     await _storage.delete(key: _userKey);
     ApiInterceptor.updateCachedToken(null);

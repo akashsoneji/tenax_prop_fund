@@ -27,21 +27,21 @@ class LoginViewA extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
           SizedBox(height: 4.h),
-          Center(child: const BrandBadge()),
-          SizedBox(height: 18.h),
-          Text(
-            config.appName,
-            textAlign: TextAlign.center,
-            style: theme.textTheme.titleLarge?.copyWith(
-              fontWeight: FontWeight.w800,
-              letterSpacing: 0.4,
-            ),
-          ),
-          SizedBox(height: 4.h),
+          // Center(child: const BrandBadge()),
+          // SizedBox(height: 18.h),
+          // Text(
+          //   config.appName,
+          //   textAlign: TextAlign.center,
+          //   style: theme.textTheme.titleLarge?.copyWith(
+          //     fontWeight: FontWeight.w800,
+          //     letterSpacing: 0.4,
+          //   ),
+          // ),
+          // SizedBox(height: 4.h),
           Text(
             'app.tagline'.tr,
             textAlign: TextAlign.center,
-            style: theme.textTheme.bodySmall?.copyWith(
+            style: theme.textTheme.bodyLarge?.copyWith(
               color: scheme.onSurface.withValues(alpha: 0.55),
             ),
           ),

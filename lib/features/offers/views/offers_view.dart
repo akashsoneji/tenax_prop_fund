@@ -12,9 +12,8 @@ import '../models/offer_models.dart';
 import '../widgets/offer_card.dart';
 
 /// "My offers" screen. Two labelled sections — offers the user can apply now
-/// and locked rewards — each a stack of [OfferCard]s driven by
-/// [OffersController]. Values are demo data so the layout can be validated
-/// end-to-end; swap the Rx lists for repository calls later.
+/// and ones already redeemed — each a stack of [OfferCard]s driven by
+/// [OffersController] from `GET /growth/offers`.
 class OffersView extends StatelessWidget {
   const OffersView({super.key});
 
@@ -25,6 +24,7 @@ class OffersView extends StatelessWidget {
 
     return Scaffold(
       backgroundColor: scheme.surface,
+      resizeToAvoidBottomInset: true,
       body: CustomScrollView(
         physics: const BouncingScrollPhysics(),
         slivers: [
@@ -37,18 +37,69 @@ class OffersView extends StatelessWidget {
                   state: c.state,
                   onRetry: c.load,
                   skeleton: const ListSkeleton(rows: 4),
-                  builder: (data) => Column(
-                    crossAxisAlignment: CrossAxisAlignment.stretch,
-                    children: [
-                      const _SectionLabel('Available Now'),
-                      for (final o in data.available) OfferCard(offer: o),
-                      SizedBox(height: 18.h),
-                      const _SectionLabel('Locked Rewards'),
-                      for (final o in data.locked) OfferCard(offer: o),
-                    ],
-                  ),
+                  builder: (data) {
+                    if (data.isEmpty) {
+                      return _EmptyOffers(message: 'offers.empty'.tr);
+                    }
+                    final available = data.available;
+                    final used = data.used;
+                    return Column(
+                      crossAxisAlignment: CrossAxisAlignment.stretch,
+                      children: [
+                        if (available.isNotEmpty) ...[
+                          _SectionLabel(
+                            'offers.available_now'.tr,
+                            count: available.length,
+                          ),
+                          for (final o in available)
+                            OfferCard(offer: o, onApply: c.copyCode),
+                        ],
+                        if (used.isNotEmpty) ...[
+                          SizedBox(height: 14.h),
+                          _SectionLabel(
+                            'offers.used_offers'.tr,
+                            count: used.length,
+                          ),
+                          for (final o in used)
+                            OfferCard(offer: o, onApply: c.copyCode),
+                        ],
+                      ],
+                    );
+                  },
                 ),
               ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+/// Shown when the backend returns no offers at all.
+class _EmptyOffers extends StatelessWidget {
+  const _EmptyOffers({required this.message});
+  final String message;
+
+  @override
+  Widget build(BuildContext context) {
+    final scheme = Theme.of(context).colorScheme;
+    return Padding(
+      padding: EdgeInsets.symmetric(vertical: 48.h),
+      child: Column(
+        children: [
+          Icon(
+            Icons.local_offer_outlined,
+            size: 40.w,
+            color: scheme.onSurfaceVariant,
+          ),
+          SizedBox(height: 12.h),
+          Text(
+            message,
+            textAlign: TextAlign.center,
+            style: GoogleFonts.beVietnamPro(
+              fontSize: 14.sp,
+              color: scheme.onSurfaceVariant,
             ),
           ),
         ],
@@ -60,8 +111,9 @@ class OffersView extends StatelessWidget {
 /// Small section header used between the two offer blocks, with the same
 /// subtle rise-in entrance as the rewards screen.
 class _SectionLabel extends StatelessWidget {
-  const _SectionLabel(this.text);
+  const _SectionLabel(this.text, {required this.count});
   final String text;
+  final int count;
 
   @override
   Widget build(BuildContext context) {
@@ -80,14 +132,39 @@ class _SectionLabel extends StatelessWidget {
         );
       },
       child: Padding(
-        padding: EdgeInsets.only(left: 2.w, bottom: 12.h),
-        child: Text(
-          text,
-          style: GoogleFonts.beVietnamPro(
-            fontSize: 18.sp,
-            fontWeight: FontWeight.w800,
-            color: scheme.onSurface,
-          ),
+        padding: EdgeInsets.only(left: 2.w, bottom: 10.h),
+        child: Row(
+          children: [
+            Flexible(
+              child: Text(
+                text,
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+                style: GoogleFonts.beVietnamPro(
+                  fontSize: 15.sp,
+                  fontWeight: FontWeight.w800,
+                  letterSpacing: -0.2,
+                  color: scheme.onSurface,
+                ),
+              ),
+            ),
+            SizedBox(width: 8.w),
+            Container(
+              padding: EdgeInsets.symmetric(horizontal: 8.w, vertical: 2.h),
+              decoration: BoxDecoration(
+                color: scheme.surfaceContainerHighest,
+                borderRadius: BorderRadius.circular(999.r),
+              ),
+              child: Text(
+                '$count',
+                style: GoogleFonts.beVietnamPro(
+                  fontSize: 11.sp,
+                  fontWeight: FontWeight.w700,
+                  color: scheme.onSurfaceVariant,
+                ),
+              ),
+            ),
+          ],
         ),
       ),
     );

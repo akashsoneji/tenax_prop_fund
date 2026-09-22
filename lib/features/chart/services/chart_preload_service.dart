@@ -72,6 +72,15 @@ class ChartPreloadService extends GetxService {
   /// string so the warm webview is never reloaded for a differing URL.
   String get preloadUrl => _config.chartUrl(_bootSymbol, dark: _dark);
 
+  /// Chart URL for [symbol] built with the SAME theme the warm instance booted
+  /// with. Asking for [currentSymbol] therefore returns exactly [preloadUrl]
+  /// (warm attach, no reload), while any other symbol yields a distinct URL so
+  /// the webview can hard-load that symbol when the in-page JS switch misses.
+  String urlFor(String symbol) => _config.chartUrl(
+        symbol.isEmpty ? _bootSymbol : symbol,
+        dark: _dark,
+      );
+
   Future<ChartPreloadService> init() async {
     // Guard against a double warm-up (post-frame callback + any other caller).
     if (headlessWebView != null) return this;

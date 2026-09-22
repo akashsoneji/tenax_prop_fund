@@ -227,7 +227,7 @@ class _FlavorEndpoints {
   static _FlavorEndpoints of(Flavor flavor) {
     switch (flavor) {
       case Flavor.tenax:
-        return _FlavorEndpoints.forHost('pipzefunded.com',
+        return _FlavorEndpoints.forHost('prop.alibabafx.com',
             pusherAppKey: 'f31641a17af7835503b4f1e9');
       case Flavor.clientA:
         return _FlavorEndpoints.forHost('my.client-a.com',

@@ -89,7 +89,9 @@ class _ChartInAppWebViewState extends State<ChartInAppWebView> {
   void didUpdateWidget(covariant ChartInAppWebView oldWidget) {
     super.didUpdateWidget(oldWidget);
 
-    if (oldWidget.url != widget.url) {
+    // A URL that differs ONLY by the `symbol` param is a symbol switch, not a
+    // different chart page — handle it via the fast in-place JS path below.
+    if (_differsBeyondSymbol(oldWidget.url, widget.url)) {
       if (mounted) {
         setState(() {
           _isReady = false;
@@ -227,6 +229,21 @@ class _ChartInAppWebViewState extends State<ChartInAppWebView> {
   ''';
 
   static String _jsStr(String s) => '"${s.replaceAll('"', r'\"')}"';
+
+  /// True when [a] and [b] point at genuinely different chart pages, i.e. they
+  /// differ in something other than the `symbol` query param.
+  static bool _differsBeyondSymbol(String a, String b) {
+    if (a == b) return false;
+    final ua = Uri.parse(a);
+    final ub = Uri.parse(b);
+    if (ua.scheme != ub.scheme || ua.host != ub.host || ua.port != ub.port) {
+      return true;
+    }
+    if (ua.path != ub.path) return true;
+    final qa = Map<String, String>.from(ua.queryParameters)..remove('symbol');
+    final qb = Map<String, String>.from(ub.queryParameters)..remove('symbol');
+    return !mapEquals(qa, qb);
+  }
 
   /// Builds the chart URL for [symbol] by REPLACING the `symbol` query param on
   /// the base URL (never appending — appending produced the malformed
@@ -394,8 +411,14 @@ class _ChartInAppWebViewState extends State<ChartInAppWebView> {
               if (!mounted) return;
               // Keep the loader up until the chart canvas is actually painted so
               // the library's multi-stage boot stays hidden (no visible refresh).
-              _loadedSymbol = widget.symbol;
-              if (_pendingSymbol == widget.symbol) _pendingSymbol = null;
+              // Trust the URL that actually loaded: a warm/headless instance can
+              // finish on a DIFFERENT symbol than the one requested, and blindly
+              // recording widget.symbol here dropped the pending switch and left
+              // the chart showing the previous symbol.
+              final loaded = url?.queryParameters['symbol'];
+              _loadedSymbol =
+                  (loaded != null && loaded.isNotEmpty) ? loaded : widget.symbol;
+              if (_pendingSymbol == _loadedSymbol) _pendingSymbol = null;
               unawaited(_revealWhenPainted());
             },
             onReceivedError: (controller, request, error) {
