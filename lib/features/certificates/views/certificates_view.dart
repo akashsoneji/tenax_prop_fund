@@ -9,46 +9,71 @@ import '../controllers/certificates_controller.dart';
 import '../models/certificate_model.dart';
 import '../widgets/certificate_card.dart';
 
-/// Certificates screen — a scrolling list of achievement cards driven by
-/// [CertificatesController]. Loading/error/empty are handled by
-/// [DataStateBuilder] on the controller's `DataState<List<Certificate>>`.
-/// Pinned gradient app bar, surface-card rows, each with an optional progress
-/// bar. Fully theme-driven (light/dark).
-class CertificatesView extends StatelessWidget {
+/// Certificates screen — an achievement shelf driven by
+/// [CertificatesController]: earned certificates first, then the ones still to
+/// unlock. Loading/error/empty are handled by [DataStateBuilder] on the
+/// controller's `DataState<CertificatesData>`. Fully theme-driven (light/dark).
+class CertificatesView extends GetView<CertificatesController> {
   const CertificatesView({super.key});
 
   @override
   Widget build(BuildContext context) {
     final scheme = Theme.of(context).colorScheme;
-    final c = Get.find<CertificatesController>();
 
     return Scaffold(
       backgroundColor: scheme.surface,
-      body: CustomScrollView(
-        physics: const BouncingScrollPhysics(),
-        slivers: [
-          PinnedGradientAppBar(title: 'certificates.title'.tr),
-          SliverPadding(
-            padding: EdgeInsets.fromLTRB(16.w, 18.h, 16.w, 32.h),
-            sliver: SliverToBoxAdapter(
-              child: Obx(
-                () => DataStateBuilder<List<Certificate>>(
-                  state: c.state,
-                  onRetry: c.load,
-                  skeleton: const _CertificatesSkeleton(),
-                  builder: (items) => Column(
-                    crossAxisAlignment: CrossAxisAlignment.stretch,
-                    children: [
-                      for (var i = 0; i < items.length; i++)
-                        CertificateCard(certificate: items[i], index: i),
-                    ],
+      body: RefreshIndicator(
+        onRefresh: controller.refreshData,
+        child: CustomScrollView(
+          physics: const AlwaysScrollableScrollPhysics(
+            parent: BouncingScrollPhysics(),
+          ),
+          slivers: [
+            PinnedGradientAppBar(title: 'certificates.title'.tr),
+            SliverPadding(
+              padding: EdgeInsets.fromLTRB(16.w, 18.h, 16.w, 32.h),
+              sliver: SliverToBoxAdapter(
+                child: Obx(
+                  () => DataStateBuilder<CertificatesData>(
+                    state: controller.state,
+                    onRetry: controller.load,
+                    skeleton: const _CertificatesSkeleton(),
+                    builder: (data) => _Shelf(data: data),
                   ),
                 ),
               ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
+    );
+  }
+}
+
+/// Earned certificates first so the shelf leads with what the trader has won.
+class _Shelf extends StatelessWidget {
+  const _Shelf({required this.data});
+
+  final CertificatesData data;
+
+  @override
+  Widget build(BuildContext context) {
+    final controller = Get.find<CertificatesController>();
+    final items = [
+      ...data.certificates.where((c) => c.earned),
+      ...data.certificates.where((c) => !c.earned),
+    ];
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        for (var i = 0; i < items.length; i++)
+          CertificateCard(
+            certificate: items[i],
+            index: i,
+            onTap: () => controller.openCertificate(items[i]),
+          ),
+      ],
     );
   }
 }
@@ -64,13 +89,13 @@ class _CertificatesSkeleton extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        CardSkeleton(lines: 2, height: 120.h),
+        CardSkeleton(lines: 3, height: 150.h),
         SizedBox(height: 14.h),
-        CardSkeleton(lines: 2, height: 96.h),
+        CardSkeleton(lines: 3, height: 150.h),
         SizedBox(height: 14.h),
-        CardSkeleton(lines: 2, height: 96.h),
+        CardSkeleton(lines: 3, height: 150.h),
         SizedBox(height: 14.h),
-        CardSkeleton(lines: 2, height: 96.h),
+        CardSkeleton(lines: 3, height: 150.h),
       ],
     );
   }

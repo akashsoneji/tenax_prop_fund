@@ -338,10 +338,10 @@ class _PendingOrderViewState extends State<PendingOrderView> {
               borderRadius: BorderRadius.circular(12.r),
             ),
             clipBehavior: Clip.antiAlias,
-            // Reuse the warm preloaded URL so the shared webview is never
-            // reloaded; the symbol is applied via JS injection.
+            // URL follows this ticket's symbol (same theme as the warm boot
+            // URL, so the preloaded symbol still attaches without a reload).
             child: ChartInAppWebView(
-              url: Get.find<ChartPreloadService>().preloadUrl,
+              url: Get.find<ChartPreloadService>().urlFor(widget.symbol),
               symbol: widget.symbol,
             ),
           ),

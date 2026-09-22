@@ -67,9 +67,21 @@ class Instrument {
       };
 }
 
+/// Parsed `data` of the instruments endpoint: the instrument list plus the
+/// category names the API itself exposes (used to build the filter pills so
+/// they always match the data).
+class InstrumentCatalog {
+  const InstrumentCatalog({required this.instruments, required this.categories});
+
+  final List<Instrument> instruments;
+  final List<String> categories;
+
+  static const empty = InstrumentCatalog(instruments: [], categories: []);
+}
+
 /// Category filter values for the instrument search sheet. [all] is the
-/// "everything" pill; [filters] is the pill order. [classify] infers a bucket
-/// from a symbol code when the API omits a category.
+/// "everything" pill and is always prepended to the API categories.
+/// [classify] infers a bucket from a symbol code when the API omits a category.
 abstract class InstrumentCategory {
   static const all = 'All';
   static const currency = 'Currency';
@@ -77,15 +89,6 @@ abstract class InstrumentCategory {
   static const crypto = 'Crypto';
   static const indices = 'Indices';
   static const shares = 'Shares';
-
-  static const filters = <String>[
-    all,
-    currency,
-    metals,
-    crypto,
-    indices,
-    shares,
-  ];
 
   /// Best-effort bucket for a bare symbol code (used when the API sends none).
   static String classify(String code) {

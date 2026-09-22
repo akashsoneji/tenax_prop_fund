@@ -7,6 +7,7 @@ import '../../../core/base/base_controller.dart';
 import '../../../core/network/api_response.dart';
 import '../../../core/state/data_state.dart';
 import '../../../core/websocket/pusher_client.dart';
+import '../../accounts/controllers/accounts_controller.dart';
 import '../../accounts/services/primary_account_service.dart';
 import '../../authentication/repositories/auth_repository.dart';
 import '../models/dashboard_models.dart';
@@ -57,7 +58,30 @@ class HomeController extends BaseController<DashboardData>
 
   final _wsSubs = <StreamSubscription>[];
 
-  void selectTab(int index) => selectedTab.value = index;
+  /// Switches the bottom-nav tab and silently refreshes the tab being entered.
+  ///
+  /// The shell keeps every tab alive in an [IndexedStack], so a tab's `onInit`
+  /// runs only once. Re-entering a tab therefore has to pull fresh data itself
+  /// — silently, so the already-rendered content stays put and only the changed
+  /// values update.
+  void selectTab(int index) {
+    if (selectedTab.value == index) return;
+    selectedTab.value = index;
+    _refreshTab(index);
+  }
+
+  /// Refreshes the controller backing the tab at [index]. Home is this
+  /// controller; the other tabs own theirs and are only refreshed when their
+  /// controller is actually registered.
+  void _refreshTab(int index) {
+    if (index == 0) {
+      refreshSilently();
+      return;
+    }
+    if (index == 4 && Get.isRegistered<AccountsController>()) {
+      Get.find<AccountsController>().refreshSilently();
+    }
+  }
 
   /// Switches the hero to the live account with [id]. Rebuilds the focused-card
   /// from that account's current snapshot row so its equity/balance (and any
@@ -119,7 +143,7 @@ class HomeController extends BaseController<DashboardData>
     if (isClosed || state != AppLifecycleState.resumed) return;
     _pusher.connect();
     if (_channel != null) _pusher.subscribe(_channel!);
-    refreshData();
+    refreshSilently();
   }
 
   Future<void> _loadUserName() async {

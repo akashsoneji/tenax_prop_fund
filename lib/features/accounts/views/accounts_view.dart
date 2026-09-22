@@ -117,10 +117,7 @@ class _AccountsBody extends StatelessWidget {
                     padding: EdgeInsets.only(bottom: 10.h),
                     child: AccountListCard(
                       account: rows[i],
-                      onTrade: () => Get.toNamed(
-                        AppRoutes.chart,
-                        arguments: {'symbol': 'XAUUSD'},
-                      ),
+                      onTrade: () => controller.tradeWithAccount(rows[i]),
                       onDashboard: () => Get.toNamed(
                         AppRoutes.account,
                         arguments: {'id': rows[i].id},

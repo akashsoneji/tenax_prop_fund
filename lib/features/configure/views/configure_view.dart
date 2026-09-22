@@ -60,22 +60,24 @@ class ConfigureView extends StatelessWidget {
                       )),
                   SizedBox(height: 22.h),
                   SectionHeader('configure.addons'.tr),
-                  Obx(() => RulesCard(
-                        children: [
-                          for (var i = 0;
-                              i < c.availableAddons.length;
-                              i++)
-                            AddonTile(
-                              addon: c.availableAddons[i],
-                              selected: c.isAddonSelected(
-                                  c.availableAddons[i].id),
-                              onTap: () => c.toggleAddon(
-                                  c.availableAddons[i].id),
-                              showDivider:
-                                  i != c.availableAddons.length - 1,
-                            ),
-                        ],
-                      )),
+                  Obx(() {
+                    // Touch the RxSet unconditionally so Obx subscribes even
+                    // when there are no add-ons to iterate over.
+                    c.selectedAddons.length;
+                    return RulesCard(
+                      children: [
+                        for (var i = 0; i < c.availableAddons.length; i++)
+                          AddonTile(
+                            addon: c.availableAddons[i],
+                            selected:
+                                c.isAddonSelected(c.availableAddons[i].id),
+                            onTap: () =>
+                                c.toggleAddon(c.availableAddons[i].id),
+                            showDivider: i != c.availableAddons.length - 1,
+                          ),
+                      ],
+                    );
+                  }),
                   if (c.availablePaymentMethods.isNotEmpty) ...[
                     SizedBox(height: 22.h),
                     SectionHeader('Payment method'),

@@ -21,12 +21,15 @@ import '../../features/billing/bindings/billing_binding.dart';
 import '../../features/billing/views/billing_view.dart';
 import '../../features/calculators/bindings/calculators_binding.dart';
 import '../../features/calculators/views/calculators_view.dart';
+import '../../features/certificates/bindings/certificate_viewer_binding.dart';
 import '../../features/certificates/bindings/certificates_binding.dart';
+import '../../features/certificates/views/certificate_viewer_view.dart';
 import '../../features/certificates/views/certificates_view.dart';
 import '../../features/challenge/bindings/challenge_binding.dart';
 import '../../features/challenge/views/challenge_view.dart';
 import '../../features/challenge/views/challenge_compare_view.dart';
 import '../../features/competitions/bindings/competitions_binding.dart';
+import '../../features/competitions/views/competition_detail_view.dart';
 import '../../features/competitions/views/competitions_view.dart';
 import '../../features/configure/bindings/configure_binding.dart';
 import '../../features/configure/views/configure_view.dart';
@@ -158,6 +161,11 @@ class AppPages {
       binding: CertificatesBinding(),
     ),
     GetPage(
+      name: AppRoutes.certificateViewer,
+      page: () => const CertificateViewerView(),
+      binding: CertificateViewerBinding(),
+    ),
+    GetPage(
       name: AppRoutes.calculators,
       page: () => const CalculatorsView(),
       binding: CalculatorsBinding(),
@@ -165,6 +173,11 @@ class AppPages {
     GetPage(
       name: AppRoutes.competitions,
       page: () => const CompetitionsView(),
+      binding: CompetitionsBinding(),
+    ),
+    GetPage(
+      name: AppRoutes.competitionDetail,
+      page: () => const CompetitionDetailView(),
       binding: CompetitionsBinding(),
     ),
     GetPage(

@@ -10,6 +10,7 @@ import 'app/routes/app_pages.dart';
 import 'app/routes/app_routes.dart';
 import 'core/localization/app_translations.dart';
 import 'features/chart/services/chart_preload_service.dart';
+import 'features/home/controllers/home_controller.dart';
 import 'features/settings/controllers/settings_controller.dart';
 import 'shared/theme/app_theme.dart';
 
@@ -103,6 +104,15 @@ class TenaxApp extends StatelessWidget {
           initialBinding: InitialBinding(config),
           initialRoute: AppRoutes.splash,
           getPages: AppPages.routes,
+
+          // Returning to the Home shell from any pushed screen refreshes the
+          // dashboard silently — the already-rendered data stays on screen and
+          // only changed values update (no skeleton, no blank frame).
+          routingCallback: (routing) {
+            if (routing?.current != AppRoutes.home) return;
+            if (!Get.isRegistered<HomeController>()) return;
+            Get.find<HomeController>().refreshSilently();
+          },
 
           // Keep the system bar ICON brightness in sync with the active theme so
           // the 3-button / gesture nav bar stays readable in both light and dark.

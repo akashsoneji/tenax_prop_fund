@@ -1,5 +1,6 @@
 import 'package:get/get.dart';
 
+import '../../accounts/services/primary_account_service.dart';
 import '../models/symbol_models.dart';
 import '../repositories/symbols_repository.dart';
 import '../services/favorites_service.dart';
@@ -20,7 +21,18 @@ class SearchInstrumentsController extends GetxController {
   final RxString selectedCategory = InstrumentCategory.all.obs;
   final RxList<Instrument> _all = <Instrument>[].obs;
 
+  /// Filter pills: "All" plus the category names the API returned.
+  final RxList<String> categories = <String>[InstrumentCategory.all].obs;
+
   FavoritesService get favorites => _favorites;
+
+  /// The user's active/primary MT5 account id, or `null` when they have no
+  /// accounts yet (fresh registration) or none is marked primary — in that case
+  /// the symbols endpoint is called unscoped.
+  int? get _activeAccountId {
+    if (!Get.isRegistered<PrimaryAccountService>()) return null;
+    return Get.find<PrimaryAccountService>().primaryAccountId.value;
+  }
 
   @override
   void onInit() {
@@ -31,10 +43,14 @@ class SearchInstrumentsController extends GetxController {
   Future<void> load() async {
     isLoading.value = true;
     error.value = '';
-    final res = await _repository.getInstruments();
+    final res = await _repository.getInstruments(accountId: _activeAccountId);
     if (isClosed) return;
     if (res.success && res.data != null) {
-      _all.assignAll(res.data!);
+      _all.assignAll(res.data!.instruments);
+      categories.assignAll([InstrumentCategory.all, ...res.data!.categories]);
+      if (!categories.contains(selectedCategory.value)) {
+        selectedCategory.value = InstrumentCategory.all;
+      }
     } else {
       error.value = res.message ?? 'errors.generic'.tr;
     }

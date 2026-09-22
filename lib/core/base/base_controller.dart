@@ -43,6 +43,23 @@ abstract class BaseController<T> extends GetxController {
     await _run();
   }
 
+  /// "Screen appeared again" refresh (tab re-select, route return, app resume).
+  ///
+  /// Delegates to [refreshData], so already-rendered data stays on screen and
+  /// only the changed values update — no skeleton flash. Overlapping triggers
+  /// (e.g. tab switch + route return in the same frame) collapse into one call.
+  Future<void> refreshSilently() async {
+    if (_refreshing) return;
+    _refreshing = true;
+    try {
+      await refreshData();
+    } finally {
+      _refreshing = false;
+    }
+  }
+
+  bool _refreshing = false;
+
   Future<void> _run() async {
     try {
       final res = await fetch();

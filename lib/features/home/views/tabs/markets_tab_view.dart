@@ -37,11 +37,12 @@ class MarketsTabView extends StatelessWidget {
         return Column(
           children: [
             Expanded(
-              // Reuse the EXACT preloaded URL so the warm webview is never
-              // reloaded for a differing theme/symbol URL. Symbol switching goes
-              // through fast JS injection, not a URL change.
+              // URL follows the SELECTED symbol (same theme as the warm boot
+              // URL, so the preloaded symbol still attaches without a reload).
+              // Symbol switching still prefers fast JS injection; the URL is the
+              // fallback the webview hard-loads when the page exposes no hook.
               child: ChartInAppWebView(
-                url: Get.find<ChartPreloadService>().preloadUrl,
+                url: Get.find<ChartPreloadService>().urlFor(symbol),
                 symbol: symbol,
               ),
             ),

@@ -55,6 +55,8 @@ dependencies:
   flutter_screenutil: ^5.9.3
   country_picker: ^2.0.28
   phone_numbers_parser: ^9.0.26
+  share_plus: ^13.3.0
+  path_provider: ^2.1.6
 
 dev_dependencies:
   flutter_test:
