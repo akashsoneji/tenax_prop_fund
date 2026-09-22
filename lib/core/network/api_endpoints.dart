@@ -20,6 +20,13 @@ abstract class ApiEndpoints {
   static const forgotPassword = '/auth/forgot-password';
   static const logout = '/auth/logout';
 
+  /// Confirms an email/OTP code (`POST`). Body: `{email, code}`. Used by the
+  /// post-register verification dialog (needs the bearer token from register).
+  static const verifyEmail = '/auth/verify-email';
+
+  /// Re-sends the verification/reset OTP (`POST`). Body: `{email}`.
+  static const resendOtp = '/auth/resend-otp';
+
   // ---------------------------------------------------------------------------
   // Profile & KYC
   // ---------------------------------------------------------------------------

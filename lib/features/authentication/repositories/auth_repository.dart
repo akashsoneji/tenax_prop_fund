@@ -38,7 +38,6 @@ class AuthRepository {
     required String lastName,
     required String email,
     required String password,
-    required String confirmPassword,
     required String countryCode,
     required String phone,
   }) async {
@@ -48,7 +47,6 @@ class AuthRepository {
         lastName: lastName,
         email: email,
         password: password,
-        confirmPassword: confirmPassword,
         countryCode: countryCode,
         phone: phone,
       );
@@ -64,6 +62,27 @@ class AuthRepository {
   Future<ApiResponse<void>> forgotPassword({required String email}) async {
     try {
       await _service.forgotPassword(email: email);
+      return ApiResponse.success(null);
+    } catch (e) {
+      return ApiResponse.failure(_messageFrom(e));
+    }
+  }
+
+  Future<ApiResponse<void>> verifyEmail({
+    required String email,
+    required String code,
+  }) async {
+    try {
+      await _service.verifyEmail(email: email, code: code);
+      return ApiResponse.success(null);
+    } catch (e) {
+      return ApiResponse.failure(_messageFrom(e));
+    }
+  }
+
+  Future<ApiResponse<void>> resendOtp({required String email}) async {
+    try {
+      await _service.resendOtp(email: email);
       return ApiResponse.success(null);
     } catch (e) {
       return ApiResponse.failure(_messageFrom(e));
