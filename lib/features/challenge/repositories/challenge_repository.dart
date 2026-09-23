@@ -23,8 +23,9 @@ class ChallengeRepository {
 
   Future<ApiResponse<ChallengeData>> compare({String currency = 'USD'}) {
     return ApiEnvelope.guard<ChallengeData>(
-      () => _api.post<Map<String, dynamic>>(
-        '/challenges/compare?currency=$currency',
+      () => _api.get<Map<String, dynamic>>(
+        '/challenges/compare',
+        query: {'currency': currency},
       ),
       (data) => ChallengeData.fromJson(
         data is Map<String, dynamic> ? data : const {},
@@ -57,13 +58,21 @@ class ChallengeRepository {
   Future<ApiResponse<ChallengeQuote>> applyCoupon({
     required int planVersionId,
     required String couponCode,
+    int quantity = 1,
+    List<int> addonIds = const [],
+    bool swapFree = false,
+    String currency = 'USD',
   }) {
     return ApiEnvelope.guard<ChallengeQuote>(
       () => _api.post<Map<String, dynamic>>(
         '/challenges/coupon',
         data: {
           'plan_version_id': planVersionId,
+          'quantity': quantity,
+          'addon_ids': addonIds,
+          'swap_free': swapFree,
           'coupon_code': couponCode,
+          'currency': currency,
         },
       ),
       (data) => ChallengeQuote.fromJson(
@@ -77,20 +86,47 @@ class ChallengeRepository {
   /// (`free` / `manual` / `gateway`).
   Future<ApiResponse<PurchaseResult>> purchase({
     required int planVersionId,
+    int quantity = 1,
     List<int> addonIds = const [],
+    bool swapFree = false,
     String? couponCode,
     required int paymentMethodId,
     required bool isManual,
+    String currency = 'USD',
   }) {
     return ApiEnvelope.guard<PurchaseResult>(
       () => _api.post<Map<String, dynamic>>(
         '/challenges/purchase',
         data: {
           'plan_version_id': planVersionId,
+          'quantity': quantity,
           'addon_ids': addonIds,
+          'swap_free': swapFree,
           'coupon_code': couponCode,
           'payment_method_id': paymentMethodId,
           'is_manual': isManual,
+          'currency': currency,
+        },
+      ),
+      (data) => PurchaseResult.fromJson(
+        data is Map<String, dynamic> ? data : const {},
+      ),
+    );
+  }
+
+  /// Starts a free trial for the given trial plan version. Returns the same
+  /// [PurchaseResult] shape as [purchase] (the `free` path — no payment).
+  Future<ApiResponse<PurchaseResult>> startFreeTrial({
+    required int planVersionId,
+    int? platformIntegrationId,
+  }) {
+    return ApiEnvelope.guard<PurchaseResult>(
+      () => _api.post<Map<String, dynamic>>(
+        '/challenges/free-trial',
+        data: {
+          'plan_version_id': planVersionId,
+          if (platformIntegrationId != null)
+            'platform_integration_id': platformIntegrationId,
         },
       ),
       (data) => PurchaseResult.fromJson(

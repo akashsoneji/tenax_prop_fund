@@ -268,6 +268,10 @@ class ConfigureController extends GetxController {
     final res = await _repository.applyCoupon(
       planVersionId: versionId,
       couponCode: code,
+      quantity: quantity.value,
+      addonIds: _selectedAddonIds,
+      swapFree: swap.value == 1,
+      currency: currency,
     );
     applyingCoupon.value = false;
 
@@ -318,10 +322,13 @@ class ConfigureController extends GetxController {
     purchasing.value = true;
     final res = await _repository.purchase(
       planVersionId: versionId,
+      quantity: quantity.value,
       addonIds: _selectedAddonIds,
+      swapFree: swap.value == 1,
       couponCode: appliedCoupon.value,
       paymentMethodId: method.id,
       isManual: method.isManual,
+      currency: currency,
     );
     purchasing.value = false;
 

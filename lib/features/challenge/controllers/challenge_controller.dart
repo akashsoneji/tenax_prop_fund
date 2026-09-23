@@ -1,7 +1,9 @@
 import 'package:get/get.dart';
 
+import '../../../app/routes/app_routes.dart';
 import '../../../core/base/base_controller.dart';
 import '../../../core/network/api_response.dart';
+import '../../../shared/widgets/app_toast.dart';
 import '../models/challenge_models.dart';
 import '../repositories/challenge_repository.dart';
 
@@ -14,12 +16,36 @@ class ChallengeController extends BaseController<ChallengeData> {
   final step = ChallengeStep.twoStep.obs;
   final selectedPlan = 0.obs;
   final comparison = Rxn<ChallengeData>();
+  final compareSelected = 0.obs;
   final quote = Rxn<ChallengeQuote>();
   final isComparing = false.obs;
   final isQuoting = false.obs;
   final actionError = RxnString();
 
   void setMode(ChallengeMode value) => mode.value = value;
+
+  void selectComparePlan(int index) => compareSelected.value = index;
+
+  /// Navigates to Configure for the compare-screen [plan], seeding the shared
+  /// catalogue (add-ons / platforms / payment methods / currency) from the main
+  /// `/challenges` data so the configure screen has everything it needs.
+  void buyComparePlan(ChallengePlan plan) {
+    final catalogue = state.valueOrNull;
+    final version = plan.versions.isNotEmpty ? plan.versions.first : null;
+    if (version != null) loadQuote(planVersionId: version.id);
+    Get.toNamed(
+      AppRoutes.configure,
+      arguments: <String, Object?>{
+        'plan': plan,
+        'plans': comparison.value?.plans ?? const <ChallengePlan>[],
+        'addons': catalogue?.addons ?? const [],
+        'platforms': catalogue?.platforms ?? const [],
+        'paymentMethods': catalogue?.paymentMethods ?? const [],
+        'currency': plan.currency,
+        'quote': quote.value,
+      },
+    );
+  }
 
   void setStep(ChallengeStep value) {
     step.value = value;
@@ -63,6 +89,7 @@ class ChallengeController extends BaseController<ChallengeData> {
     isComparing.value = false;
     if (response.success && response.data != null) {
       comparison.value = response.data;
+      compareSelected.value = 0;
       return;
     }
     actionError.value = response.message ?? 'errors.generic'.tr;
@@ -82,6 +109,40 @@ class ChallengeController extends BaseController<ChallengeData> {
     }
     actionError.value = response.message ?? 'errors.generic'.tr;
     return false;
+  }
+
+  final isStartingTrial = false.obs;
+
+  /// Starts the free trial for the given [trial] and routes by payment path
+  /// (trials resolve to the `free` path — instant provision, no payment).
+  Future<void> startFreeTrial(ChallengeTrial trial) async {
+    final versionId = trial.planVersionId;
+    if (versionId == null) {
+      AppToast.error('errors.generic'.tr);
+      return;
+    }
+    isStartingTrial.value = true;
+    actionError.value = null;
+    final response = await _repository.startFreeTrial(
+      planVersionId: versionId,
+      platformIntegrationId: trial.platformIntegrationId,
+    );
+    isStartingTrial.value = false;
+
+    if (!response.success || response.data == null) {
+      AppToast.error(response.message ?? 'errors.generic'.tr);
+      return;
+    }
+
+    final result = response.data!;
+    if (result.isManual) {
+      Get.toNamed(AppRoutes.completePayment, arguments: result.orderId);
+    } else if (result.isGateway && (result.gatewayUrl?.isNotEmpty ?? false)) {
+      Get.toNamed(AppRoutes.gatewayPayment, arguments: result.gatewayUrl);
+    } else {
+      AppToast.success('Your trial account is being provisioned.');
+      Get.until((route) => route.settings.name == AppRoutes.home);
+    }
   }
 
   void onDataLoaded(ChallengeData data) {

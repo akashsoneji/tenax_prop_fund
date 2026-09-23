@@ -4,9 +4,10 @@ import 'package:get/get.dart';
 
 import '../../../shared/theme/app_colors.dart';
 import '../../../shared/theme/app_text.dart';
-import '../../../shared/widgets/pinned_gradient_app_bar.dart';
 import '../../chart/services/chart_preload_service.dart';
 import '../../home/controllers/home_controller.dart';
+import '../../positions/controllers/positions_controller.dart';
+import '../../positions/widgets/positions_account_header.dart';
 import '../services/favorites_service.dart';
 import '../services/market_watch_v2_service.dart';
 import '../widgets/favorite_symbol_tile.dart';
@@ -25,23 +26,50 @@ class SymbolsView extends StatelessWidget {
 
     return Scaffold(
       backgroundColor: scheme.surface,
-      body: CustomScrollView(
-        physics: const BouncingScrollPhysics(),
-        slivers: [
-          PinnedGradientAppBar(
-            title: 'symbols.title'.tr,
-            showBack: false,
-            actions: [
-              IconButton(
-                onPressed: InstrumentSearchSheet.open,
-                icon: const Icon(Icons.search, color: Colors.white),
+      body: SafeArea(
+        bottom: false,
+        child: CustomScrollView(
+          physics: const BouncingScrollPhysics(),
+          slivers: [
+            SliverToBoxAdapter(
+              child: Padding(
+                padding: EdgeInsets.fromLTRB(16.w, 8.h, 8.w, 0),
+                child: Row(
+                  children: [
+                    Expanded(
+                      child: Text(
+                        'symbols.title'.tr,
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: AppText.title(
+                          color: scheme.onSurface,
+                          fontSize: 22.sp,
+                        ),
+                      ),
+                    ),
+                    IconButton(
+                      onPressed: InstrumentSearchSheet.open,
+                      icon: Icon(Icons.search, color: scheme.onSurface),
+                    ),
+                  ],
+                ),
               ),
-            ],
-          ),
-          const SliverToBoxAdapter(child: _FavoritesSection()),
-        ],
+            ),
+            if (Get.isRegistered<PositionsController>())
+              SliverToBoxAdapter(
+                child: Padding(
+                  padding: EdgeInsets.fromLTRB(16.w, 8.h, 16.w, 0),
+                  child: PositionsAccountHeader(
+                    controller: Get.find<PositionsController>(),
+                  ),
+                ),
+              ),
+            const SliverToBoxAdapter(child: _FavoritesSection()),
+          ],
+        ),
       ),
     );
+
   }
 }
 

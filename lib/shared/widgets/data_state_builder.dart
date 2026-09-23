@@ -23,6 +23,8 @@ class DataStateBuilder<T> extends StatelessWidget {
     this.emptyIcon = Icons.inbox_outlined,
     this.emptyTitle,
     this.emptyMessage,
+    this.emptyActionLabel,
+    this.onEmptyAction,
   });
 
   final DataState<T> state;
@@ -42,6 +44,11 @@ class DataStateBuilder<T> extends StatelessWidget {
   final String? emptyTitle;
   final String? emptyMessage;
 
+  /// Optional call-to-action shown under the empty placeholder (e.g. "Start a
+  /// challenge"). Both must be provided for the button to render.
+  final String? emptyActionLabel;
+  final VoidCallback? onEmptyAction;
+
   @override
   Widget build(BuildContext context) {
     return switch (state) {
@@ -54,6 +61,8 @@ class DataStateBuilder<T> extends StatelessWidget {
           icon: emptyIcon,
           title: emptyTitle ?? 'state.empty_title'.tr,
           message: emptyMessage ?? 'state.empty_message'.tr,
+          actionLabel: emptyActionLabel,
+          onAction: onEmptyAction,
         ),
       // DataInitial + DataLoading both show the skeleton.
       _ => AppShimmer(child: skeleton),
@@ -115,11 +124,15 @@ class _EmptyState extends StatelessWidget {
     required this.icon,
     required this.title,
     required this.message,
+    this.actionLabel,
+    this.onAction,
   });
 
   final IconData icon;
   final String title;
   final String message;
+  final String? actionLabel;
+  final VoidCallback? onAction;
 
   @override
   Widget build(BuildContext context) {
@@ -146,6 +159,16 @@ class _EmptyState extends StatelessWidget {
                 color: scheme.onSurface.withValues(alpha: 0.6),
               ),
             ),
+            if (actionLabel != null && onAction != null) ...[
+              SizedBox(height: 22.h),
+              SizedBox(
+                width: 200.w,
+                child: AppGradientButton(
+                  label: actionLabel!,
+                  onPressed: () async => onAction!(),
+                ),
+              ),
+            ],
           ],
         ),
       ),

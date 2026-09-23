@@ -73,8 +73,25 @@ class PositionsWsService extends GetxService with WidgetsBindingObserver {
     _account = account;
     openPositions.clear();
     pendingOrders.clear();
-    _reauth();
+    // Full restart for the new account (mirrors the dashboard set-primary
+    // flow): tear both sockets down and open fresh connections, rather than
+    // re-authing on the stale ones.
+    _restart(_op, _config.openPositionsUrl, _onOpFrame);
+    _restart(_po, _config.pendingOrdersUrl, _onPoFrame);
   }
+
+  /// Disconnects [ch] and immediately reconnects it with a reset backoff.
+  void _restart(
+    _Channel ch,
+    String url,
+    void Function(dynamic decoded) onFrame,
+  ) {
+    ch.disconnect();
+    ch.reconnectAttempts = 0;
+    _updateConnected();
+    _connect(ch, url, onFrame);
+  }
+
 
   Future<String?> _authToken() => _storage.read(key: ApiInterceptor.tokenKey);
 
@@ -117,22 +134,6 @@ class PositionsWsService extends GetxService with WidgetsBindingObserver {
       _onDisconnected(ch, url, onFrame, e);
     } finally {
       ch.connecting = false;
-    }
-  }
-
-  void _reauth() async {
-    final token = await _authToken();
-    if (token == null || token.isEmpty) return;
-    final frame = {'authID': token, 'trading_account': _account};
-    if (_op.channel != null) {
-      _op.send(frame);
-    } else {
-      _connect(_op, _config.openPositionsUrl, _onOpFrame);
-    }
-    if (_po.channel != null) {
-      _po.send(frame);
-    } else {
-      _connect(_po, _config.pendingOrdersUrl, _onPoFrame);
     }
   }
 

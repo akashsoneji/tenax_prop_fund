@@ -60,11 +60,16 @@ class ChallengeView extends StatelessWidget {
         if (data == null) return const SizedBox.shrink();
         final isPaid = c.mode.value == ChallengeMode.paid;
         if (!isPaid) {
+          final trial = data.trial;
+          final size = (trial?.accountSizeMinor ?? 0) ~/ 100;
           return ChallengeBottomBar(
-            planName: '${FlavorResolver.appName} Free Trial · \$10K',
-            price: r'\$0',
-            actionLabel: 'challenge.configure'.tr,
-            onAction: () => _continueToConfigure(c, data),
+            planName:
+                '${FlavorResolver.appName} Free Trial · \$${_sizeK(size)}',
+            price: r'$0',
+            actionLabel: 'challenge.start_free_trial'.tr,
+            onAction: () {
+              if (trial != null) c.startFreeTrial(trial);
+            },
           );
         }
         final plans = c.plansForStep(data);
@@ -118,19 +123,22 @@ class _ChallengeBody extends StatelessWidget {
     return Obx(() {
       c.selectedPlan.value;
       c.step.value;
+      final trialEnabled = data.trial?.enabled ?? false;
       return Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          AppSegmentedControl(
-            labels: [
-              'challenge.paid_challenges'.tr,
-              'challenge.free_trial'.tr
-            ],
-            selected: c.mode.value == ChallengeMode.paid ? 0 : 1,
-            onChanged: (i) => c.setMode(
-                i == 0 ? ChallengeMode.paid : ChallengeMode.freeTrial),
-          ),
-          SizedBox(height: 18.h),
+          if (trialEnabled) ...[
+            AppSegmentedControl(
+              labels: [
+                'challenge.paid_challenges'.tr,
+                'challenge.free_trial'.tr
+              ],
+              selected: c.mode.value == ChallengeMode.paid ? 0 : 1,
+              onChanged: (i) => c.setMode(
+                  i == 0 ? ChallengeMode.paid : ChallengeMode.freeTrial),
+            ),
+            SizedBox(height: 18.h),
+          ],
           AnimatedSwitcher(
             duration: AppMotion.base,
             switchInCurve: AppMotion.enter,
@@ -293,16 +301,26 @@ class _CompareLink extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final scheme = Theme.of(context).colorScheme;
-    return Container(
-      padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 14.h),
-      decoration: AppTheme.surfaceCard(scheme, radius: 14.r),
-      child: Center(
-        child: Text(
-          'challenge.compare_plans'.tr,
-          style: GoogleFonts.beVietnamPro(
-            fontSize: 14.sp,
-            fontWeight: FontWeight.w700,
-            color: scheme.primary,
+    return Material(
+      color: Colors.transparent,
+      child: InkWell(
+        borderRadius: BorderRadius.circular(14.r),
+        onTap: () {
+          Get.find<ChallengeController>().loadComparison();
+          Get.toNamed(AppRoutes.challengeCompare);
+        },
+        child: Ink(
+          padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 14.h),
+          decoration: AppTheme.surfaceCard(scheme, radius: 14.r),
+          child: Center(
+            child: Text(
+              'challenge.compare_plans'.tr,
+              style: GoogleFonts.beVietnamPro(
+                fontSize: 14.sp,
+                fontWeight: FontWeight.w700,
+                color: scheme.primary,
+              ),
+            ),
           ),
         ),
       ),
@@ -411,9 +429,15 @@ class _TrialBody extends StatelessWidget {
           SizedBox(height: 16.h),
           _TrialStatGrid(data: data),
           SizedBox(height: 16.h),
-          AppGradientButton(
-            label: 'challenge.start_free_trial'.tr,
-            onPressed: () => Get.toNamed(AppRoutes.configure),
+          Obx(
+            () => AppGradientButton(
+              label: 'challenge.start_free_trial'.tr,
+              loading: c.isStartingTrial.value,
+              onPressed: () {
+                final trial = data.trial;
+                if (trial != null) c.startFreeTrial(trial);
+              },
+            ),
           ),
           SizedBox(height: 12.h),
           Text(
@@ -435,7 +459,16 @@ String _trialDescription(ChallengeData data) {
   final trial = data.trial;
   if (trial == null) return 'challenge.free_trial'.tr;
   final size = trial.accountSizeMinor ~/ 100;
-  return '\$$size account, free for ${trial.days} days';
+  return '\$${_sizeK(size)} account, free for ${trial.days} days';
+}
+
+/// Formats a whole-dollar amount as a compact `$5K`-style label.
+String _sizeK(int dollars) {
+  if (dollars >= 1000) {
+    final k = dollars / 1000;
+    return '${k == k.roundToDouble() ? k.toStringAsFixed(0) : k}K';
+  }
+  return '$dollars';
 }
 
 class _TrialStatGrid extends StatelessWidget {
@@ -463,7 +496,7 @@ class _TrialStatGrid extends StatelessWidget {
         crossAxisCount: 2,
         mainAxisSpacing: 12.w,
         crossAxisSpacing: 12.w,
-        childAspectRatio: 2.0,
+        childAspectRatio: 1.8,
       ),
       itemBuilder: (context, i) => _TrialStatTile(rule: rules[i]),
     );
@@ -490,16 +523,22 @@ class _TrialStatTile extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          Text(
-            rule.label,
-            style: GoogleFonts.beVietnamPro(
-              fontSize: 12.5.sp,
-              color: scheme.onSurface.withValues(alpha: 0.55),
+          Flexible(
+            child: Text(
+              rule.label,
+              maxLines: 2,
+              overflow: TextOverflow.ellipsis,
+              style: GoogleFonts.beVietnamPro(
+                fontSize: 12.5.sp,
+                color: scheme.onSurface.withValues(alpha: 0.55),
+              ),
             ),
           ),
           SizedBox(height: 4.h),
           Text(
             rule.value,
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
             style: GoogleFonts.beVietnamPro(
               fontSize: 15.sp,
               fontWeight: FontWeight.w800,

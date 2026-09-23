@@ -43,6 +43,8 @@ class HomeTabView extends GetView<HomeController> {
                   skeleton: const _HomeSkeleton(),
                   emptyTitle: 'home.no_dashboard'.tr,
                   emptyMessage: 'home.no_dashboard_body'.tr,
+                  emptyActionLabel: 'home.start_challenge'.tr,
+                  onEmptyAction: () => Get.toNamed(AppRoutes.challenge),
                   builder: (data) => RefreshIndicator(
                     onRefresh: controller.refreshData,
                     color: scheme.primary,

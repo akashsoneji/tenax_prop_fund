@@ -130,14 +130,17 @@ class _CheckoutHero extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.end,
             children: [
               Expanded(
-                child: Text(
-                  order.total,
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                  style: GoogleFonts.beVietnamPro(
-                    color: AppColors.white,
-                    fontSize: 30.sp,
-                    fontWeight: FontWeight.w800,
+                child: FittedBox(
+                  fit: BoxFit.scaleDown,
+                  alignment: Alignment.centerLeft,
+                  child: Text(
+                    order.total,
+                    maxLines: 1,
+                    style: GoogleFonts.beVietnamPro(
+                      color: AppColors.white,
+                      fontSize: 30.sp,
+                      fontWeight: FontWeight.w800,
+                    ),
                   ),
                 ),
               ),

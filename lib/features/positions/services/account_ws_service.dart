@@ -71,8 +71,29 @@ class AccountWsService extends GetxService with WidgetsBindingObserver {
     if (account.isEmpty || account == _account) return;
     _account = account;
     this.account.value = AccountInfo.empty();
-    _requestData();
+    // Full restart: tear the current socket down and open a fresh one for the
+    // new account (mirrors the dashboard set-primary flow), instead of only
+    // re-authing on the stale connection.
+    _reconnect();
   }
+
+  /// Closes the live socket and immediately opens a new one. A deliberate
+  /// restart, so [_manuallyClosed] is cleared by [_connect] and the reconnect
+  /// backoff is reset.
+  void _reconnect() {
+    _reconnectTimer?.cancel();
+    _stopHeartbeat();
+    _sub?.cancel();
+    _sub = null;
+    try {
+      _channel?.sink.close();
+    } catch (_) {}
+    _channel = null;
+    isConnected.value = false;
+    _reconnectAttempts = 0;
+    _connect();
+  }
+
 
   Future<String?> _authToken() => _storage.read(key: ApiInterceptor.tokenKey);
 

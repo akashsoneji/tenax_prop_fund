@@ -303,11 +303,13 @@ class ChallengePlatform {
 
 @immutable
 class ChallengeTrial {
-  const ChallengeTrial({required this.enabled, required this.name, required this.accountSizeMinor, required this.days, required this.profitTargetPercent, required this.dailyLossPercent, required this.maxLossPercent, required this.minTradingDays, required this.passRewardPercent, required this.couponCode, required this.requiresKyc});
+  const ChallengeTrial({required this.enabled, required this.name, required this.accountSizeMinor, required this.days, required this.profitTargetPercent, required this.dailyLossPercent, required this.maxLossPercent, required this.minTradingDays, required this.passRewardPercent, required this.couponCode, required this.requiresKyc, required this.planVersionId, required this.platformIntegrationId});
   final bool enabled;
   final String name;
   final int accountSizeMinor;
   final int days;
+  final int? planVersionId;
+  final int? platformIntegrationId;
   final num profitTargetPercent;
   final num dailyLossPercent;
   final num maxLossPercent;
@@ -328,6 +330,8 @@ class ChallengeTrial {
         passRewardPercent: json['pass_reward_percent'] as num? ?? 0,
         couponCode: json['pass_coupon_code'] as String? ?? '',
         requiresKyc: json['requires_kyc'] as bool? ?? false,
+        planVersionId: (json['plan_version_id'] as num?)?.toInt(),
+        platformIntegrationId: (json['platform_integration_id'] as num?)?.toInt(),
       );
 }
 

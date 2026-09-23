@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:get/get.dart';
 
 import '../../../core/logger/app_logger.dart';
@@ -6,6 +8,7 @@ import '../../../shared/widgets/app_toast.dart';
 import '../../accounts/controllers/accounts_controller.dart';
 import '../../accounts/models/accounts_models.dart';
 import '../../accounts/repositories/accounts_repository.dart';
+import '../../accounts/services/primary_account_service.dart';
 import '../../home/controllers/home_controller.dart';
 import '../../home/models/dashboard_models.dart';
 import '../../symbols/services/market_watch_v2_service.dart';
@@ -67,6 +70,9 @@ class PositionsController extends GetxController {
 
   /// The trading account number driving all sockets + trade calls.
   final tradingAccount = ''.obs;
+
+  /// All account rows the trader can switch between (for the header pill).
+  final accountRows = <AccountRow>[].obs;
 
   /// History state (loaded lazily when the History tab is first opened).
   final history = <HistoryEntry>[].obs;
@@ -174,7 +180,27 @@ class PositionsController extends GetxController {
     return state.data.accounts;
   }
 
+  /// Switches every socket + trade call to [row]'s login (header pill sheet).
+  ///
+  /// Also persists the pick as the user's primary account via
+  /// `POST /mt5accounts/set-primary` in the background (same as the dashboard
+  /// account switch), and refocuses the Home hero on the new id — so the whole
+  /// app follows the account, not just the Positions sockets.
+  void switchToAccount(AccountRow row) {
+    if (row.login == tradingAccount.value) return;
+    _applyAccount(row.login);
+
+    if (Get.isRegistered<HomeController>()) {
+      Get.find<HomeController>().selectAccount(row.id);
+    }
+    if (Get.isRegistered<PrimaryAccountService>()) {
+      unawaited(Get.find<PrimaryAccountService>().setPrimary(row.id));
+    }
+  }
+
+
   void _selectAccount(List<AccountRow> rows) {
+    accountRows.assignAll(rows);
     final focusId = _focusedAccountId();
     if (focusId != null) {
       final match = rows.where((a) => a.id == focusId);

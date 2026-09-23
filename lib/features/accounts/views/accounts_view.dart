@@ -47,6 +47,8 @@ class AccountsView extends StatelessWidget {
                     state: c.state,
                     onRetry: c.load,
                     skeleton: const _AccountsSkeleton(),
+                    emptyActionLabel: 'accounts.start_challenge'.tr,
+                    onEmptyAction: () => Get.toNamed(AppRoutes.challenge),
                     builder: (data) => _AccountsBody(controller: c, data: data),
                   ),
                 ),

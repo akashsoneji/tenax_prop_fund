@@ -12,6 +12,7 @@ import '../widgets/close_all_sheet.dart';
 import '../widgets/history_filter_sheet.dart';
 import '../widgets/history_row.dart';
 import '../widgets/position_card.dart';
+import '../widgets/positions_account_header.dart';
 
 /// The Positions/Trade screen: a live account summary grid, a Market / Pending /
 /// History segmented switch, and the matching list (open positions with close,
@@ -30,6 +31,10 @@ class PositionsView extends GetView<PositionsController> {
       body: SafeArea(
         child: Column(
           children: [
+            Padding(
+              padding: EdgeInsets.fromLTRB(16.w, 12.h, 16.w, 0),
+              child: PositionsAccountHeader(controller: controller),
+            ),
             Padding(
               padding: EdgeInsets.fromLTRB(16.w, 12.h, 16.w, 0),
               child: Obx(
