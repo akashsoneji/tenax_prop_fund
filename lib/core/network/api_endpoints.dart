@@ -214,4 +214,35 @@ abstract class ApiEndpoints {
 
   /// Reply to a support ticket (`POST` with `{message}`).
   static String supportTicketReply(Object id) => '/support/tickets/$id/reply';
+
+  // ---------------------------------------------------------------------------
+  // Settings / Security
+  // ---------------------------------------------------------------------------
+  /// Account security snapshot. `GET` returns `data` with `two_factor_enabled`,
+  /// `two_factor_required`, `recovery_codes_remaining`, `prefs` and
+  /// `sessions[]`. `PUT` persists `{login_alerts, withdrawal_confirmation,
+  /// platform_lock}`.
+  static const settingsSecurity = '/settings/security';
+
+  /// Password change (`POST`). Body: `{current_password, password,
+  /// password_confirmation}`. Signs the user out of other devices.
+  static const settingsPassword = '/settings/password';
+
+  /// Beneficiary details (`POST`). Body: `{full_name, relationship, email,
+  /// mobile}`.
+  static const settingsBeneficiary = '/settings/beneficiary';
+
+  /// Starts two-factor enrolment (`POST`). `data` carries `secret` and the
+  /// `otpauth://` `qr_url` to scan.
+  static const twoFactorEnrol = '/settings/two-factor/enrol';
+
+  /// Finishes two-factor enrolment (`POST`). Body: `{secret, code}`. A wrong
+  /// code returns 422 with `errors.code[]`.
+  static const twoFactorConfirm = '/settings/two-factor/confirm';
+
+  /// Regenerates the recovery codes (`POST`). Body: `{current_password}`.
+  static const twoFactorRecoveryCodes = '/settings/two-factor/recovery-codes';
+
+  /// Turns two-factor off (`DELETE`). Body: `{current_password}`.
+  static const twoFactorDisable = '/settings/two-factor';
 }

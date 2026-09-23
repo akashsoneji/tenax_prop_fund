@@ -6,6 +6,7 @@ import '../../../shared/theme/app_text.dart';
 import '../../../shared/widgets/fade_slide_in.dart';
 import '../../../shared/widgets/pinned_gradient_app_bar.dart';
 import '../controllers/settings_controller.dart';
+import '../widgets/security_section.dart';
 
 /// Settings presented as a preference list: a summary hero at the top showing
 /// the active choices, then grouped cards where every option is a full-width
@@ -115,9 +116,20 @@ class SettingsView extends StatelessWidget {
                       ),
                     ),
                   ),
-                  SizedBox(height: 18.h),
+                  SizedBox(height: 22.h),
                   FadeSlideIn(
                     order: 5,
+                    child: _SectionHeader(
+                      icon: Icons.shield_outlined,
+                      title: 'settings.security.title'.tr,
+                      caption: 'settings.security.caption'.tr,
+                    ),
+                  ),
+                  SizedBox(height: 10.h),
+                  const FadeSlideIn(order: 6, child: SecuritySection()),
+                  SizedBox(height: 18.h),
+                  FadeSlideIn(
+                    order: 7,
                     child: Text(
                       'settings.footer_note'.tr,
                       textAlign: TextAlign.center,
