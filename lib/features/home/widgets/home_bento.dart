@@ -5,6 +5,8 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
 
 import '../../accounts/services/primary_account_service.dart';
+import '../../positions/controllers/positions_controller.dart';
+import '../../positions/widgets/positions_account_header.dart';
 import '../../../shared/theme/app_colors.dart';
 import '../../../shared/theme/app_theme.dart';
 import '../../../shared/widgets/app_count_up_text.dart';
@@ -46,8 +48,13 @@ class HomeBento extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        // Big gradient equity tile (full width).
-        EquityBentoTile(data: data),
+        // Account card — same Floating P/L + account pill used on Positions.
+        if (Get.isRegistered<PositionsController>())
+          PositionsAccountHeader(
+            controller: Get.find<PositionsController>(),
+          )
+        else
+          EquityBentoTile(data: data),
         SizedBox(height: gap),
         // Balance + Your accounts — paired row.
         IntrinsicHeight(
