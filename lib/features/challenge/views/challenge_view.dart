@@ -7,6 +7,7 @@ import '../../../app/flavor/flavor_resolver.dart';
 import '../../../app/routes/app_routes.dart';
 import '../../../shared/theme/app_colors.dart';
 import '../../../shared/theme/app_theme.dart';
+import '../../../shared/widgets/app_empty_view.dart';
 import '../../../shared/widgets/app_gradient_button.dart';
 import '../../../shared/widgets/app_segmented_control.dart';
 import '../../../shared/widgets/data_state_builder.dart';
@@ -200,7 +201,12 @@ class _PaidBody extends StatelessWidget {
             onChanged: (i) => c.setStep(ChallengeStep.values[i]),
           ),
           SizedBox(height: 28.h),
-          const _NoPlansState(),
+          const AppEmptyView(
+            titleKey: 'challenge.no_plans_title',
+            messageKey: 'challenge.no_plans_hint',
+            icon: Icons.hourglass_empty_rounded,
+            boxed: true,
+          ),
         ],
       );
     }
@@ -256,42 +262,6 @@ class _PaidBody extends StatelessWidget {
   }
 }
 
-class _NoPlansState extends StatelessWidget {
-  const _NoPlansState();
-
-  @override
-  Widget build(BuildContext context) {
-    final scheme = Theme.of(context).colorScheme;
-    return Container(
-      padding: EdgeInsets.symmetric(horizontal: 20.w, vertical: 28.h),
-      decoration: AppTheme.surfaceCard(scheme, radius: 18.r),
-      child: Column(
-        children: [
-          Icon(Icons.hourglass_empty_rounded, size: 42.sp, color: scheme.primary),
-          SizedBox(height: 12.h),
-          Text(
-            'No plans available',
-            textAlign: TextAlign.center,
-            style: GoogleFonts.beVietnamPro(
-              fontSize: 17.sp,
-              fontWeight: FontWeight.w800,
-              color: scheme.onSurface,
-            ),
-          ),
-          SizedBox(height: 6.h),
-          Text(
-            'Please choose another challenge type.',
-            textAlign: TextAlign.center,
-            style: GoogleFonts.beVietnamPro(
-              fontSize: 13.sp,
-              color: scheme.onSurface.withValues(alpha: 0.6),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-}
 
 class _RuleBoxCard extends StatelessWidget {
   const _RuleBoxCard({required this.box});

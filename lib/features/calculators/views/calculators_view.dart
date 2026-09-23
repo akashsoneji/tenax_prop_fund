@@ -3,6 +3,7 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
 
 import '../../../core/state/data_state.dart';
+import '../../../shared/widgets/app_empty_view.dart';
 import '../../../shared/widgets/app_gradient_button.dart';
 import '../../../shared/widgets/pinned_gradient_app_bar.dart';
 import '../controllers/calculators_controller.dart';
@@ -24,14 +25,18 @@ class CalculatorsView extends GetView<CalculatorsController> {
           return const Center(child: CircularProgressIndicator());
         }
         if (state is DataFailure<CalculatorsData>) {
-          return _MessageState(message: state.message, onRetry: controller.load);
+          return AppEmptyView(
+            messageKey: state.message,
+            icon: Icons.error_outline_rounded,
+            onRetry: controller.load,
+          );
         }
         if (state is DataEmpty) {
-          return const _MessageState(message: 'No calculators available.');
+          return const AppEmptyView(messageKey: 'calculators.none_available');
         }
         final data = controller.calculators;
         if (data == null || data.tabs.isEmpty) {
-          return const _MessageState(message: 'No calculators available.');
+          return const AppEmptyView(messageKey: 'calculators.none_available');
         }
         return CustomScrollView(
           keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
@@ -132,27 +137,3 @@ class _CalculatorForm extends StatelessWidget {
   }
 }
 
-class _MessageState extends StatelessWidget {
-  const _MessageState({required this.message, this.onRetry});
-  final String message;
-  final VoidCallback? onRetry;
-
-  @override
-  Widget build(BuildContext context) {
-    return Center(
-      child: Padding(
-        padding: EdgeInsets.all(24.w),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Text(message, textAlign: TextAlign.center),
-            if (onRetry != null) ...[
-              SizedBox(height: 12.h),
-              ElevatedButton(onPressed: onRetry, child: const Text('Retry')),
-            ],
-          ],
-        ),
-      ),
-    );
-  }
-}

@@ -5,6 +5,7 @@ import 'package:get/get.dart';
 import '../../../core/network/api_client.dart';
 import '../../../shared/theme/app_colors.dart';
 import '../../../shared/theme/app_text.dart';
+import '../../../shared/widgets/app_choice_chip.dart';
 import '../controllers/search_instruments_controller.dart';
 import '../models/symbol_models.dart';
 import '../repositories/symbols_repository.dart';
@@ -162,29 +163,17 @@ class _Pill extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final scheme = Theme.of(context).colorScheme;
-    return Material(
-      color: active ? scheme.primary : AppColors.transparent,
-      borderRadius: BorderRadius.circular(20.r),
-      child: InkWell(
-        onTap: onTap,
-        borderRadius: BorderRadius.circular(20.r),
-        child: Container(
-          padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 8.h),
-          decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(20.r),
-            border: Border.all(
-              color: active ? scheme.primary : scheme.outlineVariant,
-            ),
-          ),
-          alignment: Alignment.center,
-          child: Text(
-            label,
-            style: AppText.label(
-              color: active ? scheme.onPrimary : scheme.onSurfaceVariant,
-            ).copyWith(fontWeight: FontWeight.w600),
-          ),
-        ),
-      ),
+    return AppChoiceChip(
+      label: label,
+      selected: active,
+      onTap: onTap,
+      fontSize: 12,
+      padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 8.h),
+      selectedColor: scheme.onPrimary,
+      unselectedColor: scheme.onSurfaceVariant,
+      selectedFill: scheme.primary,
+      unselectedFill: AppColors.transparent,
+      borderColor: active ? scheme.primary : scheme.outlineVariant,
     );
   }
 }

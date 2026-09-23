@@ -4,7 +4,6 @@ import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
 
 import '../../../shared/theme/app_theme.dart';
-import '../../../shared/widgets/data_state_builder.dart';
 import '../../../shared/widgets/pinned_gradient_app_bar.dart';
 import '../controllers/challenge_controller.dart';
 import '../models/challenge_models.dart';
@@ -20,7 +19,7 @@ class ChallengeCompareView extends StatelessWidget {
       body: CustomScrollView(
         physics: const BouncingScrollPhysics(),
         slivers: [
-          const PinnedGradientAppBar(title: 'Compare challenges'),
+          PinnedGradientAppBar(title: 'challenge.compare_title'.tr),
           SliverPadding(
             padding: EdgeInsets.fromLTRB(16.w, 18.h, 16.w, 32.h),
             sliver: SliverToBoxAdapter(

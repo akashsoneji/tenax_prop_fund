@@ -3,8 +3,8 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
 
 import '../../../shared/theme/app_colors.dart';
-import '../../../shared/theme/app_text.dart';
 import '../../../shared/theme/app_theme.dart';
+import '../../../shared/widgets/app_stat_tile.dart';
 import '../models/positions_models.dart';
 
 /// The 6-cell account summary grid
@@ -58,36 +58,18 @@ class _MetricCell extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final scheme = Theme.of(context).colorScheme;
-    final muted = scheme.onSurface.withValues(alpha: AppColors.alphaMuted);
-    final text = metric.isPercent
-        ? '${metric.value.toStringAsFixed(2)}%'
-        : metric.value.toStringAsFixed(2);
-    return Column(
-      mainAxisAlignment: MainAxisAlignment.center,
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Row(
-          children: [
-            Icon(metric.icon, size: 14.w, color: scheme.primary),
-            SizedBox(width: 4.w),
-            Expanded(
-              child: Text(
-                metric.label,
-                maxLines: 1,
-                overflow: TextOverflow.ellipsis,
-                style: AppText.label(color: muted, fontSize: 11.sp),
-              ),
-            ),
-          ],
-        ),
-        SizedBox(height: 2.h),
-        Text(
-          text,
-          maxLines: 1,
-          overflow: TextOverflow.ellipsis,
-          style: AppText.subtitle(color: scheme.onSurface, fontSize: 14.sp),
-        ),
-      ],
+    return AppStatTile(
+      icon: metric.icon,
+      iconInline: true,
+      label: metric.label,
+      value: metric.isPercent
+          ? '${metric.value.toStringAsFixed(2)}%'
+          : metric.value.toStringAsFixed(2),
+      labelColor: scheme.onSurface.withValues(alpha: AppColors.alphaMuted),
+      labelFontSize: 11,
+      valueFontSize: 14,
+      valueFontWeight: FontWeight.w600,
+      gap: 2,
     );
   }
 }

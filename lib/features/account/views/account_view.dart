@@ -4,6 +4,8 @@ import 'package:get/get.dart';
 
 import '../../../shared/theme/app_colors.dart';
 import '../../../shared/theme/app_theme.dart';
+import '../../../shared/widgets/app_choice_chip.dart';
+import '../../../shared/widgets/app_empty_view.dart';
 import '../../../shared/widgets/app_gradient_button.dart';
 import '../../../shared/widgets/data_state_builder.dart';
 import '../../../shared/widgets/pinned_gradient_app_bar.dart';
@@ -104,32 +106,23 @@ class _TabChip extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final scheme = Theme.of(context).colorScheme;
-    return GestureDetector(
+    return AppChoiceChip(
+      label: label,
+      selected: selected,
       onTap: onTap,
-      behavior: HitTestBehavior.opaque,
-      child: AnimatedContainer(
-        duration: const Duration(milliseconds: 200),
-        curve: Curves.easeOutCubic,
-        padding: EdgeInsets.symmetric(horizontal: 16.w),
-        alignment: Alignment.center,
-        decoration: BoxDecoration(
-          color: selected ? scheme.primary : AppColors.transparent,
-          borderRadius: BorderRadius.circular(22.r),
-          border: Border.all(
-            color: selected
-                ? scheme.primary
-                : scheme.primary.withValues(alpha: 0.22),
-          ),
-        ),
-        child: Text(
-          label,
-          style: TextStyle(
-            fontSize: 13.sp,
-            fontWeight: FontWeight.w700,
-            color: selected ? AppColors.white : scheme.onSurfaceVariant,
-          ),
-        ),
-      ),
+      animate: true,
+      alignment: Alignment.center,
+      radius: 22,
+      fontSize: 13,
+      fontWeight: FontWeight.w700,
+      padding: EdgeInsets.symmetric(horizontal: 16.w),
+      selectedColor: AppColors.white,
+      unselectedColor: scheme.onSurfaceVariant,
+      selectedFill: scheme.primary,
+      unselectedFill: AppColors.transparent,
+      borderColor: selected
+          ? scheme.primary
+          : scheme.primary.withValues(alpha: 0.22),
     );
   }
 }
@@ -273,7 +266,10 @@ class _DetailedStats extends StatelessWidget {
         _SectionLabel('account.recent_trades'.tr),
         SizedBox(height: 12.h),
         if (data.trades.isEmpty)
-          _EmptyNote(text: 'account.no_trades'.tr)
+          const AppEmptyView(
+            messageKey: 'account.no_trades',
+            icon: Icons.receipt_long_outlined,
+          )
         else
           for (final t in data.trades) AccountTradeRow(trade: t),
       ],
@@ -531,23 +527,6 @@ class _SectionLabel extends StatelessWidget {
   }
 }
 
-class _EmptyNote extends StatelessWidget {
-  const _EmptyNote({required this.text});
-  final String text;
-
-  @override
-  Widget build(BuildContext context) {
-    final scheme = Theme.of(context).colorScheme;
-    return Padding(
-      padding: EdgeInsets.symmetric(vertical: 24.h),
-      child: Center(
-        child: Text(text,
-            style: TextStyle(
-                fontSize: 13.5.sp, color: scheme.onSurfaceVariant)),
-      ),
-    );
-  }
-}
 
 class _OverviewSkeleton extends StatelessWidget {
   const _OverviewSkeleton();

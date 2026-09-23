@@ -30,8 +30,8 @@ class EditProfileView extends GetView<EditProfileController> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
-                  const _AvatarHero(),
-                  SizedBox(height: 22.h),
+                  // const _AvatarHero(),
+                  // SizedBox(height: 22.h),
                   AppLabeledField(
                     controller: controller.fullName,
                     label: 'edit_profile.full_name'.tr,

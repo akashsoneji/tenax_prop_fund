@@ -36,10 +36,10 @@ class BillingData {
     }
     return BillingData(
       stats: [
-        BillingStat(label: 'Paid', value: _money(paid)),
-        BillingStat(label: 'Refunded', value: _money(refunded)),
-        BillingStat(label: 'Net', value: _money(paid - refunded)),
-        BillingStat(label: 'Invoices', value: '${rows.length}'),
+        BillingStat(label: 'billing.stat_paid', value: _money(paid)),
+        BillingStat(label: 'billing.stat_refunded', value: _money(refunded)),
+        BillingStat(label: 'billing.stat_net', value: _money(paid - refunded)),
+        BillingStat(label: 'billing.stat_invoices', value: '${rows.length}'),
       ],
       transactions: txns,
     );

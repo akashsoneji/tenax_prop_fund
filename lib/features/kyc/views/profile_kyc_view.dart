@@ -68,8 +68,8 @@ class _KycBody extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
           _ProfileChip(profile: profile),
-          SizedBox(height: 14.h),
-          const _WarningBanner(),
+          // SizedBox(height: 14.h),
+          // const _WarningBanner(),
           SizedBox(height: 22.h),
           _VerificationSection(profile: profile),
           SizedBox(height: 22.h),
@@ -102,11 +102,7 @@ class _ProfileChip extends StatelessWidget {
       ),
       child: Row(
         children: [
-          CircleAvatar(
-            radius: 28.r,
-            backgroundColor: scheme.primary.withValues(alpha: 0.15),
-            backgroundImage: NetworkImage(profile.avatarUrl),
-          ),
+          _ProfileAvatar(url: profile.avatarUrl, name: profile.name),
           SizedBox(width: 14.w),
           Expanded(
             child: Column(
@@ -125,6 +121,38 @@ class _ProfileChip extends StatelessWidget {
           ),
         ],
       ),
+    );
+  }
+}
+
+/// Avatar that falls back to the user's initial when the API sends no (or an
+/// empty) avatar URL — `NetworkImage('')` throws while resolving.
+class _ProfileAvatar extends StatelessWidget {
+  const _ProfileAvatar({required this.url, required this.name});
+
+  final String url;
+  final String name;
+
+  @override
+  Widget build(BuildContext context) {
+    final scheme = Theme.of(context).colorScheme;
+    final hasImage = Uri.tryParse(url)?.hasAuthority ?? false;
+    final initial = name.trim().isEmpty ? '?' : name.trim()[0].toUpperCase();
+
+    return CircleAvatar(
+      radius: 28.r,
+      backgroundColor: scheme.primary.withValues(alpha: 0.15),
+      backgroundImage: hasImage ? NetworkImage(url) : null,
+      child: hasImage
+          ? null
+          : Text(
+              initial,
+              style: GoogleFonts.beVietnamPro(
+                fontSize: 20.sp,
+                fontWeight: FontWeight.w700,
+                color: scheme.primary,
+              ),
+            ),
     );
   }
 }
@@ -258,11 +286,11 @@ class _VerificationRow extends StatelessWidget {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text(step.title,
+                    Text(step.title.tr,
                         style: GoogleFonts.beVietnamPro(
                             fontSize: 15.sp, fontWeight: FontWeight.w700)),
                     SizedBox(height: 3.h),
-                    Text(step.subtitle,
+                    Text(step.subtitle.tr,
                         style: GoogleFonts.beVietnamPro(
                             fontSize: 12.5.sp,
                             color: scheme.onSurface.withValues(alpha: 0.55))),
@@ -317,7 +345,7 @@ class _PersonalDetailsSection extends StatelessWidget {
         Container(
           padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 6.h),
           decoration: BoxDecoration(
-            gradient: AppTheme.brandGradient(scheme),
+            gradient: AppTheme.heroGradient(scheme),
             borderRadius: BorderRadius.circular(20.r),
             boxShadow: [
               BoxShadow(
@@ -360,7 +388,7 @@ class _DetailRow extends StatelessWidget {
         children: [
           Icon(row.icon, size: 18.w, color: AppColors.white.withValues(alpha: 0.85)),
           SizedBox(width: 12.w),
-          Text(row.label,
+          Text(row.label.tr,
               style: GoogleFonts.beVietnamPro(
                   fontSize: 14.sp,
                   color: AppColors.white.withValues(alpha: 0.9))),

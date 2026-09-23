@@ -1,15 +1,15 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
-import 'package:google_fonts/google_fonts.dart';
 
+import '../../../shared/theme/app_text.dart';
 import '../../../shared/widgets/fade_slide_in.dart';
 import '../../../shared/widgets/pinned_gradient_app_bar.dart';
 import '../controllers/settings_controller.dart';
 
-/// Compact settings — theme as a 3-tile segmented picker and language as a
-/// pill toggle. Selecting applies instantly and the reactive highlight moves
-/// without leaving the screen.
+/// Settings presented as a preference list: a summary hero at the top showing
+/// the active choices, then grouped cards where every option is a full-width
+/// row (icon + title + description + radio). Tapping a row applies instantly.
 class SettingsView extends StatelessWidget {
   const SettingsView({super.key});
 
@@ -20,46 +20,61 @@ class SettingsView extends StatelessWidget {
 
     return Scaffold(
       backgroundColor: scheme.surface,
+      resizeToAvoidBottomInset: true,
       body: CustomScrollView(
         physics: const BouncingScrollPhysics(),
         slivers: [
           PinnedGradientAppBar(title: 'settings.title'.tr),
           SliverPadding(
-            padding: EdgeInsets.fromLTRB(16.w, 20.h, 16.w, 32.h),
+            padding: EdgeInsets.fromLTRB(16.w, 16.h, 16.w, 32.h),
             sliver: SliverToBoxAdapter(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
                   FadeSlideIn(
                     order: 0,
-                    child: _Label(
-                      icon: Icons.palette_outlined,
-                      text: 'settings.theme'.tr,
+                    child: Obx(
+                      () => _SummaryHero(
+                        themeValue: _themeLabel(s.themeMode),
+                        languageValue: s.locale.languageCode == 'hi'
+                            ? 'settings.language_hi'.tr
+                            : 'settings.language_en'.tr,
+                      ),
                     ),
                   ),
-                  SizedBox(height: 12.h),
+                  SizedBox(height: 20.h),
                   FadeSlideIn(
                     order: 1,
+                    child: _SectionHeader(
+                      icon: Icons.palette_outlined,
+                      title: 'settings.theme'.tr,
+                      caption: 'settings.theme_caption'.tr,
+                    ),
+                  ),
+                  SizedBox(height: 10.h),
+                  FadeSlideIn(
+                    order: 2,
                     child: Obx(
-                      () => Row(
+                      () => _OptionGroup(
                         children: [
-                          _ThemeTile(
+                          _OptionRow(
                             icon: Icons.brightness_auto_rounded,
-                            label: 'settings.theme_system'.tr,
+                            title: 'settings.theme_system'.tr,
+                            description: 'settings.theme_system_desc'.tr,
                             selected: s.themeMode == ThemeMode.system,
                             onTap: () => s.setThemeMode(ThemeMode.system),
                           ),
-                          SizedBox(width: 10.w),
-                          _ThemeTile(
+                          _OptionRow(
                             icon: Icons.light_mode_rounded,
-                            label: 'settings.theme_light'.tr,
+                            title: 'settings.theme_light'.tr,
+                            description: 'settings.theme_light_desc'.tr,
                             selected: s.themeMode == ThemeMode.light,
                             onTap: () => s.setThemeMode(ThemeMode.light),
                           ),
-                          SizedBox(width: 10.w),
-                          _ThemeTile(
+                          _OptionRow(
                             icon: Icons.dark_mode_rounded,
-                            label: 'settings.theme_dark'.tr,
+                            title: 'settings.theme_dark'.tr,
+                            description: 'settings.theme_dark_desc'.tr,
                             selected: s.themeMode == ThemeMode.dark,
                             onTap: () => s.setThemeMode(ThemeMode.dark),
                           ),
@@ -67,24 +82,48 @@ class SettingsView extends StatelessWidget {
                       ),
                     ),
                   ),
-                  SizedBox(height: 28.h),
-                  FadeSlideIn(
-                    order: 2,
-                    child: _Label(
-                      icon: Icons.language_rounded,
-                      text: 'settings.language'.tr,
-                    ),
-                  ),
-                  SizedBox(height: 12.h),
+                  SizedBox(height: 22.h),
                   FadeSlideIn(
                     order: 3,
+                    child: _SectionHeader(
+                      icon: Icons.language_rounded,
+                      title: 'settings.language'.tr,
+                      caption: 'settings.language_caption'.tr,
+                    ),
+                  ),
+                  SizedBox(height: 10.h),
+                  FadeSlideIn(
+                    order: 4,
                     child: Obx(
-                      () => _PillToggle(
-                        leftLabel: 'settings.language_en'.tr,
-                        rightLabel: 'settings.language_hi'.tr,
-                        rightSelected: s.locale.languageCode == 'hi',
-                        onLeft: () => s.setLocale(const Locale('en')),
-                        onRight: () => s.setLocale(const Locale('hi')),
+                      () => _OptionGroup(
+                        children: [
+                          _OptionRow(
+                            icon: Icons.abc_rounded,
+                            title: 'settings.language_en'.tr,
+                            description: 'settings.language_en_desc'.tr,
+                            selected: s.locale.languageCode != 'hi',
+                            onTap: () => s.setLocale(const Locale('en')),
+                          ),
+                          _OptionRow(
+                            icon: Icons.translate_rounded,
+                            title: 'settings.language_hi'.tr,
+                            description: 'settings.language_hi_desc'.tr,
+                            selected: s.locale.languageCode == 'hi',
+                            onTap: () => s.setLocale(const Locale('hi')),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                  SizedBox(height: 18.h),
+                  FadeSlideIn(
+                    order: 5,
+                    child: Text(
+                      'settings.footer_note'.tr,
+                      textAlign: TextAlign.center,
+                      style: AppText.label(
+                        fontSize: 11.sp,
+                        color: scheme.onSurface.withValues(alpha: 0.5),
                       ),
                     ),
                   ),
@@ -96,155 +135,74 @@ class SettingsView extends StatelessWidget {
       ),
     );
   }
-}
 
-class _Label extends StatelessWidget {
-  const _Label({required this.icon, required this.text});
-  final IconData icon;
-  final String text;
-
-  @override
-  Widget build(BuildContext context) {
-    final scheme = Theme.of(context).colorScheme;
-    return Row(
-      children: [
-        Icon(icon, size: 17.sp, color: scheme.primary),
-        SizedBox(width: 8.w),
-        Text(
-          text,
-          style: GoogleFonts.beVietnamPro(
-            fontSize: 14.sp,
-            fontWeight: FontWeight.w800,
-            letterSpacing: 0.2,
-            color: scheme.onSurface.withValues(alpha: 0.85),
-          ),
-        ),
-      ],
-    );
+  String _themeLabel(ThemeMode mode) {
+    switch (mode) {
+      case ThemeMode.light:
+        return 'settings.theme_light'.tr;
+      case ThemeMode.dark:
+        return 'settings.theme_dark'.tr;
+      case ThemeMode.system:
+        return 'settings.theme_system'.tr;
+    }
   }
 }
 
-/// One of the three theme segments — icon over label, highlights when selected.
-class _ThemeTile extends StatelessWidget {
-  const _ThemeTile({
-    required this.icon,
-    required this.label,
-    required this.selected,
-    required this.onTap,
-  });
+/// Top card summarising what is currently active.
+class _SummaryHero extends StatelessWidget {
+  const _SummaryHero({required this.themeValue, required this.languageValue});
 
-  final IconData icon;
-  final String label;
-  final bool selected;
-  final VoidCallback onTap;
-
-  @override
-  Widget build(BuildContext context) {
-    final scheme = Theme.of(context).colorScheme;
-    return Expanded(
-      child: GestureDetector(
-        onTap: onTap,
-        child: AnimatedContainer(
-          duration: const Duration(milliseconds: 180),
-          padding: EdgeInsets.symmetric(vertical: 16.h),
-          decoration: BoxDecoration(
-            color: selected
-                ? scheme.primary.withValues(alpha: 0.10)
-                : scheme.surfaceContainerHighest.withValues(alpha: 0.35),
-            borderRadius: BorderRadius.circular(16.r),
-            border: Border.all(
-              color: selected
-                  ? scheme.primary
-                  : scheme.outlineVariant.withValues(alpha: 0.5),
-              width: selected ? 1.6 : 1,
-            ),
-          ),
-          child: Column(
-            children: [
-              Icon(
-                icon,
-                size: 24.sp,
-                color: selected
-                    ? scheme.primary
-                    : scheme.onSurface.withValues(alpha: 0.6),
-              ),
-              SizedBox(height: 8.h),
-              Text(
-                label,
-                maxLines: 1,
-                overflow: TextOverflow.ellipsis,
-                textAlign: TextAlign.center,
-                style: GoogleFonts.beVietnamPro(
-                  fontSize: 12.sp,
-                  fontWeight: FontWeight.w700,
-                  color: selected
-                      ? scheme.primary
-                      : scheme.onSurface.withValues(alpha: 0.7),
-                ),
-              ),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
-}
-
-/// Two-option sliding pill toggle (language).
-class _PillToggle extends StatelessWidget {
-  const _PillToggle({
-    required this.leftLabel,
-    required this.rightLabel,
-    required this.rightSelected,
-    required this.onLeft,
-    required this.onRight,
-  });
-
-  final String leftLabel;
-  final String rightLabel;
-  final bool rightSelected;
-  final VoidCallback onLeft;
-  final VoidCallback onRight;
+  final String themeValue;
+  final String languageValue;
 
   @override
   Widget build(BuildContext context) {
     final scheme = Theme.of(context).colorScheme;
     return Container(
-      padding: EdgeInsets.all(4.w),
+      padding: EdgeInsets.all(16.w),
       decoration: BoxDecoration(
-        color: scheme.surfaceContainerHighest.withValues(alpha: 0.4),
-        borderRadius: BorderRadius.circular(14.r),
-        border: Border.all(color: scheme.outlineVariant.withValues(alpha: 0.5)),
+        gradient: LinearGradient(
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+          colors: [
+            scheme.primary.withValues(alpha: 0.16),
+            scheme.primary.withValues(alpha: 0.04),
+          ],
+        ),
+        borderRadius: BorderRadius.circular(20.r),
+        border: Border.all(color: scheme.primary.withValues(alpha: 0.25)),
       ),
-      child: Stack(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          AnimatedAlign(
-            duration: const Duration(milliseconds: 200),
-            curve: Curves.easeOut,
-            alignment:
-                rightSelected ? Alignment.centerRight : Alignment.centerLeft,
-            child: FractionallySizedBox(
-              widthFactor: 0.5,
-              child: Container(
-                height: 40.h,
-                decoration: BoxDecoration(
-                  color: scheme.primary,
-                  borderRadius: BorderRadius.circular(11.r),
-                ),
-              ),
+          Text(
+            'settings.subtitle'.tr,
+            maxLines: 2,
+            overflow: TextOverflow.ellipsis,
+            style: AppText.subtitle(
+              fontSize: 13.sp,
+              color: scheme.onSurface.withValues(alpha: 0.75),
             ),
           ),
+          SizedBox(height: 14.h),
           Row(
             children: [
-              _PillHalf(
-                label: leftLabel,
-                selected: !rightSelected,
-                onTap: onLeft,
+              _SummaryStat(
+                icon: Icons.palette_outlined,
+                label: 'settings.theme'.tr,
+                value: themeValue,
               ),
-              _PillHalf(
-                label: rightLabel,
-                selected: rightSelected,
-                onTap: onRight,
+              SizedBox(width: 12.w),
+              Container(
+                width: 1,
+                height: 34.h,
+                color: scheme.onSurface.withValues(alpha: 0.12),
+              ),
+              SizedBox(width: 12.w),
+              _SummaryStat(
+                icon: Icons.language_rounded,
+                label: 'settings.language'.tr,
+                value: languageValue,
               ),
             ],
           ),
@@ -254,42 +212,250 @@ class _PillToggle extends StatelessWidget {
   }
 }
 
-class _PillHalf extends StatelessWidget {
-  const _PillHalf({
+class _SummaryStat extends StatelessWidget {
+  const _SummaryStat({
+    required this.icon,
     required this.label,
+    required this.value,
+  });
+
+  final IconData icon;
+  final String label;
+  final String value;
+
+  @override
+  Widget build(BuildContext context) {
+    final scheme = Theme.of(context).colorScheme;
+    return Expanded(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Icon(icon, size: 14.sp, color: scheme.primary),
+              SizedBox(width: 6.w),
+              Expanded(
+                child: Text(
+                  label,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: AppText.label(
+                    fontSize: 11.sp,
+                    color: scheme.onSurface.withValues(alpha: 0.6),
+                  ),
+                ),
+              ),
+            ],
+          ),
+          SizedBox(height: 4.h),
+          Text(
+            value,
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+            style: AppText.title(fontSize: 15.sp, color: scheme.onSurface),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _SectionHeader extends StatelessWidget {
+  const _SectionHeader({
+    required this.icon,
+    required this.title,
+    required this.caption,
+  });
+
+  final IconData icon;
+  final String title;
+  final String caption;
+
+  @override
+  Widget build(BuildContext context) {
+    final scheme = Theme.of(context).colorScheme;
+    return Row(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Icon(icon, size: 16.sp, color: scheme.primary),
+        SizedBox(width: 8.w),
+        Expanded(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                title,
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+                style: AppText.title(
+                  fontSize: 14.sp,
+                  color: scheme.onSurface.withValues(alpha: 0.9),
+                ),
+              ),
+              SizedBox(height: 2.h),
+              Text(
+                caption,
+                maxLines: 2,
+                overflow: TextOverflow.ellipsis,
+                style: AppText.label(
+                  fontSize: 11.sp,
+                  color: scheme.onSurface.withValues(alpha: 0.55),
+                ),
+              ),
+            ],
+          ),
+        ),
+      ],
+    );
+  }
+}
+
+/// Card that stacks option rows with hairline dividers between them.
+class _OptionGroup extends StatelessWidget {
+  const _OptionGroup({required this.children});
+
+  final List<Widget> children;
+
+  @override
+  Widget build(BuildContext context) {
+    final scheme = Theme.of(context).colorScheme;
+    final rows = <Widget>[];
+    for (var i = 0; i < children.length; i++) {
+      if (i > 0) {
+        rows.add(
+          Divider(
+            height: 1,
+            thickness: 1,
+            indent: 56.w,
+            color: scheme.outlineVariant.withValues(alpha: 0.4),
+          ),
+        );
+      }
+      rows.add(children[i]);
+    }
+
+    return Container(
+      clipBehavior: Clip.antiAlias,
+      decoration: BoxDecoration(
+        color: scheme.surfaceContainerHighest.withValues(alpha: 0.35),
+        borderRadius: BorderRadius.circular(18.r),
+        border: Border.all(color: scheme.outlineVariant.withValues(alpha: 0.5)),
+      ),
+      child: Column(children: rows),
+    );
+  }
+}
+
+/// A single selectable preference row.
+class _OptionRow extends StatelessWidget {
+  const _OptionRow({
+    required this.icon,
+    required this.title,
+    required this.description,
     required this.selected,
     required this.onTap,
   });
 
-  final String label;
+  final IconData icon;
+  final String title;
+  final String description;
   final bool selected;
   final VoidCallback onTap;
 
   @override
   Widget build(BuildContext context) {
     final scheme = Theme.of(context).colorScheme;
-    return Expanded(
-      child: GestureDetector(
-        onTap: onTap,
-        behavior: HitTestBehavior.opaque,
-        child: SizedBox(
-          height: 40.h,
-          child: Center(
-            child: Text(
-              label,
-              maxLines: 1,
-              overflow: TextOverflow.ellipsis,
-              style: GoogleFonts.beVietnamPro(
-                fontSize: 13.sp,
-                fontWeight: FontWeight.w700,
+    return GestureDetector(
+      onTap: onTap,
+      behavior: HitTestBehavior.opaque,
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 180),
+        padding: EdgeInsets.symmetric(horizontal: 14.w, vertical: 14.h),
+        color: selected
+            ? scheme.primary.withValues(alpha: 0.08)
+            : Colors.transparent,
+        child: Row(
+          children: [
+            Container(
+              width: 34.w,
+              height: 34.w,
+              alignment: Alignment.center,
+              decoration: BoxDecoration(
                 color: selected
-                    ? scheme.onPrimary
-                    : scheme.onSurface.withValues(alpha: 0.65),
+                    ? scheme.primary.withValues(alpha: 0.16)
+                    : scheme.onSurface.withValues(alpha: 0.06),
+                borderRadius: BorderRadius.circular(11.r),
+              ),
+              child: Icon(
+                icon,
+                size: 18.sp,
+                color: selected
+                    ? scheme.primary
+                    : scheme.onSurface.withValues(alpha: 0.6),
               ),
             ),
-          ),
+            SizedBox(width: 12.w),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    title,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: AppText.title(
+                      fontSize: 14.sp,
+                      color: selected ? scheme.primary : scheme.onSurface,
+                    ),
+                  ),
+                  SizedBox(height: 2.h),
+                  Text(
+                    description,
+                    maxLines: 2,
+                    overflow: TextOverflow.ellipsis,
+                    style: AppText.label(
+                      fontSize: 11.sp,
+                      color: scheme.onSurface.withValues(alpha: 0.55),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            SizedBox(width: 10.w),
+            _SelectionDot(selected: selected),
+          ],
         ),
       ),
+    );
+  }
+}
+
+class _SelectionDot extends StatelessWidget {
+  const _SelectionDot({required this.selected});
+
+  final bool selected;
+
+  @override
+  Widget build(BuildContext context) {
+    final scheme = Theme.of(context).colorScheme;
+    return AnimatedContainer(
+      duration: const Duration(milliseconds: 180),
+      width: 20.w,
+      height: 20.w,
+      alignment: Alignment.center,
+      decoration: BoxDecoration(
+        shape: BoxShape.circle,
+        color: selected ? scheme.primary : Colors.transparent,
+        border: Border.all(
+          color: selected
+              ? scheme.primary
+              : scheme.onSurface.withValues(alpha: 0.28),
+          width: 1.6,
+        ),
+      ),
+      child: selected
+          ? Icon(Icons.check_rounded, size: 13.sp, color: scheme.onPrimary)
+          : null,
     );
   }
 }

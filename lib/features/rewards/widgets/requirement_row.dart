@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
+
+import '../../../shared/widgets/app_pill.dart';
 
 import '../models/reward_models.dart';
 
@@ -30,7 +33,7 @@ class RequirementRow extends StatelessWidget {
             children: [
               Expanded(
                 child: Text(
-                  requirement.label,
+                  requirement.label.tr,
                   style: GoogleFonts.beVietnamPro(
                     fontSize: 14.sp,
                     fontWeight: FontWeight.w500,
@@ -38,7 +41,7 @@ class RequirementRow extends StatelessWidget {
                   ),
                 ),
               ),
-              _StatusPill(text: requirement.value, color: accent),
+              _StatusPill(text: requirement.value.tr, color: accent),
             ],
           ),
         ),
@@ -60,20 +63,11 @@ class _StatusPill extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 6.h),
-      decoration: BoxDecoration(
-        color: color.withValues(alpha: 0.10),
-        borderRadius: BorderRadius.circular(999.r),
-      ),
-      child: Text(
-        text,
-        style: GoogleFonts.beVietnamPro(
-          fontSize: 12.5.sp,
-          fontWeight: FontWeight.w700,
-          color: color,
-        ),
-      ),
+    return AppPill(
+      label: text,
+      color: color,
+      bgAlpha: 0.10,
+      fontSize: 12.5,
     );
   }
 }

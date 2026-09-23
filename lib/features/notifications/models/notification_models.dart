@@ -130,11 +130,13 @@ class NotificationGroup {
 
     return [
       if (todayItems.isNotEmpty)
-        NotificationGroup(label: 'Today', items: todayItems),
+        NotificationGroup(label: 'notifications.group_today', items: todayItems),
       if (yesterdayItems.isNotEmpty)
-        NotificationGroup(label: 'Yesterday', items: yesterdayItems),
+        NotificationGroup(
+            label: 'notifications.group_yesterday', items: yesterdayItems),
       if (earlierItems.isNotEmpty)
-        NotificationGroup(label: 'Earlier', items: earlierItems),
+        NotificationGroup(
+            label: 'notifications.group_earlier', items: earlierItems),
     ];
   }
 }

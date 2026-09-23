@@ -6,6 +6,7 @@ import 'package:get/get.dart';
 
 import '../../../shared/theme/app_colors.dart';
 import '../../../shared/theme/app_theme.dart';
+import '../../../shared/widgets/app_pill.dart';
 
 /// Shared animated backdrop for the auth module. Provides:
 ///
@@ -482,20 +483,12 @@ class _Pill extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
+    return AppPill(
+      label: label,
+      color: AppColors.white,
+      bgAlpha: 0.18,
+      fontWeight: FontWeight.w600,
       padding: EdgeInsets.symmetric(horizontal: 14.w, vertical: 8.h),
-      decoration: BoxDecoration(
-        color: AppColors.white.withValues(alpha: 0.18),
-        borderRadius: BorderRadius.circular(999.r),
-      ),
-      child: Text(
-        label,
-        style: TextStyle(
-          color: AppColors.white,
-          fontSize: 12.sp,
-          fontWeight: FontWeight.w600,
-        ),
-      ),
     );
   }
 }

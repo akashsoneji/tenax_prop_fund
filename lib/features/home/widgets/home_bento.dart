@@ -475,25 +475,16 @@ class _LivePill extends GetView<HomeController> {
   Widget build(BuildContext context) {
     return Obx(() {
       final live = controller.isLive.value;
-      return Container(
+      return AppPill(
+        label: (live ? 'home.status_live' : 'home.status_offline').tr,
+        color: AppColors.white,
+        bgAlpha: 0.14,
+        fontSize: 10.5,
+        fontWeight: FontWeight.w800,
+        letterSpacing: 0.6,
         padding: EdgeInsets.symmetric(horizontal: 10.w, vertical: 5.h),
-        decoration: BoxDecoration(
-          color: AppColors.white.withValues(alpha: 0.14),
-          borderRadius: BorderRadius.circular(999.r),
-        ),
-        child: Row(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            HomePulseDot(active: live),
-            SizedBox(width: 6.w),
-            Text(live ? 'LIVE' : 'OFFLINE',
-                style: TextStyle(
-                    fontSize: 10.5.sp,
-                    fontWeight: FontWeight.w800,
-                    letterSpacing: 0.6,
-                    color: AppColors.white)),
-          ],
-        ),
+        leading: HomePulseDot(active: live),
+        leadingGap: 6,
       );
     });
   }

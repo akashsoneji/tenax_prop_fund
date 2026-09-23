@@ -4,6 +4,7 @@ import 'package:get/get.dart';
 
 import '../../../shared/theme/app_colors.dart';
 import '../../../shared/theme/app_text.dart';
+import '../../../shared/widgets/app_empty_view.dart';
 import '../../../shared/widgets/app_segmented_control.dart';
 import '../controllers/positions_controller.dart';
 import '../widgets/account_summary_grid.dart';
@@ -76,7 +77,7 @@ class _MarketList extends StatelessWidget {
     return Obx(() {
       final rows = controller.rawPositions;
       if (rows.isEmpty) {
-        return const _EmptyState(messageKey: 'positions.no_open_trade');
+        return const AppEmptyView(messageKey: 'positions.no_open_trade');
       }
       final items = controller.openPositions;
       return Column(
@@ -155,7 +156,7 @@ class _PendingList extends StatelessWidget {
     return Obx(() {
       final rows = controller.rawPending;
       if (rows.isEmpty) {
-        return const _EmptyState(messageKey: 'positions.no_pending');
+        return const AppEmptyView(messageKey: 'positions.no_pending');
       }
       final items = controller.pendingOrders;
       return ListView.builder(
@@ -222,14 +223,14 @@ class _HistoryListState extends State<_HistoryList> {
             }
             final error = controller.historyError.value;
             if (error != null) {
-              return _EmptyState(
+              return AppEmptyView(
                 messageKey: 'positions.history_error',
                 onRetry: controller.loadHistory,
               );
             }
             final items = controller.filteredHistory;
             if (items.isEmpty) {
-              return const _EmptyState(messageKey: 'positions.no_history');
+              return const AppEmptyView(messageKey: 'positions.no_history');
             }
             final loadingMore = controller.historyLoadingMore.value;
             return ListView.builder(
@@ -361,32 +362,3 @@ class _HistoryFilterBar extends StatelessWidget {
   }
 }
 
-class _EmptyState extends StatelessWidget {
-  const _EmptyState({required this.messageKey, this.onRetry});
-  final String messageKey;
-  final VoidCallback? onRetry;
-
-  @override
-  Widget build(BuildContext context) {
-    final scheme = Theme.of(context).colorScheme;
-    final muted = scheme.onSurface.withValues(alpha: AppColors.alphaMuted);
-    return Center(
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Icon(Icons.inbox_outlined, size: 44.w, color: muted),
-          SizedBox(height: 12.h),
-          Text(messageKey.tr, style: AppText.subtitle(color: muted)),
-          if (onRetry != null) ...[
-            SizedBox(height: 12.h),
-            TextButton(
-              onPressed: onRetry,
-              child: Text('state.retry'.tr,
-                  style: AppText.subtitle(color: scheme.primary)),
-            ),
-          ],
-        ],
-      ),
-    );
-  }
-}

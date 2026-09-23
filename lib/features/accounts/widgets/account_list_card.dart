@@ -4,6 +4,7 @@ import 'package:get/get.dart';
 
 import '../../../shared/theme/app_colors.dart';
 import '../../../shared/theme/app_theme.dart';
+import '../../../shared/widgets/app_pill.dart';
 import '../models/accounts_models.dart';
 
 /// One account card, redesigned compact for mobile. A tone-coloured status rail
@@ -425,32 +426,16 @@ class _StatusPill extends StatelessWidget {
       AccountTone.neutral => scheme.onSurfaceVariant,
     };
     if (label.isEmpty) return const SizedBox.shrink();
-    return Container(
+    return AppPill(
+      label: label,
+      color: color,
+      showDot: true,
+      dotSize: 5,
+      dotGap: 5,
+      bordered: true,
+      radius: 7,
+      fontSize: 10.5,
       padding: EdgeInsets.symmetric(horizontal: 9.w, vertical: 4.h),
-      decoration: BoxDecoration(
-        color: color.withValues(alpha: 0.12),
-        borderRadius: BorderRadius.circular(7.r),
-        border: Border.all(color: color.withValues(alpha: 0.30)),
-      ),
-      child: Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Container(
-            width: 5.w,
-            height: 5.h,
-            decoration: BoxDecoration(color: color, shape: BoxShape.circle),
-          ),
-          SizedBox(width: 5.w),
-          Text(
-            label,
-            style: TextStyle(
-              fontSize: 10.5.sp,
-              fontWeight: FontWeight.w700,
-              color: color,
-            ),
-          ),
-        ],
-      ),
     );
   }
 }

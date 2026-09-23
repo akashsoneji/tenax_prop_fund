@@ -1,13 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
 
 import '../../../shared/theme/app_colors.dart';
 import '../../../shared/theme/app_theme.dart';
 
-/// The purple gradient card with a 2x2 grid of contact tiles at the top of the
-/// Support screen. Each tile is a translucent-white rounded box with a centered
-/// white icon + label.
+/// The purple gradient card at the top of the Support screen: a compact
+/// heading with a single row of four translucent-white contact tiles.
 class SupportContactCard extends StatelessWidget {
   const SupportContactCard({super.key});
 
@@ -15,15 +15,15 @@ class SupportContactCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final scheme = Theme.of(context).colorScheme;
     return Container(
-      padding: EdgeInsets.all(16.w),
+      padding: EdgeInsets.fromLTRB(14.w, 14.h, 14.w, 14.h),
       decoration: BoxDecoration(
         gradient: AppTheme.brandGradient(scheme),
         borderRadius: BorderRadius.circular(20.r),
         boxShadow: [
           BoxShadow(
             color: scheme.primary.withValues(alpha: 0.30),
-            blurRadius: 22.r,
-            offset: Offset(0, 12.h),
+            blurRadius: 18.r,
+            offset: Offset(0, 10.h),
           ),
         ],
       ),
@@ -32,43 +32,48 @@ class SupportContactCard extends StatelessWidget {
         children: [
           Text(
             'How can we help?',
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
             style: GoogleFonts.beVietnamPro(
               color: AppColors.white,
-              fontSize: 18.sp,
+              fontSize: 15.sp,
               fontWeight: FontWeight.w800,
             ),
           ),
-          SizedBox(height: 4.h),
+          SizedBox(height: 2.h),
           Text(
             'Reach us any way you like.',
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
             style: GoogleFonts.beVietnamPro(
               color: AppColors.white.withValues(alpha: 0.82),
-              fontSize: 13.sp,
+              fontSize: 11.5.sp,
               fontWeight: FontWeight.w500,
             ),
-          ),
-          SizedBox(height: 16.h),
-          Row(
-            children: [
-              const Expanded(
-                child: _ContactTile(icon: Icons.chat, label: 'WhatsApp'),
-              ),
-              SizedBox(width: 12.w),
-              const Expanded(
-                child: _ContactTile(icon: Icons.mail_outline, label: 'Email'),
-              ),
-            ],
           ),
           SizedBox(height: 12.h),
           Row(
             children: [
-              const Expanded(
-                child: _ContactTile(icon: Icons.help_outline, label: 'FAQ'),
-              ),
-              SizedBox(width: 12.w),
-              const Expanded(
+              Expanded(
                 child: _ContactTile(
-                    icon: Icons.menu_book_rounded, label: 'Rules'),
+                    icon: Icons.chat, label: 'support.contact_whatsapp'.tr),
+              ),
+              SizedBox(width: 8.w),
+              Expanded(
+                child: _ContactTile(
+                    icon: Icons.mail_outline, label: 'support.contact_email'.tr),
+              ),
+              SizedBox(width: 8.w),
+              Expanded(
+                child: _ContactTile(
+                    icon: Icons.help_outline, label: 'support.contact_faq'.tr),
+              ),
+              SizedBox(width: 8.w),
+              Expanded(
+                child: _ContactTile(
+                  icon: Icons.menu_book_rounded,
+                  label: 'support.contact_rules'.tr,
+                ),
               ),
             ],
           ),
@@ -87,23 +92,27 @@ class _ContactTile extends StatelessWidget {
   Widget build(BuildContext context) {
     return Material(
       color: AppColors.white.withValues(alpha: 0.16),
-      borderRadius: BorderRadius.circular(14.r),
+      borderRadius: BorderRadius.circular(12.r),
       child: InkWell(
         onTap: () {},
-        borderRadius: BorderRadius.circular(14.r),
+        borderRadius: BorderRadius.circular(12.r),
         child: Container(
-          height: 84.h,
+          height: 60.h,
+          padding: EdgeInsets.symmetric(horizontal: 4.w),
           alignment: Alignment.center,
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              Icon(icon, color: AppColors.white, size: 26.w),
-              SizedBox(height: 8.h),
+              Icon(icon, color: AppColors.white, size: 20.w),
+              SizedBox(height: 5.h),
               Text(
                 label,
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+                textAlign: TextAlign.center,
                 style: GoogleFonts.beVietnamPro(
                   color: AppColors.white,
-                  fontSize: 12.5.sp,
+                  fontSize: 10.5.sp,
                   fontWeight: FontWeight.w700,
                 ),
               ),

@@ -5,6 +5,7 @@ import 'package:google_fonts/google_fonts.dart';
 
 import '../../../shared/theme/app_colors.dart';
 import '../../../shared/theme/app_theme.dart';
+import '../../../shared/widgets/app_choice_chip.dart';
 import '../../../shared/widgets/data_state_builder.dart';
 import '../../../shared/widgets/pinned_gradient_app_bar.dart';
 import '../../../shared/widgets/skeletons/skeletons.dart';
@@ -255,41 +256,14 @@ class _ChannelChip extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final scheme = Theme.of(context).colorScheme;
-    return InkWell(
+    return AppChoiceChip(
+      label: label,
+      selected: on,
       onTap: () => onChanged(!on),
-      borderRadius: BorderRadius.circular(20.r),
-      child: Container(
-        padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 7.h),
-        decoration: BoxDecoration(
-          color: on
-              ? scheme.primary.withValues(alpha: 0.14)
-              : scheme.surfaceContainerHighest.withValues(alpha: 0.5),
-          borderRadius: BorderRadius.circular(20.r),
-          border: Border.all(
-            color: on
-                ? scheme.primary.withValues(alpha: 0.5)
-                : scheme.outlineVariant.withValues(alpha: 0.5),
-          ),
-        ),
-        child: Row(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Icon(
-              on ? Icons.check_circle_rounded : Icons.circle_outlined,
-              size: 15.w,
-              color: on ? scheme.primary : scheme.onSurfaceVariant,
-            ),
-            SizedBox(width: 6.w),
-            Text(
-              label,
-              style: GoogleFonts.beVietnamPro(
-                fontSize: 12.5.sp,
-                fontWeight: FontWeight.w600,
-                color: on ? scheme.primary : scheme.onSurfaceVariant,
-              ),
-            ),
-          ],
-        ),
+      leading: Icon(
+        on ? Icons.check_circle_rounded : Icons.circle_outlined,
+        size: 15.w,
+        color: on ? scheme.primary : scheme.onSurfaceVariant,
       ),
     );
   }
@@ -348,7 +322,7 @@ class _GroupBlock extends StatelessWidget {
           Padding(
             padding: EdgeInsets.only(left: 2.w, bottom: 10.h),
             child: Text(
-              group.label,
+              group.label.tr,
               style: GoogleFonts.beVietnamPro(
                 fontSize: 18.sp,
                 fontWeight: FontWeight.w800,

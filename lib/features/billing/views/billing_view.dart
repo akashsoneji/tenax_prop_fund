@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
-import 'package:google_fonts/google_fonts.dart';
 
 import '../../../shared/theme/app_colors.dart';
 import '../../../shared/theme/app_theme.dart';
+import '../../../shared/widgets/app_stat_tile.dart';
 import '../../../shared/widgets/data_state_builder.dart';
 import '../../../shared/widgets/pinned_gradient_app_bar.dart';
 import '../../../shared/widgets/skeletons/skeletons.dart';
@@ -172,36 +172,22 @@ class _StatCell extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      padding: EdgeInsets.symmetric(vertical: 16.h, horizontal: 12.w),
-      decoration: BoxDecoration(
-        color: AppColors.white.withValues(alpha: 0.10),
-        borderRadius: BorderRadius.circular(14.r),
-        border: Border.all(color: AppColors.white.withValues(alpha: 0.14)),
-      ),
-      child: Column(
-        children: [
-          Text(
-            stat.label,
-            style: GoogleFonts.beVietnamPro(
-              color: AppColors.white.withValues(alpha: 0.75),
-              fontSize: 13.sp,
-              fontWeight: FontWeight.w500,
-            ),
-          ),
-          SizedBox(height: 6.h),
-          Text(
-            stat.value,
-            maxLines: 1,
-            overflow: TextOverflow.ellipsis,
-            style: GoogleFonts.beVietnamPro(
-              color: AppColors.white,
-              fontSize: 22.sp,
-              fontWeight: FontWeight.w800,
-            ),
-          ),
-        ],
-      ),
+    return AppStatTile(
+      label: stat.label.tr,
+      value: stat.value,
+      center: true,
+      boxed: true,
+      bordered: true,
+      boxColor: AppColors.white.withValues(alpha: 0.10),
+      borderColor: AppColors.white.withValues(alpha: 0.14),
+      boxPadding: EdgeInsets.symmetric(vertical: 16.h, horizontal: 12.w),
+      boxRadius: 14,
+      labelColor: AppColors.white.withValues(alpha: 0.75),
+      labelFontSize: 13,
+      valueColor: AppColors.white,
+      valueFontSize: 22,
+      valueFontWeight: FontWeight.w800,
+      gap: 6,
     );
   }
 }

@@ -9,6 +9,7 @@ import 'package:google_fonts/google_fonts.dart';
 import '../../../shared/theme/app_colors.dart';
 import '../../../shared/theme/app_theme.dart';
 import '../../../shared/widgets/app_gradient_button.dart';
+import '../../../shared/widgets/app_pill.dart';
 import '../../../shared/widgets/app_shimmer.dart';
 import '../../../shared/widgets/data_state_builder.dart';
 import '../../../shared/widgets/pinned_gradient_app_bar.dart';
@@ -178,21 +179,11 @@ class _StatusPill extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final label = status.replaceAll('_', ' ');
-    return Container(
-      padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 6.h),
-      decoration: BoxDecoration(
-        color: AppColors.white.withValues(alpha: 0.20),
-        borderRadius: BorderRadius.circular(999.r),
-      ),
-      child: Text(
-        label,
-        style: GoogleFonts.beVietnamPro(
-          color: AppColors.white,
-          fontSize: 11.sp,
-          fontWeight: FontWeight.w700,
-        ),
-      ),
+    return AppPill(
+      label: status.replaceAll('_', ' '),
+      color: AppColors.white,
+      bgAlpha: 0.20,
+      fontSize: 11,
     );
   }
 }
@@ -249,20 +240,11 @@ class _TypeBadge extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final scheme = Theme.of(context).colorScheme;
-    return Container(
+    return AppPill(
+      label: type,
+      color: scheme.primary,
+      fontSize: 11,
       padding: EdgeInsets.symmetric(horizontal: 10.w, vertical: 4.h),
-      decoration: BoxDecoration(
-        color: scheme.primary.withValues(alpha: 0.12),
-        borderRadius: BorderRadius.circular(999.r),
-      ),
-      child: Text(
-        type,
-        style: GoogleFonts.beVietnamPro(
-          fontSize: 11.sp,
-          fontWeight: FontWeight.w700,
-          color: scheme.primary,
-        ),
-      ),
     );
   }
 }

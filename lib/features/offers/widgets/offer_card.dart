@@ -5,6 +5,7 @@ import 'package:google_fonts/google_fonts.dart';
 
 import '../../../shared/theme/app_colors.dart';
 import '../../../shared/theme/app_theme.dart';
+import '../../../shared/widgets/app_pill.dart';
 import '../models/offer_models.dart';
 
 /// Compact voucher row: a tinted tag tile, the headline value with the code
@@ -218,32 +219,19 @@ class _MetaPill extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final scheme = Theme.of(context).colorScheme;
-    return Container(
+    return AppPill(
+      label: text,
+      color: scheme.onSurfaceVariant,
+      bgColor: scheme.surfaceContainerHighest,
+      labelColor: scheme.onSurfaceVariant,
+      radius: 8,
+      fontSize: 11,
+      fontWeight: FontWeight.w600,
       padding: EdgeInsets.symmetric(horizontal: 8.w, vertical: 4.h),
-      decoration: BoxDecoration(
-        color: scheme.surfaceContainerHighest,
-        borderRadius: BorderRadius.circular(8.r),
-      ),
-      child: Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Icon(
-            tick ? Icons.check_rounded : Icons.schedule_rounded,
-            size: 12.w,
-            color: tick ? AppColors.success : scheme.onSurfaceVariant,
-          ),
-          SizedBox(width: 4.w),
-          Text(
-            text,
-            maxLines: 1,
-            overflow: TextOverflow.ellipsis,
-            style: GoogleFonts.beVietnamPro(
-              fontSize: 11.sp,
-              fontWeight: FontWeight.w600,
-              color: scheme.onSurfaceVariant,
-            ),
-          ),
-        ],
+      leading: Icon(
+        tick ? Icons.check_rounded : Icons.schedule_rounded,
+        size: 12.w,
+        color: tick ? AppColors.success : scheme.onSurfaceVariant,
       ),
     );
   }

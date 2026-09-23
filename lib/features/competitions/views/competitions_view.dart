@@ -3,7 +3,7 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
 
 import '../../../app/routes/app_routes.dart';
-import '../../../shared/theme/app_text.dart';
+import '../../../shared/widgets/app_empty_view.dart';
 import '../../../shared/widgets/data_state_builder.dart';
 import '../../../shared/widgets/fade_slide_in.dart';
 import '../../../shared/widgets/pinned_gradient_app_bar.dart';
@@ -92,7 +92,13 @@ class _CompetitionsBody extends GetView<CompetitionsController> {
         SizedBox(height: 16.h),
         Obx(() {
           final visible = controller.visible;
-          if (visible.isEmpty) return const _FilterEmpty();
+          if (visible.isEmpty) {
+            return const AppEmptyView(
+              messageKey: 'competitions.empty',
+              icon: Icons.emoji_events_outlined,
+              boxed: true,
+            );
+          }
           return ListView.separated(
             shrinkWrap: true,
             padding: EdgeInsets.zero,
@@ -128,42 +134,6 @@ class _CompetitionsBody extends GetView<CompetitionsController> {
   }
 }
 
-/// Shown when the active status tab has no competitions (the screen-level
-/// empty state is handled by [DataStateBuilder]).
-class _FilterEmpty extends StatelessWidget {
-  const _FilterEmpty();
-
-  @override
-  Widget build(BuildContext context) {
-    final scheme = Theme.of(context).colorScheme;
-
-    return Container(
-      padding: EdgeInsets.symmetric(horizontal: 20.w, vertical: 32.h),
-      decoration: BoxDecoration(
-        color: scheme.surfaceContainerHighest.withValues(alpha: 0.35),
-        borderRadius: BorderRadius.circular(18.r),
-      ),
-      child: Column(
-        children: [
-          Icon(
-            Icons.emoji_events_outlined,
-            size: 34.w,
-            color: scheme.onSurfaceVariant,
-          ),
-          SizedBox(height: 12.h),
-          Text(
-            'competitions.empty'.tr,
-            textAlign: TextAlign.center,
-            style: AppText.body(
-              fontSize: 13.sp,
-              color: scheme.onSurfaceVariant,
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-}
 
 // ---------------------------------------------------------------------------
 // Shimmer skeleton matching the screen's shape.
