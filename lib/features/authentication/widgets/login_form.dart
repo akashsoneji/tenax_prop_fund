@@ -113,7 +113,10 @@ class LoginFormState extends State<LoginForm> {
           child: Align(
             alignment: AlignmentDirectional.centerEnd,
             child: TextButton(
-              onPressed: () => Get.toNamed(AppRoutes.forgotPassword),
+              onPressed: () => Get.toNamed(
+                AppRoutes.forgotPassword,
+                arguments: _email.text.trim(),
+              ),
               child: Text('login.forgot_password'.tr),
             ),
           ),

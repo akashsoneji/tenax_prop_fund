@@ -70,13 +70,16 @@ class AuthRepository {
     }
   }
 
-  Future<ApiResponse<void>> verifyEmail({
+  Future<ApiResponse<UserModel>> verifyEmail({
     required String email,
     required String code,
   }) async {
     try {
-      await _service.verifyEmail(email: email, code: code);
-      return ApiResponse.success(null);
+      final user = await _service.verifyEmail(email: email, code: code);
+      await _storage.write(key: ApiInterceptor.tokenKey, value: user.token);
+      await _storage.write(key: _userKey, value: jsonEncode(user.toJson()));
+      ApiInterceptor.updateCachedToken(user.token);
+      return ApiResponse.success(user);
     } catch (e) {
       return ApiResponse.failure(_messageFrom(e));
     }

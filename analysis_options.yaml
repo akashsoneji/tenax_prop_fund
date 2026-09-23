@@ -12,14 +12,11 @@ analyzer:
     - build/**
     - android/**
     - ios/**
-include: package:flutter_lints/flutter.yaml
-
-analyzer:
-  exclude:
     # Shadow worktrees keep point-in-time copies of the tree, including files
     # deleted since. Without this the IDE reports errors against paths that no
     # longer exist in lib/.
     - .tenaxcode-worktrees/**
+include: package:flutter_lints/flutter.yaml
 
 linter:
   # The lint rules applied to this project can be customized in the

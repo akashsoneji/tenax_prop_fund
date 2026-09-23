@@ -7,12 +7,12 @@ import 'package:get/get.dart';
 import 'package:lottie/lottie.dart';
 
 import '../../../app/routes/app_routes.dart';
+import '../../../shared/widgets/app_toast.dart';
 import '../controllers/auth_controller.dart';
 import '../widgets/animated_field.dart';
 import '../widgets/auth_scaffold.dart';
 import '../widgets/glass_card.dart';
 import '../../../shared/widgets/app_gradient_button.dart';
-import '../widgets/otp_dialog.dart';
 
 /// Forgot password: hero illustration of an inbox, animated entry, post-send
 /// success state with a confetti burst and resend countdown.
@@ -26,6 +26,15 @@ class ForgotPasswordView extends StatefulWidget {
 class _ForgotPasswordViewState extends State<ForgotPasswordView> {
   final _email = TextEditingController();
   bool _sent = false;
+
+  @override
+  void initState() {
+    super.initState();
+    final passed = Get.arguments;
+    if (passed is String && passed.isNotEmpty) {
+      _email.text = passed;
+    }
+  }
   int _resendIn = 0;
   Timer? _ticker;
   late final ConfettiController _confetti = ConfettiController(
@@ -62,15 +71,11 @@ class _ForgotPasswordViewState extends State<ForgotPasswordView> {
     _confetti.play();
     _startResendTimer();
 
-    final email = _email.text.trim();
-    final code = await OtpDialog.show(
-      target: email,
-      onVerify: (code) => controller.verifyOtp(email: email, code: code),
-      onResend: () => controller.resendOtp(email: email),
+    AppToast.success(
+      'forgot_password.reset_link_sent'.tr,
+      title: 'forgot_password.check_inbox'.tr,
     );
-    if (code != null && mounted) {
-      Get.offAllNamed(AppRoutes.login);
-    }
+    Get.offAllNamed(AppRoutes.login);
   }
 
   /// Inline SVG-styled fallback so we don't ship a binary Lottie asset the

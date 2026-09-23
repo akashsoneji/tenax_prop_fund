@@ -738,7 +738,9 @@ class AppTranslations extends Translations {
     'register.req_symbol': 'Contains a symbol',
     'forgot_password.title': 'Reset password',
     'forgot_password.subtitle':
-        "Enter your email and we'll send a verification code.",
+        "Enter your email and we'll send you a password reset link.",
+    'forgot_password.reset_link_sent':
+        'If that email exists, a password reset link has been sent. Please check your email.',
     'forgot_password.email': 'Email',
     'forgot_password.send_code': 'Send code',
     'forgot_password.code_sent': 'Verification code sent to your email.',
@@ -1470,7 +1472,7 @@ We reserve the right to suspend or terminate accounts that violate these terms o
     'register.req_symbol': 'एक चिन्ह हो',
     'forgot_password.title': 'पासवर्ड रीसेट',
     'forgot_password.subtitle':
-        'अपना ईमेल दर्ज करें, हम एक कोड भेजेंगे।',
+        'अपना ईमेल दर्ज करें, हम आपको पासवर्ड रीसेट लिंक भेजेंगे।',
     'forgot_password.email': 'ईमेल',
     'forgot_password.send_code': 'कोड भेजें',
     'forgot_password.code_sent': 'आपके ईमेल पर कोड भेज दिया गया है।',
@@ -1482,6 +1484,8 @@ We reserve the right to suspend or terminate accounts that violate these terms o
     'otp.resend_in': 'में दोबारा भेजें',
     'otp.verifying': 'सत्यापित हो रहा है…',
     'forgot_password.check_inbox': 'अपना इनबॉक्स देखें',
+    'forgot_password.reset_link_sent':
+        'अगर यह ईमेल मौजूद है, तो पासवर्ड रीसेट लिंक भेज दिया गया है। कृपया अपना ईमेल देखें।',
     'forgot_password.spam_tip': 'टिप: अगर न दिखे तो स्पैम फ़ोल्डर देखें।',
     'terms.title': 'नियम और शर्तें',
     'terms.agree': 'मैंने नियम और शर्तें पढ़ ली हैं और सहमत हूँ।',

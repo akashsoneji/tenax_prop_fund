@@ -115,7 +115,10 @@ class AuthController extends GetxController {
     required String code,
   }) async {
     final result = await _repository.verifyEmail(email: email, code: code);
-    if (result.success) return null;
+    if (result.success) {
+      if (result.data != null) user.value = result.data;
+      return null;
+    }
     return result.message ?? 'otp.invalid_code'.tr;
   }
 

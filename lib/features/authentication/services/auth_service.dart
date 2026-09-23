@@ -62,15 +62,18 @@ class AuthService {
   }
 
   /// Calls `POST /auth/verify-email` with `{email, code}` to confirm the OTP.
-  /// Throws on any non-2xx / non-success response.
-  Future<void> verifyEmail({
+  /// On success the envelope carries a fresh `access_token` + `user` (now with
+  /// `email_verified: true`), folded into the returned [UserModel]. Throws on
+  /// any non-2xx / non-success response.
+  Future<UserModel> verifyEmail({
     required String email,
     required String code,
   }) async {
-    await _api.post<Map<String, dynamic>>(
+    final res = await _api.post<Map<String, dynamic>>(
       ApiEndpoints.verifyEmail,
       data: {'email': email, 'code': code},
     );
+    return _userFromEnvelope(res.data);
   }
 
   /// Calls `POST /auth/resend-otp` with `{email}` to re-send the OTP code.
