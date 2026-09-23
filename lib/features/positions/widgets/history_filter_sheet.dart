@@ -4,6 +4,7 @@ import 'package:get/get.dart';
 
 import '../../../shared/theme/app_colors.dart';
 import '../../../shared/theme/app_text.dart';
+import '../../../shared/widgets/app_choice_chip.dart';
 import '../controllers/positions_controller.dart';
 
 class HistoryFilterResult {
@@ -102,7 +103,21 @@ class _RangeChip extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final scheme = Theme.of(context).colorScheme;
-    return InkWell(borderRadius: BorderRadius.circular(12.r), onTap: onTap, child: Container(padding: EdgeInsets.symmetric(horizontal: 14.w, vertical: 9.h), decoration: BoxDecoration(color: selected ? scheme.primary : Colors.transparent, borderRadius: BorderRadius.circular(12.r), border: Border.all(color: selected ? scheme.primary : scheme.onSurface.withValues(alpha: AppColors.alphaHairline))), child: Text(label, style: AppText.subtitle(color: selected ? scheme.onPrimary : scheme.onSurface, fontSize: 13.sp))));
+    return AppChoiceChip(
+      label: label,
+      selected: selected,
+      onTap: onTap,
+      radius: 12,
+      fontSize: 13,
+      padding: EdgeInsets.symmetric(horizontal: 14.w, vertical: 9.h),
+      selectedColor: scheme.onPrimary,
+      unselectedColor: scheme.onSurface,
+      selectedFill: scheme.primary,
+      unselectedFill: Colors.transparent,
+      borderColor: selected
+          ? scheme.primary
+          : scheme.onSurface.withValues(alpha: AppColors.alphaHairline),
+    );
   }
 }
 

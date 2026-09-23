@@ -1,38 +1,22 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
-import 'package:google_fonts/google_fonts.dart';
 
 import '../../../shared/theme/app_theme.dart';
-import '../../../shared/widgets/app_gradient_button.dart';
 import '../../../shared/widgets/data_state_builder.dart';
 import '../../../shared/widgets/skeletons/skeletons.dart';
 import '../controllers/trading_rules_controller.dart';
 import '../models/rules_models.dart';
-import '../widgets/can_do_row.dart';
-import '../widgets/closing_rule_card.dart';
-import '../widgets/delay_row.dart';
-import '../widgets/plan_row.dart';
+import '../widgets/rule_line_card.dart';
 import '../widgets/rules_hero_header.dart';
 import '../widgets/rules_info_banner.dart';
 import '../widgets/rules_segmented_tabs.dart';
 
-/// Trading Rules screen — 4 tabs of rule content driven by
-/// [TradingRulesController]. Loading/error/empty are handled by
-/// [DataStateBuilder] on the controller's `DataState<TradingRulesData>`; the
-/// real UI reads the loaded data through [Obx] for the tab switch. Layout per
-/// tab:
-///
-///   * Tab 1 — intro banner ("Only three things close an account"), three
-///     numbered danger cards, "you get a warning first" tip.
-///   * Tab 2 — intro ("These delay money…"), checklist card with 10
-///     rows, allowed-grid tip.
-///   * Tab 3 — intro ("These delay money…"), 4 delay rows in a card.
-///   * Tab 4 — "Your plan" header, 10 row settings card, full-rulebook CTA.
-///
-/// Tabs cross-fade + slide using a single `AnimatedSwitcher` so switching is
-/// smooth and the list scroll position resets per tab (which is what users
-/// expect when tabs are unrelated content blocks).
+/// Trading Rules screen — every tab and every rule line comes from
+/// `GET /support/rules`, so the screen matches whatever the backend publishes.
+/// Loading/error/empty are handled by [DataStateBuilder] on the controller's
+/// `DataState<TradingRulesData>`; the tab switch is an [Obx] over the selected
+/// tab value and cross-fades with a single [AnimatedSwitcher].
 class TradingRulesView extends StatelessWidget {
   const TradingRulesView({super.key});
 
@@ -43,6 +27,7 @@ class TradingRulesView extends StatelessWidget {
 
     return Scaffold(
       backgroundColor: scheme.surface,
+      resizeToAvoidBottomInset: true,
       body: Column(
         children: [
           RulesHeroHeader(title: 'trading_rules.title'.tr),
@@ -76,7 +61,8 @@ class _RulesBody extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Obx(() {
-      final tab = controller.selectedTab.value;
+      final tabValue = controller.selectedTab.value;
+      final tab = data.tabs.firstWhereOrNull((t) => t.value == tabValue);
       return AnimatedSwitcher(
         duration: AppMotion.page,
         switchInCurve: AppMotion.enter,
@@ -92,24 +78,78 @@ class _RulesBody extends StatelessWidget {
           );
         },
         child: KeyedSubtree(
-          key: ValueKey(tab),
-          child: _buildTabBody(tab, data),
+          key: ValueKey(tabValue),
+          child: _RulesTabBody(
+            tab: tab,
+            section: data.sectionFor(tabValue),
+          ),
         ),
       );
     });
   }
+}
 
-  Widget _buildTabBody(RulesTab tab, TradingRulesData data) {
-    switch (tab) {
-      case RulesTab.closes:
-        return _ClosesTab(data: data);
-      case RulesTab.canDo:
-        return _CanDoTab(data: data);
-      case RulesTab.delays:
-        return _DelaysTab(data: data);
-      case RulesTab.everything:
-        return _EverythingTab(data: data);
+// ---------------------------------------------------------------------------
+// One tab: intro banner + the section's rule lines.
+// ---------------------------------------------------------------------------
+
+class _RulesTabBody extends StatelessWidget {
+  const _RulesTabBody({required this.tab, required this.section});
+
+  final RulesTab? tab;
+  final RulesSection? section;
+
+  @override
+  Widget build(BuildContext context) {
+    final scheme = Theme.of(context).colorScheme;
+    final items = section?.items ?? const <String>[];
+
+    if (items.isEmpty) {
+      return _TabScroll(
+        child: Padding(
+          padding: EdgeInsets.fromLTRB(16.w, 32.h, 16.w, 16.h),
+          child: Text(
+            'trading_rules.no_rules'.tr,
+            textAlign: TextAlign.center,
+            style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+              color: scheme.onSurfaceVariant,
+            ),
+          ),
+        ),
+      );
     }
+
+    final title = section?.title ?? tab?.label;
+
+    return _TabScroll(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          // if (title != null)
+          //   RulesInfoBanner(
+          //     icon: Icons.info_outline_rounded,
+          //     tone: RuleTone.warning,
+          //     title: title,
+          //     body: section?.body ?? 'trading_rules.section_body'.tr,
+          //   ),
+          Container(
+            margin: EdgeInsets.symmetric(horizontal: 16.w),
+            decoration: AppTheme.surfaceCard(scheme, radius: 16.r),
+            child: Column(
+              children: [
+                for (var i = 0; i < items.length; i++)
+                  RuleLineTile(
+                    number: i + 1,
+                    text: items[i],
+                    showDivider: i != items.length - 1,
+                  ),
+              ],
+            ),
+          ),
+          SizedBox(height: 8.h),
+        ],
+      ),
+    );
   }
 }
 
@@ -134,210 +174,6 @@ class _RulesSkeleton extends StatelessWidget {
           CardSkeleton(lines: 3, height: 130.h),
           SizedBox(height: 12.h),
           CardSkeleton(lines: 2, height: 100.h),
-        ],
-      ),
-    );
-  }
-}
-
-// ---------------------------------------------------------------------------
-// Tab 1 — What closes an account
-// ---------------------------------------------------------------------------
-
-class _ClosesTab extends StatelessWidget {
-  const _ClosesTab({required this.data});
-
-  final TradingRulesData data;
-
-  @override
-  Widget build(BuildContext context) {
-    return _TabScroll(
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
-          RulesInfoBanner(
-            icon: Icons.warning_amber_rounded,
-            tone: RuleTone.danger,
-            title: 'trading_rules.closes_title'.tr,
-            body: 'trading_rules.closes_body'.tr,
-          ),
-          for (var i = 0; i < data.closingRules.length; i++)
-            ClosingRuleCard(
-              rule: data.closingRules[i],
-              index: i,
-            ),
-          RulesInfoBanner(
-            icon: Icons.info_outline_rounded,
-            tone: RuleTone.warning,
-            title: data.closingTip.title,
-            body: data.closingTip.body,
-          ),
-          SizedBox(height: 8.h),
-        ],
-      ),
-    );
-  }
-}
-
-// ---------------------------------------------------------------------------
-// Tab 2 — What I can do
-// ---------------------------------------------------------------------------
-
-class _CanDoTab extends StatelessWidget {
-  const _CanDoTab({required this.data});
-
-  final TradingRulesData data;
-
-  @override
-  Widget build(BuildContext context) {
-    final scheme = Theme.of(context).colorScheme;
-    final rows = data.canDoRows;
-
-    return _TabScroll(
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
-          RulesInfoBanner(
-            icon: Icons.info_outline_rounded,
-            tone: RuleTone.warning,
-            title: 'trading_rules.cando_title'.tr,
-            body: 'trading_rules.cando_body'.tr,
-          ),
-          Container(
-            margin: EdgeInsets.symmetric(horizontal: 16.w),
-            decoration: AppTheme.surfaceCard(scheme, radius: 16.r),
-            child: Column(
-              children: [
-                for (var i = 0; i < rows.length; i++)
-                  CanDoRowTile(
-                    row: rows[i],
-                    showDivider: i != rows.length - 1,
-                  ),
-              ],
-            ),
-          ),
-          SizedBox(height: 12.h),
-          RulesInfoBanner(
-            icon: Icons.check_circle_outline_rounded,
-            tone: RuleTone.info,
-            title: 'trading_rules.grid_title'.tr,
-            body: 'trading_rules.grid_body'.tr,
-          ),
-          SizedBox(height: 8.h),
-        ],
-      ),
-    );
-  }
-}
-
-// ---------------------------------------------------------------------------
-// Tab 3 — Delays a reward
-// ---------------------------------------------------------------------------
-
-class _DelaysTab extends StatelessWidget {
-  const _DelaysTab({required this.data});
-
-  final TradingRulesData data;
-
-  @override
-  Widget build(BuildContext context) {
-    final scheme = Theme.of(context).colorScheme;
-    final rows = data.delayRows;
-
-    return _TabScroll(
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
-          RulesInfoBanner(
-            icon: Icons.info_outline_rounded,
-            tone: RuleTone.warning,
-            title: 'trading_rules.delays_title'.tr,
-            body: 'trading_rules.delays_body'.tr,
-          ),
-          Container(
-            margin: EdgeInsets.symmetric(horizontal: 16.w),
-            decoration: AppTheme.surfaceCard(scheme, radius: 16.r),
-            child: Column(
-              children: [
-                for (var i = 0; i < rows.length; i++)
-                  DelayRowTile(
-                    row: rows[i],
-                    showDivider: i != rows.length - 1,
-                  ),
-              ],
-            ),
-          ),
-          SizedBox(height: 8.h),
-        ],
-      ),
-    );
-  }
-}
-
-// ---------------------------------------------------------------------------
-// Tab 4 — Everything / Your plan
-// ---------------------------------------------------------------------------
-
-class _EverythingTab extends StatelessWidget {
-  const _EverythingTab({required this.data});
-
-  final TradingRulesData data;
-
-  @override
-  Widget build(BuildContext context) {
-    final scheme = Theme.of(context).colorScheme;
-    final rows = data.planRows;
-
-    return _TabScroll(
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
-          Padding(
-            padding: EdgeInsets.fromLTRB(20.w, 12.h, 20.w, 8.h),
-            child: Align(
-              alignment: Alignment.centerLeft,
-              child: Text(
-                'trading_rules.your_plan'.tr,
-                style: GoogleFonts.beVietnamPro(
-                  fontSize: 16.sp,
-                  fontWeight: FontWeight.w800,
-                  color: scheme.onSurface,
-                ),
-              ),
-            ),
-          ),
-          Container(
-            margin: EdgeInsets.symmetric(horizontal: 16.w),
-            decoration: AppTheme.surfaceCard(scheme, radius: 16.r),
-            child: Column(
-              children: [
-                for (var i = 0; i < rows.length; i++)
-                  PlanRowTile(
-                    row: rows[i],
-                    showDivider: i != rows.length - 1,
-                  ),
-              ],
-            ),
-          ),
-          SizedBox(height: 16.h),
-          Padding(
-            padding: EdgeInsets.symmetric(horizontal: 16.w),
-            child: AppGradientButton(
-              label: 'trading_rules.read_full'.tr,
-              icon: Icons.menu_book_rounded,
-              onPressed: () {
-                ScaffoldMessenger.of(context)
-                  ..clearSnackBars()
-                  ..showSnackBar(
-                    SnackBar(
-                      content: Text('trading_rules.opening_rulebook'.tr),
-                      duration: const Duration(seconds: 1),
-                    ),
-                  );
-              },
-            ),
-          ),
-          SizedBox(height: 8.h),
         ],
       ),
     );

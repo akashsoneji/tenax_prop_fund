@@ -312,7 +312,7 @@ class _CouponField extends StatelessWidget {
                     decoration: InputDecoration(
                       isCollapsed: true,
                       border: InputBorder.none,
-                      hintText: 'Enter coupon code',
+                      hintText: 'configure.enter_coupon_code'.tr,
                       hintStyle: GoogleFonts.beVietnamPro(
                         fontSize: 14.sp,
                         color: scheme.onSurface.withValues(alpha: 0.5),

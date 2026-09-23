@@ -22,75 +22,75 @@ class DownloadsRepository {
   // Demo data (moved out of the controller). Delete when the API is wired.
   // -------------------------------------------------------------------------
   static const List<DownloadSection> _demoSections = [
-    DownloadSection('Trading platform', [
+    DownloadSection('downloads.section_platform', [
       DownloadItem(
         icon: Icons.arrow_downward_rounded,
-        title: 'MetaTrader 5 · iOS',
-        subtitle: 'App Store',
+        title: 'downloads.mt5_ios',
+        subtitle: 'downloads.app_store',
       ),
       DownloadItem(
         icon: Icons.arrow_downward_rounded,
-        title: 'MetaTrader 5 · Android',
-        subtitle: 'Google Play',
+        title: 'downloads.mt5_android',
+        subtitle: 'downloads.google_play',
       ),
       DownloadItem(
         icon: Icons.arrow_downward_rounded,
-        title: 'MetaTrader 5 · Windows',
-        subtitle: 'Desktop installer',
+        title: 'downloads.mt5_windows',
+        subtitle: 'downloads.desktop_installer',
       ),
       DownloadItem(
         icon: Icons.arrow_downward_rounded,
-        title: 'MetaTrader 5 · macOS',
-        subtitle: 'Desktop installer',
+        title: 'downloads.mt5_macos',
+        subtitle: 'downloads.desktop_installer',
       ),
       DownloadItem(
         icon: Icons.arrow_downward_rounded,
-        title: 'Web terminal',
-        subtitle: 'No install needed',
+        title: 'downloads.web_terminal',
+        subtitle: 'downloads.no_install',
       ),
     ]),
-    DownloadSection('Read first', [
+    DownloadSection('downloads.section_read_first', [
       DownloadItem(
         icon: Icons.article_outlined,
-        title: 'Understanding the daily limit',
-        subtitle: 'The rule that ends most accounts',
+        title: 'downloads.guide_daily_limit',
+        subtitle: 'downloads.guide_daily_limit_sub',
         meta: '6 min',
       ),
       DownloadItem(
         icon: Icons.article_outlined,
-        title: 'How rewards actually work',
-        subtitle: 'Cycles, share and the consistency',
+        title: 'downloads.guide_rewards',
+        subtitle: 'downloads.guide_rewards_sub',
         meta: '5 min',
       ),
       DownloadItem(
         icon: Icons.article_outlined,
-        title: 'Passing your first phase',
-        subtitle: 'What separates the 11% who pass',
+        title: 'downloads.guide_first_phase',
+        subtitle: 'downloads.guide_first_phase_sub',
         meta: '68 min',
       ),
       DownloadItem(
         icon: Icons.article_outlined,
-        title: 'What we prohibit and why',
-        subtitle: 'The five strategies that close account',
+        title: 'downloads.guide_prohibited',
+        subtitle: 'downloads.guide_prohibited_sub',
         meta: '7 min',
       ),
     ]),
-    DownloadSection('Video', [
+    DownloadSection('downloads.section_video', [
       DownloadItem(
         icon: Icons.desktop_windows_outlined,
-        title: 'Setting up MetaTrader 5',
+        title: 'downloads.video_setup_mt5',
         subtitle: '',
         meta: '4:12',
       ),
       DownloadItem(
         icon: Icons.desktop_windows_outlined,
-        title: 'Reading your account screen',
+        title: 'downloads.video_account_screen',
         subtitle: '',
         meta: '3:05',
       ),
       DownloadItem(
         icon: Icons.desktop_windows_outlined,
-        title: 'Requesting a reward',
+        title: 'downloads.video_request_reward',
         subtitle: '',
         meta: '2:38',
       ),

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
 
 import '../../../shared/theme/app_colors.dart';
@@ -44,7 +45,7 @@ class AddonTile extends StatelessWidget {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
-                          addon.title,
+                          addon.title.tr,
                           style: GoogleFonts.beVietnamPro(
                             fontSize: 14.5.sp,
                             fontWeight: FontWeight.w700,
@@ -53,7 +54,7 @@ class AddonTile extends StatelessWidget {
                         ),
                         SizedBox(height: 3.h),
                         Text(
-                          addon.description,
+                          addon.description.tr,
                           style: GoogleFonts.beVietnamPro(
                             fontSize: 12.5.sp,
                             height: 1.35,
@@ -62,7 +63,7 @@ class AddonTile extends StatelessWidget {
                         ),
                         SizedBox(height: 4.h),
                         Text(
-                          addon.tagLabel,
+                          addon.tagLabel.tr,
                           style: GoogleFonts.beVietnamPro(
                             fontSize: 12.5.sp,
                             fontWeight: FontWeight.w600,

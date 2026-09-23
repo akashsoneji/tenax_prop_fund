@@ -5,6 +5,7 @@ import 'package:google_fonts/google_fonts.dart';
 
 import '../../../../shared/theme/app_colors.dart';
 import '../../../../shared/theme/app_theme.dart';
+import '../../../../shared/widgets/app_pill.dart';
 import '../models/verification_models.dart';
 
 /// A verification step card mirroring the white_label KYC timeline card: a
@@ -75,7 +76,7 @@ class VerificationStepCard extends StatelessWidget {
                       SizedBox(height: 6.h),
                     ],
                     Text(
-                      step.title,
+                      step.title.tr,
                       maxLines: 2,
                       overflow: TextOverflow.ellipsis,
                       style: GoogleFonts.beVietnamPro(
@@ -93,7 +94,8 @@ class VerificationStepCard extends StatelessWidget {
             ],
           ),
           SizedBox(height: 14.h),
-          for (final b in step.benefits) _FeatureRow(label: b, onCard: onCard),
+          for (final b in step.benefits)
+            _FeatureRow(label: b.tr, onCard: onCard),
         ],
       ),
     );
@@ -184,35 +186,20 @@ class _StatusPill extends StatelessWidget {
       bg = scheme.onSurface.withValues(alpha: 0.08);
       fg = scheme.onSurface.withValues(alpha: 0.55);
     }
-    return Container(
-      padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 6.h),
-      decoration: BoxDecoration(
-        color: bg,
-        borderRadius: BorderRadius.circular(20.r),
-      ),
-      child: Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Text(
-            completed
-                ? 'verification.completed'.tr
-                : 'verification.incomplete'.tr,
-            maxLines: 1,
-            softWrap: false,
-            overflow: TextOverflow.clip,
-            style: GoogleFonts.beVietnamPro(
-              fontSize: 11.sp,
-              fontWeight: FontWeight.w600,
-              color: fg,
-            ),
-          ),
-          SizedBox(width: 5.w),
-          Icon(
-            completed ? Icons.check_circle_rounded : Icons.remove_circle_outline,
-            size: 12.w,
-            color: fg,
-          ),
-        ],
+    return AppPill(
+      label: completed
+          ? 'verification.completed'.tr
+          : 'verification.incomplete'.tr,
+      color: fg,
+      bgColor: bg,
+      labelColor: fg,
+      radius: 20,
+      fontSize: 11,
+      fontWeight: FontWeight.w600,
+      trailing: Icon(
+        completed ? Icons.check_circle_rounded : Icons.remove_circle_outline,
+        size: 12.w,
+        color: fg,
       ),
     );
   }

@@ -233,7 +233,7 @@ class _PayoutMethodsTabContent extends StatelessWidget {
                 child: ElevatedButton.icon(
                   onPressed: () => _showAddMethodSheet(context, controller),
                   icon: const Icon(Icons.add_rounded),
-                  label: const Text('Add method'),
+                  label: Text('rewards.add_method'.tr),
                   style: ElevatedButton.styleFrom(
                     backgroundColor: Theme.of(context).colorScheme.primary,
                     foregroundColor: Theme.of(context).colorScheme.onPrimary,
@@ -247,8 +247,8 @@ class _PayoutMethodsTabContent extends StatelessWidget {
               if (methods.isEmpty)
                 InfoBanner(
                   variant: InfoBannerVariant.warning,
-                  title: 'No payout method saved',
-                  body: 'Add a payout method before requesting your reward.',
+                  title: 'rewards.no_method_title'.tr,
+                  body: 'rewards.no_method_body'.tr,
                 )
               else
                 for (final method in methods) ...[
@@ -303,7 +303,7 @@ class _PayoutMethodsTabContent extends StatelessWidget {
                   ),
                   SizedBox(height: 18.h),
                   Text(
-                    'Add payout method',
+                    'rewards.add_payout_method'.tr,
                     style: GoogleFonts.beVietnamPro(
                       fontSize: 20.sp,
                       fontWeight: FontWeight.w800,
@@ -312,29 +312,38 @@ class _PayoutMethodsTabContent extends StatelessWidget {
                   SizedBox(height: 16.h),
                   DropdownButtonFormField<String>(
                     value: type,
-                    decoration: const InputDecoration(labelText: 'Method type'),
-                    items: const [
-                      DropdownMenuItem(value: 'bank', child: Text('Bank transfer')),
-                      DropdownMenuItem(value: 'crypto', child: Text('USDT / Crypto')),
-                      DropdownMenuItem(value: 'upi', child: Text('UPI')),
+                    decoration: InputDecoration(
+                        labelText: 'rewards.method_type'.tr),
+                    items: [
+                      DropdownMenuItem(
+                          value: 'bank',
+                          child: Text('rewards.method_bank'.tr)),
+                      DropdownMenuItem(
+                          value: 'crypto',
+                          child: Text('rewards.method_crypto'.tr)),
+                      DropdownMenuItem(
+                          value: 'upi', child: Text('rewards.method_upi'.tr)),
                     ],
                     onChanged: (value) => setSheetState(() => type = value ?? 'bank'),
                   ),
                   SizedBox(height: 12.h),
                   TextField(
                     controller: labelController,
-                    decoration: const InputDecoration(labelText: 'Method name'),
+                    decoration: InputDecoration(
+                        labelText: 'rewards.method_name'.tr),
                   ),
                   SizedBox(height: 12.h),
                   TextField(
                     controller: accountController,
-                    decoration: const InputDecoration(labelText: 'Account / wallet address'),
+                    decoration: InputDecoration(
+                        labelText: 'rewards.account_address'.tr),
                   ),
                   if (type == 'bank') ...[
                     SizedBox(height: 12.h),
                     TextField(
                       controller: ifscController,
-                      decoration: const InputDecoration(labelText: 'IFSC / routing code'),
+                      decoration: InputDecoration(
+                          labelText: 'rewards.ifsc_routing'.tr),
                     ),
                   ],
                   SizedBox(height: 20.h),
@@ -366,7 +375,7 @@ class _PayoutMethodsTabContent extends StatelessWidget {
                               width: 20,
                               child: CircularProgressIndicator(strokeWidth: 2),
                             )
-                          : const Text('Save method'),
+                          : Text('rewards.save_method'.tr),
                     ),
                   ),
                 ],
@@ -392,9 +401,12 @@ class _FinanceTabs extends StatelessWidget {
   Widget build(BuildContext context) {
     final scheme = Theme.of(context).colorScheme;
     final tabs = <({String label, IconData icon})>[
-      (label: 'Rewards', icon: Icons.auto_awesome_rounded),
-      (label: 'Billing', icon: Icons.receipt_long_rounded),
-      (label: 'Payout methods', icon: Icons.account_balance_wallet_rounded),
+      (label: 'rewards.tab_rewards'.tr, icon: Icons.auto_awesome_rounded),
+      (label: 'rewards.tab_billing'.tr, icon: Icons.receipt_long_rounded),
+      (
+        label: 'rewards.tab_payout_methods'.tr,
+        icon: Icons.account_balance_wallet_rounded
+      ),
     ];
 
     return Container(

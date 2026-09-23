@@ -6,25 +6,22 @@ import 'package:google_fonts/google_fonts.dart';
 import '../../../shared/theme/app_colors.dart';
 import '../../../shared/theme/app_theme.dart';
 import '../controllers/trading_rules_controller.dart';
-import '../models/rules_models.dart';
 
-/// Top-of-screen segmented tab bar for the 4 rules tabs.
+/// Top-of-screen segmented tab bar, built from the tabs the rules API returns.
 ///
-/// Visually a single rounded pill with a soft brand-purple background and a
-/// dark-purple "pill" indicator that animates between segments using
-/// [AnimatedAlign] (cheap, no custom AnimationController).
-///
-/// The bar is horizontally scrollable so long labels ("Everything" etc.) are
-/// not clipped on narrow phones.
+/// The bar is horizontally scrollable so long labels are not clipped on narrow
+/// phones, and it hides itself while the tab list is still loading.
 class RulesSegmentedTabs extends StatelessWidget {
   const RulesSegmentedTabs({super.key});
 
   @override
   Widget build(BuildContext context) {
     final c = Get.find<TradingRulesController>();
-    final tabs = RulesTab.values;
 
     return Obx(() {
+      final tabs = c.tabs;
+      if (tabs.isEmpty) return const SizedBox.shrink();
+
       final selected = c.selectedTab.value;
       return Container(
         margin: EdgeInsets.fromLTRB(16.w, 12.h, 16.w, 4.h),
@@ -41,8 +38,8 @@ class RulesSegmentedTabs extends StatelessWidget {
               for (final t in tabs)
                 _SegmentChip(
                   label: t.label,
-                  isSelected: t == selected,
-                  onTap: () => c.selectTab(t),
+                  isSelected: t.value == selected,
+                  onTap: () => c.selectTab(t.value),
                 ),
             ],
           ),

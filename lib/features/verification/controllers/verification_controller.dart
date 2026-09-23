@@ -28,30 +28,30 @@ class VerificationController extends GetxController {
   final steps = <VerificationStep>[
     const VerificationStep(
       index: 1,
-      title: 'Personal Details',
+      title: 'verification.step_personal_details',
       benefits: [
-        'Deposit up to \$2000 within 14 days',
-        'Limited deposit methods',
-        'Live & demo trading',
+        'verification.benefit_deposit_limit',
+        'verification.benefit_limited_methods',
+        'verification.benefit_live_demo',
       ],
       status: VerificationStatus.completed,
     ),
     const VerificationStep(
       index: 2,
-      title: 'ID Verification',
+      title: 'verification.step_id_verification',
       benefits: [
-        'Unlimited deposits',
-        'Global and local payments',
-        'Withdrawals',
+        'verification.benefit_unlimited_deposits',
+        'verification.benefit_global_local_payments',
+        'verification.benefit_withdrawals',
       ],
     ),
     const VerificationStep(
       index: 3,
-      title: 'Bank Verification',
+      title: 'verification.step_bank_verification',
       benefits: [
-        'Unlimited deposits',
-        'Global and local payments',
-        'Withdrawals',
+        'verification.benefit_unlimited_deposits',
+        'verification.benefit_global_local_payments',
+        'verification.benefit_withdrawals',
       ],
     ),
   ].obs;

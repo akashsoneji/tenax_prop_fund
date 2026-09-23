@@ -25,6 +25,23 @@ class AppPill extends StatelessWidget {
     required this.color,
     this.value,
     this.showDot = false,
+    this.bordered = false,
+    this.radius = 999,
+    this.fontSize = 12,
+    this.fontWeight,
+    this.letterSpacing,
+    this.dotSize = 6,
+    this.dotGap = 6,
+    this.padding,
+    this.bgAlpha = 0.12,
+    this.borderAlpha = 0.30,
+    this.bgColor,
+    this.dotColor,
+    this.labelColor,
+    this.leading,
+    this.leadingGap = 4,
+    this.trailing,
+    this.trailingGap = 5,
   });
 
   /// Status pill: single tinted label with an optional leading dot.
@@ -55,37 +72,105 @@ class AppPill extends StatelessWidget {
   /// Show a leading colour dot (status style).
   final bool showDot;
 
+  /// Add a hairline border tinted from [color].
+  final bool bordered;
+
+  /// Corner radius in r. Defaults to a full 999 capsule.
+  final double radius;
+
+  /// Label font size in sp. Defaults to 12.
+  final double fontSize;
+
+  /// Label font weight. Defaults to w700 (w500 when a [value] is present).
+  final FontWeight? fontWeight;
+
+  /// Label letter spacing. Defaults to the font's own tracking.
+  final double? letterSpacing;
+
+  /// Leading dot diameter in w. Defaults to 6.
+  final double dotSize;
+
+  /// Gap between the dot and the label in w. Defaults to 6.
+  final double dotGap;
+
+  /// Pill padding. Defaults to 12w / 6h.
+  final EdgeInsetsGeometry? padding;
+
+  /// Opacity of the [color] fill behind the label. Defaults to 0.12.
+  final double bgAlpha;
+
+  /// Opacity of the [color] border when [bordered] is true. Defaults to 0.30.
+  final double borderAlpha;
+
+  /// Explicit fill colour. Overrides the [color] + [bgAlpha] wash when set —
+  /// use it when the fill is unrelated to the text tone (e.g. a white
+  /// translucent pill on a dark gradient hero).
+  final Color? bgColor;
+
+  /// Explicit dot colour. Defaults to [color].
+  final Color? dotColor;
+
+  /// Explicit label colour. Defaults to [color].
+  final Color? labelColor;
+
+  /// Optional widget rendered before the label (e.g. a leading icon). Rendered
+  /// after the dot when [showDot] is also set.
+  final Widget? leading;
+
+  /// Gap after [leading] in w. Defaults to 4.
+  final double leadingGap;
+
+  /// Optional widget rendered after the label (e.g. a status icon).
+  final Widget? trailing;
+
+  /// Gap before [trailing] in w. Defaults to 5.
+  final double trailingGap;
+
   @override
   Widget build(BuildContext context) {
     if (label.isEmpty && (value == null || value!.isEmpty)) {
       return const SizedBox.shrink();
     }
 
+    final resolvedLabelColor = labelColor ??
+        (value == null ? color : color.withValues(alpha: 0.75));
+
     return Container(
-      padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 6.h),
+      padding: padding ??
+          EdgeInsets.symmetric(horizontal: 12.w, vertical: 6.h),
       decoration: BoxDecoration(
-        color: color.withValues(alpha: 0.12),
-        borderRadius: BorderRadius.circular(999.r),
+        color: bgColor ?? color.withValues(alpha: bgAlpha),
+        borderRadius: BorderRadius.circular(radius.r),
+        border: bordered
+            ? Border.all(color: color.withValues(alpha: borderAlpha))
+            : null,
       ),
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
           if (showDot) ...[
             Container(
-              width: 6.w,
-              height: 6.w,
-              decoration: BoxDecoration(color: color, shape: BoxShape.circle),
+              width: dotSize.w,
+              height: dotSize.w,
+              decoration: BoxDecoration(
+                color: dotColor ?? color,
+                shape: BoxShape.circle,
+              ),
             ),
-            SizedBox(width: 6.w),
+            SizedBox(width: dotGap.w),
+          ],
+          if (leading != null) ...[
+            leading!,
+            SizedBox(width: leadingGap.w),
           ],
           Text(
             label,
             style: GoogleFonts.beVietnamPro(
-              fontSize: 12.sp,
-              fontWeight: value == null ? FontWeight.w700 : FontWeight.w500,
-              color: value == null
-                  ? color
-                  : color.withValues(alpha: 0.75),
+              fontSize: fontSize.sp,
+              fontWeight: fontWeight ??
+                  (value == null ? FontWeight.w700 : FontWeight.w500),
+              letterSpacing: letterSpacing,
+              color: resolvedLabelColor,
             ),
           ),
           if (value != null && value!.isNotEmpty) ...[
@@ -93,11 +178,15 @@ class AppPill extends StatelessWidget {
             Text(
               value!,
               style: GoogleFonts.beVietnamPro(
-                fontSize: 12.sp,
+                fontSize: fontSize.sp,
                 fontWeight: FontWeight.w700,
                 color: color,
               ),
             ),
+          ],
+          if (trailing != null) ...[
+            SizedBox(width: trailingGap.w),
+            trailing!,
           ],
         ],
       ),

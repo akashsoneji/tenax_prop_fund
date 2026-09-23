@@ -33,12 +33,9 @@ class PayoutMethodsView extends StatelessWidget {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
-                  const WarningBanner(
-                    title: 'The name must match your KYC document',
-                    body:
-                        'A payout is rejected if the account name differs from '
-                        'your verified ID — even by a middle name. This is the '
-                        'single most common reason a first reward is delayed.',
+                  WarningBanner(
+                    title: 'payout_methods.name_match_title'.tr,
+                    body: 'payout_methods.name_match_body'.tr,
                   ),
                   SizedBox(height: 18.h),
                   Obx(

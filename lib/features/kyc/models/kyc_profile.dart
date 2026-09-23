@@ -85,32 +85,38 @@ class KycProfile {
       avatarUrl: '',
       steps: [
         KycVerificationStep(
-          title: 'Email confirmed',
+          title: 'kyc.step_email_confirmed',
           subtitle: email,
           status: emailVerified ? KycStepStatus.done : KycStepStatus.pending,
         ),
         KycVerificationStep(
-          title: 'Identity document',
-          subtitle: 'Passport or national ID',
+          title: 'kyc.step_identity_document',
+          subtitle: 'kyc.step_identity_document_sub',
           status: _stepStatusFrom(kyc?.identity ?? KycDocState.notSubmitted),
         ),
         KycVerificationStep(
-          title: 'Proof of address',
-          subtitle: 'Bank statement or bill, under 3 months',
+          title: 'kyc.step_proof_of_address',
+          subtitle: 'kyc.step_proof_of_address_sub',
           status: _stepStatusFrom(kyc?.address ?? KycDocState.notSubmitted),
         ),
       ],
       details: [
         KycDetailRow(
             icon: Icons.person_outline_rounded,
-            label: 'Full name',
+            label: 'kyc.detail_full_name',
             value: fullName),
         KycDetailRow(
-            icon: Icons.public_rounded, label: 'Country', value: country),
+            icon: Icons.public_rounded,
+            label: 'kyc.detail_country',
+            value: country),
         KycDetailRow(
-            icon: Icons.smartphone_rounded, label: 'Mobile', value: phone),
+            icon: Icons.smartphone_rounded,
+            label: 'kyc.detail_mobile',
+            value: phone),
         KycDetailRow(
-            icon: Icons.mail_outline_rounded, label: 'Email', value: email),
+            icon: Icons.mail_outline_rounded,
+            label: 'kyc.detail_email',
+            value: email),
       ],
     );
   }

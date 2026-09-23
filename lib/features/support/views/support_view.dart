@@ -47,7 +47,7 @@ class SupportView extends StatelessWidget {
                     crossAxisAlignment: CrossAxisAlignment.stretch,
                     children: [
                       const _Enter(child: SupportContactCard()),
-                      SizedBox(height: 26.h),
+                      SizedBox(height: 20.h),
                       const _SectionTitle('Your tickets'),
                       SizedBox(height: 10.h),
                       _Enter(delay: 0.15, child: _TicketsCard(data: data)),
@@ -132,8 +132,8 @@ class _SupportSkeleton extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        HeroSkeleton(height: 200.h),
-        SizedBox(height: 26.h),
+        HeroSkeleton(height: 124.h),
+        SizedBox(height: 20.h),
         ShimmerBox(width: 140.w, height: 16.h),
         SizedBox(height: 10.h),
         CardSkeleton(lines: 3, height: 140.h),

@@ -75,17 +75,17 @@ class RewardsData {
     final canRequest = stats['can_request'] as bool? ?? false;
     return [
       PayoutRequirement(
-        label: 'KYC verified',
-        value: kycApproved ? 'Verified' : 'Not Yet',
+        label: 'rewards.req_kyc_verified',
+        value: kycApproved ? 'rewards.req_verified' : 'rewards.req_not_yet',
         status: kycApproved ? RequirementStatus.pass : RequirementStatus.fail,
       ),
       PayoutRequirement(
-        label: 'Payout method saved',
-        value: hasMethod ? 'Saved' : 'Not Yet',
+        label: 'rewards.req_payout_method',
+        value: hasMethod ? 'rewards.req_saved' : 'rewards.req_not_yet',
         status: hasMethod ? RequirementStatus.pass : RequirementStatus.fail,
       ),
       PayoutRequirement(
-        label: 'Minimum payout',
+        label: 'rewards.req_minimum_payout',
         value: (stats['min_payout'] as String?) ?? '—',
         status: canRequest ? RequirementStatus.pass : RequirementStatus.partial,
       ),

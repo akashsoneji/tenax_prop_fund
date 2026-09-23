@@ -52,17 +52,15 @@ class ReferralView extends StatelessWidget {
                       SizedBox(height: 18.h),
                       _StatGridCard(data: data),
                       SizedBox(height: 26.h),
-                      const _SectionTitle('How you get paid'),
+                      _SectionTitle('referral.how_you_get_paid'.tr),
                       const _HowYouGetPaidCard(),
                       SizedBox(height: 18.h),
-                      const ReferralWarningBanner(
-                        title: 'Referral earnings need a funded account',
-                        body:
-                            'You can collect them once you have passed a challenge. '
-                            'Until then they accrue.',
+                      ReferralWarningBanner(
+                        title: 'referral.warning_title'.tr,
+                        body: 'referral.warning_body'.tr,
                       ),
                       SizedBox(height: 26.h),
-                      const _SectionTitle('Your referrals'),
+                      _SectionTitle('referral.your_referrals'.tr),
                       const _EmptyReferralsCard(),
                     ],
                   ),
@@ -284,22 +282,24 @@ class _StatGridCard extends StatelessWidget {
               children: [
                 Expanded(
                   child: _StatCell(
-                      label: 'Signed up', value: '${data.signedUp}'),
+                      label: 'referral.signed_up'.tr, value: '${data.signedUp}'),
                 ),
                 Expanded(
                   child: _StatCell(
-                      label: 'Purchased', value: '${data.purchased}'),
+                      label: 'referral.purchased'.tr,
+                      value: '${data.purchased}'),
                 ),
               ],
             ),
             Row(
               children: [
                 Expanded(
-                  child:
-                      _StatCell(label: 'Earned', value: data.earnedLabel),
+                  child: _StatCell(
+                      label: 'referral.earned'.tr, value: data.earnedLabel),
                 ),
                 Expanded(
-                  child: _StatCell(label: 'Your rate', value: data.rateLabel),
+                  child: _StatCell(
+                      label: 'referral.your_rate'.tr, value: data.rateLabel),
                 ),
               ],
             ),
@@ -487,7 +487,7 @@ class _EmptyReferralsCard extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    'Nobody yet',
+                    'referral.empty_title'.tr,
                     style: GoogleFonts.beVietnamPro(
                       fontSize: 18.sp,
                       fontWeight: FontWeight.w800,
@@ -496,7 +496,7 @@ class _EmptyReferralsCard extends StatelessWidget {
                   ),
                   SizedBox(height: 6.h),
                   Text(
-                    'Share your link to get started.',
+                    'referral.empty_hint'.tr,
                     style: GoogleFonts.beVietnamPro(
                       fontSize: 13.5.sp,
                       fontWeight: FontWeight.w500,

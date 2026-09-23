@@ -4,6 +4,8 @@ import 'package:get/get.dart';
 
 import '../../../shared/theme/app_colors.dart';
 import '../../../shared/theme/app_theme.dart';
+import '../../../shared/widgets/app_pill.dart';
+import '../../../shared/widgets/app_stat_tile.dart';
 import '../models/account_models.dart';
 
 /// Modern gradient summary hero for the Account overview tab. Leads with the
@@ -153,39 +155,21 @@ class _HeroMiniStat extends StatelessWidget {
       AccountTone.down => AppColors.dangerBright,
       AccountTone.neutral => AppColors.white,
     };
-    return Container(
-      padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 10.h),
-      decoration: BoxDecoration(
-        color: AppColors.white.withValues(alpha: 0.10),
-        borderRadius: BorderRadius.circular(14.r),
-        border: Border.all(color: AppColors.white.withValues(alpha: 0.14)),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(
-            label,
-            maxLines: 1,
-            overflow: TextOverflow.ellipsis,
-            style: TextStyle(
-              fontSize: 10.5.sp,
-              fontWeight: FontWeight.w600,
-              color: AppColors.white.withValues(alpha: 0.72),
-            ),
-          ),
-          SizedBox(height: 4.h),
-          Text(
-            value.isEmpty ? '—' : value,
-            maxLines: 1,
-            overflow: TextOverflow.ellipsis,
-            style: TextStyle(
-              fontSize: 16.sp,
-              fontWeight: FontWeight.w800,
-              color: valueColor,
-            ),
-          ),
-        ],
-      ),
+    return AppStatTile(
+      label: label,
+      value: value.isEmpty ? '—' : value,
+      boxed: true,
+      bordered: true,
+      boxColor: AppColors.white.withValues(alpha: 0.10),
+      borderColor: AppColors.white.withValues(alpha: 0.14),
+      boxPadding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 10.h),
+      boxRadius: 14,
+      labelColor: AppColors.white.withValues(alpha: 0.72),
+      labelFontSize: 10.5,
+      labelFontWeight: FontWeight.w600,
+      valueColor: valueColor,
+      valueFontSize: 16,
+      valueFontWeight: FontWeight.w800,
     );
   }
 }
@@ -204,31 +188,15 @@ class _HeroStatusPill extends StatelessWidget {
       AccountTone.down => AppColors.dangerBright,
       AccountTone.neutral => AppColors.accent,
     };
-    return Container(
+    return AppPill(
+      label: label,
+      color: dot,
+      bgColor: AppColors.white.withValues(alpha: 0.16),
+      labelColor: AppColors.white,
+      showDot: true,
+      radius: 20,
+      fontSize: 11.5,
       padding: EdgeInsets.symmetric(horizontal: 10.w, vertical: 5.h),
-      decoration: BoxDecoration(
-        color: AppColors.white.withValues(alpha: 0.16),
-        borderRadius: BorderRadius.circular(20.r),
-      ),
-      child: Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Container(
-            width: 6.w,
-            height: 6.h,
-            decoration: BoxDecoration(color: dot, shape: BoxShape.circle),
-          ),
-          SizedBox(width: 6.w),
-          Text(
-            label,
-            style: TextStyle(
-              fontSize: 11.5.sp,
-              fontWeight: FontWeight.w700,
-              color: AppColors.white,
-            ),
-          ),
-        ],
-      ),
     );
   }
 }
@@ -248,18 +216,12 @@ class AccountStatusPill extends StatelessWidget {
       AccountTone.down => AppColors.danger,
       AccountTone.neutral => scheme.onSurfaceVariant,
     };
-    return Container(
-      padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 6.h),
-      decoration: BoxDecoration(
-        color: color.withValues(alpha: 0.12),
-        borderRadius: BorderRadius.circular(20.r),
-        border: Border.all(color: color.withValues(alpha: 0.35)),
-      ),
-      child: Text(
-        label,
-        style: TextStyle(
-            fontSize: 12.sp, fontWeight: FontWeight.w700, color: color),
-      ),
+    return AppPill(
+      label: label,
+      color: color,
+      bordered: true,
+      borderAlpha: 0.35,
+      radius: 20,
     );
   }
 }

@@ -1,8 +1,9 @@
 /// Data models for the Trading Rules screen.
 ///
-/// The screen has 4 tabs; each tab is just a list of cards. We model them as
-/// plain immutable Dart classes (no codegen) because the data is static demo
-/// content that the controller seeds once at construction time.
+/// Mirrors `GET /support/rules` exactly: the payload is a list of tabs plus a
+/// map of sections keyed by the tab `value`. Every tab is rendered the same
+/// way (a card of rule lines), so the screen adapts to whatever the backend
+/// publishes without any code change.
 library;
 
 import 'package:flutter/material.dart';
@@ -10,45 +11,89 @@ import 'package:flutter/material.dart';
 import '../../../shared/theme/app_colors.dart';
 
 /// The full payload the Trading Rules screen needs in one fetch, so the
-/// controller holds a single `DataState<TradingRulesData>` instead of several
-/// loosely-related static lists. Mirrors `AccountsData`.
+/// controller holds a single `DataState<TradingRulesData>`.
 class TradingRulesData {
-  const TradingRulesData({
-    required this.closingRules,
-    required this.closingTip,
-    required this.canDoRows,
-    required this.delayRows,
-    required this.planRows,
-  });
+  const TradingRulesData({required this.tabs, required this.sections});
 
-  final List<ClosingRule> closingRules;
-  final RulesTip closingTip;
-  final List<CanDoRow> canDoRows;
-  final List<DelayRow> delayRows;
-  final List<PlanRow> planRows;
+  final List<RulesTab> tabs;
+
+  /// Keyed by [RulesTab.value].
+  final Map<String, RulesSection> sections;
+
+  factory TradingRulesData.fromJson(Map<String, dynamic> json) {
+    final rawTabs = json['tabs'];
+    final tabs = rawTabs is List
+        ? rawTabs
+              .whereType<Map>()
+              .map((e) => RulesTab.fromJson(e.cast<String, dynamic>()))
+              .where((t) => t.value.isNotEmpty)
+              .toList()
+        : <RulesTab>[];
+
+    final rawSections = json['sections'];
+    final sections = <String, RulesSection>{};
+    if (rawSections is Map) {
+      rawSections.forEach((key, value) {
+        if (value is Map) {
+          sections['$key'] = RulesSection.fromJson(value.cast<String, dynamic>());
+        }
+      });
+    }
+
+    return TradingRulesData(tabs: tabs, sections: sections);
+  }
+
+  RulesSection? sectionFor(String tabValue) => sections[tabValue];
 
   bool get isEmpty =>
-      closingRules.isEmpty &&
-      canDoRows.isEmpty &&
-      delayRows.isEmpty &&
-      planRows.isEmpty;
+      tabs.isEmpty || sections.values.every((s) => s.items.isEmpty);
 }
 
-/// The 4 segments shown in the screen's top tab bar.
-///
-/// Order here = visual order in the tab bar.
-enum RulesTab {
-  closes('What closes an account'),
-  canDo('What I can do'),
-  delays('Delays a reward'),
-  everything('Everything');
+/// One segment in the screen's top tab bar, straight from `data.tabs[]`.
+class RulesTab {
+  const RulesTab({required this.value, required this.label});
 
-  const RulesTab(this.label);
+  final String value;
   final String label;
+
+  factory RulesTab.fromJson(Map<String, dynamic> json) => RulesTab(
+    value: '${json['value'] ?? ''}',
+    label: '${json['label'] ?? json['value'] ?? ''}',
+  );
 }
 
-/// Severity/tone of a "rule" card on the first tab. Drives the accent color
-/// (red for danger, purple for warning, green for info, neutral for plain).
+/// The content of one tab: an optional heading/description plus the rule
+/// lines the backend published under `sections.<tab>.list`.
+class RulesSection {
+  const RulesSection({this.title, this.body, required this.items});
+
+  final String? title;
+  final String? body;
+  final List<String> items;
+
+  factory RulesSection.fromJson(Map<String, dynamic> json) {
+    final rawList = json['list'];
+    return RulesSection(
+      title: _text(json['title']),
+      body: _text(json['body'] ?? json['description']),
+      items: rawList is List
+          ? rawList
+                .map((e) => '$e'.trim())
+                .where((e) => e.isNotEmpty)
+                .toList()
+          : const <String>[],
+    );
+  }
+
+  static String? _text(Object? value) {
+    if (value == null) return null;
+    final text = '$value'.trim();
+    return text.isEmpty ? null : text;
+  }
+}
+
+/// Severity/tone of a rules card. Drives the accent color (red for danger,
+/// purple for warning, blue for info, neutral for plain).
 enum RuleTone {
   danger,
   warning,
@@ -87,82 +132,4 @@ enum RuleTone {
         return scheme.onSurfaceVariant;
     }
   }
-}
-
-/// A single numbered rule card on the "What closes an account" tab.
-class ClosingRule {
-  const ClosingRule({
-    required this.index,
-    required this.title,
-    required this.body,
-    required this.highlight,
-    required this.tone,
-  });
-
-  final int index;
-  final String title;
-  final String body;
-
-  /// Short, brand-red/bold callout under the body, e.g. "5% · $5,000 …".
-  final String highlight;
-  final RuleTone tone;
-}
-
-/// "You get a warning first" card at the bottom of the first tab.
-class RulesTip {
-  const RulesTip({required this.title, required this.body});
-  final String title;
-  final String body;
-}
-
-/// A row on the "What I can do" tab — checklist of permitted / prohibited
-/// strategies and instruments.
-class CanDoRow {
-  const CanDoRow({
-    required this.label,
-    required this.status,
-    this.footnote,
-  });
-
-  final String label;
-  final CanDoStatus status;
-
-  /// Right-column text e.g. "Yes", "No", "Above 60 seconds", or "Yes, gap
-  /// risk is yours" — kept on the model so future i18n stays simple.
-  final String? footnote;
-}
-
-enum CanDoStatus {
-  yes,
-  no,
-  conditional,
-}
-
-/// A row on the "Delays a reward" tab — rule + consequence label.
-class DelayRow {
-  const DelayRow({
-    required this.title,
-    required this.body,
-    required this.consequence,
-  });
-
-  final String title;
-  final String body;
-  final String consequence;
-}
-
-/// A row in the "Your plan" list on the "Everything" tab.
-class PlanRow {
-  const PlanRow({
-    required this.label,
-    required this.value,
-    this.emphasized = false,
-  });
-
-  final String label;
-  final String value;
-
-  /// True for the dollar/percent column so the value renders bolder and in
-  /// brand purple, matching the design.
-  final bool emphasized;
 }

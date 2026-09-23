@@ -41,13 +41,11 @@ class AppTheme {
       _build(config, Brightness.dark);
 
   static ThemeData _build(FlavorConfig config, Brightness brightness) {
-    // Dark mode needs a lighter primary — #4A0D55 on black is muddy and reads
-    // as navy. Light mode uses the deep brand purple. Yellow stays constant.
     final isDark = brightness == Brightness.dark;
-    final primary = isDark ? AppColors.brandPurpleLight : config.primaryColor;
-    // Dark-mode CTA text is dark (on lavender primary); light-mode CTA text is
-    // white (on deep purple primary). Both must be REAL contrast, never grey.
-    final onPrimary = isDark ? AppColors.inkLight : Colors.white;
+    // Primary is the flavor's brand color in BOTH themes — a flavor must never
+    // see a different hue just because dark mode is on.
+    final primary = config.primaryColor;
+    const onPrimary = Colors.white;
 
     // Light-mode surfaces get a subtle warm-lavender bg + white cards for
     // clean contrast; dark-mode surfaces stay near-black.

@@ -1,17 +1,18 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
-import 'package:google_fonts/google_fonts.dart';
 
 import '../../../../app/routes/app_routes.dart';
 import '../../../../features/authentication/repositories/auth_repository.dart';
 import '../../../../shared/theme/app_colors.dart';
+import '../../../../shared/theme/app_text.dart';
 import '../../../../shared/theme/app_theme.dart';
 import '../../../../shared/widgets/pinned_gradient_app_bar.dart';
+import '../../widgets/delete_account_dialog.dart';
 
 /// The "More" tab: a grouped directory of every secondary destination in the
-/// app, styled to match the design — a purple gradient header over six
-/// card-grouped sections (Trading, Money, Rewards hub, Tools, Help, Account).
+/// app. Each section is a single card that carries its own tinted title strip,
+/// with compact single-line rows underneath — no second line of helper text.
 ///
 /// Lives inside [HomeShellView], which already provides the bottom nav, so this
 /// widget only renders the header + scrolling content. Rows whose destination
@@ -29,7 +30,9 @@ class MoreTabView extends StatelessWidget {
     final scheme = Theme.of(context).colorScheme;
     return Scaffold(
       backgroundColor: scheme.surface,
+      resizeToAvoidBottomInset: true,
       body: CustomScrollView(
+        physics: const BouncingScrollPhysics(),
         slivers: [
           PinnedGradientAppBar(title: 'home.tabs.more'.tr, showBack: showBack),
           SliverToBoxAdapter(
@@ -40,10 +43,10 @@ class MoreTabView extends StatelessWidget {
                 children: [
                   for (var i = 0; i < _sections.length; i++) ...[
                     _MoreSection(section: _sections[i], order: i),
-                    if (i < _sections.length - 1) SizedBox(height: 22.h),
+                    if (i < _sections.length - 1) SizedBox(height: 16.h),
                   ],
-                  SizedBox(height: 22.h),
-                  const _LogoutRow(),
+                  SizedBox(height: 18.h),
+                  const _DangerZone(),
                 ],
               ),
             ),
@@ -54,77 +57,46 @@ class MoreTabView extends StatelessWidget {
   }
 
   static const _sections = <_Section>[
-    _Section('more.trading', [
-      _Item(Icons.show_chart_rounded, 'more.item.markets', 'more.sub.markets'),
-      _Item(Icons.bar_chart_rounded, 'more.item.open_positions',
-          'more.sub.open_positions'),
-      _Item(Icons.receipt_long_rounded, 'more.item.trade_history',
-          'more.sub.trade_history'),
-      _Item(Icons.groups_2_rounded, 'more.item.my_accounts',
-          'more.sub.my_accounts', AppRoutes.accounts),
-      _Item(Icons.emoji_events_rounded, 'more.item.buy_challenge',
-          'more.sub.buy_challenge', AppRoutes.challenge),
-      _Item(Icons.card_giftcard_rounded, 'more.item.rewards', 'more.sub.rewards',
+    _Section(Icons.person_rounded, 'more.account', [
+      _Item(Icons.account_circle_outlined, 'more.item.profile',
+          AppRoutes.profileKyc),
+      _Item(Icons.verified_user_outlined, 'more.item.verify_identity',
+          AppRoutes.verification),
+      _Item(Icons.shield_outlined, 'more.item.security', AppRoutes.settings),
+    ]),
+    _Section(Icons.account_balance_wallet_rounded, 'more.money', [
+      _Item(Icons.description_outlined, 'more.item.billing', AppRoutes.billing),
+      _Item(Icons.account_balance_wallet_outlined, 'more.item.payout_methods',
+          AppRoutes.payoutMethods),
+      _Item(Icons.card_giftcard_rounded, 'more.item.rewards',
           AppRoutes.rewards),
     ]),
-    _Section('more.money', [
-      _Item(Icons.description_outlined, 'more.item.billing', 'more.sub.billing',
-          AppRoutes.billing),
-      _Item(Icons.account_balance_wallet_outlined, 'more.item.payout_methods',
-          'more.sub.payout_methods', AppRoutes.payoutMethods),
-      _Item(Icons.redeem_rounded, 'more.item.promotional',
-          'more.sub.promotional'),
-    ]),
-    _Section('more.rewards_hub', [
-      _Item(Icons.share_rounded, 'more.item.refer', 'more.sub.refer',
-          AppRoutes.referral),
-      _Item(Icons.local_offer_outlined, 'more.item.offers', 'more.sub.offers',
-          AppRoutes.offers),
+    _Section(Icons.auto_awesome_rounded, 'more.rewards_hub', [
+      _Item(Icons.share_rounded, 'more.item.refer', AppRoutes.referral),
+      _Item(Icons.local_offer_outlined, 'more.item.offers', AppRoutes.offers),
       _Item(Icons.leaderboard_rounded, 'more.item.competitions',
-          'more.sub.competitions', AppRoutes.competitions),
+          AppRoutes.competitions),
       _Item(Icons.workspace_premium_outlined, 'more.item.certificates',
-          'more.sub.certificates', AppRoutes.certificates),
+          AppRoutes.certificates),
     ]),
-    _Section('more.tools', [
+    _Section(Icons.handyman_rounded, 'more.tools', [
       _Item(Icons.calculate_outlined, 'more.item.calculators',
-          'more.sub.calculators', AppRoutes.calculators),
-      _Item(Icons.calendar_month_rounded, 'more.item.economic_calendar',
-          'more.sub.economic_calendar', AppRoutes.economicCalendar),
-      // Symbols specs & utilities — hidden for now, not needed.
-      // _Item(Icons.tune_rounded, 'more.item.symbols', 'more.sub.symbols',
-      //     AppRoutes.symbols),
-      _Item(Icons.download_rounded, 'more.item.downloads',
-          'more.sub.downloads', AppRoutes.downloads),
+          AppRoutes.calculators),
     ]),
-    _Section('more.help', [
+    _Section(Icons.support_agent_rounded, 'more.help', [
       _Item(Icons.menu_book_rounded, 'more.item.trading_rules',
-          'more.sub.trading_rules', AppRoutes.tradingRules),
-      _Item(Icons.help_outline_rounded, 'more.item.faq', 'more.sub.faq',
-          AppRoutes.faq),
-      _Item(Icons.headset_mic_outlined, 'more.item.support', 'more.sub.support',
-          AppRoutes.support),
+          AppRoutes.tradingRules),
+      _Item(Icons.help_outline_rounded, 'more.item.faq', AppRoutes.faq),
+      _Item(Icons.headset_mic_outlined, 'more.item.support', AppRoutes.support),
       _Item(Icons.notifications_none_rounded, 'more.item.notifications',
-          'more.sub.notifications', AppRoutes.notifications),
+          AppRoutes.notifications),
     ]),
-    _Section('more.account', [
-      _Item(Icons.account_circle_outlined, 'more.item.profile',
-          'more.sub.profile', AppRoutes.profileKyc),
-      _Item(Icons.edit_rounded, 'more.item.edit_profile',
-          'more.sub.edit_profile', AppRoutes.editProfile),
-      _Item(Icons.badge_outlined, 'more.item.profile_kyc',
-          'more.sub.profile_kyc', AppRoutes.profileKyc),
-      _Item(Icons.verified_user_outlined, 'more.item.verify_identity',
-          'more.sub.verify_identity', AppRoutes.verification),
-      _Item(Icons.shield_outlined, 'more.item.security', 'more.sub.security',
-          AppRoutes.settings),
-    ]),
+    
   ];
 }
 
 // ---------------------------------------------------------------------------
-
-// ---------------------------------------------------------------------------
-// Section (label + grouped card)
+// Section — one card carrying a tinted title strip + its rows
 // ---------------------------------------------------------------------------
 class _MoreSection extends StatelessWidget {
   const _MoreSection({required this.section, required this.order});
@@ -146,42 +118,55 @@ class _MoreSection extends StatelessWidget {
           child: child,
         ),
       ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Padding(
-            padding: EdgeInsets.only(left: 4.w, bottom: 10.h),
-            child: Text(section.titleKey.tr,
-                style: GoogleFonts.beVietnamPro(
-                    fontSize: 15.sp,
-                    fontWeight: FontWeight.w700,
-                    color: scheme.onSurface.withValues(alpha: 0.65))),
-          ),
-          Container(
-            decoration: AppTheme.surfaceCard(scheme, radius: 18.r),
-            child: Column(
-              children: [
-                for (var i = 0; i < section.items.length; i++) ...[
-                  _MoreRow(item: section.items[i]),
-                  if (i < section.items.length - 1)
-                    Divider(
-                      height: 1.h,
-                      thickness: 1,
-                      indent: 64.w,
-                      color: scheme.onSurface.withValues(alpha: 0.06),
+      child: Container(
+        clipBehavior: Clip.antiAlias,
+        decoration: AppTheme.surfaceCard(scheme, radius: 18.r),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            Container(
+              padding: EdgeInsets.symmetric(horizontal: 14.w, vertical: 10.h),
+              color: scheme.primary.withValues(alpha: 0.07),
+              child: Row(
+                children: [
+                  Icon(section.icon, size: 15.w, color: scheme.primary),
+                  SizedBox(width: 8.w),
+                  Expanded(
+                    child: Text(
+                      section.titleKey.tr.toUpperCase(),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: AppText.label(
+                        fontSize: 11.sp,
+                        color: scheme.primary,
+                      ).copyWith(
+                        fontWeight: FontWeight.w800,
+                        letterSpacing: 0.8,
+                      ),
                     ),
+                  ),
                 ],
-              ],
+              ),
             ),
-          ),
-        ],
+            for (var i = 0; i < section.items.length; i++) ...[
+              _MoreRow(item: section.items[i]),
+              if (i < section.items.length - 1)
+                Divider(
+                  height: 1.h,
+                  thickness: 1,
+                  indent: 48.w,
+                  color: scheme.onSurface.withValues(alpha: 0.06),
+                ),
+            ],
+          ],
+        ),
       ),
     );
   }
 }
 
 // ---------------------------------------------------------------------------
-// Row
+// Row — single line: icon, title, chevron
 // ---------------------------------------------------------------------------
 class _MoreRow extends StatelessWidget {
   const _MoreRow({required this.item});
@@ -209,39 +194,28 @@ class _MoreRow extends StatelessWidget {
       color: AppColors.transparent,
       child: InkWell(
         onTap: _onTap,
-        borderRadius: BorderRadius.circular(18.r),
         child: Padding(
-          padding: EdgeInsets.symmetric(horizontal: 14.w, vertical: 12.h),
+          padding: EdgeInsets.symmetric(horizontal: 14.w, vertical: 14.h),
           child: Row(
             children: [
-              Container(
-                width: 38.w,
-                height: 38.h,
-                decoration: BoxDecoration(
-                  color: scheme.primary.withValues(alpha: 0.10),
-                  borderRadius: BorderRadius.circular(11.r),
-                ),
-                alignment: Alignment.center,
-                child: Icon(item.icon, size: 19.w, color: scheme.primary),
-              ),
-              SizedBox(width: 12.w),
+              Icon(item.icon, size: 20.w, color: scheme.primary),
+              SizedBox(width: 14.w),
               Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(item.titleKey.tr,
-                        style: GoogleFonts.beVietnamPro(
-                            fontSize: 14.sp, fontWeight: FontWeight.w700)),
-                    SizedBox(height: 2.h),
-                    Text(item.subtitleKey.tr,
-                        style: GoogleFonts.beVietnamPro(
-                            fontSize: 12.sp,
-                            color: scheme.onSurface.withValues(alpha: 0.55))),
-                  ],
+                child: Text(
+                  item.titleKey.tr,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: AppText.subtitle(
+                    fontSize: 14.sp,
+                    color: scheme.onSurface,
+                  ),
                 ),
               ),
-              Icon(Icons.chevron_right_rounded,
-                  color: scheme.primary.withValues(alpha: 0.7)),
+              Icon(
+                Icons.chevron_right_rounded,
+                size: 20.w,
+                color: scheme.onSurface.withValues(alpha: 0.35),
+              ),
             ],
           ),
         ),
@@ -254,24 +228,54 @@ class _MoreRow extends StatelessWidget {
 // Data
 // ---------------------------------------------------------------------------
 class _Section {
-  const _Section(this.titleKey, this.items);
+  const _Section(this.icon, this.titleKey, this.items);
+  final IconData icon;
   final String titleKey;
   final List<_Item> items;
 }
 
 class _Item {
-  const _Item(this.icon, this.titleKey, this.subtitleKey, [this.route]);
+  const _Item(this.icon, this.titleKey, [this.route]);
   final IconData icon;
   final String titleKey;
-  final String subtitleKey;
   final String? route;
 }
 
 // ---------------------------------------------------------------------------
-// Logout
+// Danger zone — delete account + logout
 // ---------------------------------------------------------------------------
-class _LogoutRow extends StatelessWidget {
-  const _LogoutRow();
+class _DangerZone extends StatelessWidget {
+  const _DangerZone();
+
+  @override
+  Widget build(BuildContext context) {
+    final scheme = Theme.of(context).colorScheme;
+    return Container(
+      clipBehavior: Clip.antiAlias,
+      decoration: AppTheme.surfaceCard(scheme, radius: 18.r),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          _DangerRow(
+            icon: Icons.delete_forever_rounded,
+            label: 'more.delete_account'.tr,
+            onTap: showDeleteAccountDialog,
+          ),
+          Divider(
+            height: 1.h,
+            thickness: 1,
+            indent: 48.w,
+            color: scheme.onSurface.withValues(alpha: 0.06),
+          ),
+          _DangerRow(
+            icon: Icons.logout_rounded,
+            label: 'more.logout'.tr,
+            onTap: _confirmAndLogout,
+          ),
+        ],
+      ),
+    );
+  }
 
   Future<void> _confirmAndLogout() async {
     final confirmed = await Get.dialog<bool>(
@@ -295,42 +299,41 @@ class _LogoutRow extends StatelessWidget {
     await Get.find<AuthRepository>().logout();
     Get.offAllNamed(AppRoutes.login);
   }
+}
+
+class _DangerRow extends StatelessWidget {
+  const _DangerRow({
+    required this.icon,
+    required this.label,
+    required this.onTap,
+  });
+
+  final IconData icon;
+  final String label;
+  final VoidCallback onTap;
 
   @override
   Widget build(BuildContext context) {
-    final scheme = Theme.of(context).colorScheme;
-    return Container(
-      decoration: AppTheme.surfaceCard(scheme, radius: 18.r),
-      child: Material(
-        color: AppColors.transparent,
-        child: InkWell(
-          onTap: _confirmAndLogout,
-          borderRadius: BorderRadius.circular(18.r),
-          child: Padding(
-            padding: EdgeInsets.symmetric(horizontal: 14.w, vertical: 12.h),
-            child: Row(
-              children: [
-                Container(
-                  width: 38.w,
-                  height: 38.h,
-                  decoration: BoxDecoration(
-                    color: AppColors.danger.withValues(alpha: 0.10),
-                    borderRadius: BorderRadius.circular(11.r),
-                  ),
-                  alignment: Alignment.center,
-                  child: Icon(Icons.logout_rounded,
-                      size: 19.w, color: AppColors.danger),
+    return Material(
+      color: AppColors.transparent,
+      child: InkWell(
+        onTap: onTap,
+        child: Padding(
+          padding: EdgeInsets.symmetric(horizontal: 14.w, vertical: 14.h),
+          child: Row(
+            children: [
+              Icon(icon, size: 20.w, color: AppColors.danger),
+              SizedBox(width: 14.w),
+              Expanded(
+                child: Text(
+                  label,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: AppText.subtitle(
+                      fontSize: 14.sp, color: AppColors.danger),
                 ),
-                SizedBox(width: 12.w),
-                Expanded(
-                  child: Text('more.logout'.tr,
-                      style: GoogleFonts.beVietnamPro(
-                          fontSize: 14.sp,
-                          fontWeight: FontWeight.w700,
-                          color: AppColors.danger)),
-                ),
-              ],
-            ),
+              ),
+            ],
           ),
         ),
       ),

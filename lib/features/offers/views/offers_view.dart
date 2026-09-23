@@ -4,6 +4,7 @@ import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
 
 import '../../../shared/theme/app_theme.dart';
+import '../../../shared/widgets/app_empty_view.dart';
 import '../../../shared/widgets/data_state_builder.dart';
 import '../../../shared/widgets/pinned_gradient_app_bar.dart';
 import '../../../shared/widgets/skeletons/skeletons.dart';
@@ -39,7 +40,10 @@ class OffersView extends StatelessWidget {
                   skeleton: const ListSkeleton(rows: 4),
                   builder: (data) {
                     if (data.isEmpty) {
-                      return _EmptyOffers(message: 'offers.empty'.tr);
+                      return const AppEmptyView(
+                        messageKey: 'offers.empty',
+                        icon: Icons.local_offer_outlined,
+                      );
                     }
                     final available = data.available;
                     final used = data.used;
@@ -76,37 +80,6 @@ class OffersView extends StatelessWidget {
   }
 }
 
-/// Shown when the backend returns no offers at all.
-class _EmptyOffers extends StatelessWidget {
-  const _EmptyOffers({required this.message});
-  final String message;
-
-  @override
-  Widget build(BuildContext context) {
-    final scheme = Theme.of(context).colorScheme;
-    return Padding(
-      padding: EdgeInsets.symmetric(vertical: 48.h),
-      child: Column(
-        children: [
-          Icon(
-            Icons.local_offer_outlined,
-            size: 40.w,
-            color: scheme.onSurfaceVariant,
-          ),
-          SizedBox(height: 12.h),
-          Text(
-            message,
-            textAlign: TextAlign.center,
-            style: GoogleFonts.beVietnamPro(
-              fontSize: 14.sp,
-              color: scheme.onSurfaceVariant,
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-}
 
 /// Small section header used between the two offer blocks, with the same
 /// subtle rise-in entrance as the rewards screen.

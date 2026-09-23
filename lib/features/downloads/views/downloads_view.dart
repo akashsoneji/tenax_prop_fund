@@ -45,7 +45,7 @@ class DownloadsView extends StatelessWidget {
                         if (s > 0) SizedBox(height: 26.h),
                         FadeSlideIn(
                           order: s * 2,
-                          child: SectionHeader(sections[s].title),
+                          child: SectionHeader(sections[s].title.tr),
                         ),
                         FadeSlideIn(
                           order: s * 2 + 1,
@@ -75,8 +75,8 @@ class _SectionCard extends StatelessWidget {
         for (var i = 0; i < section.items.length; i++)
           IconLeadingRow(
             icon: section.items[i].icon,
-            title: section.items[i].title,
-            subtitle: section.items[i].subtitle,
+            title: section.items[i].title.tr,
+            subtitle: section.items[i].subtitle.tr,
             showDivider: i != section.items.length - 1,
             trailing: section.items[i].meta == null
                 ? null
