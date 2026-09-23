@@ -62,7 +62,12 @@ class _ForgotPasswordViewState extends State<ForgotPasswordView> {
     _confetti.play();
     _startResendTimer();
 
-    final code = await OtpDialog.show(target: _email.text.trim());
+    final email = _email.text.trim();
+    final code = await OtpDialog.show(
+      target: email,
+      onVerify: (code) => controller.verifyOtp(email: email, code: code),
+      onResend: () => controller.resendOtp(email: email),
+    );
     if (code != null && mounted) {
       Get.offAllNamed(AppRoutes.login);
     }

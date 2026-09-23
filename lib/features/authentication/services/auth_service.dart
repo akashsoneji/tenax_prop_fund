@@ -35,7 +35,6 @@ class AuthService {
     required String lastName,
     required String email,
     required String password,
-    required String confirmPassword,
     required String countryCode,
     required String phone,
   }) async {
@@ -46,7 +45,6 @@ class AuthService {
         'last_name': lastName,
         'email': email,
         'password': password,
-        'password_confirmation': confirmPassword,
         'country_code': countryCode,
         'phone': phone,
       },
@@ -59,6 +57,26 @@ class AuthService {
   Future<void> forgotPassword({required String email}) async {
     await _api.post<Map<String, dynamic>>(
       ApiEndpoints.forgotPassword,
+      data: {'email': email},
+    );
+  }
+
+  /// Calls `POST /auth/verify-email` with `{email, code}` to confirm the OTP.
+  /// Throws on any non-2xx / non-success response.
+  Future<void> verifyEmail({
+    required String email,
+    required String code,
+  }) async {
+    await _api.post<Map<String, dynamic>>(
+      ApiEndpoints.verifyEmail,
+      data: {'email': email, 'code': code},
+    );
+  }
+
+  /// Calls `POST /auth/resend-otp` with `{email}` to re-send the OTP code.
+  Future<void> resendOtp({required String email}) async {
+    await _api.post<Map<String, dynamic>>(
+      ApiEndpoints.resendOtp,
       data: {'email': email},
     );
   }

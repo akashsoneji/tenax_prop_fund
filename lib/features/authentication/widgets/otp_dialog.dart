@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
@@ -12,18 +14,36 @@ import 'glass_card.dart';
 /// input, backspace moves focus back, paste from SMS is auto-split.
 /// On submit, returns the full code via `Get.back(result:)` or null on cancel.
 class OtpDialog extends StatefulWidget {
-  const OtpDialog({super.key, required this.target});
+  const OtpDialog({
+    super.key,
+    required this.target,
+    this.onVerify,
+    this.onResend,
+  });
 
   final String target;
 
-  static Future<String?> show({required String target}) {
+  /// Verifies the entered [code]; returns null on success or an error message
+  /// to show inline. When null the dialog just returns the code (no API call).
+  final Future<String?> Function(String code)? onVerify;
+
+  /// Re-sends the OTP; returns null on success or an error message. When null
+  /// the resend button is hidden.
+  final Future<String?> Function()? onResend;
+
+  static Future<String?> show({
+    required String target,
+    Future<String?> Function(String code)? onVerify,
+    Future<String?> Function()? onResend,
+  }) {
     return showGeneralDialog<String>(
       context: Get.context!,
       barrierDismissible: false,
       barrierLabel: 'otp',
       barrierColor: AppColors.black.withValues(alpha: 0.55),
       transitionDuration: AppMotion.base,
-      pageBuilder: (context, anim, sec) => OtpDialog(target: target),
+      pageBuilder: (context, anim, sec) =>
+          OtpDialog(target: target, onVerify: onVerify, onResend: onResend),
       transitionBuilder: (context, anim, sec, child) {
         final scaleAnim = CurvedAnimation(parent: anim, curve: AppMotion.enter);
         return FadeTransition(
@@ -50,9 +70,19 @@ class _OtpDialogState extends State<OtpDialog> {
   final List<FocusNode> _nodes = List.generate(_length, (_) => FocusNode());
   final _shake = ShakeController();
   String? _error;
+  bool _busy = false;
+  int _resendIn = 0;
+  Timer? _ticker;
+
+  @override
+  void initState() {
+    super.initState();
+    if (widget.onResend != null) _startResendTimer();
+  }
 
   @override
   void dispose() {
+    _ticker?.cancel();
     for (final c in _ctrls) {
       c.dispose();
     }
@@ -60,6 +90,31 @@ class _OtpDialogState extends State<OtpDialog> {
       n.dispose();
     }
     super.dispose();
+  }
+
+  void _startResendTimer() {
+    _resendIn = 60;
+    _ticker?.cancel();
+    _ticker = Timer.periodic(const Duration(seconds: 1), (t) {
+      if (!mounted) return t.cancel();
+      setState(() {
+        _resendIn -= 1;
+        if (_resendIn <= 0) t.cancel();
+      });
+    });
+  }
+
+  Future<void> _resend() async {
+    final onResend = widget.onResend;
+    if (onResend == null || _busy || _resendIn > 0) return;
+    setState(() => _busy = true);
+    final error = await onResend();
+    if (!mounted) return;
+    setState(() {
+      _busy = false;
+      _error = error;
+    });
+    if (error == null) _startResendTimer();
   }
 
   void _onChanged(int i, String value) {
@@ -95,7 +150,8 @@ class _OtpDialogState extends State<OtpDialog> {
 
   String get _code => _ctrls.map((c) => c.text).join();
 
-  void _verify() {
+  Future<void> _verify() async {
+    if (_busy) return;
     final value = _code;
     if (value.length != _length || int.tryParse(value) == null) {
       setState(() => _error = 'otp.invalid_code'.tr);
@@ -103,7 +159,29 @@ class _OtpDialogState extends State<OtpDialog> {
       HapticFeedback.mediumImpact();
       return;
     }
-    Get.back(result: value);
+
+    final onVerify = widget.onVerify;
+    if (onVerify == null) {
+      Get.back(result: value);
+      return;
+    }
+
+    setState(() {
+      _busy = true;
+      _error = null;
+    });
+    final error = await onVerify(value);
+    if (!mounted) return;
+    if (error == null) {
+      Get.back(result: value);
+      return;
+    }
+    setState(() {
+      _busy = false;
+      _error = error;
+    });
+    _shake.shake();
+    HapticFeedback.mediumImpact();
   }
 
   @override
@@ -141,15 +219,19 @@ class _OtpDialogState extends State<OtpDialog> {
                 ShakeWidget(
                   controller: _shake,
                   child: Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: List.generate(_length, (i) {
-                      return _PinCell(
-                        controller: _ctrls[i],
-                        focusNode: _nodes[i],
-                        onChanged: (v) => _onChanged(i, v),
-                        onBackspace: () => _onBackspace(i),
-                        hasError: _error != null,
-                        onSubmitted: i == _length - 1 ? _verify : null,
+                      return Expanded(
+                        child: Padding(
+                          padding: EdgeInsets.symmetric(horizontal: 4.w),
+                          child: _PinCell(
+                            controller: _ctrls[i],
+                            focusNode: _nodes[i],
+                            onChanged: (v) => _onChanged(i, v),
+                            onBackspace: () => _onBackspace(i),
+                            hasError: _error != null,
+                            onSubmitted: i == _length - 1 ? _verify : null,
+                          ),
+                        ),
                       );
                     }),
                   ),
@@ -166,12 +248,31 @@ class _OtpDialogState extends State<OtpDialog> {
                     ),
                   ),
                 ],
+                if (widget.onResend != null) ...[
+                  SizedBox(height: 14.h),
+                  Center(
+                    child: TextButton(
+                      onPressed: (_busy || _resendIn > 0) ? null : _resend,
+                      child: Text(
+                        _resendIn > 0
+                            ? '${'common.resend'.tr} ${'otp.resend_in'.tr} ${_resendIn}s'
+                            : 'common.resend'.tr,
+                        style: TextStyle(
+                          color: (_busy || _resendIn > 0)
+                              ? scheme.onSurface.withValues(alpha: 0.5)
+                              : scheme.primary,
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                    ),
+                  ),
+                ],
                 SizedBox(height: 18.h),
                 Row(
                   mainAxisAlignment: MainAxisAlignment.end,
                   children: [
                     TextButton(
-                      onPressed: () => Get.back(),
+                      onPressed: _busy ? null : () => Get.back(),
                       child: Text('common.cancel'.tr),
                     ),
                     SizedBox(width: 8.w),
@@ -184,8 +285,17 @@ class _OtpDialogState extends State<OtpDialog> {
                         shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(10.r)),
                       ),
-                      onPressed: _verify,
-                      child: Text('common.verify'.tr),
+                      onPressed: _busy ? null : _verify,
+                      child: _busy
+                          ? SizedBox(
+                              width: 18.w,
+                              height: 18.w,
+                              child: CircularProgressIndicator(
+                                strokeWidth: 2.2.w,
+                                color: scheme.onPrimary,
+                              ),
+                            )
+                          : Text('common.verify'.tr),
                     ),
                   ],
                 ),
@@ -218,48 +328,55 @@ class _PinCell extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final scheme = Theme.of(context).colorScheme;
-    return AnimatedContainer(
-      duration: AppMotion.fast,
-      width: 44.w,
-      height: 52.h,
-      decoration: BoxDecoration(
-        color: scheme.surfaceContainerHighest,
-        borderRadius: BorderRadius.circular(10.r),
-        border: Border.all(
-          color: hasError
-              ? scheme.error
-              : (focusNode.hasFocus ? scheme.primary : AppColors.transparent),
-          width: 1.6.w,
-        ),
-      ),
-      child: Center(
-        child: TextField(
-          controller: controller,
-          focusNode: focusNode,
-          onChanged: (v) {
-            onChanged(v);
-            if (v.isEmpty) onBackspace();
-          },
-          onSubmitted: (_) => onSubmitted?.call(),
-          keyboardType: TextInputType.number,
-          textAlign: TextAlign.center,
-          maxLength: 1,
-          autofocus: true,
-          autofillHints: const [AutofillHints.oneTimeCode],
-          style: TextStyle(
-            fontSize: 22.sp,
-            fontWeight: FontWeight.w700,
-            color: scheme.onSurface,
+    return AspectRatio(
+      aspectRatio: 1,
+      child: AnimatedContainer(
+        duration: AppMotion.fast,
+        decoration: BoxDecoration(
+          color: scheme.surfaceContainerHighest,
+          borderRadius: BorderRadius.circular(12.r),
+          border: Border.all(
+            color: hasError
+                ? scheme.error
+                : (focusNode.hasFocus
+                    ? scheme.primary
+                    : scheme.outline.withValues(alpha: 0.20)),
+            width: 1.6.w,
           ),
-          inputFormatters: [
-            FilteringTextInputFormatter.digitsOnly,
-            LengthLimitingTextInputFormatter(1),
-          ],
-          decoration: const InputDecoration(
-            counterText: '',
-            border: InputBorder.none,
-            isCollapsed: true,
-            contentPadding: EdgeInsets.zero,
+        ),
+        child: Center(
+          child: TextField(
+            controller: controller,
+            focusNode: focusNode,
+            onChanged: (v) {
+              onChanged(v);
+              if (v.isEmpty) onBackspace();
+            },
+            onSubmitted: (_) => onSubmitted?.call(),
+            keyboardType: TextInputType.number,
+            textAlign: TextAlign.center,
+            maxLength: 1,
+            autofocus: true,
+            autofillHints: const [AutofillHints.oneTimeCode],
+            style: TextStyle(
+              fontSize: 22.sp,
+              fontWeight: FontWeight.w700,
+              color: scheme.onSurface,
+            ),
+            inputFormatters: [
+              FilteringTextInputFormatter.digitsOnly,
+              LengthLimitingTextInputFormatter(1),
+            ],
+            decoration: const InputDecoration(
+              counterText: '',
+              filled: false,
+              border: InputBorder.none,
+              enabledBorder: InputBorder.none,
+              focusedBorder: InputBorder.none,
+              errorBorder: InputBorder.none,
+              isCollapsed: true,
+              contentPadding: EdgeInsets.zero,
+            ),
           ),
         ),
       ),

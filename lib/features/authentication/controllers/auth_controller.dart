@@ -50,17 +50,17 @@ class AuthController extends GetxController {
   }
 
   Future<bool> register({
-    required String fullName,
+    required String firstName,
+    required String lastName,
     required String email,
     required String password,
-    required String confirmPassword,
     required bool agreedToTerms,
     required String phone,
     String countryCode = 'IN',
   }) async {
     errorMessage.value = null;
 
-    if (fullName.trim().isEmpty) {
+    if (firstName.trim().isEmpty || lastName.trim().isEmpty) {
       errorMessage.value = 'register.name_required'.tr;
       return false;
     }
@@ -76,27 +76,18 @@ class AuthController extends GetxController {
       errorMessage.value = 'register.password_weak'.tr;
       return false;
     }
-    if (password != confirmPassword) {
-      errorMessage.value = 'register.password_mismatch'.tr;
-      return false;
-    }
+   
     if (!agreedToTerms) {
       errorMessage.value = 'terms.agree'.tr;
       return false;
     }
 
-    // Split the single full-name field into the first/last the API requires.
-    final parts = fullName.trim().split(RegExp(r'\s+'));
-    final firstName = parts.first;
-    final lastName = parts.length > 1 ? parts.sublist(1).join(' ') : parts.first;
-
     isLoading.value = true;
     final result = await _repository.register(
-      firstName: firstName,
-      lastName: lastName,
+      firstName: firstName.trim(),
+      lastName: lastName.trim(),
       email: email,
       password: password,
-      confirmPassword: confirmPassword,
       countryCode: countryCode,
       phone: phone.trim(),
     );
@@ -115,6 +106,24 @@ class AuthController extends GetxController {
     await _repository.logout();
     user.value = null;
     Get.offAllNamed(AppRoutes.login);
+  }
+
+  /// Verifies the OTP [code] for [email]. Returns null on success, or a
+  /// user-facing error message the OTP dialog can show inline.
+  Future<String?> verifyOtp({
+    required String email,
+    required String code,
+  }) async {
+    final result = await _repository.verifyEmail(email: email, code: code);
+    if (result.success) return null;
+    return result.message ?? 'otp.invalid_code'.tr;
+  }
+
+  /// Re-sends the OTP for [email]. Returns null on success, or an error message.
+  Future<String?> resendOtp({required String email}) async {
+    final result = await _repository.resendOtp(email: email);
+    if (result.success) return null;
+    return result.message ?? 'Something went wrong. Please try again.';
   }
 
   Future<bool> requestPasswordReset({required String email}) async {
