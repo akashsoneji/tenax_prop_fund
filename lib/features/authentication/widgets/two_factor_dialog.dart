@@ -6,36 +6,27 @@ import 'package:get/get.dart';
 import '../../../shared/theme/app_colors.dart';
 import '../../../shared/theme/app_theme.dart';
 import 'animated_field.dart';
-import 'glass_card.dart';
 
 /// Two-factor authenticator-code entry, shown when `POST /auth/login` answers
 /// `two_factor_required: true` with a `challenge_token`.
 ///
-/// 6-cell code entry: each cell takes one digit, focus auto-advances, backspace
-/// steps back and a pasted code is split across the cells. Also accepts an
-/// 8-character recovery code through the "use a recovery code" toggle.
+/// The 6 cells are PAINTED from a single hidden [TextField] rather than being
+/// six real fields: typing and backspace then follow the platform's own text
+/// editing (so add/remove never loses a digit), and there is no per-keystroke
+/// focus hopping. The surface is a plain theme card — no backdrop blur and no
+/// repeating animation — because a blurred, continuously-animating dialog drops
+/// frames badly on mid-range devices while the keyboard is up.
 ///
 /// [onVerify] performs the network call and returns `null` on success or an
 /// error message to show inline. On success the dialog closes and returns the
-/// submitted code; cancelling returns `null`.
+/// submitted code; closing it returns `null`.
 class TwoFactorDialog extends StatefulWidget {
-  const TwoFactorDialog({
-    super.key,
-    required this.onVerify,
-    this.allowRecoveryCode = true,
-  });
+  const TwoFactorDialog({super.key, required this.onVerify});
 
-  final Future<String?> Function(String code, {required bool isRecoveryCode})
-      onVerify;
-
-  /// Shows the "use a recovery code" toggle. Off when the backend has no
-  /// recovery-code fallback for this account.
-  final bool allowRecoveryCode;
+  final Future<String?> Function(String code) onVerify;
 
   static Future<String?> show({
-    required Future<String?> Function(String code, {required bool isRecoveryCode})
-        onVerify,
-    bool allowRecoveryCode = true,
+    required Future<String?> Function(String code) onVerify,
   }) {
     return showGeneralDialog<String>(
       context: Get.context!,
@@ -43,16 +34,13 @@ class TwoFactorDialog extends StatefulWidget {
       barrierLabel: 'two_factor',
       barrierColor: AppColors.black.withValues(alpha: 0.55),
       transitionDuration: AppMotion.base,
-      pageBuilder: (context, anim, sec) => TwoFactorDialog(
-        onVerify: onVerify,
-        allowRecoveryCode: allowRecoveryCode,
-      ),
+      pageBuilder: (context, anim, sec) => TwoFactorDialog(onVerify: onVerify),
       transitionBuilder: (context, anim, sec, child) {
         final scaleAnim = CurvedAnimation(parent: anim, curve: AppMotion.enter);
         return FadeTransition(
           opacity: anim,
           child: ScaleTransition(
-            scale: scaleAnim.drive(Tween<double>(begin: 0.92, end: 1.0)),
+            scale: scaleAnim.drive(Tween<double>(begin: 0.94, end: 1.0)),
             child: child,
           ),
         );
@@ -67,67 +55,34 @@ class TwoFactorDialog extends StatefulWidget {
 class _TwoFactorDialogState extends State<TwoFactorDialog> {
   static const _length = 6;
 
-  final List<TextEditingController> _ctrls = List.generate(
-    _length,
-    (_) => TextEditingController(),
-  );
-  final List<FocusNode> _nodes = List.generate(_length, (_) => FocusNode());
-  final _recoveryCtrl = TextEditingController();
+  final _ctrl = TextEditingController();
+  final _node = FocusNode();
   final _shake = ShakeController();
 
   String? _error;
   bool _busy = false;
-  bool _useRecovery = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _ctrl.addListener(_onCodeChanged);
+  }
 
   @override
   void dispose() {
-    for (final c in _ctrls) {
-      c.dispose();
-    }
-    for (final n in _nodes) {
-      n.dispose();
-    }
-    _recoveryCtrl.dispose();
+    _ctrl.removeListener(_onCodeChanged);
+    _ctrl.dispose();
+    _node.dispose();
     super.dispose();
   }
 
-  String get _code =>
-      _useRecovery ? _recoveryCtrl.text.trim() : _ctrls.map((c) => c.text).join();
+  String get _code => _ctrl.text;
 
-  void _onChanged(int i, String value) {
-    if (value.length > 1) {
-      final digits = value.replaceAll(RegExp(r'\D'), '').split('');
-      for (var k = 0; k < _length; k++) {
-        final ch = k < digits.length ? digits[k] : '';
-        _ctrls[k].text = ch;
-        _ctrls[k].selection = TextSelection.collapsed(offset: ch.length);
-      }
-      _focus(_length - 1);
-      return;
-    }
-    if (value.isNotEmpty && i < _length - 1) _focus(i + 1);
-    if (_error != null) setState(() => _error = null);
-  }
-
-  void _onBackspace(int i) {
-    if (_ctrls[i].text.isEmpty && i > 0) _focus(i - 1);
-  }
-
-  void _focus(int i) {
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      _nodes[i].requestFocus();
-    });
-  }
-
-  void _toggleRecovery() {
+  void _onCodeChanged() {
     setState(() {
-      _useRecovery = !_useRecovery;
-      _error = null;
-      _recoveryCtrl.clear();
-      for (final c in _ctrls) {
-        c.clear();
-      }
+      if (_error != null) _error = null;
     });
+    if (_code.length == _length) _verify();
   }
 
   void _fail(String message) {
@@ -143,12 +98,7 @@ class _TwoFactorDialogState extends State<TwoFactorDialog> {
     if (_busy) return;
     final value = _code;
 
-    if (_useRecovery) {
-      if (value.isEmpty) {
-        _fail('two_factor.recovery_required'.tr);
-        return;
-      }
-    } else if (value.length != _length || int.tryParse(value) == null) {
+    if (value.length != _length) {
       _fail('two_factor.invalid_code'.tr);
       return;
     }
@@ -157,7 +107,7 @@ class _TwoFactorDialogState extends State<TwoFactorDialog> {
       _busy = true;
       _error = null;
     });
-    final error = await widget.onVerify(value, isRecoveryCode: _useRecovery);
+    final error = await widget.onVerify(value);
     if (!mounted) return;
     if (error == null) {
       Get.back(result: value);
@@ -170,49 +120,49 @@ class _TwoFactorDialogState extends State<TwoFactorDialog> {
   Widget build(BuildContext context) {
     final scheme = Theme.of(context).colorScheme;
     return Center(
-      child: Material(
-        color: AppColors.transparent,
-        child: GlassCard(
-          radius: 24.r,
-          padding: EdgeInsets.fromLTRB(20.w, 22.h, 20.w, 16.h),
+      child: Padding(
+        padding: EdgeInsets.symmetric(horizontal: 20.w),
+        child: Material(
+          color: scheme.surface,
+          borderRadius: BorderRadius.circular(22.r),
+          clipBehavior: Clip.antiAlias,
           child: ConstrainedBox(
             constraints: BoxConstraints(maxWidth: 380.w),
             child: SingleChildScrollView(
               physics: const BouncingScrollPhysics(),
+              padding: EdgeInsets.fromLTRB(20.w, 14.h, 20.w, 20.h),
               child: Column(
                 mainAxisSize: MainAxisSize.min,
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
-                  _Header(useRecovery: _useRecovery),
+                  Align(
+                    alignment: Alignment.centerRight,
+                    child: IconButton(
+                      onPressed: _busy ? null : () => Get.back(),
+                      visualDensity: VisualDensity.compact,
+                      padding: EdgeInsets.zero,
+                      constraints: BoxConstraints.tightFor(
+                        width: 32.w,
+                        height: 32.w,
+                      ),
+                      icon: Icon(
+                        Icons.close_rounded,
+                        size: 20.w,
+                        color: scheme.onSurface.withValues(alpha: 0.6),
+                      ),
+                    ),
+                  ),
+                  const _Header(),
                   SizedBox(height: 20.h),
                   ShakeWidget(
                     controller: _shake,
-                    child: _useRecovery
-                        ? _RecoveryField(
-                            controller: _recoveryCtrl,
-                            hasError: _error != null,
-                            onSubmitted: _verify,
-                          )
-                        : Row(
-                            children: List.generate(_length, (i) {
-                              return Expanded(
-                                child: Padding(
-                                  padding:
-                                      EdgeInsets.symmetric(horizontal: 4.w),
-                                  child: _PinCell(
-                                    controller: _ctrls[i],
-                                    focusNode: _nodes[i],
-                                    onChanged: (v) => _onChanged(i, v),
-                                    onBackspace: () => _onBackspace(i),
-                                    hasError: _error != null,
-                                    autofocus: i == 0,
-                                    onSubmitted:
-                                        i == _length - 1 ? _verify : null,
-                                  ),
-                                ),
-                              );
-                            }),
-                          ),
+                    child: _CodeField(
+                      controller: _ctrl,
+                      focusNode: _node,
+                      length: _length,
+                      hasError: _error != null,
+                      onSubmitted: _verify,
+                    ),
                   ),
                   if (_error != null) ...[
                     SizedBox(height: 10.h),
@@ -226,57 +176,27 @@ class _TwoFactorDialogState extends State<TwoFactorDialog> {
                       ),
                     ),
                   ],
-                  if (widget.allowRecoveryCode) ...[
-                    SizedBox(height: 10.h),
-                    Center(
-                      child: TextButton(
-                        onPressed: _busy ? null : _toggleRecovery,
-                        child: Text(
-                          _useRecovery
-                              ? 'two_factor.use_auth_code'.tr
-                              : 'two_factor.use_recovery_code'.tr,
-                          style: TextStyle(
-                            color: _busy
-                                ? scheme.onSurface.withValues(alpha: 0.5)
-                                : scheme.primary,
-                            fontWeight: FontWeight.w600,
-                            fontSize: 12.sp,
-                          ),
-                        ),
+                  SizedBox(height: 18.h),
+                  FilledButton(
+                    style: FilledButton.styleFrom(
+                      backgroundColor: scheme.primary,
+                      foregroundColor: scheme.onPrimary,
+                      padding: EdgeInsets.symmetric(vertical: 14.h),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(12.r),
                       ),
                     ),
-                  ],
-                  SizedBox(height: 12.h),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.end,
-                    children: [
-                      TextButton(
-                        onPressed: _busy ? null : () => Get.back(),
-                        child: Text('common.cancel'.tr),
-                      ),
-                      SizedBox(width: 8.w),
-                      FilledButton(
-                        style: FilledButton.styleFrom(
-                          backgroundColor: scheme.primary,
-                          foregroundColor: scheme.onPrimary,
-                          padding: EdgeInsets.symmetric(
-                              horizontal: 22.w, vertical: 12.h),
-                          shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(10.r)),
-                        ),
-                        onPressed: _busy ? null : _verify,
-                        child: _busy
-                            ? SizedBox(
-                                width: 18.w,
-                                height: 18.w,
-                                child: CircularProgressIndicator(
-                                  strokeWidth: 2.2.w,
-                                  color: scheme.onPrimary,
-                                ),
-                              )
-                            : Text('common.verify'.tr),
-                      ),
-                    ],
+                    onPressed: _busy ? null : _verify,
+                    child: _busy
+                        ? SizedBox(
+                            width: 18.w,
+                            height: 18.w,
+                            child: CircularProgressIndicator(
+                              strokeWidth: 2.2.w,
+                              color: scheme.onPrimary,
+                            ),
+                          )
+                        : Text('common.verify'.tr),
                   ),
                 ],
               ),
@@ -289,9 +209,7 @@ class _TwoFactorDialogState extends State<TwoFactorDialog> {
 }
 
 class _Header extends StatelessWidget {
-  const _Header({required this.useRecovery});
-
-  final bool useRecovery;
+  const _Header();
 
   @override
   Widget build(BuildContext context) {
@@ -322,9 +240,7 @@ class _Header extends StatelessWidget {
         ),
         SizedBox(height: 6.h),
         Text(
-          useRecovery
-              ? 'two_factor.recovery_subtitle'.tr
-              : 'two_factor.subtitle'.tr,
+          'two_factor.subtitle'.tr,
           textAlign: TextAlign.center,
           style: TextStyle(
             color: scheme.onSurface.withValues(alpha: 0.65),
@@ -336,135 +252,123 @@ class _Header extends StatelessWidget {
   }
 }
 
-class _RecoveryField extends StatelessWidget {
-  const _RecoveryField({
+/// One real (invisible) [TextField] stacked under [length] painted cells. The
+/// field owns the text, so typing, backspace, paste and autofill all behave
+/// exactly like a normal input; the cells are just a read-only rendering of it.
+class _CodeField extends StatelessWidget {
+  const _CodeField({
     required this.controller,
+    required this.focusNode,
+    required this.length,
     required this.hasError,
     required this.onSubmitted,
   });
 
   final TextEditingController controller;
+  final FocusNode focusNode;
+  final int length;
   final bool hasError;
   final VoidCallback onSubmitted;
 
   @override
   Widget build(BuildContext context) {
-    final scheme = Theme.of(context).colorScheme;
-    return Container(
-      decoration: BoxDecoration(
-        color: scheme.surfaceContainerHighest,
-        borderRadius: BorderRadius.circular(12.r),
-        border: Border.all(
-          color: hasError ? scheme.error : scheme.outline.withValues(alpha: 0.20),
-          width: 1.6.w,
+    return Stack(
+      children: [
+        _Cells(
+          controller: controller,
+          focusNode: focusNode,
+          length: length,
+          hasError: hasError,
         ),
-      ),
-      padding: EdgeInsets.symmetric(horizontal: 14.w, vertical: 4.h),
-      child: TextField(
-        controller: controller,
-        autofocus: true,
-        textAlign: TextAlign.center,
-        textCapitalization: TextCapitalization.characters,
-        onSubmitted: (_) => onSubmitted(),
-        style: TextStyle(
-          fontSize: 16.sp,
-          fontWeight: FontWeight.w700,
-          letterSpacing: 2,
-          color: scheme.onSurface,
-        ),
-        decoration: InputDecoration(
-          hintText: 'two_factor.recovery_hint'.tr,
-          hintStyle: TextStyle(
-            fontSize: 13.sp,
-            fontWeight: FontWeight.w500,
-            letterSpacing: 0,
-            color: scheme.onSurface.withValues(alpha: 0.4),
+        Positioned.fill(
+          child: Opacity(
+            opacity: 0,
+            child: TextField(
+              controller: controller,
+              focusNode: focusNode,
+              autofocus: true,
+              keyboardType: TextInputType.number,
+              textInputAction: TextInputAction.done,
+              onSubmitted: (_) => onSubmitted(),
+              autofillHints: const [AutofillHints.oneTimeCode],
+              enableInteractiveSelection: false,
+              showCursor: false,
+              inputFormatters: [
+                FilteringTextInputFormatter.digitsOnly,
+                LengthLimitingTextInputFormatter(length),
+              ],
+              decoration: const InputDecoration(
+                counterText: '',
+                border: InputBorder.none,
+              ),
+            ),
           ),
-          filled: false,
-          border: InputBorder.none,
-          enabledBorder: InputBorder.none,
-          focusedBorder: InputBorder.none,
-          contentPadding: EdgeInsets.symmetric(vertical: 12.h),
         ),
-      ),
+      ],
     );
   }
 }
 
-class _PinCell extends StatelessWidget {
-  const _PinCell({
+class _Cells extends StatelessWidget {
+  const _Cells({
     required this.controller,
     required this.focusNode,
-    required this.onChanged,
-    required this.onBackspace,
+    required this.length,
     required this.hasError,
-    required this.autofocus,
-    this.onSubmitted,
   });
 
   final TextEditingController controller;
   final FocusNode focusNode;
-  final ValueChanged<String> onChanged;
-  final VoidCallback onBackspace;
+  final int length;
   final bool hasError;
-  final bool autofocus;
-  final VoidCallback? onSubmitted;
 
   @override
   Widget build(BuildContext context) {
     final scheme = Theme.of(context).colorScheme;
-    return AspectRatio(
-      aspectRatio: 1,
-      child: AnimatedContainer(
-        duration: AppMotion.fast,
-        decoration: BoxDecoration(
-          color: scheme.surfaceContainerHighest,
-          borderRadius: BorderRadius.circular(12.r),
-          border: Border.all(
-            color: hasError
-                ? scheme.error
-                : (focusNode.hasFocus
-                    ? scheme.primary
-                    : scheme.outline.withValues(alpha: 0.20)),
-            width: 1.6.w,
-          ),
-        ),
-        child: Center(
-          child: TextField(
-            controller: controller,
-            focusNode: focusNode,
-            onChanged: (v) {
-              onChanged(v);
-              if (v.isEmpty) onBackspace();
-            },
-            onSubmitted: (_) => onSubmitted?.call(),
-            keyboardType: TextInputType.number,
-            textAlign: TextAlign.center,
-            maxLength: 1,
-            autofocus: autofocus,
-            autofillHints: const [AutofillHints.oneTimeCode],
-            style: TextStyle(
-              fontSize: 22.sp,
-              fontWeight: FontWeight.w700,
-              color: scheme.onSurface,
-            ),
-            inputFormatters: [
-              FilteringTextInputFormatter.digitsOnly,
-              LengthLimitingTextInputFormatter(1),
-            ],
-            decoration: const InputDecoration(
-              counterText: '',
-              filled: false,
-              border: InputBorder.none,
-              enabledBorder: InputBorder.none,
-              focusedBorder: InputBorder.none,
-              errorBorder: InputBorder.none,
-              isCollapsed: true,
-              contentPadding: EdgeInsets.zero,
-            ),
-          ),
-        ),
-      ),
+    return AnimatedBuilder(
+      animation: Listenable.merge([controller, focusNode]),
+      builder: (context, _) {
+        final code = controller.text;
+        final cursor = code.length.clamp(0, length - 1);
+        return Row(
+          children: List.generate(length, (i) {
+            final filled = i < code.length;
+            final active = focusNode.hasFocus && i == cursor;
+            return Expanded(
+              child: Padding(
+                padding: EdgeInsets.symmetric(horizontal: 4.w),
+                child: AspectRatio(
+                  aspectRatio: 1,
+                  child: DecoratedBox(
+                    decoration: BoxDecoration(
+                      color: scheme.surfaceContainerHighest,
+                      borderRadius: BorderRadius.circular(12.r),
+                      border: Border.all(
+                        color: hasError
+                            ? scheme.error
+                            : (active
+                                ? scheme.primary
+                                : scheme.outline.withValues(alpha: 0.20)),
+                        width: 1.6.w,
+                      ),
+                    ),
+                    child: Center(
+                      child: Text(
+                        filled ? code[i] : '',
+                        style: TextStyle(
+                          fontSize: 22.sp,
+                          fontWeight: FontWeight.w700,
+                          color: scheme.onSurface,
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+            );
+          }),
+        );
+      },
     );
   }
 }

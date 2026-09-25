@@ -27,12 +27,7 @@ abstract class ApiEndpoints {
   /// Re-sends the verification/reset OTP (`POST`). Body: `{email}`.
   static const resendOtp = '/auth/resend-otp';
 
-  /// Completes a login that answered `two_factor_required` (`POST`). Body:
-  /// `{challenge_token, code}` (or `recovery_code` instead of `code`); the
-  /// response mirrors login and carries `access_token` + `user`.
-  ///
-  /// NOTE: path not yet confirmed by the backend — update here only.
-  static const verifyTwoFactor = '/auth/two-factor-challenge';
+
 
   // ---------------------------------------------------------------------------
   // Profile & KYC
@@ -264,6 +259,9 @@ abstract class ApiEndpoints {
 
   /// Finishes two-factor enrolment (`POST`). Body: `{secret, code}`. A wrong
   /// code returns 422 with `errors.code[]`.
+  ///
+  /// Also used to complete a LOGIN that answered `two_factor_required`: body is
+  /// just `{code}`, authenticated with the `challenge_token` as bearer.
   static const twoFactorConfirm = '/settings/two-factor/confirm';
 
   /// Regenerates the recovery codes (`POST`). Body: `{current_password}`.

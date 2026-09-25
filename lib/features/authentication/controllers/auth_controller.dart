@@ -63,11 +63,10 @@ class AuthController extends GetxController {
   /// no session, since nothing was persisted.
   Future<void> _promptTwoFactor(String challengeToken) async {
     await TwoFactorDialog.show(
-      onVerify: (code, {required bool isRecoveryCode}) async {
+      onVerify: (code) async {
         final result = await _repository.verifyTwoFactor(
           challengeToken: challengeToken,
           code: code,
-          isRecoveryCode: isRecoveryCode,
         );
         final verifiedUser = result.data;
         if (!result.success || verifiedUser == null) {

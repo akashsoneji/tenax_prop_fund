@@ -41,13 +41,11 @@ class AuthRepository {
   Future<ApiResponse<UserModel>> verifyTwoFactor({
     required String challengeToken,
     required String code,
-    required bool isRecoveryCode,
   }) async {
     try {
-      final user = await _service.verifyTwoFactor(
+      final user = await _service.confirmTwoFactor(
         challengeToken: challengeToken,
         code: code,
-        isRecoveryCode: isRecoveryCode,
       );
       await persistSession(user);
       return ApiResponse.success(user);

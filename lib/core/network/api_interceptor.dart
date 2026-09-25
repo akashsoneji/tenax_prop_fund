@@ -14,10 +14,10 @@ import '../logger/app_logger.dart';
 /// single request. Call [ApiInterceptor.updateCachedToken] on login/logout to
 /// keep the cache in sync with secure storage.
 ///
-/// In debug builds it also prints every request/response/error (full URL,
-/// bearer token, body, status) to the console so network issues are visible in
-/// the debug panel. This logging is compiled out in release/profile via
-/// [kDebugMode].
+/// In debug builds it also prints every request/response/error (full URL, the
+/// headers actually being sent, body, status) to the console so network issues
+/// are visible in the debug panel. This logging is compiled out in
+/// release/profile via [kDebugMode].
 class ApiInterceptor extends Interceptor {
   ApiInterceptor(this._storage);
 
@@ -55,7 +55,11 @@ class ApiInterceptor extends Interceptor {
       _loaded = true;
     }
     final token = _cachedToken;
-    if (token != null && token.isNotEmpty) {
+    // A caller may pass its own Authorization (the two-factor login step
+    // authenticates with the challenge token) — never overwrite it.
+    if (options.headers['Authorization'] == null &&
+        token != null &&
+        token.isNotEmpty) {
       options.headers['Authorization'] = 'Bearer $token';
     }
 
@@ -63,7 +67,7 @@ class ApiInterceptor extends Interceptor {
       final url = '${options.baseUrl}${options.path}';
       log.i(
         '➡️ ${options.method} $url\n'
-        'Token: ${token == null || token.isEmpty ? '(none)' : token}\n'
+        'Headers: ${_pretty(options.headers)}\n'
         'Query: ${options.queryParameters}\n'
         'Body: ${_pretty(options.data)}',
       );

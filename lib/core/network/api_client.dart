@@ -50,8 +50,16 @@ class ApiClient {
 
   Dio get raw => _dio;
 
-  Future<Response<T>> get<T>(String path, {Map<String, dynamic>? query}) =>
-      _dio.get<T>(path, queryParameters: query);
+  Future<Response<T>> get<T>(
+    String path, {
+    Map<String, dynamic>? query,
+    Map<String, String>? headers,
+  }) =>
+      _dio.get<T>(
+        path,
+        queryParameters: query,
+        options: headers == null ? null : Options(headers: headers),
+      );
 
   /// GETs an absolute [url] as an Inertia XHR and returns the decoded `props`
   /// map. The portal's web routes (e.g. `/app/accounts`) reply with the full
@@ -191,8 +199,19 @@ class ApiClient {
     return null;
   }
 
-  Future<Response<T>> post<T>(String path, {Object? data}) =>
-      _dio.post<T>(path, data: data);
+  /// [headers] overrides what the interceptor would add — used by the
+  /// two-factor login step, which must authenticate with the challenge token
+  /// instead of the (not yet existing) session token.
+  Future<Response<T>> post<T>(
+    String path, {
+    Object? data,
+    Map<String, String>? headers,
+  }) =>
+      _dio.post<T>(
+        path,
+        data: data,
+        options: headers == null ? null : Options(headers: headers),
+      );
 
   /// POST to the WEB host (root domain, no `/api/v1`). Used for the trade
   /// endpoints which live under `/api/user/trade/...`, not the mobile REST base.

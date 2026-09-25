@@ -1,5 +1,6 @@
 import '../../../core/network/api_client.dart';
 import '../../../core/network/api_endpoints.dart';
+import '../../../core/platform/platform_info.dart';
 import '../models/login_outcome.dart';
 import '../models/user_model.dart';
 
@@ -28,7 +29,7 @@ class AuthService {
       data: {
         'email': email,
         'password': password,
-        'device_name': 'flutter-app',
+        'device_name': PlatformInfo.deviceName,
       },
     );
     final data = res.data?['data'];
@@ -91,26 +92,46 @@ class AuthService {
     return _userFromEnvelope(res.data);
   }
 
-  /// Completes a two-factor login by exchanging the `challenge_token` from
-  /// [login] plus the user's code for a real session. The envelope mirrors
-  /// login (`access_token` + `user`), so the result is a ready [UserModel].
+  /// Completes a two-factor login: `POST /settings/two-factor/confirm` with
+  /// `{code}`, authenticated with the `challenge_token` from [login] (the real
+  /// session token does not exist yet, so it is sent as the bearer explicitly).
   ///
-  /// A recovery code is sent as `recovery_code`; an authenticator code as
-  /// `code`.
-  Future<UserModel> verifyTwoFactor({
+  /// When the envelope carries `access_token` + `user` that is the new session;
+  /// otherwise the challenge token is now a full token and the profile is
+  /// fetched to build the user.
+  Future<UserModel> confirmTwoFactor({
     required String challengeToken,
     required String code,
-    required bool isRecoveryCode,
   }) async {
     final res = await _api.post<Map<String, dynamic>>(
-      ApiEndpoints.verifyTwoFactor,
-      data: {
-        'challenge_token': challengeToken,
-        if (isRecoveryCode) 'recovery_code': code else 'code': code,
-        'device_name': 'flutter-app',
-      },
+      ApiEndpoints.twoFactorConfirm,
+      data: {'code': code, 'device_name': PlatformInfo.deviceName},
+      headers: {'Authorization': 'Bearer $challengeToken'},
     );
-    return _userFromEnvelope(res.data);
+    final data = res.data?['data'];
+    final map = data is Map<String, dynamic> ? data : const <String, dynamic>{};
+    final token = map['access_token'] as String? ?? challengeToken;
+    final user = map['user'];
+    if (user is Map<String, dynamic>) {
+      return UserModel.fromJson(user).copyWith(token: token);
+    }
+    return _profile(token);
+  }
+
+  /// Reads `GET /profile` with an explicit bearer — used right after a
+  /// two-factor confirm whose response did not include the user object.
+  Future<UserModel> _profile(String token) async {
+    final res = await _api.get<Map<String, dynamic>>(
+      ApiEndpoints.profile,
+      headers: {'Authorization': 'Bearer $token'},
+    );
+    final data = res.data?['data'];
+    if (data is! Map<String, dynamic>) {
+      throw const FormatException('Malformed profile response');
+    }
+    final user = data['user'] is Map<String, dynamic> ? data['user'] : data;
+    return UserModel.fromJson(user as Map<String, dynamic>)
+        .copyWith(token: token);
   }
 
   /// Calls `POST /auth/resend-otp` with `{email}` to re-send the OTP code.

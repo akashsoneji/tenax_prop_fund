@@ -10,4 +10,13 @@ class PlatformInfo {
 
   static bool get isIOS => !kIsWeb && Platform.isIOS;
   static bool get isAndroid => !kIsWeb && Platform.isAndroid;
+
+  /// Value sent as `device_name` when creating a session — the backend lists it
+  /// under the user's active sessions, so it must name the platform.
+  static String get deviceName {
+    if (kIsWeb) return 'web';
+    if (Platform.isIOS) return 'ios';
+    if (Platform.isAndroid) return 'android';
+    return Platform.operatingSystem;
+  }
 }
