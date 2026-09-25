@@ -51,7 +51,7 @@ class SecurityRepository {
     required String mobile,
   }) =>
       _guardMessage(
-        () => _api.post<dynamic>(
+        () => _api.put<dynamic>(
           ApiEndpoints.settingsBeneficiary,
           data: {
             'full_name': fullName,

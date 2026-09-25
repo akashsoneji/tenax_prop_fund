@@ -5,6 +5,7 @@ import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 
 import '../../../core/network/api_interceptor.dart';
 import '../../../core/network/api_response.dart';
+import '../models/login_outcome.dart';
 import '../models/user_model.dart';
 import '../services/auth_service.dart';
 
@@ -18,20 +19,51 @@ class AuthRepository {
 
   static const _userKey = 'auth_user';
 
-  Future<ApiResponse<UserModel>> login({
+  /// Signs in. When the account has two-factor enabled the response carries a
+  /// challenge instead of a token, so NOTHING is persisted — the session is only
+  /// stored once the code is verified (see [persistSession]).
+  Future<ApiResponse<LoginOutcome>> login({
     required String email,
     required String password,
   }) async {
     try {
-      final user = await _service.login(email: email, password: password);
-      await _storage.write(key: ApiInterceptor.tokenKey, value: user.token);
-      await _storage.write(key: _userKey, value: jsonEncode(user.toJson()));
-      ApiInterceptor.updateCachedToken(user.token);
-      ApiInterceptor.resetUnauthorizedGuard();
-      return ApiResponse.success(user);
+      final outcome = await _service.login(email: email, password: password);
+      final user = outcome.user;
+      if (user != null) await persistSession(user);
+      return ApiResponse.success(outcome);
     } catch (e) {
       return ApiResponse.failure('Login failed. Please try again.');
     }
+  }
+
+  /// Completes a two-factor login. On success the session is persisted here —
+  /// this is the first point at which a 2FA login actually has a token.
+  Future<ApiResponse<UserModel>> verifyTwoFactor({
+    required String challengeToken,
+    required String code,
+    required bool isRecoveryCode,
+  }) async {
+    try {
+      final user = await _service.verifyTwoFactor(
+        challengeToken: challengeToken,
+        code: code,
+        isRecoveryCode: isRecoveryCode,
+      );
+      await persistSession(user);
+      return ApiResponse.success(user);
+    } catch (e) {
+      return ApiResponse.failure(_messageFrom(e));
+    }
+  }
+
+  /// Writes [user] + its token to secure storage and primes the network layer.
+  /// Shared by login and by the two-factor verification step, which is the point
+  /// at which a 2FA login actually receives its token.
+  Future<void> persistSession(UserModel user) async {
+    await _storage.write(key: ApiInterceptor.tokenKey, value: user.token);
+    await _storage.write(key: _userKey, value: jsonEncode(user.toJson()));
+    ApiInterceptor.updateCachedToken(user.token);
+    ApiInterceptor.resetUnauthorizedGuard();
   }
 
   Future<ApiResponse<UserModel>> register({

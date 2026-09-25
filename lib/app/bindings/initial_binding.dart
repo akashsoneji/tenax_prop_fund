@@ -14,6 +14,7 @@ import '../../features/authentication/repositories/auth_repository.dart';
 import '../../features/authentication/services/auth_service.dart';
 import '../flavor/flavor_config.dart';
 import '../routes/app_routes.dart';
+import '../session/session_manager.dart';
 
 /// Registers app-wide singletons before any route loads. Feature-specific
 /// dependencies are registered by their own bindings.
@@ -98,6 +99,7 @@ class InitialBinding extends Bindings {
 
   Future<void> _handleUnauthorized() async {
     await Get.find<AuthRepository>().clearSession();
+    SessionManager.clear();
     if (Get.currentRoute == AppRoutes.getStarted) return;
     Get.offAllNamed(AppRoutes.getStarted);
   }
