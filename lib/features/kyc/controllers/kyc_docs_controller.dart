@@ -56,34 +56,20 @@ class KycDocsController extends GetxController {
     if (submitting.value) return;
     final idFront = files[KycDocSlot.idDocument];
     final addressFront = files[KycDocSlot.proofOfAddress];
-    if (idFront == null && addressFront == null) {
-      AppToast.error('kyc.docs_select_first'.tr);
+    // The API requires identity + address proof in the same request.
+    if (idFront == null || addressFront == null) {
+      AppToast.error('kyc.docs_both_required'.tr);
       return;
     }
     submitting.value = true;
-
-    // The PROPCRM API takes one document type per request (front + optional
-    // back), so identity and address proofs are uploaded separately.
-    var ok = true;
-    if (idFront != null) {
-      final res = await _repository.uploadDocument(
-        documentType: 'id_proof',
-        front: idFront,
-        back: files[KycDocSlot.idDocumentBack],
-      );
-      ok = res.success;
-    }
-    if (ok && addressFront != null) {
-      final res = await _repository.uploadDocument(
-        documentType: 'address_proof',
-        front: addressFront,
-        back: files[KycDocSlot.proofOfAddressBack],
-      );
-      ok = res.success;
-    }
-
+    final res = await _repository.uploadDocuments(
+      idDocument: idFront,
+      idDocumentBack: files[KycDocSlot.idDocumentBack],
+      proofOfAddress: addressFront,
+      proofOfAddressBack: files[KycDocSlot.proofOfAddressBack],
+    );
     submitting.value = false;
-    if (!ok) return;
+    if (!res.success) return;
 
     if (Get.isRegistered<KycController>()) {
       await Get.find<KycController>().refreshProfile();

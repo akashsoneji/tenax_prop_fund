@@ -1,35 +1,47 @@
-/// One selectable payout destination shown on the Payout methods screen.
-///
-/// All demo data lives in the controller; a real impl swaps [isSetUp] for the
-/// saved-state coming back from the payout API.
+/// One saved payout destination returned by `GET /finance/methods`.
 class PayoutMethod {
   const PayoutMethod({
+    required this.id,
+    required this.type,
     required this.name,
     required this.meta,
     required this.description,
+    this.currency = 'USD',
+    this.details = const <String, dynamic>{},
     this.isSetUp = false,
   });
 
+  /// Server id — used for `PUT` / `DELETE /finance/methods/{id}`.
+  final String id;
+
+  /// Rail value (`bank`, `usdt`, `upi`…) matching a [MethodType.value].
+  final String type;
   final String name;
   final String meta;
   final String description;
+  final String currency;
+
+  /// The rail-specific fields saved with the method (account number, address…).
+  final Map<String, dynamic> details;
   final bool isSetUp;
 
-  /// Maps one entry of `GET /finance/methods` -> `data.methods`. The live API
-  /// currently returns an empty array and no sample row, so field names are
-  /// best-effort with defensive fallbacks across the likely keys.
   factory PayoutMethod.fromJson(Map<String, dynamic> json) {
+    final rawDetails = json['details'];
+    final details = rawDetails is Map<String, dynamic>
+        ? rawDetails
+        : const <String, dynamic>{};
     return PayoutMethod(
-      name: (json['name'] ?? json['label'] ?? json['type'] ?? '—').toString(),
-      meta: (json['meta'] ?? json['subtitle'] ?? json['summary'] ?? '')
+      id: json['id']?.toString() ?? '',
+      type: (json['type'] ?? '').toString(),
+      name: (json['label'] ?? json['name'] ?? json['type'] ?? '—').toString(),
+      meta: (json['meta'] ?? json['masked'] ?? json['summary'] ?? json['type'] ?? '')
           .toString(),
-      description:
-          (json['description'] ?? json['details'] ?? json['note'] ?? '')
-              .toString(),
-      isSetUp: json['is_set_up'] as bool? ??
-          json['isSetUp'] as bool? ??
-          json['configured'] as bool? ??
-          false,
+      description: (json['description'] ?? json['note'] ?? '').toString(),
+      currency: (json['currency'] as String?)?.trim().isNotEmpty == true
+          ? json['currency'] as String
+          : 'USD',
+      details: details,
+      isSetUp: json['is_set_up'] as bool? ?? json['id'] != null,
     );
   }
 }

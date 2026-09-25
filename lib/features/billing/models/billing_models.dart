@@ -74,6 +74,44 @@ extension BillingFilterX on BillingFilter {
         return 'Refund';
     }
   }
+
+  /// Localization key for the type dropdown label.
+  String get labelKey {
+    switch (this) {
+      case BillingFilter.all:
+        return 'billing.type_all';
+      case BillingFilter.challenge:
+        return 'billing.type_challenge';
+      case BillingFilter.addOn:
+        return 'billing.type_addon';
+      case BillingFilter.refund:
+        return 'billing.type_refund';
+    }
+  }
+}
+
+/// Optional server-side status filter for `GET /finance/transactions?status=`.
+enum BillingStatusFilter { all, paid, pending, refunded, failed }
+
+extension BillingStatusFilterX on BillingStatusFilter {
+  /// The value sent to the API (`status` query param).
+  String get apiValue => name;
+
+  /// Localization key for the dropdown label.
+  String get labelKey {
+    switch (this) {
+      case BillingStatusFilter.all:
+        return 'billing.status_all';
+      case BillingStatusFilter.paid:
+        return 'billing.status_paid';
+      case BillingStatusFilter.pending:
+        return 'billing.status_pending';
+      case BillingStatusFilter.refunded:
+        return 'billing.status_refunded';
+      case BillingStatusFilter.failed:
+        return 'billing.status_failed';
+    }
+  }
 }
 
 /// One row in the billing transaction list.

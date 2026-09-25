@@ -8,19 +8,19 @@ import 'package:google_fonts/google_fonts.dart';
 
 import '../../billing/controllers/billing_controller.dart';
 import '../../billing/models/billing_models.dart';
-import '../../billing/widgets/billing_filter_tabs.dart';
+import '../../billing/widgets/billing_filter_dropdown.dart';
 import '../../billing/widgets/billing_transaction_list.dart';
 import '../../payout_methods/controllers/payout_methods_controller.dart';
 import '../../payout_methods/models/payout_method.dart';
-import '../../payout_methods/widgets/payout_method_card.dart';
+import '../../payout_methods/widgets/add_payout_method_sheet.dart';
+import '../controllers/rewards_controller.dart';
+import '../models/reward_models.dart';
 import '../../../shared/theme/app_colors.dart';
 import '../../../shared/theme/app_theme.dart';
 import '../../../shared/widgets/app_gradient_button.dart';
 import '../../../shared/widgets/data_state_builder.dart';
 import '../../../shared/widgets/pinned_gradient_app_bar.dart';
 import '../../../shared/widgets/skeletons/skeletons.dart';
-import '../controllers/rewards_controller.dart';
-import '../models/reward_models.dart';
 import '../widgets/info_banner.dart';
 import '../widgets/requirement_row.dart';
 import '../widgets/request_payout_sheet.dart';
@@ -154,9 +154,34 @@ class _BillingTabContent extends StatelessWidget {
                 ],
               ),
               SizedBox(height: 14.h,),
-              BillingFilterTabs(
-                selected: controller.filter.value,
-                onChanged: controller.setFilter,
+              Row(
+                children: [
+                  Expanded(
+                    child: Obx(
+                      () => BillingFilterDropdown<BillingFilter>(
+                        selected: controller.filter.value,
+                        values: BillingFilter.values,
+                        labelOf: (f) => f.labelKey.tr,
+                        isDefault: (f) => f == BillingFilter.all,
+                        onChanged: controller.setFilter,
+                        icon: Icons.category_outlined,
+                      ),
+                    ),
+                  ),
+                  SizedBox(width: 10.w),
+                  Expanded(
+                    child: Obx(
+                      () => BillingFilterDropdown<BillingStatusFilter>(
+                        selected: controller.status.value,
+                        values: BillingStatusFilter.values,
+                        labelOf: (s) => s.labelKey.tr,
+                        isDefault: (s) => s == BillingStatusFilter.all,
+                        onChanged: controller.setStatus,
+                        icon: Icons.tune_rounded,
+                      ),
+                    ),
+                  ),
+                ],
               ),
               SizedBox(height: 16.h),
               BillingTransactionList(
@@ -217,44 +242,32 @@ class _PayoutMethodsTabContent extends StatelessWidget {
           state: controller.state,
           onRetry: controller.load,
           skeleton: const _RewardsSkeleton(),
+          emptyIcon: Icons.account_balance_wallet_outlined,
+          emptyTitle: 'rewards.no_method_title'.tr,
+          emptyMessage: 'rewards.no_method_body'.tr,
+          emptyActionLabel: 'rewards.add_method'.tr,
+          onEmptyAction: () => _openAddSheet(context),
           builder: (methods) => Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
               Text(
-                'Payout methods',
+                'rewards.tab_payout_methods'.tr,
                 style: GoogleFonts.beVietnamPro(
                   fontSize: 20.sp,
                   fontWeight: FontWeight.w800,
                 ),
               ),
               SizedBox(height: 14.h),
-              SizedBox(
-                height: 50.h,
-                child: ElevatedButton.icon(
-                  onPressed: () => _showAddMethodSheet(context, controller),
-                  icon: const Icon(Icons.add_rounded),
-                  label: Text('rewards.add_method'.tr),
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: Theme.of(context).colorScheme.primary,
-                    foregroundColor: Theme.of(context).colorScheme.onPrimary,
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(15.r),
-                    ),
-                  ),
-                ),
+              AppGradientButton(
+                label: 'rewards.add_method'.tr,
+                icon: Icons.add_rounded,
+                onPressed: () => _openAddSheet(context),
               ),
               SizedBox(height: 16.h),
-              if (methods.isEmpty)
-                InfoBanner(
-                  variant: InfoBannerVariant.warning,
-                  title: 'rewards.no_method_title'.tr,
-                  body: 'rewards.no_method_body'.tr,
-                )
-              else
-                for (final method in methods) ...[
-                  PayoutMethodCard(method: method),
-                  SizedBox(height: 12.h),
-                ],
+              for (final m in methods)
+                _MethodManageRow(
+                  method: RewardPayoutMethod(id: m.id, label: m.name),
+                ),
             ],
           ),
         ),
@@ -262,128 +275,116 @@ class _PayoutMethodsTabContent extends StatelessWidget {
     );
   }
 
-  void _showAddMethodSheet(
-    BuildContext context,
-    PayoutMethodsController controller,
-  ) {
-    final labelController = TextEditingController();
-    final accountController = TextEditingController();
-    final ifscController = TextEditingController();
-    var type = 'bank';
+  Future<void> _openAddSheet(BuildContext context) async {
+    final saved = await AddPayoutMethodSheet.show(context);
+    // Rewards stats depend on "method saved", so refresh them too.
+    if (saved == true) Get.find<RewardsController>().load();
+  }
+}
 
-    showModalBottomSheet<void>(
-      context: context,
-      isScrollControlled: true,
-      backgroundColor: Colors.transparent,
-      builder: (sheetContext) => StatefulBuilder(
-        builder: (context, setSheetState) => Padding(
-          padding: EdgeInsets.only(
-            bottom: MediaQuery.viewInsetsOf(context).bottom,
-          ),
-          child: Container(
-            padding: EdgeInsets.fromLTRB(20.w, 14.h, 20.w, 24.h),
-            decoration: BoxDecoration(
-              color: Theme.of(context).colorScheme.surface,
-              borderRadius: BorderRadius.vertical(top: Radius.circular(24.r)),
-            ),
-            child: SingleChildScrollView(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.stretch,
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Center(
-                    child: Container(
-                      width: 42.w,
-                      height: 4.h,
-                      decoration: BoxDecoration(
-                        color: Colors.grey.shade400,
-                        borderRadius: BorderRadius.circular(4.r),
-                      ),
-                    ),
-                  ),
-                  SizedBox(height: 18.h),
-                  Text(
-                    'rewards.add_payout_method'.tr,
-                    style: GoogleFonts.beVietnamPro(
-                      fontSize: 20.sp,
-                      fontWeight: FontWeight.w800,
-                    ),
-                  ),
-                  SizedBox(height: 16.h),
-                  DropdownButtonFormField<String>(
-                    value: type,
-                    decoration: InputDecoration(
-                        labelText: 'rewards.method_type'.tr),
-                    items: [
-                      DropdownMenuItem(
-                          value: 'bank',
-                          child: Text('rewards.method_bank'.tr)),
-                      DropdownMenuItem(
-                          value: 'crypto',
-                          child: Text('rewards.method_crypto'.tr)),
-                      DropdownMenuItem(
-                          value: 'upi', child: Text('rewards.method_upi'.tr)),
-                    ],
-                    onChanged: (value) => setSheetState(() => type = value ?? 'bank'),
-                  ),
-                  SizedBox(height: 12.h),
-                  TextField(
-                    controller: labelController,
-                    decoration: InputDecoration(
-                        labelText: 'rewards.method_name'.tr),
-                  ),
-                  SizedBox(height: 12.h),
-                  TextField(
-                    controller: accountController,
-                    decoration: InputDecoration(
-                        labelText: 'rewards.account_address'.tr),
-                  ),
-                  if (type == 'bank') ...[
-                    SizedBox(height: 12.h),
-                    TextField(
-                      controller: ifscController,
-                      decoration: InputDecoration(
-                          labelText: 'rewards.ifsc_routing'.tr),
-                    ),
-                  ],
-                  SizedBox(height: 20.h),
-                  Obx(
-                    () => ElevatedButton(
-                      onPressed: controller.isSubmitting.value
-                          ? null
-                          : () async {
-                              final result = await controller.createMethod(
-                                type: type,
-                                label: labelController.text.trim(),
-                                currency: 'USD',
-                                details: {
-                                  'account_number': accountController.text.trim(),
-                                  if (ifscController.text.trim().isNotEmpty)
-                                    'ifsc': ifscController.text.trim(),
-                                },
-                              );
-                              if (!sheetContext.mounted) return;
-                              if (result.success) {
-                                Navigator.of(sheetContext).pop();
-                              } else {
-                                Get.snackbar('Unable to add method', result.message ?? 'Please try again.');
-                              }
-                            },
-                      child: controller.isSubmitting.value
-                          ? const SizedBox(
-                              height: 20,
-                              width: 20,
-                              child: CircularProgressIndicator(strokeWidth: 2),
-                            )
-                          : Text('rewards.save_method'.tr),
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          ),
-        ),
+class _MethodManageRow extends StatelessWidget {
+  const _MethodManageRow({required this.method});
+  final RewardPayoutMethod method;
+
+  @override
+  Widget build(BuildContext context) {
+    final scheme = Theme.of(context).colorScheme;
+    return Container(
+      margin: EdgeInsets.only(bottom: 10.h),
+      padding: EdgeInsets.fromLTRB(14.w, 12.h, 10.w, 12.h),
+      decoration: BoxDecoration(
+        color: scheme.surface,
+        borderRadius: BorderRadius.circular(14.r),
+        border: Border.all(color: scheme.outlineVariant.withValues(alpha: 0.4)),
       ),
+      child: Row(
+        children: [
+          Container(
+            width: 38.w,
+            height: 38.w,
+            decoration: BoxDecoration(
+              color: scheme.primaryContainer.withValues(alpha: 0.45),
+              borderRadius: BorderRadius.circular(10.r),
+            ),
+            child: Icon(Icons.account_balance_wallet_rounded,
+                size: 18.w, color: scheme.primary),
+          ),
+          SizedBox(width: 12.w),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  method.label,
+                  style: GoogleFonts.beVietnamPro(
+                    fontSize: 14.sp,
+                    fontWeight: FontWeight.w700,
+                    color: scheme.onSurface,
+                  ),
+                ),
+                SizedBox(height: 2.h),
+                Text(
+                  method.id,
+                  style: GoogleFonts.beVietnamPro(
+                    fontSize: 11.sp,
+                    color: scheme.onSurfaceVariant,
+                  ),
+                ),
+              ],
+            ),
+          ),
+          TextButton.icon(
+            onPressed: () => _edit(context, method),
+            icon: Icon(Icons.edit_rounded, size: 16.w),
+            label: Text('rewards.history_edit'.tr),
+          ),
+          TextButton.icon(
+            onPressed: () => _delete(context, method),
+            icon: Icon(Icons.delete_outline_rounded, size: 16.w),
+            label: Text('rewards.history_delete'.tr),
+            style: TextButton.styleFrom(
+              foregroundColor: AppColors.danger,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  void _edit(BuildContext context, RewardPayoutMethod method) {
+    final existing = Get.find<PayoutMethodsController>()
+        .state
+        .valueOrNull
+        ?.firstWhereOrNull((m) => m.id == method.id);
+    if (existing == null) return;
+    AddPayoutMethodSheet.show(context, existing: existing).then((saved) {
+      if (saved == true) Get.find<RewardsController>().load();
+    });
+  }
+
+  void _delete(BuildContext context, RewardPayoutMethod method) {
+    Get.defaultDialog(
+      title: 'rewards.history_delete_confirm'.tr,
+      middleText: method.label,
+      textConfirm: 'rewards.history_delete'.tr,
+      textCancel: 'rewards.cancel_no'.tr,
+      confirmTextColor: Theme.of(context).colorScheme.onError,
+      buttonColor: AppColors.danger,
+      onConfirm: () async {
+        Get.back();
+        final result =
+            await Get.find<PayoutMethodsController>().deleteMethod(method.id);
+        if (result.success) Get.find<RewardsController>().load();
+        Get.snackbar(
+          result.success
+              ? 'rewards.method_deleted'.tr
+              : 'rewards.cannot_submit'.tr,
+          result.success ? '' : (result.message ?? 'rewards.cannot_submit_body'.tr),
+          snackPosition: SnackPosition.BOTTOM,
+          margin: EdgeInsets.all(16.w),
+          borderRadius: 14.r,
+        );
+      },
     );
   }
 }
@@ -476,7 +477,7 @@ class _RewardsBody extends StatelessWidget {
         RewardsSectionTitle('rewards.requests'.tr),
         _RequestsCard(controller: controller, data: data),
         SizedBox(height: 18.h),
-        _RequestPayoutCta(controller: controller),
+          _RequestPayoutCta(controller: controller, data: data),
         SizedBox(height: 18.h),
         InfoBanner(
           variant: InfoBannerVariant.warning,
@@ -625,11 +626,13 @@ class _RequestsCard extends StatelessWidget {
 // CTA
 // ---------------------------------------------------------------------------
 class _RequestPayoutCta extends StatelessWidget {
-  const _RequestPayoutCta({required this.controller});
+  const _RequestPayoutCta({required this.controller, required this.data});
   final RewardsController controller;
+  final RewardsData data;
 
   @override
   Widget build(BuildContext context) {
+    final canRequest = data.meetsMinimumPayout;
     return TweenAnimationBuilder<double>(
       tween: Tween(begin: 0, end: 1),
       duration: const Duration(milliseconds: 600),
@@ -646,10 +649,12 @@ class _RequestPayoutCta extends StatelessWidget {
       child: AppGradientButton(
         label: 'rewards.request_payout'.tr,
         icon: Icons.account_balance_wallet_rounded,
-        onPressed: () {
-          controller.openPayoutSheet();
-          _showRequestSheet(context);
-        },
+        onPressed: canRequest
+            ? () {
+                controller.openPayoutSheet();
+                _showRequestSheet(context);
+              }
+            : null,
       ),
     );
   }

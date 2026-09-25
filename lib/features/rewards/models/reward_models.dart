@@ -14,6 +14,10 @@ class RewardsData {
     required this.requirements,
     required this.accounts,
     required this.payoutMethods,
+    required this.canRequestPayout,
+    required this.availableMinor,
+    required this.minPayoutMinor,
+    required this.minPayout,
   });
 
   final MoneySnapshot withdrawable;
@@ -24,12 +28,28 @@ class RewardsData {
   final List<RewardAccount> accounts;
   final List<RewardPayoutMethod> payoutMethods;
 
+  /// Raw API `stats.can_request` (KYC + method + minimum all satisfied).
+  final bool canRequestPayout;
+
+  /// `stats.available_minor` — withdrawable balance in cents.
+  final int availableMinor;
+
+  /// `stats.min_payout_minor` — minimum payout in cents.
+  final int minPayoutMinor;
+
+  /// `stats.min_payout` — formatted display string (e.g. "USD 1.00").
+  final String minPayout;
+
+  /// Available balance has reached the minimum payout (compared in minor
+  /// units, never on the formatted strings).
+  bool get meetsMinimumPayout =>
+      minPayoutMinor > 0 && availableMinor >= minPayoutMinor;
+
   bool get isEmpty => requirements.isEmpty && accounts.isEmpty;
 
   /// Maps `GET /finance/rewards` — `data` holds `stats`, `methods`, `accounts`
   /// and `eligibility`. Money values use the preformatted display strings
-  /// (`available`, `pending`, `paid`); requirements are derived from the KYC /
-  /// eligibility flags in `stats`.
+  /// (`available`, `pending`, `paid`); comparisons use the `_minor` integers.
   factory RewardsData.fromJson(dynamic data) {
     final map = data is Map<String, dynamic> ? data : <String, dynamic>{};
     final stats =
@@ -52,6 +72,9 @@ class RewardsData {
             .toList() ??
         <RewardAccount>[];
 
+    final availableMinor = (stats['available_minor'] as num?)?.toInt() ?? 0;
+    final minPayoutMinor = (stats['min_payout_minor'] as num?)?.toInt() ?? 0;
+
     return RewardsData(
       withdrawable: MoneySnapshot(
           amountUsd: money('available', '\$0'), tone: StatTone.green),
@@ -61,18 +84,26 @@ class RewardsData {
           MoneySnapshot(amountUsd: money('paid', '\$0'), tone: StatTone.purple),
       yourShare:
           ShareSnapshot(percent: (stats['share_percent'] as num?)?.toInt() ?? 0),
-      requirements: _requirementsFrom(stats, methods.isNotEmpty),
+      requirements: _requirementsFrom(
+        stats,
+        hasMethod: methods.isNotEmpty,
+        meetsMinimum: minPayoutMinor > 0 && availableMinor >= minPayoutMinor,
+      ),
       accounts: accounts,
       payoutMethods: methods,
+      canRequestPayout: stats['can_request'] as bool? ?? false,
+      availableMinor: availableMinor,
+      minPayoutMinor: minPayoutMinor,
+      minPayout: money('min_payout', '—'),
     );
   }
 
   static List<PayoutRequirement> _requirementsFrom(
-    Map stats,
-    bool hasMethod,
-  ) {
+    Map stats, {
+    required bool hasMethod,
+    required bool meetsMinimum,
+  }) {
     final kycApproved = stats['kyc_approved'] as bool? ?? false;
-    final canRequest = stats['can_request'] as bool? ?? false;
     return [
       PayoutRequirement(
         label: 'rewards.req_kyc_verified',
@@ -87,7 +118,7 @@ class RewardsData {
       PayoutRequirement(
         label: 'rewards.req_minimum_payout',
         value: (stats['min_payout'] as String?) ?? '—',
-        status: canRequest ? RequirementStatus.pass : RequirementStatus.partial,
+        status: meetsMinimum ? RequirementStatus.pass : RequirementStatus.partial,
       ),
     ];
   }
@@ -138,6 +169,133 @@ class PayoutRequirement {
 
 enum RequirementStatus { pass, fail, partial }
 
+/// One field definition inside a method type (bank / usdt / upi).
+class MethodFieldDef {
+  const MethodFieldDef({
+    required this.key,
+    required this.label,
+    required this.type,
+    required this.isRequired,
+    this.placeholder,
+  });
+  final String key;
+  final String label;
+  final String type;
+  final bool isRequired;
+  final String? placeholder;
+
+  factory MethodFieldDef.fromJson(Map<String, dynamic> json) =>
+      MethodFieldDef(
+        key: json['key'] as String? ?? '',
+        label: json['label'] as String? ?? '',
+        type: json['type'] as String? ?? 'text',
+        isRequired: json['required'] as bool? ?? false,
+        placeholder: json['placeholder'] as String?,
+      );
+}
+
+/// One payout-method type entry returned by GET /finance/method-types.
+class PayoutMethodType {
+  const PayoutMethodType({
+    required this.value,
+    required this.label,
+    required this.fields,
+  });
+  final String value;
+  final String label;
+  final List<MethodFieldDef> fields;
+
+  factory PayoutMethodType.fromJson(Map<String, dynamic> json) =>
+      PayoutMethodType(
+        value: json['value']?.toString() ?? '',
+        label: json['label']?.toString() ?? '',
+        fields: (json['fields'] as List?)
+                ?.whereType<Map<String, dynamic>>()
+                .map(MethodFieldDef.fromJson)
+                .toList() ??
+            <MethodFieldDef>[],
+      );
+}
+
+/// Full method-types response.
+class MethodTypesResponse {
+  const MethodTypesResponse({required this.methodTypes});
+  final List<PayoutMethodType> methodTypes;
+
+  factory MethodTypesResponse.fromJson(Map<String, dynamic> json) =>
+      MethodTypesResponse(
+        methodTypes: (json['method_types'] as List?)
+                ?.whereType<Map<String, dynamic>>()
+                .map(PayoutMethodType.fromJson)
+                .toList() ??
+            <PayoutMethodType>[],
+      );
+}
+
+/// One row in the payout history list.
+class PayoutHistoryItem {
+  const PayoutHistoryItem({
+    required this.id,
+    required this.status,
+    required this.amount,
+    required this.currency,
+    required this.methodLabel,
+    required this.createdAt,
+    this.updatedAt,
+    this.notes,
+    this.cancellable = false,
+  });
+  final int id;
+  final String status;
+  final String amount;
+  final String currency;
+  final String methodLabel;
+  final String createdAt;
+  final String? updatedAt;
+  final String? notes;
+  final bool cancellable;
+
+  factory PayoutHistoryItem.fromJson(Map<String, dynamic> json) =>
+      PayoutHistoryItem(
+        id: json['id'] as int? ?? 0,
+        status: json['status']?.toString() ?? '',
+        amount: json['amount']?.toString() ?? '\$0',
+        currency: json['currency']?.toString() ?? 'USD',
+        methodLabel: json['method_label']?.toString() ??
+            json['payout_method']?['label']?.toString() ??
+            '',
+        createdAt: json['created_at']?.toString() ?? '',
+        updatedAt: json['updated_at']?.toString(),
+        notes: json['notes']?.toString(),
+        cancellable: json['cancellable'] as bool? ?? false,
+      );
+}
+
+/// Paginated payouts list.
+class PayoutsPage {
+  const PayoutsPage({
+    required this.items,
+    required this.currentPage,
+    required this.totalPages,
+    required this.hasNext,
+  });
+  final List<PayoutHistoryItem> items;
+  final int currentPage;
+  final int totalPages;
+  final bool hasNext;
+
+  factory PayoutsPage.fromJson(Map<String, dynamic> json) => PayoutsPage(
+        items: (json['payouts'] as List?)
+                ?.whereType<Map<String, dynamic>>()
+                .map(PayoutHistoryItem.fromJson)
+                .toList() ??
+            <PayoutHistoryItem>[],
+        currentPage: json['meta']?['current_page'] as int? ?? 1,
+        totalPages: json['meta']?['total_pages'] as int? ?? 1,
+        hasNext: json['meta']?['has_next'] as bool? ?? false,
+      );
+}
+
 /// Account entry shown in the Request-a-payout sheet's account picker.
 class RewardAccount {
   const RewardAccount({
@@ -171,6 +329,62 @@ class RewardAccount {
 }
 
 enum AccountStatus { funded, evaluation, breached }
+
+enum PayoutHistoryFilter {
+  all('rewards.history_filter_all'),
+  pending('rewards.history_filter_pending'),
+  approved('rewards.history_filter_approved'),
+  disbursed('rewards.history_filter_disbursed');
+
+  const PayoutHistoryFilter(this.labelKey);
+  final String labelKey;
+}
+
+class PayoutHistoryRow {
+  const PayoutHistoryRow({
+    required this.title,
+    required this.subtitle,
+    required this.amount,
+    required this.status,
+    required this.canCancel,
+    required this.payoutId,
+  });
+  final String title;
+  final String subtitle;
+  final String amount;
+  final PayoutHistoryFilterStatus status;
+  final bool canCancel;
+  final int payoutId;
+}
+
+enum PayoutHistoryFilterStatus { pending, approved, disbursed, cancelled }
+
+extension PayoutHistoryFilterStatusLabel on PayoutHistoryFilterStatus {
+  String get labelKey {
+    switch (this) {
+      case PayoutHistoryFilterStatus.pending:
+        return 'rewards.history_status_pending';
+      case PayoutHistoryFilterStatus.approved:
+        return 'rewards.history_status_approved';
+      case PayoutHistoryFilterStatus.disbursed:
+        return 'rewards.history_status_disbursed';
+      case PayoutHistoryFilterStatus.cancelled:
+        return 'rewards.history_status_cancelled';
+    }
+  }
+  Color get color {
+    switch (this) {
+      case PayoutHistoryFilterStatus.pending:
+        return AppColors.amber;
+      case PayoutHistoryFilterStatus.approved:
+        return AppColors.info;
+      case PayoutHistoryFilterStatus.disbursed:
+        return AppColors.success;
+      case PayoutHistoryFilterStatus.cancelled:
+        return AppColors.danger;
+    }
+  }
+}
 
 extension AccountStatusLabel on AccountStatus {
   String get label {

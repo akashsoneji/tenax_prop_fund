@@ -17,6 +17,9 @@ class BillingController extends BaseController<BillingData> {
 
   /// The active filter tab.
   final filter = BillingFilter.all.obs;
+
+  /// The active status filter (dropdown).
+  final status = BillingStatusFilter.all.obs;
   final isExporting = false.obs;
 
   Future<void> setFilter(BillingFilter f) async {
@@ -25,9 +28,17 @@ class BillingController extends BaseController<BillingData> {
     await load();
   }
 
+  Future<void> setStatus(BillingStatusFilter s) async {
+    if (status.value == s) return;
+    status.value = s;
+    await load();
+  }
+
   @override
-  Future<ApiResponse<BillingData>> fetch() =>
-      _repository.getBilling(filter: filter.value);
+  Future<ApiResponse<BillingData>> fetch() => _repository.getBilling(
+        filter: filter.value,
+        status: status.value.apiValue,
+      );
 
   Future<ApiResponse<String>> exportBilling() async {
     if (isExporting.value) {

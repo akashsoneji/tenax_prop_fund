@@ -169,40 +169,28 @@ class VerificationController extends GetxController {
     }
   }
 
-  /// Uploads the selected ID and address proofs to the PROPCRM API (one request
-  /// per document type). Returns true when every attempted upload succeeded.
+  /// Uploads identity + address proofs in one `POST /kyc/documents` request —
+  /// the API requires both fronts together. Returns true on success.
   Future<bool> uploadDocuments() async {
     if (uploadingDocs.value) return false;
     final idPath = idFront.value.filePath;
     final addressPath = addressFront.value.filePath;
-    if (idPath == null && addressPath == null) {
-      AppToast.error('kyc.docs_select_first'.tr);
+    if (idPath == null || addressPath == null) {
+      AppToast.error('kyc.docs_both_required'.tr);
       return false;
     }
+    final idBackPath = idBack.value.filePath;
+    final addressBackPath = addressBack.value.filePath;
     uploadingDocs.value = true;
-    var ok = true;
-    if (idPath != null) {
-      final res = await _repository.uploadDocument(
-        documentType: 'id_proof',
-        front: File(idPath),
-        back: idBack.value.filePath == null
-            ? null
-            : File(idBack.value.filePath!),
-      );
-      ok = res.success;
-    }
-    if (ok && addressPath != null) {
-      final res = await _repository.uploadDocument(
-        documentType: 'address_proof',
-        front: File(addressPath),
-        back: addressBack.value.filePath == null
-            ? null
-            : File(addressBack.value.filePath!),
-      );
-      ok = res.success;
-    }
+    final res = await _repository.uploadDocuments(
+      idDocument: File(idPath),
+      idDocumentBack: idBackPath == null ? null : File(idBackPath),
+      proofOfAddress: File(addressPath),
+      proofOfAddressBack:
+          addressBackPath == null ? null : File(addressBackPath),
+    );
     uploadingDocs.value = false;
-    return ok;
+    return res.success;
   }
 
   /// Persists the personal-details form via `PUT /profile`. Returns true on

@@ -64,31 +64,32 @@ class KycRepository {
     );
   }
 
-  /// Uploads one document type (front + optional back) to the PROPCRM API,
-  /// which expects `document_type`, `front` and `back` multipart fields per
-  /// call. Returns the refreshed [KycStatus].
-  Future<ApiResponse<KycStatus>> uploadDocument({
-    required String documentType,
-    required File front,
-    File? back,
+  /// Uploads all KYC files in ONE multipart request. The API validates
+  /// `id_document` and `proof_of_address` as required together, with
+  /// `id_document_back` / `proof_of_address_back` optional. Returns the
+  /// refreshed [KycStatus].
+  Future<ApiResponse<KycStatus>> uploadDocuments({
+    required File idDocument,
+    required File proofOfAddress,
+    File? idDocumentBack,
+    File? proofOfAddressBack,
   }) async {
-    final form = FormData.fromMap({'document_type': documentType});
-    form.files.add(
-      MapEntry(
-        'front',
-        await MultipartFile.fromFile(
-          front.path,
-          filename: front.path.split('/').last,
-        ),
-      ),
-    );
-    if (back != null) {
+    final parts = <String, File?>{
+      'id_document': idDocument,
+      'id_document_back': idDocumentBack,
+      'proof_of_address': proofOfAddress,
+      'proof_of_address_back': proofOfAddressBack,
+    };
+    final form = FormData();
+    for (final entry in parts.entries) {
+      final file = entry.value;
+      if (file == null) continue;
       form.files.add(
         MapEntry(
-          'back',
+          entry.key,
           await MultipartFile.fromFile(
-            back.path,
-            filename: back.path.split('/').last,
+            file.path,
+            filename: file.path.split('/').last,
           ),
         ),
       );

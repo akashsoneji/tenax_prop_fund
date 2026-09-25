@@ -230,6 +230,25 @@ abstract class ApiEndpoints {
 
   /// Beneficiary details (`POST`). Body: `{full_name, relationship, email,
   /// mobile}`.
+  // ---------------------------------------------------------------------------
+  // Finance / Rewards & Payouts
+  // ---------------------------------------------------------------------------
+  /// Full rewards page (stats, accounts, methods, payouts history).
+  /// Query: `status` (all|pending|approved|disbursed), `page`.
+  static const financeRewards = '/finance/rewards';
+
+  /// Available payout method types (bank, usdt, upi).
+  static const financeMethodTypes = '/finance/method-types';
+
+  /// Saved payout methods.
+  static const financeMethods = '/finance/methods';
+
+  /// Create a payout request.
+  static const financePayouts = '/finance/payouts';
+
+  /// Cancel a pending payout request.
+  static String financePayoutCancel(Object id) => '/finance/payouts/$id/cancel';
+
   static const settingsBeneficiary = '/settings/beneficiary';
 
   /// Starts two-factor enrolment (`POST`). `data` carries `secret` and the

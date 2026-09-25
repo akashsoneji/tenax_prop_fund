@@ -48,7 +48,7 @@ class ReferralData {
       shareUrl: referral['share_url'] as String? ?? '',
       signedUp: (stats['referrals'] as num?)?.toInt() ?? 0,
       purchased: (referral['times_used'] as num?)?.toInt() ?? 0,
-      earned: _parseMoney(stats['total_paid']),
+      earned: _parseMoney(stats['to_be_paid']),
       rate: _parsePercent(settings['commission_percent']),
       referrals: rows
           .whereType<Map<String, dynamic>>()

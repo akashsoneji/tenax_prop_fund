@@ -10,7 +10,7 @@ import '../../../shared/widgets/pinned_gradient_app_bar.dart';
 import '../../../shared/widgets/skeletons/skeletons.dart';
 import '../controllers/billing_controller.dart';
 import '../models/billing_models.dart';
-import '../widgets/billing_filter_tabs.dart';
+import '../widgets/billing_filter_dropdown.dart';
 import '../widgets/billing_transaction_list.dart';
 
 /// The Billing history screen. Composed of:
@@ -70,11 +70,34 @@ class _BillingBody extends StatelessWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              Obx(
-                () => BillingFilterTabs(
-                  selected: controller.filter.value,
-                  onChanged: controller.setFilter,
-                ),
+              Row(
+                children: [
+                  Expanded(
+                    child: Obx(
+                      () => BillingFilterDropdown<BillingFilter>(
+                        selected: controller.filter.value,
+                        values: BillingFilter.values,
+                        labelOf: (f) => f.labelKey.tr,
+                        isDefault: (f) => f == BillingFilter.all,
+                        onChanged: controller.setFilter,
+                        icon: Icons.category_outlined,
+                      ),
+                    ),
+                  ),
+                  SizedBox(width: 10.w),
+                  Expanded(
+                    child: Obx(
+                      () => BillingFilterDropdown<BillingStatusFilter>(
+                        selected: controller.status.value,
+                        values: BillingStatusFilter.values,
+                        labelOf: (s) => s.labelKey.tr,
+                        isDefault: (s) => s == BillingStatusFilter.all,
+                        onChanged: controller.setStatus,
+                        icon: Icons.tune_rounded,
+                      ),
+                    ),
+                  ),
+                ],
               ),
               SizedBox(height: 18.h),
               Obx(

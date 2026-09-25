@@ -133,7 +133,7 @@ class _CodeHeroCard extends StatelessWidget {
       child: Container(
         padding: EdgeInsets.fromLTRB(18.w, 16.h, 18.w, 18.h),
         decoration: BoxDecoration(
-          gradient: AppTheme.brandGradient(scheme),
+          gradient: AppTheme.heroGradient(scheme),
           borderRadius: BorderRadius.circular(20.r),
           boxShadow: [
             BoxShadow(

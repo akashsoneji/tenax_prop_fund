@@ -20,6 +20,9 @@ class RewardsBinding extends Bindings {
     Get.lazyPut<RewardsController>(
       () => RewardsController(Get.find<RewardsRepository>()),
     );
+    Get.lazyPut<ExtendedRewardsController>(
+      () => ExtendedRewardsController(Get.find<RewardsRepository>()),
+    );
     Get.lazyPut<BillingRepository>(
       () => BillingRepository(Get.find<ApiClient>()),
     );

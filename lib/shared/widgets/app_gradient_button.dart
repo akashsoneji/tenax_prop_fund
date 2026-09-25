@@ -79,9 +79,15 @@ class _AppGradientButtonState extends State<AppGradientButton>
   Widget build(BuildContext context) {
     final scheme = Theme.of(context).colorScheme;
     final disabled = widget.onPressed == null || widget.loading;
+    // A truly blocked button (disabled and NOT mid-request) is shown solid grey
+    // so it reads as unavailable; the loading state keeps the brand gradient.
+    final blocked = widget.onPressed == null && !widget.loading;
+    final fgColor = blocked
+        ? scheme.onSurface.withValues(alpha: 0.45)
+        : Colors.white;
 
     final btn = Opacity(
-      opacity: disabled ? 0.85 : 1,
+      opacity: disabled && !blocked ? 0.85 : 1,
       child: Material(
       color: AppColors.transparent,
         borderRadius: BorderRadius.circular(14.r),
@@ -90,7 +96,10 @@ class _AppGradientButtonState extends State<AppGradientButton>
           borderRadius: BorderRadius.circular(14.r),
           child: Ink(
             decoration: BoxDecoration(
-              gradient: AppTheme.heroGradient(scheme),
+              gradient: blocked ? null : AppTheme.heroGradient(scheme),
+              color: blocked
+                  ? scheme.onSurface.withValues(alpha: 0.12)
+                  : null,
               borderRadius: BorderRadius.circular(14.r),
             ),
             child: SizedBox(
@@ -137,13 +146,13 @@ class _AppGradientButtonState extends State<AppGradientButton>
                             children: [
                               if (widget.icon != null) ...[
                                 Icon(widget.icon,
-                                    color: Colors.white, size: 18.w),
+                                    color: fgColor, size: 18.w),
                                 SizedBox(width: 10.w),
                               ],
                               Text(
                                 widget.label,
                                 style: GoogleFonts.beVietnamPro(
-                                  color: Colors.white,
+                                  color: fgColor,
                                   fontSize: 16.sp,
                                   fontWeight: FontWeight.w700,
                                   letterSpacing: 0.3,
