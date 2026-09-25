@@ -41,6 +41,7 @@ class KeyValueRow extends StatelessWidget {
           child: Row(
             children: [
               Expanded(
+                flex: 2,
                 child: Text(
                   label,
                   style: GoogleFonts.beVietnamPro(
@@ -49,7 +50,12 @@ class KeyValueRow extends StatelessWidget {
                   ),
                 ),
               ),
-              Flexible(
+              SizedBox(width: 12.w),
+              // Both sides are Expanded (tight): a loose label would leave its
+              // unused share after the value, so the value's right edge would
+              // drift with label length.
+              Expanded(
+                flex: 3,
                 child: Text(
                   value,
                   textAlign: TextAlign.right,

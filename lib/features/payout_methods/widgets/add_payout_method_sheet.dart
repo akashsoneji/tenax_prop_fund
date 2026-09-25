@@ -88,75 +88,77 @@ class _AddPayoutMethodSheetState extends State<AddPayoutMethodSheet> {
   Widget build(BuildContext context) {
     final scheme = Theme.of(context).colorScheme;
     final viewInsets = MediaQuery.viewInsetsOf(context);
-    return Padding(
-      padding: EdgeInsets.only(bottom: viewInsets.bottom),
-      child: Container(
-        decoration: BoxDecoration(
-          color: scheme.brightness == Brightness.dark
-              ? AppColors.sheetDark
-              : Colors.white,
-          borderRadius: BorderRadius.vertical(top: Radius.circular(24.r)),
-        ),
-        padding: EdgeInsets.fromLTRB(20.w, 14.h, 20.w, 22.h),
-        child: SingleChildScrollView(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Center(
-                child: Container(
-                  width: 38.w,
-                  height: 4.h,
-                  margin: EdgeInsets.only(bottom: 14.h),
-                  decoration: BoxDecoration(
-                    color: scheme.onSurface.withValues(alpha: 0.15),
-                    borderRadius: BorderRadius.circular(2.r),
+    return SafeArea(
+      child: Padding(
+        padding: EdgeInsets.only(bottom: viewInsets.bottom),
+        child: Container(
+          decoration: BoxDecoration(
+            color: scheme.brightness == Brightness.dark
+                ? AppColors.sheetDark
+                : Colors.white,
+            borderRadius: BorderRadius.vertical(top: Radius.circular(24.r)),
+          ),
+          padding: EdgeInsets.fromLTRB(20.w, 14.h, 20.w, 22.h),
+          child: SingleChildScrollView(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Center(
+                  child: Container(
+                    width: 38.w,
+                    height: 4.h,
+                    margin: EdgeInsets.only(bottom: 14.h),
+                    decoration: BoxDecoration(
+                      color: scheme.onSurface.withValues(alpha: 0.15),
+                      borderRadius: BorderRadius.circular(2.r),
+                    ),
                   ),
                 ),
-              ),
-              Text(
-                _isEdit
-                    ? 'payout_methods.edit_method'.tr
-                    : 'rewards.add_payout_method'.tr,
-                style: GoogleFonts.beVietnamPro(
-                  fontSize: 18.sp,
-                  fontWeight: FontWeight.w800,
-                  color: scheme.onSurface,
+                Text(
+                  _isEdit
+                      ? 'payout_methods.edit_method'.tr
+                      : 'rewards.add_payout_method'.tr,
+                  style: GoogleFonts.beVietnamPro(
+                    fontSize: 18.sp,
+                    fontWeight: FontWeight.w800,
+                    color: scheme.onSurface,
+                  ),
                 ),
-              ),
-              SizedBox(height: 18.h),
-              Obx(() {
-                if (_controller.isLoadingMethodTypes.value &&
-                    _controller.methodTypes.isEmpty) {
-                  return Padding(
-                    padding: EdgeInsets.symmetric(vertical: 30.h),
-                    child: const Center(child: CircularProgressIndicator()),
+                SizedBox(height: 18.h),
+                Obx(() {
+                  if (_controller.isLoadingMethodTypes.value &&
+                      _controller.methodTypes.isEmpty) {
+                    return Padding(
+                      padding: EdgeInsets.symmetric(vertical: 30.h),
+                      child: const Center(child: CircularProgressIndicator()),
+                    );
+                  }
+                  if (_controller.methodTypes.isEmpty) {
+                    return _EmptyTypes(scheme: scheme);
+                  }
+                  return _Form(
+                    types: _controller.methodTypes,
+                    selected: _selected,
+                    onTypeChanged: (t) => setState(() {
+                      _selected = t;
+                      _syncFieldControllers();
+                    }),
+                    labelText: _labelText,
+                    fieldControllers: _fieldControllers,
                   );
-                }
-                if (_controller.methodTypes.isEmpty) {
-                  return _EmptyTypes(scheme: scheme);
-                }
-                return _Form(
-                  types: _controller.methodTypes,
-                  selected: _selected,
-                  onTypeChanged: (t) => setState(() {
-                    _selected = t;
-                    _syncFieldControllers();
-                  }),
-                  labelText: _labelText,
-                  fieldControllers: _fieldControllers,
-                );
-              }),
-              SizedBox(height: 22.h),
-              Obx(
-                () => AppGradientButton(
-                  label: 'rewards.save_method'.tr,
-                  icon: Icons.check_rounded,
-                  loading: _submitting || _controller.isSubmitting.value,
-                  onPressed: _canSubmit ? _submit : null,
+                }),
+                SizedBox(height: 22.h),
+                Obx(
+                  () => AppGradientButton(
+                    label: 'rewards.save_method'.tr,
+                    icon: Icons.check_rounded,
+                    loading: _submitting || _controller.isSubmitting.value,
+                    onPressed: _canSubmit ? _submit : null,
+                  ),
                 ),
-              ),
-            ],
+              ],
+            ),
           ),
         ),
       ),
