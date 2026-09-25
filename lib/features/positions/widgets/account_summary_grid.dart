@@ -28,13 +28,14 @@ class AccountSummaryGrid extends StatelessWidget {
           Icons.speed_rounded, isPercent: true),
     ];
     return Container(
-      padding: EdgeInsets.all(12.w),
+      padding: EdgeInsets.fromLTRB(12.w, 10.h, 12.w, 10.h),
       decoration: AppTheme.surfaceCard(scheme, radius: 18.r),
       child: GridView.count(
         crossAxisCount: 3,
         shrinkWrap: true,
+        padding: EdgeInsets.zero,
         physics: const NeverScrollableScrollPhysics(),
-        childAspectRatio: 1.55,
+        childAspectRatio: 2.05,
         mainAxisSpacing: 8.h,
         crossAxisSpacing: 8.w,
         children: [for (final c in cells) _MetricCell(metric: c)],

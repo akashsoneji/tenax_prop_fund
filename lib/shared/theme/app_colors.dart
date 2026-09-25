@@ -72,6 +72,19 @@ class AppColors {
   /// Info blue accent (demo badge, informational chips).
   static const info = Color(0xFF2563EB);
 
+  /// Cyan/teal accent pair — used on dark purple hero cards where a cool
+  /// highlight reads better than gold. Bright is the ink/border, deep is the
+  /// gradient end on filled CTAs.
+  static const cyanBright = Color(0xFF22D3EE);
+  static const cyanDeep = Color(0xFF0E9AAE);
+
+  /// Bright pink highlight paired with [brandMagenta] on dark purple heroes.
+  static const pinkBright = Color(0xFFF472B6);
+
+  /// Slightly cooled white — the gradient end of a white CTA so the fill has
+  /// depth instead of reading as flat paper.
+  static const frostWhite = Color(0xFFE6DCEC);
+
   // ---------------------------------------------------------------------------
   // Surfaces & ink — DARK
   // ---------------------------------------------------------------------------
