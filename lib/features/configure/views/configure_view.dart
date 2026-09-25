@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -12,6 +13,8 @@ import '../../../shared/widgets/section_header.dart';
 import '../../challenge/widgets/challenge_bottom_bar.dart';
 import '../controllers/configure_controller.dart';
 import '../widgets/addon_tile.dart';
+import '../widgets/order_summary_card.dart';
+import '../widgets/payment_method_tile.dart';
 
 /// Configure — platform + swap selection, add-ons, quantity stepper, the
 /// create-account form and a live Summary. Every input flows through
@@ -38,7 +41,7 @@ class ConfigureView extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
                   _SelectedPlanHeader(c: c),
-                  SizedBox(height: 22.h),
+                  SizedBox(height: 14.h),
                   if (c.availablePlatforms.isNotEmpty) ...[
                     SectionHeader('configure.platform'.tr),
                     Obx(() => AppSegmentedControl(
@@ -47,7 +50,7 @@ class ConfigureView extends StatelessWidget {
                               0, c.availablePlatforms.length - 1),
                           onChanged: c.setPlatform,
                         )),
-                    SizedBox(height: 20.h),
+                    SizedBox(height: 14.h),
                   ],
                   SectionHeader('configure.swap'.tr),
                   Obx(() => AppSegmentedControl(
@@ -58,60 +61,41 @@ class ConfigureView extends StatelessWidget {
                         selected: c.swap.value,
                         onChanged: c.setSwap,
                       )),
-                  SizedBox(height: 22.h),
-                  SectionHeader('configure.addons'.tr),
-                  Obx(() {
-                    // Touch the RxSet unconditionally so Obx subscribes even
-                    // when there are no add-ons to iterate over.
-                    c.selectedAddons.length;
-                    return RulesCard(
-                      children: [
-                        for (var i = 0; i < c.availableAddons.length; i++)
-                          AddonTile(
-                            addon: c.availableAddons[i],
-                            selected:
-                                c.isAddonSelected(c.availableAddons[i].id),
-                            onTap: () =>
-                                c.toggleAddon(c.availableAddons[i].id),
-                            showDivider: i != c.availableAddons.length - 1,
-                          ),
-                      ],
-                    );
-                  }),
-                  if (c.availablePaymentMethods.isNotEmpty) ...[
-                    SizedBox(height: 22.h),
-                    SectionHeader('Payment method'),
-                    Obx(() => AppSegmentedControl(
-                          labels: c.paymentMethodLabels,
-                          selected: c.paymentMethod.value.clamp(
-                              0, c.availablePaymentMethods.length - 1),
-                          onChanged: c.setPaymentMethod,
-                        )),
+                  if (c.availableAddons.isNotEmpty) ...[
+                    SizedBox(height: 14.h),
+                    SectionHeader('configure.addons'.tr),
+                    Obx(() {
+                      // Touch the RxSet so Obx rebuilds on toggle.
+                      c.selectedAddons.length;
+                      return RulesCard(
+                        children: [
+                          for (var i = 0; i < c.availableAddons.length; i++)
+                            AddonTile(
+                              addon: c.availableAddons[i],
+                              selected:
+                                  c.isAddonSelected(c.availableAddons[i].id),
+                              onTap: () =>
+                                  c.toggleAddon(c.availableAddons[i].id),
+                              showDivider: i != c.availableAddons.length - 1,
+                            ),
+                        ],
+                      );
+                    }),
                   ],
-                  SizedBox(height: 22.h),
+                  if (c.availablePaymentMethods.isNotEmpty) ...[
+                    SizedBox(height: 14.h),
+                    SectionHeader('configure.payment_method'.tr),
+                    PaymentMethodTile(c: c),
+                  ],
+                  SizedBox(height: 14.h),
                   SectionHeader('configure.quantity'.tr),
                   _QuantityRow(c: c),
-                  SizedBox(height: 22.h),
-                  SectionHeader('Coupon code'),
+                  SizedBox(height: 14.h),
+                  SectionHeader('configure.coupon_code'.tr),
                   _CouponField(c: c),
-                  SizedBox(height: 22.h),
+                  SizedBox(height: 14.h),
                   SectionHeader('configure.summary'.tr),
-                  Obx(() {
-                    final rows = c.summaryRows;
-                    return RulesCard(
-                      children: [
-                        for (final r in rows)
-                          KeyValueRow(label: r.label, value: r.value),
-                        KeyValueRow(
-                          label: 'configure.total'.tr,
-                          value: '\$${c.total}',
-                          emphasize: true,
-                          valueColor: scheme.primary,
-                          showDivider: false,
-                        ),
-                      ],
-                    );
-                  }),
+                  OrderSummaryCard(c: c),
                 ],
               ),
             ),
@@ -146,7 +130,7 @@ class _SelectedPlanHeader extends StatelessWidget {
     return Container(
       padding: EdgeInsets.all(18.w),
       decoration: BoxDecoration(
-        gradient: AppTheme.brandGradient(scheme),
+        gradient: AppTheme.heroGradient(scheme),
         borderRadius: BorderRadius.circular(20.r),
         boxShadow: [
           BoxShadow(
@@ -288,46 +272,38 @@ class _CouponField extends StatelessWidget {
       return Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Container(
-            padding: EdgeInsets.symmetric(horizontal: 14.w, vertical: 4.h),
-            decoration: BoxDecoration(
-              color: scheme.surface,
-              borderRadius: BorderRadius.circular(14.r),
-              border: Border.all(color: borderColor, width: 1.4.w),
+          TextField(
+            controller: c.couponCode,
+            enabled: !applied,
+            // Keyboard stays in normal mode; the formatter uppercases what is
+            // typed so codes still match the server's uppercase format.
+            textCapitalization: TextCapitalization.none,
+            autocorrect: false,
+            enableSuggestions: false,
+            textInputAction: TextInputAction.done,
+            onSubmitted: (_) => c.applyCoupon(),
+            style: GoogleFonts.beVietnamPro(
+              fontSize: 14.sp,
+              fontWeight: FontWeight.w600,
+              color: scheme.onSurface,
             ),
-            child: Row(
-              children: [
-                Expanded(
-                  child: TextField(
-                    controller: c.couponCode,
-                    enabled: !applied,
-                    textCapitalization: TextCapitalization.characters,
-                    textInputAction: TextInputAction.done,
-                    onSubmitted: (_) => c.applyCoupon(),
-                    style: GoogleFonts.beVietnamPro(
-                      fontSize: 14.sp,
-                      fontWeight: FontWeight.w600,
-                      color: scheme.onSurface,
-                    ),
-                    decoration: InputDecoration(
-                      isCollapsed: true,
-                      border: InputBorder.none,
-                      hintText: 'configure.enter_coupon_code'.tr,
-                      hintStyle: GoogleFonts.beVietnamPro(
-                        fontSize: 14.sp,
-                        color: scheme.onSurface.withValues(alpha: 0.5),
-                      ),
-                    ),
-                  ),
-                ),
-                SizedBox(width: 8.w),
-                _CouponAction(
-                  applied: applied,
-                  loading: loading,
-                  onApply: c.applyCoupon,
-                  onRemove: c.removeCoupon,
-                ),
-              ],
+            decoration: InputDecoration(
+              isCollapsed: true,
+              border: InputBorder.none,
+              hintText: 'configure.enter_coupon_code'.tr,
+              hintStyle: GoogleFonts.beVietnamPro(
+                fontSize: 14.sp,
+                color: scheme.onSurface.withValues(alpha: 0.5),
+              ),
+              suffix:  SizedBox(
+                height: 20.h,
+                child: _CouponAction(
+                                  applied: applied,
+                                  loading: loading,
+                                  onApply: c.applyCoupon,
+                                  onRemove: c.removeCoupon,
+                                ),
+              ),
             ),
           ),
           if (applied) ...[
@@ -407,7 +383,16 @@ class _CouponAction extends StatelessWidget {
   }
 }
 
-// ---------------------------------------------------------------------------
-// Create account form
-// ---------------------------------------------------------------------------
+/// Uppercases typed text while keeping the cursor/selection where it was, so
+/// the keyboard itself doesn't need caps-lock.
+class _UpperCaseFormatter extends TextInputFormatter {
+  const _UpperCaseFormatter();
 
+  @override
+  TextEditingValue formatEditUpdate(
+    TextEditingValue oldValue,
+    TextEditingValue newValue,
+  ) {
+    return newValue.copyWith(text: newValue.text.toUpperCase());
+  }
+}
