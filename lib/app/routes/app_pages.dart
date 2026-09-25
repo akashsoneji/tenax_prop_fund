@@ -11,6 +11,8 @@ import '../../features/offers/views/offers_view.dart';
 import '../../features/payout_methods/bindings/payout_methods_binding.dart';
 import '../../features/payout_methods/views/payout_methods_view.dart';
 import '../../features/referral/bindings/referral_binding.dart';
+import '../../features/referral/bindings/referral_history_binding.dart';
+import '../../features/referral/views/referral_history_view.dart';
 import '../../features/referral/views/referral_view.dart';
 import '../../features/support/bindings/support_binding.dart';
 import '../../features/support/views/support_view.dart';
@@ -18,7 +20,9 @@ import '../../features/chart/views/chart_view.dart';
 import '../../features/symbols/bindings/symbols_binding.dart';
 import '../../features/symbols/views/symbols_view.dart';
 import '../../features/billing/bindings/billing_binding.dart';
+import '../../features/billing/bindings/invoice_viewer_binding.dart';
 import '../../features/billing/views/billing_view.dart';
+import '../../features/billing/views/invoice_viewer_view.dart';
 import '../../features/calculators/bindings/calculators_binding.dart';
 import '../../features/calculators/views/calculators_view.dart';
 import '../../features/certificates/bindings/certificate_viewer_binding.dart';
@@ -166,6 +170,11 @@ class AppPages {
       binding: CertificateViewerBinding(),
     ),
     GetPage(
+      name: AppRoutes.invoiceViewer,
+      page: () => const InvoiceViewerView(),
+      binding: InvoiceViewerBinding(),
+    ),
+    GetPage(
       name: AppRoutes.calculators,
       page: () => const CalculatorsView(),
       binding: CalculatorsBinding(),
@@ -263,6 +272,11 @@ class AppPages {
       name: AppRoutes.referral,
       page: () => const ReferralView(),
       binding: ReferralBinding(),
+    ),
+    GetPage(
+      name: AppRoutes.referralHistory,
+      page: () => const ReferralHistoryView(),
+      binding: ReferralHistoryBinding(),
     ),
     GetPage(
       name: AppRoutes.support,

@@ -85,22 +85,26 @@ class _AppGradientButtonState extends State<AppGradientButton>
     final fgColor = blocked
         ? scheme.onSurface.withValues(alpha: 0.45)
         : Colors.white;
+    // Compact (44–48) vs full-size (52–54, default 54). Callers pass mostly
+    // `.h`-scaled heights; 50.h sits between both groups on any screen.
+    final compact = widget.height < 50.h;
+    final radius = BorderRadius.circular(compact ? 12.r : 14.r);
 
     final btn = Opacity(
       opacity: disabled && !blocked ? 0.85 : 1,
       child: Material(
       color: AppColors.transparent,
-        borderRadius: BorderRadius.circular(14.r),
+        borderRadius: radius,
         child: InkWell(
           onTap: disabled ? null : widget.onPressed,
-          borderRadius: BorderRadius.circular(14.r),
+          borderRadius: radius,
           child: Ink(
             decoration: BoxDecoration(
               gradient: blocked ? null : AppTheme.heroGradient(scheme),
               color: blocked
                   ? scheme.onSurface.withValues(alpha: 0.12)
                   : null,
-              borderRadius: BorderRadius.circular(14.r),
+              borderRadius: radius,
             ),
             child: SizedBox(
               height: widget.height,
@@ -113,7 +117,7 @@ class _AppGradientButtonState extends State<AppGradientButton>
                         final v = _sweep?.value ?? 0.0;
                         return Positioned.fill(
                           child: ClipRRect(
-                            borderRadius: BorderRadius.circular(14.r),
+                            borderRadius: radius,
                             child: DecoratedBox(
                               decoration: BoxDecoration(
                                 gradient: LinearGradient(
@@ -153,9 +157,11 @@ class _AppGradientButtonState extends State<AppGradientButton>
                                 widget.label,
                                 style: GoogleFonts.beVietnamPro(
                                   color: fgColor,
-                                  fontSize: 16.sp,
+                                  // Compact buttons get a proportionate label;
+                                  // default 54-tall CTAs keep 16sp.
+                                  fontSize: compact ? 14.sp : 16.sp,
                                   fontWeight: FontWeight.w700,
-                                  letterSpacing: 0.3,
+                                  letterSpacing: 0.2,
                                 ),
                               ),
                             ],

@@ -103,11 +103,12 @@ class _ErrorState extends StatelessWidget {
               ),
             ),
             if (onRetry != null) ...[
-              SizedBox(height: 20.h),
+              SizedBox(height: 16.h),
               SizedBox(
                 width: 160.w,
                 child: AppGradientButton(
                   label: 'state.retry'.tr,
+                  height: 44.h,
                   onPressed: onRetry!,
                 ),
               ),
@@ -160,11 +161,12 @@ class _EmptyState extends StatelessWidget {
               ),
             ),
             if (actionLabel != null && onAction != null) ...[
-              SizedBox(height: 22.h),
+              SizedBox(height: 16.h),
               SizedBox(
-                width: 200.w,
+                width: 180.w,
                 child: AppGradientButton(
                   label: actionLabel!,
+                  height: 44.h,
                   onPressed: () async => onAction!(),
                 ),
               ),

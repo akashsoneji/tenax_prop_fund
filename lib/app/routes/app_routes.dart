@@ -15,6 +15,7 @@ abstract class AppRoutes {
   static const tradingRules = '/trading-rules';
   static const account = '/account';
   static const billing = '/billing';
+  static const invoiceViewer = '/billing/invoice';
   static const certificates = '/certificates';
   static const certificateViewer = '/certificates/viewer';
   static const calculators = '/calculators';
@@ -37,6 +38,7 @@ abstract class AppRoutes {
   static const notifications = '/notifications';
   static const payoutMethods = '/payout-methods';
   static const referral = '/referral';
+  static const referralHistory = '/referral/history';
   static const support = '/support';
   static const symbols = '/symbols';
   static const chart = '/chart';

@@ -52,8 +52,8 @@ class ReferralData {
     final rows = commissionsRaw is List
         ? commissionsRaw
         : (commissionsRaw is Map
-            ? (commissionsRaw['data'] as List<dynamic>? ?? const [])
-            : const []);
+              ? (commissionsRaw['data'] as List<dynamic>? ?? const [])
+              : const []);
     return ReferralData(
       referralCode: referral['code'] as String? ?? '',
       shareUrl: referral['share_url'] as String? ?? '',
@@ -95,15 +95,16 @@ class Referral {
   final DateTime? createdAt;
 
   factory Referral.fromJson(Map<String, dynamic> json) => Referral(
-        name: json['referred'] as String? ??
-            json['name'] as String? ??
-            json['email'] as String? ??
-            '',
-        plan: json['plan'] as String? ?? '',
-        price: json['price'] as String? ?? '',
-        rate: json['rate'] as String? ?? '',
-        status: json['status'] as String? ?? '',
-        earned: json['amount'] as String? ?? json['earned'] as String? ?? '',
-        createdAt: DateTime.tryParse(json['created_at'] as String? ?? ''),
-      );
+    name:
+        json['referred'] as String? ??
+        json['name'] as String? ??
+        json['email'] as String? ??
+        '',
+    plan: json['plan'] as String? ?? '',
+    price: json['price'] as String? ?? '',
+    rate: json['rate'] as String? ?? '',
+    status: json['status'] as String? ?? '',
+    earned: json['amount'] as String? ?? json['earned'] as String? ?? '',
+    createdAt: DateTime.tryParse(json['created_at'] as String? ?? ''),
+  );
 }

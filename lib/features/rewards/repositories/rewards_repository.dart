@@ -1,10 +1,19 @@
 import '../../../core/network/api_client.dart';
 import '../../../core/network/api_endpoints.dart';
+import '../../../core/network/api_envelope.dart';
 import '../../../core/network/api_response.dart';
 import '../models/reward_models.dart';
 
 /// Loads reward balances, eligibility, accounts, payout history, and method
 /// types from the live finance API.
+/// One page of payout history plus its pagination meta.
+class PayoutHistoryPage {
+  const PayoutHistoryPage({required this.items, required this.meta});
+
+  final List<PayoutHistoryItem> items;
+  final PageMeta meta;
+}
+
 class RewardsRepository {
   RewardsRepository(this._api);
 
@@ -142,7 +151,7 @@ class RewardsRepository {
     required double amount,
     required String currency,
     required String payoutMethodId,
-    required String tradingAccountId,
+    String? tradingAccountId,
     String? notes,
     String? currentPassword,
   }) async {
@@ -151,24 +160,46 @@ class RewardsRepository {
       'currency': currency,
       'payout_method_id':
           int.tryParse(payoutMethodId) ?? payoutMethodId,
-      'trading_account_id':
-          int.tryParse(tradingAccountId) ?? tradingAccountId,
+      if (tradingAccountId != null)
+        'trading_account_id':
+            int.tryParse(tradingAccountId) ?? tradingAccountId,
       if (notes != null && notes.isNotEmpty) 'notes': notes,
       if (currentPassword != null && currentPassword.isNotEmpty)
         'current_password': currentPassword,
     };
-    final response = await _api.post<dynamic>(
-      ApiEndpoints.financePayouts,
-      data: payload,
+    // guard() catches the DioException a 422 throws (e.g. "No open payout
+    // cycle is available right now.") and shows the server message as a toast.
+    return ApiEnvelope.guard<void>(
+      () => _api.post<dynamic>(ApiEndpoints.financePayouts, data: payload),
+      (_) {},
     );
-    final body = response.data;
-    if (body is Map<String, dynamic> && body['success'] == true) {
-      return ApiResponse.success(null);
-    }
-    final message = body is Map<String, dynamic>
-        ? body['message']?.toString()
-        : null;
-    return ApiResponse.failure(message ?? 'Unable to request payout');
+  }
+
+  /// Paged payout requests (`GET /finance/payouts?status=&page=`). `data` is a
+  /// flat list; `meta` carries `current_page` / `has_next` / `total`.
+  Future<ApiResponse<PayoutHistoryPage>> getPayouts({
+    String status = 'all',
+    int page = 1,
+  }) {
+    return ApiEnvelope.guardBody<PayoutHistoryPage>(
+      () => _api.get<Map<String, dynamic>>(
+        ApiEndpoints.financePayouts,
+        query: {'status': status, 'page': page},
+      ),
+      (body) {
+        final list = (body['data'] as List?) ?? const [];
+        final meta = body['meta'] is Map<String, dynamic>
+            ? PageMeta.fromJson(body['meta'] as Map<String, dynamic>)
+            : PageMeta.empty;
+        return PayoutHistoryPage(
+          items: list
+              .whereType<Map<String, dynamic>>()
+              .map(PayoutHistoryItem.fromJson)
+              .toList(),
+          meta: meta,
+        );
+      },
+    );
   }
 
   /// STEP 8 — Cancel a pending payout request.

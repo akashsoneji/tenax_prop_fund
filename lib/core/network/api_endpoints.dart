@@ -72,6 +72,13 @@ abstract class ApiEndpoints {
   /// (code/share_url) and `stats` (referrals count, to_be_paid).
   static const referrals = '/growth/referrals';
 
+  /// Referral earnings withdrawal (`POST`). Body: `amount`, `payout_method_id`.
+  static const referralWithdraw = '/growth/referrals/withdraw';
+
+  /// Paged referral commission history (`GET ?page=`). `data` is a flat list,
+  /// `meta` carries `current_page` / `has_next`.
+  static const referralCommissions = '/growth/referrals/commissions';
+
   /// Promo vouchers for the "My offers" screen. Standard
   /// `{success, message, data}` envelope where `data` nests `offers[]` and
   /// `available_count`.
@@ -250,6 +257,16 @@ abstract class ApiEndpoints {
 
   /// Cancel a pending payout request.
   static String financePayoutCancel(Object id) => '/finance/payouts/$id/cancel';
+
+  /// Billing history. Query: `type`, `status`.
+  static const financeTransactions = '/finance/transactions';
+
+  /// Billing history as CSV.
+  static const financeTransactionsExport = '/finance/transactions/export';
+
+  /// Rendered invoice (`GET`). `data` = `{ invoice_number, format, html }`.
+  static String financeTransactionInvoice(Object id) =>
+      '/finance/transactions/$id/invoice';
 
   static const settingsBeneficiary = '/settings/beneficiary';
 

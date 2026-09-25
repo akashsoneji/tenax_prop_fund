@@ -1,16 +1,16 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
-import 'package:google_fonts/google_fonts.dart';
 
-import '../../../shared/theme/app_colors.dart';
-import '../../../../shared/widgets/app_gradient_button.dart';
+import '../../../shared/widgets/app_gradient_button.dart';
+import '../../../shared/widgets/app_toast.dart';
 import '../controllers/rewards_controller.dart';
 import '../models/reward_models.dart';
 
-/// Modal sheet shown when the user taps "Request a payout" on the Rewards
-/// screen. Renders the KYC-name banner, account / amount / method fields
-/// and a gradient CTA. Submit logic lives in [RewardsController.submitRequest].
+/// "Request a payout" sheet — mirrors the web form: withdrawable strip,
+/// Amount*, Payout method*, Trading account (optional), Notes (optional) and
+/// password confirmation, with Cancel / Submit. Submit logic lives in
+/// [RewardsController.submitRequest].
 class RequestPayoutSheet extends StatefulWidget {
   const RequestPayoutSheet({super.key});
 
@@ -19,19 +19,16 @@ class RequestPayoutSheet extends StatefulWidget {
 }
 
 class _RequestPayoutSheetState extends State<RequestPayoutSheet> {
-  final _amountFocus = FocusNode();
-  late final TextEditingController _amountText;
-
-  @override
-  void initState() {
-    super.initState();
-    _amountText = TextEditingController();
-  }
+  final _amount = TextEditingController();
+  final _notes = TextEditingController();
+  final _password = TextEditingController();
+  final _obscure = true.obs;
 
   @override
   void dispose() {
-    _amountFocus.dispose();
-    _amountText.dispose();
+    _amount.dispose();
+    _notes.dispose();
+    _password.dispose();
     super.dispose();
   }
 
@@ -39,154 +36,179 @@ class _RequestPayoutSheetState extends State<RequestPayoutSheet> {
   Widget build(BuildContext context) {
     final c = Get.find<RewardsController>();
     final scheme = Theme.of(context).colorScheme;
-    final viewInsets = MediaQuery.viewInsetsOf(context);
     final data = c.state.valueOrNull;
     if (data == null) return const SizedBox.shrink();
 
     return Padding(
-      padding: EdgeInsets.only(bottom: viewInsets.bottom),
+      padding: EdgeInsets.only(bottom: MediaQuery.viewInsetsOf(context).bottom),
       child: Container(
         decoration: BoxDecoration(
-          color: scheme.brightness == Brightness.dark
-              ? AppColors.sheetDark
-              : Colors.white,
-          borderRadius: BorderRadius.vertical(top: Radius.circular(24.r)),
+          color: scheme.surface,
+          borderRadius: BorderRadius.vertical(top: Radius.circular(20.r)),
         ),
-        padding: EdgeInsets.fromLTRB(20.w, 14.h, 20.w, 22.h),
-        child: SingleChildScrollView(
+        child: SafeArea(
+          top: false,
           child: Column(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
             mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              // Drag handle.
-              Center(
-                child: Container(
-                  width: 38.w,
-                  height: 4.h,
-                  margin: EdgeInsets.only(bottom: 14.h),
-                  decoration: BoxDecoration(
-                    color: scheme.onSurface.withValues(alpha: 0.15),
-                    borderRadius: BorderRadius.circular(2.r),
+              _Header(onClose: () => _close(c)),
+              Divider(height: 1.h, color: scheme.outlineVariant),
+              Flexible(
+                child: SingleChildScrollView(
+                  physics: const BouncingScrollPhysics(),
+                  padding: EdgeInsets.fromLTRB(16.w, 12.h, 16.w, 12.h),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                    children: [
+                      _BalanceStrip(data: data),
+                      SizedBox(height: 12.h),
+                      _Field(
+                        label: 'rewards.amount_usd'.tr,
+                        required: true,
+                        child: _Input(
+                          controller: _amount,
+                          hint: '0.00',
+                          keyboardType: const TextInputType.numberWithOptions(
+                              decimal: true),
+                          onChanged: c.setAmount,
+                        ),
+                      ),
+                      SizedBox(height: 10.h),
+                      _Field(
+                        label: 'rewards.payout_method'.tr,
+                        required: true,
+                        child: Obx(() => _Dropdown<String?>(
+                              value: c.selectedMethod.value,
+                              items: <String?, String>{
+                                for (final m in data.payoutMethods) m.id: m.label,
+                              },
+                              onChanged: (v) {
+                                if (v != null) c.selectMethod(v);
+                              },
+                            )),
+                      ),
+                      SizedBox(height: 10.h),
+                      _Field(
+                        label: 'rewards.trading_account_optional'.tr,
+                        child: Obx(() => _Dropdown<String?>(
+                              value: c.selectedAccountId.value,
+                              items: {
+                                null: 'rewards.none'.tr,
+                                for (final a in data.accounts) a.id: a.label,
+                              },
+                              onChanged: c.selectAccount,
+                            )),
+                      ),
+                      SizedBox(height: 10.h),
+                      _Field(
+                        label: 'rewards.notes_optional'.tr,
+                        child: _Input(controller: _notes, maxLines: 2),
+                      ),
+                      SizedBox(height: 10.h),
+                      _Field(
+                        label: 'rewards.password_confirm'.tr,
+                        helper: 'rewards.password_helper'.tr,
+                        child: Obx(() => _Input(
+                              controller: _password,
+                              obscure: _obscure.value,
+                              suffix: IconButton(
+                                visualDensity: VisualDensity.compact,
+                                onPressed: () => _obscure.toggle(),
+                                icon: Icon(
+                                  _obscure.value
+                                      ? Icons.visibility_outlined
+                                      : Icons.visibility_off_outlined,
+                                  size: 18.w,
+                                  color: scheme.onSurfaceVariant,
+                                ),
+                              ),
+                            )),
+                      ),
+                    ],
                   ),
                 ),
               ),
-              _SheetHeader(onClose: c.closePayoutSheet),
-              SizedBox(height: 18.h),
-              _NameMatchBanner(scheme: scheme),
-              SizedBox(height: 18.h),
-              _AccountPicker(controller: c, data: data),
-              SizedBox(height: 14.h),
-              _AmountField(
-                controller: c,
-                textController: _amountText,
-                focusNode: _amountFocus,
-                scheme: scheme,
+              Divider(height: 1.h, color: scheme.outlineVariant),
+              _Actions(
+                submitting: c.isSubmitting,
+                onCancel: () => _close(c),
+                onSubmit: () => _submit(c, data),
               ),
-              SizedBox(height: 14.h),
-              _MethodPicker(controller: c, data: data),
-              SizedBox(height: 22.h),
-              _SubmitButton(controller: c, data: data, onSubmitted: () {
-                _amountText.clear();
-                c.setAmount('');
-              }),
             ],
           ),
         ),
       ),
     );
   }
+
+  /// ✕ / Cancel: discard everything so the next open starts blank.
+  void _close(RewardsController c) {
+    _resetForm(c);
+    Navigator.of(context).pop();
+  }
+
+  Future<void> _submit(RewardsController c, RewardsData data) async {
+    final result = await c.submitRequest(
+      data,
+      notes: _notes.text,
+      password: _password.text,
+    );
+    if (!mounted) return;
+
+    // Local validation (bad amount / no method) → keep the sheet open so the
+    // user can fix it; show the reason in the top toast.
+    if (result.isLocalValidation) {
+      if (result.message != null) AppToast.error(result.message!);
+      return;
+    }
+
+    // Server answered (success or e.g. 422 "No open payout cycle…"): close and
+    // reset. On failure ApiEnvelope.guard has already shown the server message
+    // as a top toast, so we don't show it twice.
+    _resetForm(c);
+    Navigator.of(context).pop();
+    if (result.isSuccess) {
+      AppToast.success(
+        'rewards.payout_requested_body'.tr,
+        title: 'rewards.payout_requested'.tr,
+      );
+    }
+  }
+
+  void _resetForm(RewardsController c) {
+    _amount.clear();
+    _notes.clear();
+    _password.clear();
+    _obscure.value = true;
+    c.setAmount('');
+    c.selectAccount(null);
+  }
 }
 
-// ---------------------------------------------------------------------------
-// Pieces
-// ---------------------------------------------------------------------------
-
-class _SheetHeader extends StatelessWidget {
-  const _SheetHeader({required this.onClose});
+class _Header extends StatelessWidget {
+  const _Header({required this.onClose});
   final VoidCallback onClose;
 
   @override
   Widget build(BuildContext context) {
-    return Row(
-      children: [
-        Expanded(
-          child: Text(
-            'rewards.request_payout'.tr,
-            style: GoogleFonts.beVietnamPro(
-              fontSize: 18.sp,
-              fontWeight: FontWeight.w800,
-            ),
-          ),
-        ),
-        _CloseButton(onTap: onClose),
-      ],
-    );
-  }
-}
-
-class _CloseButton extends StatelessWidget {
-  const _CloseButton({required this.onTap});
-  final VoidCallback onTap;
-
-  @override
-  Widget build(BuildContext context) {
-    return InkWell(
-      onTap: onTap,
-      customBorder: const CircleBorder(),
-      child: Container(
-        width: 32.w,
-        height: 32.w,
-        decoration: BoxDecoration(
-          shape: BoxShape.circle,
-          border: Border.all(color: AppColors.danger, width: 1.4),
-        ),
-        alignment: Alignment.center,
-        child: Icon(Icons.close_rounded,
-            size: 16.w, color: AppColors.danger),
-      ),
-    );
-  }
-}
-
-class _NameMatchBanner extends StatelessWidget {
-  const _NameMatchBanner({required this.scheme});
-  final ColorScheme scheme;
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      padding: EdgeInsets.fromLTRB(14.w, 12.h, 14.w, 14.h),
-      decoration: BoxDecoration(
-        color: AppColors.warningInk.withValues(
-            alpha: scheme.brightness == Brightness.dark ? 0.16 : 0.12),
-        borderRadius: BorderRadius.circular(12.r),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
+    final text = Theme.of(context).textTheme;
+    return Padding(
+      padding: EdgeInsets.fromLTRB(16.w, 8.h, 6.w, 8.h),
+      child: Row(
         children: [
-          Row(
-            children: [
-              Icon(Icons.info_outline_rounded,
-                  size: 18.w, color: const Color(0xFFA36A00)),
-              SizedBox(width: 8.w),
-              Text(
-                'rewards.name_match_id_short'.tr,
-                style: GoogleFonts.beVietnamPro(
-                  fontSize: 13.5.sp,
-                  fontWeight: FontWeight.w700,
-                  color: const Color(0xFFA36A00),
-                ),
+          Expanded(
+            child: Text(
+              'rewards.request_payout'.tr,
+              style: text.titleMedium?.copyWith(
+                fontSize: 16.sp,
+                fontWeight: FontWeight.w700,
               ),
-            ],
-          ),
-          SizedBox(height: 6.h),
-          Text(
-            'rewards.name_match_id_short_body'.tr,
-            style: GoogleFonts.beVietnamPro(
-              fontSize: 12.5.sp,
-              color: scheme.onSurface.withValues(alpha: 0.7),
-              height: 1.4,
             ),
+          ),
+          IconButton(
+            onPressed: onClose,
+            icon: Icon(Icons.close_rounded, size: 20.w),
           ),
         ],
       ),
@@ -194,194 +216,220 @@ class _NameMatchBanner extends StatelessWidget {
   }
 }
 
-class _AccountPicker extends StatelessWidget {
-  const _AccountPicker({required this.controller, required this.data});
-  final RewardsController controller;
+/// "Withdrawable: $2.50 · Minimum $1" — straight from the rewards API.
+class _BalanceStrip extends StatelessWidget {
+  const _BalanceStrip({required this.data});
   final RewardsData data;
 
   @override
   Widget build(BuildContext context) {
-    return Obx(() {
-      final selected = controller.selectedAccount(data);
-      return _SheetField(
-        label: 'rewards.account'.tr,
-        child: DropdownButtonHideUnderline(
-          child: DropdownButton<String>(
-            value: selected?.id,
-            isExpanded: true,
-            icon: const Icon(Icons.expand_more_rounded),
-            items: [
-              for (final a in data.accounts)
-                DropdownMenuItem(
-                  value: a.id,
-                  child: Text(a.label,
-                      style: GoogleFonts.beVietnamPro(
-                          fontSize: 14.sp, fontWeight: FontWeight.w600)),
-                ),
-            ],
-            onChanged: (v) {
-              if (v != null) controller.selectAccount(v);
-            },
-          ),
-        ),
-      );
-    });
-  }
-}
-
-class _AmountField extends StatelessWidget {
-  const _AmountField({
-    required this.controller,
-    required this.textController,
-    required this.focusNode,
-    required this.scheme,
-  });
-
-  final RewardsController controller;
-  final TextEditingController textController;
-  final FocusNode focusNode;
-  final ColorScheme scheme;
-
-  @override
-  Widget build(BuildContext context) {
-    return _SheetField(
-      label: 'rewards.amount'.tr,
-      child: TextField(
-        controller: textController,
-        focusNode: focusNode,
-        keyboardType: const TextInputType.numberWithOptions(decimal: true),
-        onChanged: controller.setAmount,
-        style: GoogleFonts.beVietnamPro(
-          fontSize: 16.sp,
-          fontWeight: FontWeight.w700,
-          color: scheme.onSurface,
-        ),
-        decoration: const InputDecoration(
-          hintText: '\$0.00',
-          border: InputBorder.none,
-          enabledBorder: InputBorder.none,
-          focusedBorder: InputBorder.none,
-          filled: false,
-          contentPadding: EdgeInsets.zero,
+    final scheme = Theme.of(context).colorScheme;
+    final base = Theme.of(context).textTheme.bodySmall?.copyWith(
+          fontSize: 12.5.sp,
+          color: scheme.onSurfaceVariant,
+        );
+    return Container(
+      padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 10.h),
+      decoration: BoxDecoration(
+        color: scheme.primary.withValues(alpha: 0.06),
+        borderRadius: BorderRadius.circular(10.r),
+      ),
+      child: Text.rich(
+        TextSpan(
+          style: base,
+          children: [
+            TextSpan(text: '${'rewards.withdrawable'.tr}: '),
+            TextSpan(
+              text: data.withdrawable.amountUsd,
+              style: base?.copyWith(
+                fontWeight: FontWeight.w700,
+                color: scheme.onSurface,
+              ),
+            ),
+            TextSpan(text: ' · ${'rewards.minimum'.tr} ${data.minPayout}'),
+          ],
         ),
       ),
     );
   }
 }
 
-class _MethodPicker extends StatelessWidget {
-  const _MethodPicker({required this.controller, required this.data});
-  final RewardsController controller;
-  final RewardsData data;
-
-  @override
-  Widget build(BuildContext context) {
-    return Obx(() {
-      return _SheetField(
-        label: 'rewards.method'.tr,
-        child: DropdownButtonHideUnderline(
-          child: DropdownButton<String>(
-            value: controller.selectedMethod.value,
-            isExpanded: true,
-            icon: const Icon(Icons.expand_more_rounded),
-            items: [
-              for (final m in data.payoutMethods)
-                DropdownMenuItem(
-                  value: m.id,
-                  child: Text(m.label,
-                      style: GoogleFonts.beVietnamPro(
-                          fontSize: 14.sp, fontWeight: FontWeight.w600)),
-                ),
-            ],
-            onChanged: (v) {
-              if (v != null) controller.selectMethod(v);
-            },
-          ),
-        ),
-      );
-    });
-  }
-}
-
-class _SubmitButton extends StatelessWidget {
-  const _SubmitButton({
-    required this.controller,
-    required this.data,
-    required this.onSubmitted,
+class _Field extends StatelessWidget {
+  const _Field({
+    required this.label,
+    required this.child,
+    this.required = false,
+    this.helper,
   });
-  final RewardsController controller;
-  final RewardsData data;
-  final VoidCallback onSubmitted;
 
-  @override
-  Widget build(BuildContext context) {
-    return AppGradientButton(
-      label: 'rewards.request_payout_button'.tr,
-      icon: Icons.lock_open_rounded,
-      onPressed: () async {
-        final result = await controller.submitRequest(data);
-        if (result.isSuccess) {
-          Get.back();
-          onSubmitted();
-          Get.snackbar(
-            'rewards.payout_requested'.tr,
-            'rewards.payout_requested_body'.tr,
-            snackPosition: SnackPosition.BOTTOM,
-            margin: EdgeInsets.all(16.w),
-            borderRadius: 14.r,
-          );
-        } else {
-          Get.snackbar(
-            'rewards.cannot_submit'.tr,
-            result.message ?? 'rewards.cannot_submit_body'.tr,
-            snackPosition: SnackPosition.BOTTOM,
-            margin: EdgeInsets.all(16.w),
-            borderRadius: 14.r,
-          );
-        }
-      },
-    );
-  }
-}
-
-class _SheetField extends StatelessWidget {
-  const _SheetField({required this.label, required this.child});
   final String label;
   final Widget child;
+  final bool required;
+  final String? helper;
 
   @override
   Widget build(BuildContext context) {
     final scheme = Theme.of(context).colorScheme;
+    final text = Theme.of(context).textTheme;
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Padding(
-          padding: EdgeInsets.only(left: 4.w, bottom: 6.h),
-          child: Text(
-            label,
-            style: GoogleFonts.beVietnamPro(
-              fontSize: 12.5.sp,
-              fontWeight: FontWeight.w600,
-              color: scheme.onSurface.withValues(alpha: 0.55),
+        Text.rich(
+          TextSpan(
+            text: label,
+            children: [
+              if (required)
+                TextSpan(text: ' *', style: TextStyle(color: scheme.error)),
+            ],
+          ),
+          style: text.labelLarge?.copyWith(
+            fontSize: 12.5.sp,
+            fontWeight: FontWeight.w600,
+            color: scheme.onSurface,
+          ),
+        ),
+        SizedBox(height: 5.h),
+        child,
+        if (helper != null) ...[
+          SizedBox(height: 4.h),
+          Text(
+            helper!,
+            style: text.bodySmall?.copyWith(
+              fontSize: 11.sp,
+              color: scheme.onSurfaceVariant,
             ),
           ),
-        ),
-        Container(
-          padding: EdgeInsets.symmetric(horizontal: 14.w, vertical: 12.h),
-          decoration: BoxDecoration(
-            color: scheme.brightness == Brightness.dark
-                ? Colors.white.withValues(alpha: 0.05)
-                : AppColors.track,
-            borderRadius: BorderRadius.circular(12.r),
-            border: Border.all(
-                color: Theme.of(context)
-                    .colorScheme
-                    .primary
-                    .withValues(alpha: 0.15)),
-          ),
-          child: child,
-        ),
+        ],
       ],
+    );
+  }
+}
+
+InputDecoration _decoration(BuildContext context, {String? hint, Widget? suffix}) {
+  final scheme = Theme.of(context).colorScheme;
+  OutlineInputBorder border(Color color, [double width = 1]) =>
+      OutlineInputBorder(
+        borderRadius: BorderRadius.circular(10.r),
+        borderSide: BorderSide(color: color, width: width),
+      );
+  return InputDecoration(
+    isDense: true,
+    hintText: hint,
+    suffixIcon: suffix,
+    filled: true,
+    fillColor: scheme.surface,
+    contentPadding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 11.h),
+    enabledBorder: border(scheme.outlineVariant),
+    focusedBorder: border(scheme.primary, 1.4),
+  );
+}
+
+class _Input extends StatelessWidget {
+  const _Input({
+    required this.controller,
+    this.hint,
+    this.keyboardType,
+    this.onChanged,
+    this.obscure = false,
+    this.suffix,
+    this.maxLines = 1,
+  });
+
+  final TextEditingController controller;
+  final String? hint;
+  final TextInputType? keyboardType;
+  final ValueChanged<String>? onChanged;
+  final bool obscure;
+  final Widget? suffix;
+  final int maxLines;
+
+  @override
+  Widget build(BuildContext context) {
+    return TextField(
+      controller: controller,
+      keyboardType: keyboardType,
+      onChanged: onChanged,
+      obscureText: obscure,
+      maxLines: obscure ? 1 : maxLines,
+      minLines: 1,
+      style: Theme.of(context).textTheme.bodyMedium?.copyWith(fontSize: 14.sp),
+      decoration: _decoration(context, hint: hint, suffix: suffix),
+    );
+  }
+}
+
+class _Dropdown<T> extends StatelessWidget {
+  const _Dropdown({
+    required this.value,
+    required this.items,
+    required this.onChanged,
+  });
+
+  final T value;
+  final Map<T, String> items;
+  final ValueChanged<T?> onChanged;
+
+  @override
+  Widget build(BuildContext context) {
+    return DropdownButtonFormField<T>(
+      initialValue: items.containsKey(value) ? value : null,
+      isExpanded: true,
+      icon: Icon(Icons.expand_more_rounded, size: 20.w),
+      style: Theme.of(context).textTheme.bodyMedium?.copyWith(fontSize: 14.sp),
+      decoration: _decoration(context),
+      items: [
+        for (final e in items.entries)
+          DropdownMenuItem<T>(
+            value: e.key,
+            child: Text(e.value, maxLines: 1, overflow: TextOverflow.ellipsis),
+          ),
+      ],
+      onChanged: onChanged,
+    );
+  }
+}
+
+class _Actions extends StatelessWidget {
+  const _Actions({
+    required this.submitting,
+    required this.onCancel,
+    required this.onSubmit,
+  });
+
+  final RxBool submitting;
+  final VoidCallback onCancel;
+  final VoidCallback onSubmit;
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: EdgeInsets.fromLTRB(16.w, 10.h, 16.w, 10.h),
+      child: Row(
+        children: [
+          Expanded(
+            child: OutlinedButton(
+              onPressed: onCancel,
+              style: OutlinedButton.styleFrom(
+                minimumSize: Size.fromHeight(44.h),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(12.r),
+                ),
+              ),
+              child: Text('rewards.cancel_no'.tr),
+            ),
+          ),
+          SizedBox(width: 10.w),
+          Expanded(
+            flex: 2,
+            child: Obx(() => AppGradientButton(
+                  label: 'rewards.submit_request'.tr,
+                  height: 44.h,
+                  loading: submitting.value,
+                  onPressed: submitting.value ? null : onSubmit,
+                )),
+          ),
+        ],
+      ),
     );
   }
 }

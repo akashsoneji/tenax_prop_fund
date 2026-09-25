@@ -3,6 +3,7 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
 
+import '../../../app/routes/app_routes.dart';
 import '../../../shared/theme/app_colors.dart';
 import '../../../shared/theme/app_theme.dart';
 import '../../../shared/widgets/data_state_builder.dart';
@@ -10,7 +11,9 @@ import '../../../shared/widgets/pinned_gradient_app_bar.dart';
 import '../../../shared/widgets/skeletons/skeletons.dart';
 import '../controllers/referral_controller.dart';
 import '../models/referral_models.dart';
+import '../widgets/referral_commission_row.dart';
 import '../widgets/referral_warning_banner.dart';
+import '../widgets/referral_withdraw_sheet.dart';
 
 /// Refer & earn screen: referral-code hero, a 2x2 stat grid, a "How you get
 /// paid" explainer, a funded-account warning and the empty referrals state.
@@ -27,7 +30,14 @@ class ReferralView extends StatelessWidget {
       body: CustomScrollView(
         physics: const BouncingScrollPhysics(),
         slivers: [
-          PinnedGradientAppBar(title: 'referral.title'.tr),
+          PinnedGradientAppBar(
+            title: 'referral.title'.tr,
+            actions: [
+              _HistoryAction(
+                onTap: () => Get.toNamed(AppRoutes.referralHistory),
+              ),
+            ],
+          ),
           SliverToBoxAdapter(
             child: Padding(
               padding: EdgeInsets.fromLTRB(16.w, 18.h, 16.w, 32.h),
@@ -169,6 +179,8 @@ class _CodeHeroCard extends StatelessWidget {
             _HeroMetaRow(data: data),
             SizedBox(height: 10.h),
             _ShareLinkButton(onTap: controller.shareLink),
+            SizedBox(height: 10.h),
+            _WithdrawButton(onTap: () => showReferralWithdrawSheet(data)),
           ],
         ),
       ),
@@ -190,8 +202,11 @@ class _HeroHeader extends StatelessWidget {
             borderRadius: BorderRadius.circular(11.r),
           ),
           alignment: Alignment.center,
-          child: Icon(Icons.card_giftcard_rounded,
-              size: 18.w, color: _heroAccent),
+          child: Icon(
+            Icons.card_giftcard_rounded,
+            size: 18.w,
+            color: _heroAccent,
+          ),
         ),
         SizedBox(width: 12.w),
         Expanded(
@@ -285,8 +300,11 @@ class _CodePill extends StatelessWidget {
                 child: Row(
                   mainAxisSize: MainAxisSize.min,
                   children: [
-                    Icon(Icons.copy_rounded,
-                        size: 15.w, color: AppColors.white),
+                    Icon(
+                      Icons.copy_rounded,
+                      size: 15.w,
+                      color: AppColors.white,
+                    ),
                     SizedBox(width: 6.w),
                     Text(
                       'referral.copy_code'.tr,
@@ -319,25 +337,25 @@ class _HeroStatsStrip extends StatelessWidget {
         icon: Icons.person_rounded,
         label: 'referral.signed_up'.tr,
         value: '${data.signedUp}',
-        gold: false
+        gold: false,
       ),
       (
         icon: Icons.shopping_cart_rounded,
         label: 'referral.purchased'.tr,
         value: '${data.purchased}',
-        gold: false
+        gold: false,
       ),
       (
         icon: Icons.paid_rounded,
         label: 'referral.earned'.tr,
         value: data.earnedLabel,
-        gold: true
+        gold: true,
       ),
       (
         icon: Icons.percent_rounded,
         label: 'referral.your_rate'.tr,
         value: data.rateLabel,
-        gold: true
+        gold: true,
       ),
     ];
 
@@ -346,8 +364,7 @@ class _HeroStatsStrip extends StatelessWidget {
       decoration: BoxDecoration(
         color: AppColors.white.withValues(alpha: 0.07),
         borderRadius: BorderRadius.circular(15.r),
-        border:
-            Border.all(color: AppColors.white.withValues(alpha: 0.09)),
+        border: Border.all(color: AppColors.white.withValues(alpha: 0.09)),
       ),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.center,
@@ -511,8 +528,11 @@ class _ShareLinkButton extends StatelessWidget {
           child: Row(
             children: [
               const Spacer(),
-              Icon(Icons.ios_share_rounded,
-                  size: 17.w, color: AppColors.heroInkDeep),
+              Icon(
+                Icons.ios_share_rounded,
+                size: 17.w,
+                color: AppColors.heroInkDeep,
+              ),
               SizedBox(width: 10.w),
               Container(
                 width: 1,
@@ -529,8 +549,11 @@ class _ShareLinkButton extends StatelessWidget {
                 ),
               ),
               const Spacer(),
-              Icon(Icons.arrow_forward_rounded,
-                  size: 17.w, color: AppColors.heroInkDeep),
+              Icon(
+                Icons.arrow_forward_rounded,
+                size: 17.w,
+                color: AppColors.heroInkDeep,
+              ),
               SizedBox(width: 14.w),
             ],
           ),
@@ -540,7 +563,95 @@ class _ShareLinkButton extends StatelessWidget {
   }
 }
 
-// ---------------------------------------------------------------------------
+/// Dark "Withdraw earnings" CTA under the share button; opens the withdraw
+/// sheet (amount + payout method).
+class _WithdrawButton extends StatelessWidget {
+  const _WithdrawButton({required this.onTap});
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    return Material(
+      color: AppColors.transparent,
+      borderRadius: BorderRadius.circular(15.r),
+      child: InkWell(
+        onTap: onTap,
+        borderRadius: BorderRadius.circular(15.r),
+        child: Ink(
+          height: 44.h,
+          decoration: BoxDecoration(
+            color: AppColors.heroInkDeep,
+            borderRadius: BorderRadius.circular(15.r),
+            border: Border.all(color: AppColors.white.withValues(alpha: 0.18)),
+          ),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Icon(
+                Icons.account_balance_wallet_rounded,
+                size: 17.w,
+                color: AppColors.white,
+              ),
+              SizedBox(width: 10.w),
+              Flexible(
+                child: Text(
+                  'referral.withdraw'.tr,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: GoogleFonts.beVietnamPro(
+                    fontSize: 14.5.sp,
+                    fontWeight: FontWeight.w800,
+                    color: AppColors.white,
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+/// App-bar "History" pill that opens the paginated commission history.
+class _HistoryAction extends StatelessWidget {
+  const _HistoryAction({required this.onTap});
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    return Material(
+      color: AppColors.transparent,
+      borderRadius: BorderRadius.circular(20.r),
+      child: InkWell(
+        onTap: onTap,
+        borderRadius: BorderRadius.circular(20.r),
+        child: Ink(
+          padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 7.h),
+          decoration: BoxDecoration(
+            color: AppColors.white.withValues(alpha: 0.16),
+            borderRadius: BorderRadius.circular(20.r),
+          ),
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Icon(Icons.history_rounded, size: 16.w, color: AppColors.white),
+              SizedBox(width: 5.w),
+              Text(
+                'referral.history'.tr,
+                style: GoogleFonts.beVietnamPro(
+                  fontSize: 12.5.sp,
+                  fontWeight: FontWeight.w700,
+                  color: AppColors.white,
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
 
 // ---------------------------------------------------------------------------
 // How you get paid
@@ -676,102 +787,11 @@ class _ReferralsList extends StatelessWidget {
         child: Column(
           children: [
             for (var i = 0; i < referrals.length; i++) ...[
-              _ReferralRow(referral: referrals[i]),
+              ReferralCommissionRow(referral: referrals[i]),
               if (i != referrals.length - 1) Divider(height: 1.h),
             ],
           ],
         ),
-      ),
-    );
-  }
-}
-
-class _ReferralRow extends StatelessWidget {
-  const _ReferralRow({required this.referral});
-  final Referral referral;
-
-  @override
-  Widget build(BuildContext context) {
-    final scheme = Theme.of(context).colorScheme;
-    final isPending = referral.status.toLowerCase() == 'pending';
-    final statusColor = isPending ? AppColors.warningInk : AppColors.success;
-    return Padding(
-      padding: EdgeInsets.symmetric(vertical: 14.h),
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  referral.name,
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                  style: GoogleFonts.beVietnamPro(
-                    fontSize: 14.5.sp,
-                    fontWeight: FontWeight.w700,
-                    color: scheme.onSurface,
-                  ),
-                ),
-                SizedBox(height: 3.h),
-                Text(
-                  referral.plan,
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                  style: GoogleFonts.beVietnamPro(
-                    fontSize: 12.sp,
-                    fontWeight: FontWeight.w500,
-                    color: scheme.onSurfaceVariant,
-                  ),
-                ),
-                SizedBox(height: 6.h),
-                Container(
-                  padding:
-                      EdgeInsets.symmetric(horizontal: 8.w, vertical: 3.h),
-                  decoration: BoxDecoration(
-                    color: statusColor.withValues(alpha: 0.12),
-                    borderRadius: BorderRadius.circular(20.r),
-                  ),
-                  child: Text(
-                    referral.status,
-                    style: GoogleFonts.beVietnamPro(
-                      fontSize: 10.5.sp,
-                      fontWeight: FontWeight.w700,
-                      color: statusColor,
-                    ),
-                  ),
-                ),
-              ],
-            ),
-          ),
-          SizedBox(width: 12.w),
-          Column(
-            crossAxisAlignment: CrossAxisAlignment.end,
-            children: [
-              Text(
-                referral.earned,
-                maxLines: 1,
-                style: GoogleFonts.beVietnamPro(
-                  fontSize: 16.sp,
-                  fontWeight: FontWeight.w800,
-                  height: 1.0,
-                  color: scheme.onSurface,
-                ),
-              ),
-              SizedBox(height: 4.h),
-              Text(
-                '${referral.rate} · ${referral.price}',
-                maxLines: 1,
-                style: GoogleFonts.beVietnamPro(
-                  fontSize: 11.sp,
-                  fontWeight: FontWeight.w500,
-                  color: scheme.onSurfaceVariant,
-                ),
-              ),
-            ],
-          ),
-        ],
       ),
     );
   }
@@ -829,8 +849,11 @@ class _EmptyReferralsCard extends StatelessWidget {
                 color: Colors.white.withValues(alpha: 0.18),
               ),
               alignment: Alignment.center,
-              child: Icon(Icons.groups_rounded,
-                  color: Colors.white, size: 24.w),
+              child: Icon(
+                Icons.groups_rounded,
+                color: Colors.white,
+                size: 24.w,
+              ),
             ),
           ],
         ),
