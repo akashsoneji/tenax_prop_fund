@@ -117,12 +117,20 @@ extension BillingStatusFilterX on BillingStatusFilter {
 /// One row in the billing transaction list.
 class BillingTransaction {
   const BillingTransaction({
+    required this.id,
+    required this.invoiceNumber,
     required this.title,
     required this.reference,
     required this.amount,
     required this.status,
     required this.category,
   });
+
+  /// Transaction id used by `GET /finance/transactions/{id}/invoice`.
+  final String id;
+
+  /// e.g. "INV-4SNZ5BF" — shown as the invoice viewer's title.
+  final String invoiceNumber;
 
   final String title;
 
@@ -139,6 +147,8 @@ class BillingTransaction {
   factory BillingTransaction.fromJson(Map<String, dynamic> json) {
     final status = _statusFrom(json['status'] as String?);
     return BillingTransaction(
+      id: json['id']?.toString() ?? '',
+      invoiceNumber: (json['invoice'] as String?)?.trim() ?? '',
       title: (json['description'] as String?)?.trim().isNotEmpty == true
           ? json['description'] as String
           : (json['number'] as String? ?? '—'),
@@ -193,9 +203,36 @@ class BillingTransaction {
 
   bool get isRefund => status == BillingStatus.refunded;
 
+  /// Rows without a server id can't fetch an invoice.
+  bool get hasInvoice => id.isNotEmpty;
+
   IconData get icon => isRefund
       ? Icons.monetization_on_outlined
       : Icons.credit_card_rounded;
+}
+
+/// Rendered invoice from `GET /finance/transactions/{id}/invoice`:
+/// `{ invoice_number, format: "html", html }`. The viewer loads [html]
+/// straight into a WebView.
+class InvoiceDocument {
+  const InvoiceDocument({
+    required this.invoiceNumber,
+    required this.format,
+    required this.html,
+  });
+
+  final String invoiceNumber;
+  final String format;
+  final String html;
+
+  factory InvoiceDocument.fromJson(dynamic data) {
+    final map = data is Map<String, dynamic> ? data : const <String, dynamic>{};
+    return InvoiceDocument(
+      invoiceNumber: map['invoice_number']?.toString() ?? '',
+      format: map['format']?.toString() ?? 'html',
+      html: map['html']?.toString() ?? '',
+    );
+  }
 }
 
 enum BillingStatus { paid, awaitingPayment, refunded }

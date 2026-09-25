@@ -18,7 +18,9 @@ import '../../features/chart/views/chart_view.dart';
 import '../../features/symbols/bindings/symbols_binding.dart';
 import '../../features/symbols/views/symbols_view.dart';
 import '../../features/billing/bindings/billing_binding.dart';
+import '../../features/billing/bindings/invoice_viewer_binding.dart';
 import '../../features/billing/views/billing_view.dart';
+import '../../features/billing/views/invoice_viewer_view.dart';
 import '../../features/calculators/bindings/calculators_binding.dart';
 import '../../features/calculators/views/calculators_view.dart';
 import '../../features/certificates/bindings/certificate_viewer_binding.dart';
@@ -164,6 +166,11 @@ class AppPages {
       name: AppRoutes.certificateViewer,
       page: () => const CertificateViewerView(),
       binding: CertificateViewerBinding(),
+    ),
+    GetPage(
+      name: AppRoutes.invoiceViewer,
+      page: () => const InvoiceViewerView(),
+      binding: InvoiceViewerBinding(),
     ),
     GetPage(
       name: AppRoutes.calculators,

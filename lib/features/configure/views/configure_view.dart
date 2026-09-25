@@ -280,6 +280,7 @@ class _CouponField extends StatelessWidget {
             textCapitalization: TextCapitalization.none,
             autocorrect: false,
             enableSuggestions: false,
+            inputFormatters: const [_UpperCaseFormatter()],
             textInputAction: TextInputAction.done,
             onSubmitted: (_) => c.applyCoupon(),
             style: GoogleFonts.beVietnamPro(

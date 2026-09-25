@@ -17,7 +17,9 @@ import '../controllers/rewards_controller.dart';
 import '../models/reward_models.dart';
 import '../../../shared/theme/app_colors.dart';
 import '../../../shared/theme/app_theme.dart';
+import '../../../shared/widgets/app_confirm_dialog.dart';
 import '../../../shared/widgets/app_gradient_button.dart';
+import '../../../shared/widgets/app_toast.dart';
 import '../../../shared/widgets/data_state_builder.dart';
 import '../../../shared/widgets/pinned_gradient_app_bar.dart';
 import '../../../shared/widgets/skeletons/skeletons.dart';
@@ -261,6 +263,7 @@ class _PayoutMethodsTabContent extends StatelessWidget {
               AppGradientButton(
                 label: 'rewards.add_method'.tr,
                 icon: Icons.add_rounded,
+                height: 44.h,
                 onPressed: () => _openAddSheet(context),
               ),
               SizedBox(height: 16.h),
@@ -289,9 +292,10 @@ class _MethodManageRow extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final scheme = Theme.of(context).colorScheme;
+    final text = Theme.of(context).textTheme;
     return Container(
       margin: EdgeInsets.only(bottom: 10.h),
-      padding: EdgeInsets.fromLTRB(14.w, 12.h, 10.w, 12.h),
+      padding: EdgeInsets.fromLTRB(12.w, 10.h, 4.w, 10.h),
       decoration: BoxDecoration(
         color: scheme.surface,
         borderRadius: BorderRadius.circular(14.r),
@@ -311,40 +315,28 @@ class _MethodManageRow extends StatelessWidget {
           ),
           SizedBox(width: 12.w),
           Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  method.label,
-                  style: GoogleFonts.beVietnamPro(
-                    fontSize: 14.sp,
-                    fontWeight: FontWeight.w700,
-                    color: scheme.onSurface,
-                  ),
-                ),
-                SizedBox(height: 2.h),
-                Text(
-                  method.id,
-                  style: GoogleFonts.beVietnamPro(
-                    fontSize: 11.sp,
-                    color: scheme.onSurfaceVariant,
-                  ),
-                ),
-              ],
+            child: Text(
+              method.label,
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+              style: text.titleSmall?.copyWith(
+                fontSize: 14.sp,
+                fontWeight: FontWeight.w700,
+                color: scheme.onSurface,
+              ),
             ),
           ),
-          TextButton.icon(
+          IconButton(
+            tooltip: 'rewards.history_edit'.tr,
             onPressed: () => _edit(context, method),
-            icon: Icon(Icons.edit_rounded, size: 16.w),
-            label: Text('rewards.history_edit'.tr),
+            icon: Icon(Icons.edit_outlined,
+                size: 20.w, color: scheme.onSurfaceVariant),
           ),
-          TextButton.icon(
+          IconButton(
+            tooltip: 'payout_methods.remove'.tr,
             onPressed: () => _delete(context, method),
-            icon: Icon(Icons.delete_outline_rounded, size: 16.w),
-            label: Text('rewards.history_delete'.tr),
-            style: TextButton.styleFrom(
-              foregroundColor: AppColors.danger,
-            ),
+            icon: Icon(Icons.delete_outline_rounded,
+                size: 20.w, color: scheme.error),
           ),
         ],
       ),
@@ -362,30 +354,36 @@ class _MethodManageRow extends StatelessWidget {
     });
   }
 
-  void _delete(BuildContext context, RewardPayoutMethod method) {
-    Get.defaultDialog(
-      title: 'rewards.history_delete_confirm'.tr,
-      middleText: method.label,
-      textConfirm: 'rewards.history_delete'.tr,
-      textCancel: 'rewards.cancel_no'.tr,
-      confirmTextColor: Theme.of(context).colorScheme.onError,
-      buttonColor: AppColors.danger,
-      onConfirm: () async {
-        Get.back();
-        final result =
-            await Get.find<PayoutMethodsController>().deleteMethod(method.id);
-        if (result.success) Get.find<RewardsController>().load();
-        Get.snackbar(
-          result.success
-              ? 'rewards.method_deleted'.tr
-              : 'rewards.cannot_submit'.tr,
-          result.success ? '' : (result.message ?? 'rewards.cannot_submit_body'.tr),
-          snackPosition: SnackPosition.BOTTOM,
-          margin: EdgeInsets.all(16.w),
-          borderRadius: 14.r,
-        );
-      },
+  Future<void> _delete(BuildContext context, RewardPayoutMethod method) async {
+    final scheme = Theme.of(context).colorScheme;
+    final confirmed = await AppConfirmDialog.show(
+      title: 'payout_methods.remove_title'.tr,
+      confirmLabel: 'payout_methods.remove'.tr,
+      destructive: true,
+      message: TextSpan(
+        children: [
+          TextSpan(text: '${'payout_methods.remove'.tr} '),
+          TextSpan(
+            text: method.label,
+            style: TextStyle(
+              fontWeight: FontWeight.w700,
+              color: scheme.onSurface,
+            ),
+          ),
+          TextSpan(text: '? ${'payout_methods.remove_body'.tr}'),
+        ],
+      ),
     );
+    if (!confirmed) return;
+
+    final result =
+        await Get.find<PayoutMethodsController>().deleteMethod(method.id);
+    if (result.success) {
+      Get.find<RewardsController>().load();
+      AppToast.success('rewards.method_deleted'.tr);
+    } else {
+      AppToast.error(result.message ?? 'rewards.cannot_submit_body'.tr);
+    }
   }
 }
 
@@ -664,10 +662,18 @@ class _RequestPayoutCta extends StatelessWidget {
 // Sheet plumbing
 // ---------------------------------------------------------------------------
 void _showRequestSheet(BuildContext context) {
+  final controller = Get.find<RewardsController>();
   showModalBottomSheet(
     context: context,
     isScrollControlled: true,
     backgroundColor: AppColors.transparent,
     builder: (_) => const RequestPayoutSheet(),
-  );
+  ).whenComplete(() {
+    // Swipe-down / tap-outside / back skip the sheet's own reset — clear the
+    // controller-held fields here so the next open always starts blank.
+    controller
+      ..setAmount('')
+      ..selectAccount(null)
+      ..closePayoutSheet();
+  });
 }

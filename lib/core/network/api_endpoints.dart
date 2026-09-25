@@ -256,6 +256,16 @@ abstract class ApiEndpoints {
   /// Cancel a pending payout request.
   static String financePayoutCancel(Object id) => '/finance/payouts/$id/cancel';
 
+  /// Billing history. Query: `type`, `status`.
+  static const financeTransactions = '/finance/transactions';
+
+  /// Billing history as CSV.
+  static const financeTransactionsExport = '/finance/transactions/export';
+
+  /// Rendered invoice (`GET`). `data` = `{ invoice_number, format, html }`.
+  static String financeTransactionInvoice(Object id) =>
+      '/finance/transactions/$id/invoice';
+
   static const settingsBeneficiary = '/settings/beneficiary';
 
   /// Starts two-factor enrolment (`POST`). `data` carries `secret` and the

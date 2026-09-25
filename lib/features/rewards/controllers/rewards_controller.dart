@@ -23,7 +23,6 @@ class RewardsController extends BaseController<RewardsData> {
     final response = await _repository.getRewards();
     final data = response.data;
     if (data != null) {
-      selectedAccountId.value ??= data.accounts.firstOrNull?.id;
       if (data.payoutMethods.isNotEmpty) {
         selectedMethod.value ??= data.payoutMethods.first.id;
       }
@@ -43,34 +42,39 @@ class RewardsController extends BaseController<RewardsData> {
   void openPayoutSheet() => isSheetOpen.value = true;
   void closePayoutSheet() => isSheetOpen.value = false;
 
-  void selectAccount(String id) => selectedAccountId.value = id;
+  /// `null` = "None" (the request is not tied to a trading account).
+  void selectAccount(String? id) => selectedAccountId.value = id;
   void selectMethod(String method) => selectedMethod.value = method;
   void setAmount(String value) => amountController.value = value;
 
-  Future<PayoutSubmitResult> submitRequest(RewardsData data) async {
+  Future<PayoutSubmitResult> submitRequest(
+    RewardsData data, {
+    String? notes,
+    String? password,
+  }) async {
     final raw = amountController.value.trim();
     final parsed = double.tryParse(raw.replaceAll(RegExp(r'[^0-9.]'), ''));
-    final accountId = selectedAccountId.value;
     final methodId = selectedMethod.value;
     if (parsed == null || parsed <= 0) {
-      return const PayoutSubmitResult.failure('Enter a valid amount.');
+      return PayoutSubmitResult.invalid('rewards.err_amount_invalid'.tr);
     }
     final amountMinor = (parsed * 100).round();
     if (amountMinor < data.minPayoutMinor) {
-      return PayoutSubmitResult.failure('Minimum payout is ${data.minPayout}.');
+      return PayoutSubmitResult.invalid(
+        'rewards.err_amount_min'.trParams({'min': data.minPayout}),
+      );
     }
     if (amountMinor > data.availableMinor) {
-      return PayoutSubmitResult.failure(
-        'Amount exceeds available ${data.withdrawable.amountUsd}.',
+      return PayoutSubmitResult.invalid(
+        'rewards.err_amount_max'
+            .trParams({'max': data.withdrawable.amountUsd}),
       );
     }
-    if (blockingCount(data) > 0 || accountId == null || methodId == null) {
-      return const PayoutSubmitResult.failure(
-        'Complete KYC and add a payout method first.',
-      );
+    if (methodId == null) {
+      return PayoutSubmitResult.invalid('rewards.err_method_required'.tr);
     }
     if (isSubmitting.value) {
-      return const PayoutSubmitResult.failure('Request already submitting.');
+      return const PayoutSubmitResult.invalid(null);
     }
 
     isSubmitting.value = true;
@@ -79,11 +83,15 @@ class RewardsController extends BaseController<RewardsData> {
         amount: parsed,
         currency: 'USD',
         payoutMethodId: methodId,
-        tradingAccountId: accountId,
+        // Optional on the web form — "None" leaves it off the request.
+        tradingAccountId: selectedAccountId.value,
+        notes: notes?.trim(),
+        currentPassword: password,
       );
+      if (response.success) load();
       return response.success
           ? const PayoutSubmitResult.success()
-          : PayoutSubmitResult.failure(response.message ?? 'Unable to request payout.');
+          : PayoutSubmitResult.failure(response.message);
     } finally {
       isSubmitting.value = false;
     }
@@ -91,10 +99,24 @@ class RewardsController extends BaseController<RewardsData> {
 }
 
 class PayoutSubmitResult {
-  const PayoutSubmitResult.success() : isSuccess = true, message = null;
-  const PayoutSubmitResult.failure(this.message) : isSuccess = false;
+  const PayoutSubmitResult.success()
+      : isSuccess = true,
+        isLocalValidation = false,
+        message = null;
+
+  /// The server rejected the request (its message is already toasted by
+  /// ApiEnvelope.guard).
+  const PayoutSubmitResult.failure(this.message)
+      : isSuccess = false,
+        isLocalValidation = false;
+
+  /// Rejected before any request was sent — the user can fix the form.
+  const PayoutSubmitResult.invalid(this.message)
+      : isSuccess = false,
+        isLocalValidation = true;
 
   final bool isSuccess;
+  final bool isLocalValidation;
   final String? message;
 }
 

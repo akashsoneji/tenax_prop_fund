@@ -1,5 +1,6 @@
 import '../../../core/network/api_client.dart';
 import '../../../core/network/api_endpoints.dart';
+import '../../../core/network/api_envelope.dart';
 import '../../../core/network/api_response.dart';
 import '../models/reward_models.dart';
 
@@ -142,7 +143,7 @@ class RewardsRepository {
     required double amount,
     required String currency,
     required String payoutMethodId,
-    required String tradingAccountId,
+    String? tradingAccountId,
     String? notes,
     String? currentPassword,
   }) async {
@@ -151,24 +152,19 @@ class RewardsRepository {
       'currency': currency,
       'payout_method_id':
           int.tryParse(payoutMethodId) ?? payoutMethodId,
-      'trading_account_id':
-          int.tryParse(tradingAccountId) ?? tradingAccountId,
+      if (tradingAccountId != null)
+        'trading_account_id':
+            int.tryParse(tradingAccountId) ?? tradingAccountId,
       if (notes != null && notes.isNotEmpty) 'notes': notes,
       if (currentPassword != null && currentPassword.isNotEmpty)
         'current_password': currentPassword,
     };
-    final response = await _api.post<dynamic>(
-      ApiEndpoints.financePayouts,
-      data: payload,
+    // guard() catches the DioException a 422 throws (e.g. "No open payout
+    // cycle is available right now.") and shows the server message as a toast.
+    return ApiEnvelope.guard<void>(
+      () => _api.post<dynamic>(ApiEndpoints.financePayouts, data: payload),
+      (_) {},
     );
-    final body = response.data;
-    if (body is Map<String, dynamic> && body['success'] == true) {
-      return ApiResponse.success(null);
-    }
-    final message = body is Map<String, dynamic>
-        ? body['message']?.toString()
-        : null;
-    return ApiResponse.failure(message ?? 'Unable to request payout');
   }
 
   /// STEP 8 — Cancel a pending payout request.

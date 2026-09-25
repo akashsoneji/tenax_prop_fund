@@ -451,6 +451,12 @@ class AppTranslations extends Translations {
     'billing.status_refunded': 'Refunded',
     'billing.status_failed': 'Failed',
     'billing.no_transactions': 'No transactions here yet',
+    'billing.invoice': 'Invoice',
+    'billing.invoice_share': 'Share',
+    'billing.invoice_download': 'Download PDF',
+    'billing.invoice_unavailable': 'Invoice not available',
+    'billing.invoice_unavailable_body':
+        'We couldn\'t load this invoice. Please try again later.',
     'calculators.title': 'Calculators',
     'calculators.none_available': 'No calculators available.',
     'calculators.tab_position_size': 'Position size',
@@ -699,6 +705,11 @@ class AppTranslations extends Translations {
             'ID — even by a middle name. This is the single most common reason '
             'a first reward is delayed.',
     'payout_methods.add_method': 'Add this method',
+    'payout_methods.remove_title': 'Remove payout method',
+    'payout_methods.remove': 'Remove',
+    'payout_methods.remove_body':
+        'Open payout requests keep their original destination; you can add '
+            'this method again later.',
     'payout_methods.label': 'Label',
     'payout_methods.label_hint': 'Primary bank',
     'payout_methods.edit_method': 'Edit payout method',
@@ -781,6 +792,20 @@ class AppTranslations extends Translations {
     'rewards.method_image': 'Method image',
     'rewards.password_confirm': 'Confirm password',
     'rewards.password_hint': 'Enter your current password',
+    'rewards.amount_usd': 'Amount (USD)',
+    'rewards.payout_method': 'Payout method',
+    'rewards.trading_account_optional': 'Trading account (optional)',
+    'rewards.none': 'None',
+    'rewards.notes_optional': 'Notes (optional)',
+    'rewards.password_helper':
+        'Required while withdrawal confirmation is on (Settings → Security).',
+    'rewards.minimum': 'Minimum',
+    'rewards.submit_request': 'Submit request',
+    'rewards.cancel_no': 'Cancel',
+    'rewards.err_amount_invalid': 'Enter a valid amount.',
+    'rewards.err_amount_min': 'Minimum payout is @min.',
+    'rewards.err_amount_max': 'Amount exceeds your withdrawable @max.',
+    'rewards.err_method_required': 'Please choose a payout method.',
     'trading_rules.title': 'Trading rules',
     'trading_rules.no_rules': 'No rules published for this section yet.',
     'trading_rules.section_body':
@@ -1460,6 +1485,12 @@ We reserve the right to suspend or terminate accounts that violate these terms o
     'billing.status_refunded': 'रिफ़ंड',
     'billing.status_failed': 'विफल',
     'billing.no_transactions': 'यहाँ अभी कोई लेनदेन नहीं',
+    'billing.invoice': 'इनवॉइस',
+    'billing.invoice_share': 'शेयर करें',
+    'billing.invoice_download': 'PDF डाउनलोड करें',
+    'billing.invoice_unavailable': 'इनवॉइस उपलब्ध नहीं है',
+    'billing.invoice_unavailable_body':
+        'यह इनवॉइस लोड नहीं हो सका। कृपया बाद में पुनः प्रयास करें।',
     'calculators.title': 'कैलकुलेटर',
     'calculators.none_available': 'कोई कैलकुलेटर उपलब्ध नहीं है।',
     'calculators.tab_position_size': 'पोज़िशन साइज़',
@@ -1708,6 +1739,20 @@ We reserve the right to suspend or terminate accounts that violate these terms o
     'rewards.method_image': 'विधि छवि',
     'rewards.password_confirm': 'पासवर्ड पुष्टि करें',
     'rewards.password_hint': 'अपना वर्तमान पासवर्ड दर्ज करें',
+    'rewards.amount_usd': 'राशि (USD)',
+    'rewards.payout_method': 'पेआउट विधि',
+    'rewards.trading_account_optional': 'ट्रेडिंग खाता (वैकल्पिक)',
+    'rewards.none': 'कोई नहीं',
+    'rewards.notes_optional': 'नोट्स (वैकल्पिक)',
+    'rewards.password_helper':
+        'निकासी पुष्टि चालू होने पर आवश्यक (सेटिंग्स → सुरक्षा)।',
+    'rewards.minimum': 'न्यूनतम',
+    'rewards.submit_request': 'अनुरोध भेजें',
+    'rewards.cancel_no': 'रद्द करें',
+    'rewards.err_amount_invalid': 'मान्य राशि दर्ज करें।',
+    'rewards.err_amount_min': 'न्यूनतम पेआउट @min है।',
+    'rewards.err_amount_max': 'राशि आपकी निकासी योग्य @max से अधिक है।',
+    'rewards.err_method_required': 'कृपया पेआउट विधि चुनें।',
     'trading_rules.title': 'ट्रेडिंग नियम',
     'trading_rules.no_rules': 'इस सेक्शन के लिए अभी कोई नियम प्रकाशित नहीं हुआ है।',
     'trading_rules.section_body':
@@ -2034,6 +2079,11 @@ We reserve the right to suspend or terminate accounts that violate these terms o
         'यदि खाता नाम आपकी सत्यापित ID से अलग है — मिडिल नाम तक — तो पेआउट '
             'अस्वीकार हो जाता है। पहला रिवॉर्ड देर होने का यही सबसे आम कारण है।',
     'payout_methods.add_method': 'यह विधि जोड़ें',
+    'payout_methods.remove_title': 'पेआउट विधि हटाएँ',
+    'payout_methods.remove': 'हटाएँ',
+    'payout_methods.remove_body':
+        'खुले पेआउट अनुरोध अपने मूल गंतव्य पर ही रहेंगे; आप यह विधि बाद में '
+            'फिर से जोड़ सकते हैं।',
     'payout_methods.label': 'लेबल',
     'payout_methods.label_hint': 'मुख्य बैंक',
     'payout_methods.edit_method': 'पेआउट विधि संपादित करें',

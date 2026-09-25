@@ -3,6 +3,7 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
 
+import '../../../app/routes/app_routes.dart';
 import '../../../shared/theme/app_colors.dart';
 import '../../../shared/theme/app_theme.dart';
 import '../models/billing_models.dart';
@@ -61,7 +62,11 @@ class _TransactionRow extends StatelessWidget {
     final scheme = Theme.of(context).colorScheme;
     final refund = transaction.isRefund;
     final tint = refund ? AppColors.success : scheme.primary;
-    return Padding(
+    return InkWell(
+      onTap: transaction.hasInvoice
+          ? () => Get.toNamed(AppRoutes.invoiceViewer, arguments: transaction)
+          : null,
+      child: Padding(
       padding: EdgeInsets.symmetric(vertical: 14.h),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -130,6 +135,7 @@ class _TransactionRow extends StatelessWidget {
             ],
           ),
         ],
+      ),
       ),
     );
   }

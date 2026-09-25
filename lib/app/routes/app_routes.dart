@@ -15,6 +15,7 @@ abstract class AppRoutes {
   static const tradingRules = '/trading-rules';
   static const account = '/account';
   static const billing = '/billing';
+  static const invoiceViewer = '/billing/invoice';
   static const certificates = '/certificates';
   static const certificateViewer = '/certificates/viewer';
   static const calculators = '/calculators';
