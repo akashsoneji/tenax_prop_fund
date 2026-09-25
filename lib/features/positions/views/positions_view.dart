@@ -7,6 +7,7 @@ import '../../../shared/theme/app_text.dart';
 import '../../../shared/widgets/app_empty_view.dart';
 import '../../../shared/widgets/app_segmented_control.dart';
 import '../controllers/positions_controller.dart';
+import '../models/positions_models.dart';
 import '../widgets/account_summary_grid.dart';
 import '../widgets/close_all_sheet.dart';
 import '../widgets/history_filter_sheet.dart';
@@ -22,6 +23,17 @@ import '../widgets/positions_account_header.dart';
 class PositionsView extends GetView<PositionsController> {
   const PositionsView({super.key});
 
+  /// Pulls the next history page once the user is within one screen of the
+  /// bottom, so the list keeps filling without a "Load more" tap.
+  bool _onScroll(ScrollNotification notification) {
+    if (controller.selectedTab.value != PositionsTab.history) return false;
+    final metrics = notification.metrics;
+    if (metrics.pixels >= metrics.maxScrollExtent - 300) {
+      controller.loadMoreHistory();
+    }
+    return false;
+  }
+
   @override
   Widget build(BuildContext context) {
     final scheme = Theme.of(context).colorScheme;
@@ -29,150 +41,171 @@ class PositionsView extends GetView<PositionsController> {
       resizeToAvoidBottomInset: true,
       backgroundColor: scheme.surface,
       body: SafeArea(
-        child: Column(
-          children: [
-            Padding(
-              padding: EdgeInsets.fromLTRB(16.w, 12.h, 16.w, 0),
-              child: PositionsAccountHeader(controller: controller),
-            ),
-            Padding(
-              padding: EdgeInsets.fromLTRB(16.w, 12.h, 16.w, 0),
-              child: Obx(
-                () => AppSegmentedControl(
-                  labels: [
-                    '${'positions.market'.tr} (${controller.openPositions.length})',
-                    '${'positions.pending'.tr} (${controller.pendingOrders.length})',
-                    '${'positions.history'.tr} (${controller.history.length})',
-                  ],
-                  selected: controller.selectedTab.value.index,
-                  onChanged: (i) =>
-                      controller.selectTab(PositionsTab.values[i]),
-                ),
+        child: NotificationListener<ScrollNotification>(
+          onNotification: _onScroll,
+          child: CustomScrollView(
+            physics: const BouncingScrollPhysics(),
+            slivers: [
+              SliverToBoxAdapter(child: _PositionsHeader(controller: controller)),
+              Obx(
+                () => switch (controller.selectedTab.value) {
+                  PositionsTab.market => _MarketSliver(controller: controller),
+                  PositionsTab.pending => _PendingSliver(controller: controller),
+                  PositionsTab.history => _HistorySliver(controller: controller),
+                },
               ),
-            ),
-            Padding(
-              padding: EdgeInsets.fromLTRB(16.w, 12.h, 16.w, 8.h),
-              child: Obx(() => AccountSummaryGrid(account: controller.account.value)),
-            ),
-            Expanded(
-              child: Obx(() {
-                switch (controller.selectedTab.value) {
-                  case PositionsTab.market:
-                    return _MarketList(controller: controller);
-                  case PositionsTab.pending:
-                    return _PendingList(controller: controller);
-                  case PositionsTab.history:
-                    return _HistoryList(controller: controller);
-                }
-              }),
-            ),
-          ],
+            ],
+          ),
         ),
       ),
     );
   }
 }
 
-class _MarketList extends StatelessWidget {
-  const _MarketList({required this.controller});
+/// Account header, tab switch and the live summary grid. Sits in the same
+/// scroll view as the list so it scrolls away with the trades.
+class _PositionsHeader extends StatelessWidget {
+  const _PositionsHeader({required this.controller});
+  final PositionsController controller;
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      children: [
+        Padding(
+          padding: EdgeInsets.fromLTRB(16.w, 12.h, 16.w, 0),
+          child: PositionsAccountHeader(controller: controller),
+        ),
+        Padding(
+          padding: EdgeInsets.fromLTRB(16.w, 12.h, 16.w, 0),
+          child: Obx(
+            () => AppSegmentedControl(
+              labels: [
+                '${'positions.market'.tr} (${controller.openPositions.length})',
+                '${'positions.pending'.tr} (${controller.pendingOrders.length})',
+                '${'positions.history'.tr} (${controller.history.length})',
+              ],
+              selected: controller.selectedTab.value.index,
+              onChanged: (i) => controller.selectTab(PositionsTab.values[i]),
+            ),
+          ),
+        ),
+        Padding(
+          padding: EdgeInsets.fromLTRB(16.w, 12.h, 16.w, 8.h),
+          child: Obx(
+            () => AccountSummaryGrid(account: controller.account.value),
+          ),
+        ),
+      ],
+    );
+  }
+}
+
+class _MarketSliver extends StatelessWidget {
+  const _MarketSliver({required this.controller});
   final PositionsController controller;
 
   @override
   Widget build(BuildContext context) {
     return Obx(() {
-      final rows = controller.rawPositions;
-      if (rows.isEmpty) {
-        return const AppEmptyView(messageKey: 'positions.no_open_trade');
+      if (controller.rawPositions.isEmpty) {
+        return const SliverFillRemaining(
+          hasScrollBody: false,
+          child: AppEmptyView(messageKey: 'positions.no_open_trade'),
+        );
       }
       final items = controller.openPositions;
-      return Column(
+      return SliverPadding(
+        padding: EdgeInsets.symmetric(horizontal: 16.w),
+        sliver: SliverList.builder(
+          itemCount: items.length + 1,
+          itemBuilder: (context, i) {
+            if (i == 0) {
+              return _CloseAllBar(controller: controller, items: items);
+            }
+            final position = items[i - 1];
+            return Obx(
+              () => PositionCard(
+                position: position,
+                busy: controller.busy.value,
+                onAction: () => controller.closePosition(position),
+              ),
+            );
+          },
+        ),
+      );
+    });
+  }
+}
+
+class _CloseAllBar extends StatelessWidget {
+  const _CloseAllBar({required this.controller, required this.items});
+  final PositionsController controller;
+  final List<TradePosition> items;
+
+  Future<void> _closeAll(BuildContext context) async {
+    final group = await showCloseAllSheet(context, positions: items);
+    if (group == null) return;
+    await controller.closePositions(switch (group) {
+      CloseGroup.all => items,
+      CloseGroup.profitable =>
+        items.where((position) => position.profitLoss > 0).toList(),
+      CloseGroup.losing =>
+        items.where((position) => position.profitLoss < 0).toList(),
+      CloseGroup.long => items.where((position) => position.isBuy).toList(),
+      CloseGroup.short => items.where((position) => !position.isBuy).toList(),
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: EdgeInsets.only(bottom: 8.h),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.end,
         children: [
-          Padding(
-            padding: EdgeInsets.fromLTRB(16.w, 0, 16.w, 8.h),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.end,
-              children: [
-                Obx(
-                  () => TextButton(
-                    onPressed: controller.busy.value
-                        ? null
-                        : () async {
-                            final group = await showCloseAllSheet(
-                              context,
-                              positions: items,
-                            );
-                            if (group == null) return;
-                            await controller.closePositions(
-                              switch (group) {
-                                CloseGroup.all => items,
-                                CloseGroup.profitable => items
-                                    .where((position) => position.profitLoss > 0)
-                                    .toList(),
-                                CloseGroup.losing => items
-                                    .where((position) => position.profitLoss < 0)
-                                    .toList(),
-                                CloseGroup.long => items
-                                    .where((position) => position.isBuy)
-                                    .toList(),
-                                CloseGroup.short => items
-                                    .where((position) => !position.isBuy)
-                                    .toList(),
-                              },
-                            );
-                          },
-                    child: Text(
-                      'positions.close_all'.tr,
-                      style: AppText.subtitle(
-                        color: AppColors.danger,
-                        fontSize: 13.sp,
-                      ),
-                    ),
-                  ),
-                ),
-              ],
-            ),
-          ),
-          Expanded(
-            child: ListView.builder(
-              physics: const BouncingScrollPhysics(),
-              padding: EdgeInsets.symmetric(horizontal: 16.w),
-              itemCount: items.length,
-              itemBuilder: (context, i) => Obx(
-                () => PositionCard(
-                  position: items[i],
-                  busy: controller.busy.value,
-                  onAction: () => controller.closePosition(items[i]),
+          Obx(
+            () => TextButton(
+              onPressed: controller.busy.value ? null : () => _closeAll(context),
+              child: Text(
+                'positions.close_all'.tr,
+                style: AppText.subtitle(
+                  color: AppColors.danger,
+                  fontSize: 13.sp,
                 ),
               ),
             ),
           ),
         ],
-      );
-    });
+      ),
+    );
   }
 }
 
-class _PendingList extends StatelessWidget {
-  const _PendingList({required this.controller});
+class _PendingSliver extends StatelessWidget {
+  const _PendingSliver({required this.controller});
   final PositionsController controller;
 
   @override
   Widget build(BuildContext context) {
     return Obx(() {
-      final rows = controller.rawPending;
-      if (rows.isEmpty) {
-        return const AppEmptyView(messageKey: 'positions.no_pending');
+      if (controller.rawPending.isEmpty) {
+        return const SliverFillRemaining(
+          hasScrollBody: false,
+          child: AppEmptyView(messageKey: 'positions.no_pending'),
+        );
       }
       final items = controller.pendingOrders;
-      return ListView.builder(
-        physics: const BouncingScrollPhysics(),
+      return SliverPadding(
         padding: EdgeInsets.symmetric(horizontal: 16.w),
-        itemCount: items.length,
-        itemBuilder: (context, i) => Obx(
-          () => PositionCard(
-            position: items[i],
-            busy: controller.busy.value,
-            onAction: () => controller.cancelPending(items[i]),
+        sliver: SliverList.builder(
+          itemCount: items.length,
+          itemBuilder: (context, i) => Obx(
+            () => PositionCard(
+              position: items[i],
+              busy: controller.busy.value,
+              onAction: () => controller.cancelPending(items[i]),
+            ),
           ),
         ),
       );
@@ -180,82 +213,74 @@ class _PendingList extends StatelessWidget {
   }
 }
 
-class _HistoryList extends StatefulWidget {
-  const _HistoryList({required this.controller});
+class _HistorySliver extends StatelessWidget {
+  const _HistorySliver({required this.controller});
   final PositionsController controller;
 
   @override
-  State<_HistoryList> createState() => _HistoryListState();
+  Widget build(BuildContext context) {
+    return Obx(() {
+      if (controller.historyLoading.value) {
+        return _HistoryStateSliver(
+          controller: controller,
+          child: const Center(child: CircularProgressIndicator()),
+        );
+      }
+      if (controller.historyError.value != null) {
+        return _HistoryStateSliver(
+          controller: controller,
+          child: AppEmptyView(
+            messageKey: 'positions.history_error',
+            onRetry: controller.loadHistory,
+          ),
+        );
+      }
+      final items = controller.filteredHistory;
+      if (items.isEmpty) {
+        return _HistoryStateSliver(
+          controller: controller,
+          child: const AppEmptyView(messageKey: 'positions.no_history'),
+        );
+      }
+      final loadingMore = controller.historyLoadingMore.value;
+      return SliverPadding(
+        padding: EdgeInsets.symmetric(horizontal: 16.w),
+        sliver: SliverList.builder(
+          itemCount: items.length + 1 + (loadingMore ? 1 : 0),
+          itemBuilder: (context, i) {
+            if (i == 0) return _HistoryFilterBar(controller: controller);
+            final index = i - 1;
+            if (index >= items.length) {
+              return Padding(
+                padding: EdgeInsets.symmetric(vertical: 16.h),
+                child: const Center(child: CircularProgressIndicator()),
+              );
+            }
+            return HistoryRow(entry: items[index]);
+          },
+        ),
+      );
+    });
+  }
 }
 
-class _HistoryListState extends State<_HistoryList> {
-  final _scroll = ScrollController();
-
-  @override
-  void initState() {
-    super.initState();
-    _scroll.addListener(_onScroll);
-  }
-
-  @override
-  void dispose() {
-    _scroll
-      ..removeListener(_onScroll)
-      ..dispose();
-    super.dispose();
-  }
-
-  /// Pulls the next page once the user is within one screen of the bottom, so
-  /// the list keeps filling without a "Load more" tap.
-  void _onScroll() {
-    if (!_scroll.hasClients) return;
-    final position = _scroll.position;
-    if (position.pixels >= position.maxScrollExtent - 300) {
-      widget.controller.loadMoreHistory();
-    }
-  }
+/// Keeps the history filter bar visible above a loading/error/empty state while
+/// still filling the remaining viewport height.
+class _HistoryStateSliver extends StatelessWidget {
+  const _HistoryStateSliver({required this.controller, required this.child});
+  final PositionsController controller;
+  final Widget child;
 
   @override
   Widget build(BuildContext context) {
-    final controller = widget.controller;
-    return Column(
-      children: [
-        _HistoryFilterBar(controller: controller),
-        Expanded(
-          child: Obx(() {
-            if (controller.historyLoading.value) {
-              return const Center(child: CircularProgressIndicator());
-            }
-            final error = controller.historyError.value;
-            if (error != null) {
-              return AppEmptyView(
-                messageKey: 'positions.history_error',
-                onRetry: controller.loadHistory,
-              );
-            }
-            final items = controller.filteredHistory;
-            if (items.isEmpty) {
-              return const AppEmptyView(messageKey: 'positions.no_history');
-            }
-            final loadingMore = controller.historyLoadingMore.value;
-            return ListView.builder(
-              controller: _scroll,
-              physics: const BouncingScrollPhysics(),
-              padding: EdgeInsets.symmetric(horizontal: 16.w),
-              itemCount: items.length + (loadingMore ? 1 : 0),
-              itemBuilder: (context, i) {
-                if (i >= items.length) {
-                  return Padding(
-                    padding: EdgeInsets.symmetric(vertical: 16.h),
-                    child: const Center(child: CircularProgressIndicator()),
-                  );
-                }
-                return HistoryRow(entry: items[i]);
-              },
-            );
-          }),
-        ),
-      ],
+    return SliverFillRemaining(
+      hasScrollBody: false,
+      child: Column(
+        children: [
+          _HistoryFilterBar(controller: controller),
+          Expanded(child: child),
+        ],
+      ),
     );
   }
 }

@@ -50,4 +50,33 @@ class AccountRepository {
     );
   }
 
+  /// Confirms the reset purchase (`POST /accounts/{id}/reset`). Returns the
+  /// created order id so the caller can open the Complete-payment screen.
+  Future<ApiResponse<String>> confirmReset(
+    Object accountId, {
+    required int paymentMethodId,
+    required bool isManual,
+  }) {
+    return ApiEnvelope.guard<String>(
+      () => _api.post<Map<String, dynamic>>(
+        ApiEndpoints.accountReset(accountId),
+        data: {
+          'confirm': true,
+          'payment_method_id': paymentMethodId,
+          'is_manual': isManual,
+        },
+      ),
+      (data) {
+        final map = data is Map<String, dynamic> ? data : const {};
+        final direct = map['order_id'] ??
+            (map['order'] is Map ? (map['order'] as Map)['id'] : null);
+        if (direct != null) return direct.toString();
+        // The live API only returns the order inside the checkout path,
+        // e.g. `/app/challenges/orders/58/pay`.
+        final match = RegExp(r'/orders/(\d+)')
+            .firstMatch(map['checkout_url']?.toString() ?? '');
+        return match?.group(1) ?? '';
+      },
+    );
+  }
 }

@@ -555,6 +555,35 @@ class PlatformDownload {
 // ---------------------------------------------------------------------------
 // Reset tab
 // ---------------------------------------------------------------------------
+/// One entry of `data.payment_methods[]` on the reset quote.
+class ResetPaymentMethod {
+  const ResetPaymentMethod({
+    required this.id,
+    required this.name,
+    required this.slug,
+    required this.type,
+    required this.mode,
+    required this.isManual,
+  });
+
+  final int id;
+  final String name;
+  final String slug;
+  final String type;
+  final String mode;
+  final bool isManual;
+
+  factory ResetPaymentMethod.fromJson(Map<String, dynamic> json) =>
+      ResetPaymentMethod(
+        id: (json['id'] as num?)?.toInt() ?? 0,
+        name: json['name'] as String? ?? '',
+        slug: json['slug'] as String? ?? '',
+        type: json['type'] as String? ?? '',
+        mode: json['mode'] as String? ?? '',
+        isManual: json['is_manual'] as bool? ?? false,
+      );
+}
+
 class ResetData {
   const ResetData({
     required this.login,
@@ -566,6 +595,7 @@ class ResetData {
     required this.message,
     required this.eligible,
     required this.quotable,
+    required this.paymentMethods,
   });
 
   final String login;
@@ -577,6 +607,7 @@ class ResetData {
   final String message;
   final bool eligible;
   final bool quotable;
+  final List<ResetPaymentMethod> paymentMethods;
 
   /// The REST `GET /accounts/{id}/reset` `data` block already has `account` and
   /// `quote` at the shape [fromProps] expects, so it delegates directly.
@@ -598,6 +629,10 @@ class ResetData {
       message: quote['message'] as String? ?? '',
       eligible: quote['eligible'] as bool? ?? false,
       quotable: quote['quotable'] as bool? ?? false,
+      paymentMethods: (props['payment_methods'] as List<dynamic>? ?? const [])
+          .whereType<Map<String, dynamic>>()
+          .map(ResetPaymentMethod.fromJson)
+          .toList(growable: false),
     );
   }
 }

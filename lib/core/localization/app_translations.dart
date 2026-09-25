@@ -427,6 +427,16 @@ class AppTranslations extends Translations {
     'account.reset_clear_balance': 'Balance, profit, drawdown, trading days',
     'account.reset_clear_counter': 'Scaling counter returns to zero',
     'account.reset_this': 'Reset this account',
+    'account.reset_confirm_title': 'Confirm account reset',
+    'account.reset_confirm_blurb':
+        'This creates a reset order — the account is restored once the payment completes.',
+    'account.reset_pay_with': 'Pay with',
+    'account.reset_select_method': 'Select a payment method',
+    'account.reset_method_manual': 'manual',
+    'account.reset_method_online': 'online',
+    'account.reset_confirm_note':
+        'You will be taken to the payment page with the account details and a place to upload your proof.',
+    'account.reset_confirm_cta': 'Confirm reset',
     'account.rules_close': 'Rules you are close to',
     'account.daily_limit_equity': 'The daily limit is measured on equity',
     'account.daily_limit_body':
