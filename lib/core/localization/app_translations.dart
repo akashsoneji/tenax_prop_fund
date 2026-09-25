@@ -427,6 +427,16 @@ class AppTranslations extends Translations {
     'account.reset_clear_balance': 'Balance, profit, drawdown, trading days',
     'account.reset_clear_counter': 'Scaling counter returns to zero',
     'account.reset_this': 'Reset this account',
+    'account.reset_confirm_title': 'Confirm account reset',
+    'account.reset_confirm_blurb':
+        'This creates a reset order — the account is restored once the payment completes.',
+    'account.reset_pay_with': 'Pay with',
+    'account.reset_select_method': 'Select a payment method',
+    'account.reset_method_manual': 'manual',
+    'account.reset_method_online': 'online',
+    'account.reset_confirm_note':
+        'You will be taken to the payment page with the account details and a place to upload your proof.',
+    'account.reset_confirm_cta': 'Confirm reset',
     'account.rules_close': 'Rules you are close to',
     'account.daily_limit_equity': 'The daily limit is measured on equity',
     'account.daily_limit_body':
@@ -752,6 +762,12 @@ class AppTranslations extends Translations {
     'referral.warning_title': 'Referral earnings need a funded account',
     'referral.warning_body':
         'You can collect them once you have passed a challenge. Until then they accrue.',
+    'referral.clicks': 'Clicks',
+    'referral.conversion': 'Conversion',
+    'referral.total_paid': 'Paid',
+    'referral.your_referral_code': 'Your referral code',
+    'referral.copy_code': 'Copy code',
+    'referral.share_link': 'Share link',
     'referral.signed_up': 'Signed up',
     'referral.purchased': 'Purchased',
     'referral.earned': 'Earned',
@@ -2126,6 +2142,12 @@ We reserve the right to suspend or terminate accounts that violate these terms o
     'referral.warning_title': 'रेफ़रल कमाई के लिए फंडेड अकाउंट ज़रूरी है',
     'referral.warning_body':
         'चैलेंज पास करने के बाद ही आप इसे निकाल सकते हैं। तब तक यह जुड़ती रहती है।',
+    'referral.clicks': 'क्लिक',
+    'referral.conversion': 'कन्वर्ज़न',
+    'referral.total_paid': 'भुगतान',
+    'referral.your_referral_code': 'आपका रेफ़रल कोड',
+    'referral.copy_code': 'कोड कॉपी करें',
+    'referral.share_link': 'लिंक शेयर करें',
     'referral.signed_up': 'साइन अप किया',
     'referral.purchased': 'खरीदा',
     'referral.earned': 'कमाया',

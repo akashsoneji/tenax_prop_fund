@@ -16,6 +16,7 @@ import '../models/account_models.dart';
 import '../widgets/account_analytics_widgets.dart';
 import '../widgets/account_overview_widgets.dart';
 import '../widgets/account_tab_widgets.dart';
+import '../widgets/reset_confirm_dialog.dart';
 
 /// Account detail screen — a mobile-native version of the web
 /// `My accounts › Account overview` page, with four tabs (Account overview,
@@ -164,7 +165,7 @@ class _TabBody extends StatelessWidget {
             state: controller.reset.value ?? const DataInitial(),
             onRetry: controller.retryReset,
             skeleton: const _OverviewSkeleton(),
-            builder: (data) => _ResetTab(data: data),
+            builder: (data) => _ResetTab(controller: controller, data: data),
           );
       }
     });
@@ -398,7 +399,8 @@ class _PlatformTab extends StatelessWidget {
 // Reset tab
 // ---------------------------------------------------------------------------
 class _ResetTab extends StatelessWidget {
-  const _ResetTab({required this.data});
+  const _ResetTab({required this.controller, required this.data});
+  final AccountController controller;
   final ResetData data;
 
   @override
@@ -474,7 +476,11 @@ class _ResetTab extends StatelessWidget {
         SizedBox(height: 18.h),
         AppGradientButton(
           label: 'account.reset_this'.tr,
-          onPressed: data.eligible && data.quotable ? () {} : null,
+          onPressed: data.eligible &&
+                  data.quotable &&
+                  data.paymentMethods.isNotEmpty
+              ? () => ResetConfirmDialog.show(controller, data)
+              : null,
         ),
       ],
     );

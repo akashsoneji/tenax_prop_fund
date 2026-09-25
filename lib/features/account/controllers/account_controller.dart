@@ -1,6 +1,7 @@
 import 'package:flutter/services.dart';
 import 'package:get/get.dart';
 
+import '../../../app/routes/app_routes.dart';
 import '../../../core/base/base_controller.dart';
 import '../../../core/network/api_response.dart';
 import '../../../core/state/data_state.dart';
@@ -47,6 +48,13 @@ class AccountController extends BaseController<AccountData> {
   final platform = Rxn<DataState<PlatformData>>(const DataInitial());
   final reset = Rxn<DataState<ResetData>>(const DataInitial());
 
+  /// Payment method chosen in the confirm-reset dialog.
+  final selectedResetMethod = Rxn<ResetPaymentMethod>();
+  final resetSubmitting = false.obs;
+
+  void selectResetMethod(ResetPaymentMethod method) =>
+      selectedResetMethod.value = method;
+
   @override
   Future<ApiResponse<AccountData>> fetch() =>
       _repository.getOverview(accountId);
@@ -80,6 +88,36 @@ class AccountController extends BaseController<AccountData> {
     reset.value = res.success && res.data != null
         ? DataSuccess(res.data as ResetData)
         : DataFailure(res.message ?? 'errors.generic'.tr);
+    final methods = (reset.value is DataSuccess<ResetData>)
+        ? (reset.value as DataSuccess<ResetData>).data.paymentMethods
+        : const <ResetPaymentMethod>[];
+    selectedResetMethod.value = methods.isEmpty ? null : methods.first;
+  }
+
+  /// Confirms the reset purchase with the selected payment method and, on
+  /// success, opens the Complete-payment screen for the created order.
+  Future<void> confirmReset() async {
+    final method = selectedResetMethod.value;
+    if (method == null || resetSubmitting.value) return;
+    resetSubmitting.value = true;
+    final res = await _repository.confirmReset(
+      accountId,
+      paymentMethodId: method.id,
+      isManual: method.isManual,
+    );
+    if (isClosed) return;
+    resetSubmitting.value = false;
+    if (!res.success) {
+      AppToast.error(res.message ?? 'errors.generic'.tr);
+      return;
+    }
+    Get.back();
+    final orderId = res.data ?? '';
+    if (orderId.isEmpty) {
+      AppToast.error('errors.generic'.tr);
+      return;
+    }
+    Get.toNamed(AppRoutes.completePayment, arguments: orderId);
   }
 
   Future<void> retryPlatform() => _loadPlatform();

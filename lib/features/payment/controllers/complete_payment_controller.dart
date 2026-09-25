@@ -51,7 +51,23 @@ class CompletePaymentController extends GetxController {
     }
   }
 
+  /// True while the native file picker is open. A second tap would throw
+  /// `already_active`, so the view checks this before launching it.
+  final picking = false.obs;
+
   void setProof(File file) => proofFile.value = file;
+
+  /// Runs [pick] guarded so only one native picker session can be open.
+  Future<void> pickProof(Future<String?> Function() pick) async {
+    if (picking.value) return;
+    picking.value = true;
+    try {
+      final path = await pick();
+      if (path != null) proofFile.value = File(path);
+    } finally {
+      picking.value = false;
+    }
+  }
 
   /// True once a proof file is attached and we're not already submitting.
   bool get canSubmit => proofFile.value != null && !submitting.value;

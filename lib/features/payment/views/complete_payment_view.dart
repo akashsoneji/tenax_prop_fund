@@ -428,10 +428,11 @@ class _UploadProofCard extends StatelessWidget {
     );
   }
 
-  Future<void> _pickProof(CompletePaymentController controller) async {
-    final picked = await FilePicker.pickFile(type: FileType.image);
-    final path = picked?.path;
-    if (path != null) controller.setProof(File(path));
+  Future<void> _pickProof(CompletePaymentController controller) {
+    return controller.pickProof(() async {
+      final picked = await FilePicker.pickFile(type: FileType.image);
+      return picked?.path;
+    });
   }
 }
 

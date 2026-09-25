@@ -11,8 +11,13 @@ class ReferralData {
     required this.shareUrl,
     required this.signedUp,
     required this.purchased,
-    required this.earned,
-    required this.rate,
+    required this.earnedLabel,
+    required this.rateLabel,
+    required this.clicks,
+    required this.conversionRate,
+    required this.totalPaidLabel,
+    required this.withdrawableLabel,
+    required this.minWithdrawLabel,
     required this.referrals,
   });
 
@@ -20,12 +25,18 @@ class ReferralData {
   final String shareUrl;
   final int signedUp;
   final int purchased;
-  final int earned; // whole USD
-  final int rate; // percent
-  final List<Referral> referrals;
 
-  String get earnedLabel => '\$$earned';
-  String get rateLabel => '$rate%';
+  /// Server-formatted money / percent strings — rendered as-is so the app never
+  /// disagrees with the portal on rounding or currency symbol.
+  final String earnedLabel;
+  final String rateLabel;
+  final int clicks;
+  final String conversionRate;
+  final String totalPaidLabel;
+  final String withdrawableLabel;
+  final String minWithdrawLabel;
+
+  final List<Referral> referrals;
 
   bool get isEmpty => referralCode.isEmpty;
 
@@ -48,27 +59,18 @@ class ReferralData {
       shareUrl: referral['share_url'] as String? ?? '',
       signedUp: (stats['referrals'] as num?)?.toInt() ?? 0,
       purchased: (referral['times_used'] as num?)?.toInt() ?? 0,
-      earned: _parseMoney(stats['to_be_paid']),
-      rate: _parsePercent(settings['commission_percent']),
+      earnedLabel: stats['to_be_paid'] as String? ?? '\$0.00',
+      rateLabel: settings['commission_percent'] as String? ?? '0%',
+      clicks: (stats['clicks'] as num?)?.toInt() ?? 0,
+      conversionRate: stats['conversion_rate'] as String? ?? '0%',
+      totalPaidLabel: stats['total_paid'] as String? ?? '\$0.00',
+      withdrawableLabel: settings['withdrawable'] as String? ?? '\$0.00',
+      minWithdrawLabel: settings['min_withdraw'] as String? ?? '\$0.00',
       referrals: rows
           .whereType<Map<String, dynamic>>()
           .map(Referral.fromJson)
           .toList(),
     );
-  }
-
-  /// Parses a display money string like `"$1,234.56"` to whole USD.
-  static int _parseMoney(dynamic value) {
-    if (value == null) return 0;
-    final cleaned = value.toString().replaceAll(RegExp(r'[^0-9.\-]'), '');
-    return (double.tryParse(cleaned) ?? 0).round();
-  }
-
-  /// Parses a display percent string like `"10%"` to an int.
-  static int _parsePercent(dynamic value) {
-    if (value == null) return 0;
-    final cleaned = value.toString().replaceAll(RegExp(r'[^0-9]'), '');
-    return int.tryParse(cleaned) ?? 0;
   }
 }
 
@@ -76,17 +78,32 @@ class ReferralData {
 class Referral {
   const Referral({
     required this.name,
+    required this.plan,
+    required this.price,
+    required this.rate,
     required this.status,
     required this.earned,
+    required this.createdAt,
   });
 
   final String name;
+  final String plan;
+  final String price;
+  final String rate;
   final String status;
   final String earned;
+  final DateTime? createdAt;
 
   factory Referral.fromJson(Map<String, dynamic> json) => Referral(
-        name: json['name'] as String? ?? json['email'] as String? ?? '',
+        name: json['referred'] as String? ??
+            json['name'] as String? ??
+            json['email'] as String? ??
+            '',
+        plan: json['plan'] as String? ?? '',
+        price: json['price'] as String? ?? '',
+        rate: json['rate'] as String? ?? '',
         status: json['status'] as String? ?? '',
         earned: json['amount'] as String? ?? json['earned'] as String? ?? '',
+        createdAt: DateTime.tryParse(json['created_at'] as String? ?? ''),
       );
 }
