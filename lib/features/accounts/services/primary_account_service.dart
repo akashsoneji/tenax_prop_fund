@@ -54,6 +54,14 @@ class PrimaryAccountService extends GetxService {
   PrimaryAccountItem? get primary => accounts
       .firstWhereOrNull((a) => a.id == primaryAccountId.value);
 
+  /// Drops every cached value so a newly logged-in user never sees the previous
+  /// user's accounts. The service itself is permanent, so this is what stands in
+  /// for disposal between sessions.
+  void resetForNewSession() {
+    accounts.clear();
+    primaryAccountId.value = null;
+  }
+
   /// Background refresh of the accounts list + active id. Silent (no toast) so a
   /// transient failure never interrupts the user; safe to call fire-and-forget.
   Future<void> refresh() async {

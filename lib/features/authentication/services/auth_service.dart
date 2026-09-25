@@ -1,5 +1,6 @@
 import '../../../core/network/api_client.dart';
 import '../../../core/network/api_endpoints.dart';
+import '../models/login_outcome.dart';
 import '../models/user_model.dart';
 
 /// Talks to the REST auth endpoints. Only services touch the network client.
@@ -8,11 +9,17 @@ class AuthService {
 
   final ApiClient _api;
 
-  /// Calls `POST /auth/login`. On success the envelope's `data` carries
-  /// `access_token` + `user`; we fold the token into the returned [UserModel].
+  /// Calls `POST /auth/login`.
+  ///
+  /// Two shapes come back with `200 success: true`:
+  /// - normal — `data` carries `access_token` + `user`, folded into a
+  ///   [UserModel];
+  /// - 2FA enabled — `data` carries `two_factor_required: true` plus a
+  ///   `challenge_token`, and NO user/token yet.
+  ///
   /// Throws on any non-2xx / non-success response (the repository maps it to a
   /// friendly [ApiResponse.failure]).
-  Future<UserModel> login({
+  Future<LoginOutcome> login({
     required String email,
     required String password,
   }) async {
@@ -24,7 +31,15 @@ class AuthService {
         'device_name': 'flutter-app',
       },
     );
-    return _userFromEnvelope(res.data);
+    final data = res.data?['data'];
+    if (data is Map<String, dynamic> && data['two_factor_required'] == true) {
+      final challenge = data['challenge_token']?.toString() ?? '';
+      if (challenge.isEmpty) {
+        throw const FormatException('two_factor_required without a token');
+      }
+      return LoginOutcome.twoFactor(challenge);
+    }
+    return LoginOutcome.authenticated(_userFromEnvelope(res.data));
   }
 
   /// Calls `POST /auth/register`. On success the envelope mirrors login
@@ -72,6 +87,28 @@ class AuthService {
     final res = await _api.post<Map<String, dynamic>>(
       ApiEndpoints.verifyEmail,
       data: {'email': email, 'code': code},
+    );
+    return _userFromEnvelope(res.data);
+  }
+
+  /// Completes a two-factor login by exchanging the `challenge_token` from
+  /// [login] plus the user's code for a real session. The envelope mirrors
+  /// login (`access_token` + `user`), so the result is a ready [UserModel].
+  ///
+  /// A recovery code is sent as `recovery_code`; an authenticator code as
+  /// `code`.
+  Future<UserModel> verifyTwoFactor({
+    required String challengeToken,
+    required String code,
+    required bool isRecoveryCode,
+  }) async {
+    final res = await _api.post<Map<String, dynamic>>(
+      ApiEndpoints.verifyTwoFactor,
+      data: {
+        'challenge_token': challengeToken,
+        if (isRecoveryCode) 'recovery_code': code else 'code': code,
+        'device_name': 'flutter-app',
+      },
     );
     return _userFromEnvelope(res.data);
   }

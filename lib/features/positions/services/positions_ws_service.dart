@@ -51,6 +51,11 @@ class PositionsWsService extends GetxService with WidgetsBindingObserver {
   final _Channel _op = _Channel('op');
   final _Channel _po = _Channel('po');
 
+  /// Bumped by [resetForNewSession]. A connect that was already in flight when
+  /// the session changed reads the OLD token, so it checks this before adopting
+  /// its channel and aborts when it is stale.
+  int _session = 0;
+
   @override
   void onInit() {
     super.onInit();
@@ -80,6 +85,19 @@ class PositionsWsService extends GetxService with WidgetsBindingObserver {
     _restart(_po, _config.pendingOrdersUrl, _onPoFrame);
   }
 
+  /// Forgets the bound trading account and both live lists, then restarts the
+  /// sockets with whatever token is currently stored. Called on logout (no token
+  /// → connect is skipped and the sockets stay down) and again after login, so
+  /// the next user never inherits the previous user's trades.
+  void resetForNewSession() {
+    _session++;
+    _account = '0';
+    openPositions.clear();
+    pendingOrders.clear();
+    _restart(_op, _config.openPositionsUrl, _onOpFrame);
+    _restart(_po, _config.pendingOrdersUrl, _onPoFrame);
+  }
+
   /// Disconnects [ch] and immediately reconnects it with a reset backoff.
   void _restart(
     _Channel ch,
@@ -87,6 +105,7 @@ class PositionsWsService extends GetxService with WidgetsBindingObserver {
     void Function(dynamic decoded) onFrame,
   ) {
     ch.disconnect();
+    ch.connecting = false;
     ch.reconnectAttempts = 0;
     _updateConnected();
     _connect(ch, url, onFrame);
@@ -106,6 +125,7 @@ class PositionsWsService extends GetxService with WidgetsBindingObserver {
     void Function(dynamic decoded) onFrame,
   ) async {
     if (ch.connecting || ch.channel != null) return;
+    final session = _session;
     ch.connecting = true;
     ch.manuallyClosed = false;
     try {
@@ -114,8 +134,15 @@ class PositionsWsService extends GetxService with WidgetsBindingObserver {
         log.w('positions/${ch.name}: no auth token, skipping connect');
         return;
       }
+      if (session != _session) return;
       final channel = WebSocketChannel.connect(Uri.parse(url));
       await channel.ready;
+      // The session changed while the handshake was in flight — this socket
+      // would auth with the previous user's token, so drop it.
+      if (session != _session) {
+        await channel.sink.close();
+        return;
+      }
       ch.channel = channel;
       ch.reconnectAttempts = 0;
       _updateConnected();

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 import 'package:get/get.dart';
 import 'package:qr_flutter/qr_flutter.dart';
 
@@ -223,7 +224,7 @@ class _TwoFactorEnrolSheetState extends State<_TwoFactorEnrolSheet> {
       title: 'settings.security.enable_two_factor'.tr,
       subtitle: 'settings.security.enrol_sheet_desc'.tr,
       children: [
-        _QrCard(data: widget.enrolment.otpauthUri),
+        _QrCard(enrolment: widget.enrolment),
         SizedBox(height: 12.h),
         _CopyField(
           label: 'settings.security.secret_key'.tr,
@@ -400,12 +401,17 @@ class _RecoveryCodesSheetState extends State<_RecoveryCodesSheet> {
   }
 }
 
-/// The `otpauth://` URI as a scannable QR. Kept on a white plate in both themes
-/// because scanners need the light-on-dark contrast the spec assumes.
+/// The enrolment QR on a white plate in both themes, because scanners need the
+/// light-on-dark contrast the spec assumes.
+///
+/// Prefers the server-rendered image (`qr_image`, a base64 data URI — SVG in the
+/// current backend) so what the user scans is exactly what the server issued,
+/// and falls back to generating the QR locally from the `otpauth://` URI when
+/// the image is missing or cannot be decoded.
 class _QrCard extends StatelessWidget {
-  const _QrCard({required this.data});
+  const _QrCard({required this.enrolment});
 
-  final String data;
+  final TwoFactorEnrolment enrolment;
 
   @override
   Widget build(BuildContext context) {
@@ -420,23 +426,13 @@ class _QrCard extends StatelessWidget {
             border:
                 Border.all(color: scheme.outlineVariant.withValues(alpha: 0.5)),
           ),
-          child: QrImageView(
-            data: data,
-            size: 180.w,
-            version: QrVersions.auto,
-            backgroundColor: Colors.white,
-            errorCorrectionLevel: QrErrorCorrectLevel.M,
-            padding: EdgeInsets.all(8.w),
-            eyeStyle: const QrEyeStyle(
-              eyeShape: QrEyeShape.square,
-              color: Colors.black,
-            ),
-            dataModuleStyle: const QrDataModuleStyle(
-              dataModuleShape: QrDataModuleShape.square,
-              color: Colors.black,
-            ),
+          child: SizedBox(
+            width: 180.w,
+            height: 180.w,
+            child: _QrImage(enrolment: enrolment),
           ),
         ),
+
         SizedBox(height: 10.h),
         Text(
           'settings.security.scan_hint'.tr,
@@ -447,6 +443,41 @@ class _QrCard extends StatelessWidget {
           ),
         ),
       ],
+    );
+  }
+}
+
+/// Renders the enrolment QR: the server's `qr_image` when it decodes, otherwise
+/// a locally generated QR of the `otpauth://` URI. Both encode the same secret,
+/// so the fallback is equivalent from the authenticator's point of view.
+class _QrImage extends StatelessWidget {
+  const _QrImage({required this.enrolment});
+
+  final TwoFactorEnrolment enrolment;
+
+  @override
+  Widget build(BuildContext context) {
+    final bytes = enrolment.qrImageBytes;
+    if (bytes != null && bytes.isNotEmpty) {
+      return enrolment.qrImageIsSvg
+          ? SvgPicture.memory(bytes, fit: BoxFit.contain)
+          : Image.memory(bytes, fit: BoxFit.contain, gaplessPlayback: true);
+    }
+    return QrImageView(
+      data: enrolment.otpauthUri,
+      size: 180.w,
+      version: QrVersions.auto,
+      backgroundColor: Colors.white,
+      errorCorrectionLevel: QrErrorCorrectLevel.M,
+      padding: EdgeInsets.all(8.w),
+      eyeStyle: const QrEyeStyle(
+        eyeShape: QrEyeShape.square,
+        color: Colors.black,
+      ),
+      dataModuleStyle: const QrDataModuleStyle(
+        dataModuleShape: QrDataModuleShape.square,
+        color: Colors.black,
+      ),
     );
   }
 }

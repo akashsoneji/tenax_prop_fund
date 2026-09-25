@@ -1,8 +1,10 @@
 import 'package:get/get.dart';
 
 import '../../../app/routes/app_routes.dart';
+import '../../../app/session/session_manager.dart';
 import '../models/user_model.dart';
 import '../repositories/auth_repository.dart';
+import '../widgets/two_factor_dialog.dart';
 
 /// ONE controller shared by every flavor's auth UI. Contains only business
 /// orchestration — validation, calling the repo, exposing state. It never
@@ -41,12 +43,46 @@ class AuthController extends GetxController {
     final result = await _repository.login(email: email, password: password);
     isLoading.value = false;
 
-    if (result.success && result.data != null) {
-      user.value = result.data;
-      Get.offAllNamed(AppRoutes.home);
-    } else {
+    final outcome = result.data;
+    if (!result.success || outcome == null) {
       errorMessage.value = result.message;
+      return;
     }
+
+    if (outcome.requiresTwoFactor) {
+      await _promptTwoFactor(outcome.challengeToken!);
+      return;
+    }
+
+    _completeLogin(outcome.user!);
+  }
+
+  /// Shows the authenticator-code dialog for a login that answered
+  /// `two_factor_required`. The dialog stays open on a wrong code (it renders
+  /// the message inline); dismissing it leaves the user on the login screen with
+  /// no session, since nothing was persisted.
+  Future<void> _promptTwoFactor(String challengeToken) async {
+    await TwoFactorDialog.show(
+      onVerify: (code, {required bool isRecoveryCode}) async {
+        final result = await _repository.verifyTwoFactor(
+          challengeToken: challengeToken,
+          code: code,
+          isRecoveryCode: isRecoveryCode,
+        );
+        final verifiedUser = result.data;
+        if (!result.success || verifiedUser == null) {
+          return result.message ?? 'two_factor.verify_failed'.tr;
+        }
+        _completeLogin(verifiedUser);
+        return null;
+      },
+    );
+  }
+
+  void _completeLogin(UserModel authenticated) {
+    user.value = authenticated;
+    SessionManager.start();
+    Get.offAllNamed(AppRoutes.home);
   }
 
   Future<bool> register({

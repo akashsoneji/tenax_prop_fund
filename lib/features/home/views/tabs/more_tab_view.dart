@@ -3,6 +3,7 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
 
 import '../../../../app/routes/app_routes.dart';
+import '../../../../app/session/session_manager.dart';
 import '../../../../features/authentication/repositories/auth_repository.dart';
 import '../../../../shared/theme/app_colors.dart';
 import '../../../../shared/theme/app_text.dart';
@@ -297,6 +298,7 @@ class _DangerZone extends StatelessWidget {
     );
     if (confirmed != true) return;
     await Get.find<AuthRepository>().logout();
+    SessionManager.clear();
     Get.offAllNamed(AppRoutes.login);
   }
 }

@@ -49,6 +49,11 @@ class AccountWsService extends GetxService with WidgetsBindingObserver {
   bool _manuallyClosed = false;
   bool _connecting = false;
 
+  /// Bumped by [resetForNewSession]. A connect that was already in flight when
+  /// the session changed reads the OLD token, so it checks this before adopting
+  /// its channel and aborts when it is stale.
+  int _session = 0;
+
   @override
   void onInit() {
     super.onInit();
@@ -77,6 +82,17 @@ class AccountWsService extends GetxService with WidgetsBindingObserver {
     _reconnect();
   }
 
+  /// Forgets the bound trading account and the last snapshot, then restarts the
+  /// socket with whatever token is currently stored. Called on logout (no token
+  /// → the connect attempt is skipped and the socket stays down) and again after
+  /// login, so the next user never inherits the previous user's stream.
+  void resetForNewSession() {
+    _session++;
+    _account = '0';
+    account.value = AccountInfo.empty();
+    _reconnect();
+  }
+
   /// Closes the live socket and immediately opens a new one. A deliberate
   /// restart, so [_manuallyClosed] is cleared by [_connect] and the reconnect
   /// backoff is reset.
@@ -90,6 +106,7 @@ class AccountWsService extends GetxService with WidgetsBindingObserver {
     } catch (_) {}
     _channel = null;
     isConnected.value = false;
+    _connecting = false;
     _reconnectAttempts = 0;
     _connect();
   }
@@ -99,6 +116,7 @@ class AccountWsService extends GetxService with WidgetsBindingObserver {
 
   Future<void> _connect() async {
     if (_connecting || _channel != null) return;
+    final session = _session;
     _connecting = true;
     _manuallyClosed = false;
     try {
@@ -107,8 +125,15 @@ class AccountWsService extends GetxService with WidgetsBindingObserver {
         log.w('account ws: no auth token, skipping connect');
         return;
       }
+      if (session != _session) return;
       final channel = WebSocketChannel.connect(Uri.parse(_config.accountWsUrl));
       await channel.ready;
+      // The session changed while the handshake was in flight — this socket
+      // would auth with the previous user's token, so drop it.
+      if (session != _session) {
+        await channel.sink.close();
+        return;
+      }
       _channel = channel;
       _reconnectAttempts = 0;
       isConnected.value = true;
@@ -130,8 +155,10 @@ class AccountWsService extends GetxService with WidgetsBindingObserver {
   }
 
   void _requestData() async {
+    final session = _session;
     final token = await _authToken();
     if (token == null || token.isEmpty || _channel == null) return;
+    if (session != _session) return;
     _send({'authID': token, 'trading_account': _account});
   }
 

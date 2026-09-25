@@ -88,6 +88,11 @@ class MarketWatchV2Service extends GetxService with WidgetsBindingObserver {
   Timer? _heartbeatTimer;
   int _reconnectAttempts = 0;
   bool _manuallyClosed = false;
+
+  /// Bumped by [resetForNewSession]. A connect that was already in flight when
+  /// the session changed reads the OLD token, so it checks this before adopting
+  /// its channel and aborts when it is stale.
+  int _session = 0;
   bool _connecting = false;
 
   @override
@@ -161,12 +166,34 @@ class MarketWatchV2Service extends GetxService with WidgetsBindingObserver {
   Future<String?> _authToken() =>
       _storage.read(key: ApiInterceptor.tokenKey);
 
+  /// Restarts the socket so it re-auths with whatever token is currently stored.
+  /// Called on logout (no token → connect is skipped and the socket stays down)
+  /// and again after login, so ticks are never served on the previous user's
+  /// authenticated connection. Desired subscriptions are kept: they are the
+  /// device's watchlist, not per-user session state.
+  void resetForNewSession() {
+    _session++;
+    _reconnectTimer?.cancel();
+    _stopHeartbeat();
+    _sub?.cancel();
+    _sub = null;
+    try {
+      _channel?.sink.close();
+    } catch (_) {}
+    _channel = null;
+    _connecting = false;
+    isConnected.value = false;
+    _reconnectAttempts = 0;
+    _connect();
+  }
+
   Future<void> _connect() async {
     // Re-entrancy guard MUST flip synchronously, before the first await:
     // onInit, lifecycle-resume and subscribeSymbols can all call _connect in
     // the same microtask, and if the flag were set after `await _authToken()`
     // every caller would pass the guard and open a duplicate socket.
     if (_connecting || _channel != null) return;
+    final session = _session;
     _connecting = true;
     _manuallyClosed = false;
 
@@ -176,9 +203,16 @@ class MarketWatchV2Service extends GetxService with WidgetsBindingObserver {
         log.w('marketwatchv2: no auth token, skipping connect');
         return;
       }
+      if (session != _session) return;
 
       final channel = WebSocketChannel.connect(Uri.parse(_config.marketWatchV2Url));
       await channel.ready;
+      // The session changed while the handshake was in flight — this socket
+      // would auth with the previous user's token, so drop it.
+      if (session != _session) {
+        await channel.sink.close();
+        return;
+      }
       _channel = channel;
       _reconnectAttempts = 0;
       isConnected.value = true;

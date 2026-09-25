@@ -1,6 +1,9 @@
 // Models for the Settings → Security module (`/settings/security`).
 // Parsing only — every rule about what a value means lives in the controller.
 
+import 'dart:convert';
+import 'dart:typed_data';
+
 /// The three server-side security toggles.
 class SecurityPrefs {
   const SecurityPrefs({
@@ -123,16 +126,42 @@ class SecuritySettings {
 
 /// Response of `POST /settings/two-factor/enrol`.
 class TwoFactorEnrolment {
-  const TwoFactorEnrolment({required this.secret, required this.qrUrl});
+  const TwoFactorEnrolment({
+    required this.secret,
+    required this.qrUrl,
+    required this.qrImage,
+  });
 
   final String secret;
   final String qrUrl;
+
+  /// The server-rendered QR as a data URI, e.g.
+  /// `data:image/svg+xml;base64,<payload>`. Empty when the backend did not
+  /// send one, in which case the QR is generated locally from [otpauthUri].
+  final String qrImage;
 
   factory TwoFactorEnrolment.fromJson(Map<String, dynamic> json) =>
       TwoFactorEnrolment(
         secret: json['secret']?.toString() ?? '',
         qrUrl: json['qr_url']?.toString() ?? '',
+        qrImage: json['qr_image']?.toString() ?? '',
       );
+
+  /// [qrImage]'s base64 payload decoded to bytes, or `null` when there is no
+  /// image or it is malformed (the caller then falls back to local generation).
+  Uint8List? get qrImageBytes {
+    final comma = qrImage.indexOf(',');
+    if (comma < 0 || !qrImage.startsWith('data:')) return null;
+    try {
+      return base64Decode(qrImage.substring(comma + 1).trim());
+    } on FormatException {
+      return null;
+    }
+  }
+
+  /// True when [qrImage] carries an SVG (the backend's current format), which
+  /// needs `SvgPicture` rather than `Image.memory`.
+  bool get qrImageIsSvg => qrImage.startsWith('data:image/svg+xml');
 
   /// The URI actually encoded into the QR.
   ///
