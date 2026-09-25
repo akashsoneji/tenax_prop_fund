@@ -13,6 +13,7 @@ import '../../billing/widgets/billing_transaction_list.dart';
 import '../../payout_methods/controllers/payout_methods_controller.dart';
 import '../../payout_methods/models/payout_method.dart';
 import '../../payout_methods/widgets/add_payout_method_sheet.dart';
+import '../controllers/payout_history_controller.dart';
 import '../controllers/rewards_controller.dart';
 import '../models/reward_models.dart';
 import '../../../shared/theme/app_colors.dart';
@@ -24,6 +25,7 @@ import '../../../shared/widgets/data_state_builder.dart';
 import '../../../shared/widgets/pinned_gradient_app_bar.dart';
 import '../../../shared/widgets/skeletons/skeletons.dart';
 import '../widgets/info_banner.dart';
+import '../widgets/payout_history_tab.dart';
 import '../widgets/requirement_row.dart';
 import '../widgets/request_payout_sheet.dart';
 import '../widgets/section_title.dart';
@@ -48,7 +50,22 @@ class RewardsView extends StatefulWidget {
 }
 
 class _RewardsViewState extends State<RewardsView> {
+  static const _payoutHistoryTab = 3;
+
+  /// Next page is requested once the user is within this distance of the end.
+  static final _loadMoreExtent = 300.h;
+
   int _selectedTab = 0;
+
+  /// The tabs share one CustomScrollView, so paging for the Payout history
+  /// tab is driven from here: near the bottom → fetch the next page.
+  bool _onScroll(ScrollNotification n) {
+    if (_selectedTab != _payoutHistoryTab) return false;
+    if (n.metrics.extentAfter < _loadMoreExtent) {
+      Get.find<PayoutHistoryController>().loadMore();
+    }
+    return false;
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -57,26 +74,29 @@ class _RewardsViewState extends State<RewardsView> {
 
     return Scaffold(
       backgroundColor: scheme.surface,
-      body: CustomScrollView(
-        physics: const BouncingScrollPhysics(),
-        slivers: [
-          PinnedGradientAppBar(title: 'rewards.title'.tr),
-          SliverToBoxAdapter(
-            child: Padding(
-              padding: EdgeInsets.fromLTRB(16.w, 14.h, 16.w, 0),
-              child: _FinanceTabs(
-                selectedTab: _selectedTab,
-                onChanged: (tab) => setState(() => _selectedTab = tab),
+      body: NotificationListener<ScrollNotification>(
+        onNotification: _onScroll,
+        child: CustomScrollView(
+          physics: const BouncingScrollPhysics(),
+          slivers: [
+            PinnedGradientAppBar(title: 'rewards.title'.tr),
+            SliverToBoxAdapter(
+              child: Padding(
+                padding: EdgeInsets.fromLTRB(16.w, 14.h, 16.w, 0),
+                child: _FinanceTabs(
+                  selectedTab: _selectedTab,
+                  onChanged: (tab) => setState(() => _selectedTab = tab),
+                ),
               ),
             ),
-          ),
-          SliverToBoxAdapter(
-            child: SizedBox(
-              width: MediaQuery.sizeOf(context).width,
-              child: _buildTabContent(c),
+            SliverToBoxAdapter(
+              child: SizedBox(
+                width: MediaQuery.sizeOf(context).width,
+                child: _buildTabContent(c),
+              ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }
@@ -84,6 +104,7 @@ class _RewardsViewState extends State<RewardsView> {
   Widget _buildTabContent(RewardsController controller) {
     if (_selectedTab == 1) return const _BillingTabContent();
     if (_selectedTab == 2) return const _PayoutMethodsTabContent();
+    if (_selectedTab == _payoutHistoryTab) return const PayoutHistoryTab();
 
     return Padding(
       padding: EdgeInsets.fromLTRB(16.w, 18.h, 16.w, 32.h),
@@ -155,7 +176,7 @@ class _BillingTabContent extends StatelessWidget {
                   ),
                 ],
               ),
-              SizedBox(height: 14.h,),
+              SizedBox(height: 14.h),
               Row(
                 children: [
                   Expanded(
@@ -310,8 +331,11 @@ class _MethodManageRow extends StatelessWidget {
               color: scheme.primaryContainer.withValues(alpha: 0.45),
               borderRadius: BorderRadius.circular(10.r),
             ),
-            child: Icon(Icons.account_balance_wallet_rounded,
-                size: 18.w, color: scheme.primary),
+            child: Icon(
+              Icons.account_balance_wallet_rounded,
+              size: 18.w,
+              color: scheme.primary,
+            ),
           ),
           SizedBox(width: 12.w),
           Expanded(
@@ -329,14 +353,20 @@ class _MethodManageRow extends StatelessWidget {
           IconButton(
             tooltip: 'rewards.history_edit'.tr,
             onPressed: () => _edit(context, method),
-            icon: Icon(Icons.edit_outlined,
-                size: 20.w, color: scheme.onSurfaceVariant),
+            icon: Icon(
+              Icons.edit_outlined,
+              size: 20.w,
+              color: scheme.onSurfaceVariant,
+            ),
           ),
           IconButton(
             tooltip: 'payout_methods.remove'.tr,
             onPressed: () => _delete(context, method),
-            icon: Icon(Icons.delete_outline_rounded,
-                size: 20.w, color: scheme.error),
+            icon: Icon(
+              Icons.delete_outline_rounded,
+              size: 20.w,
+              color: scheme.error,
+            ),
           ),
         ],
       ),
@@ -344,9 +374,7 @@ class _MethodManageRow extends StatelessWidget {
   }
 
   void _edit(BuildContext context, RewardPayoutMethod method) {
-    final existing = Get.find<PayoutMethodsController>()
-        .state
-        .valueOrNull
+    final existing = Get.find<PayoutMethodsController>().state.valueOrNull
         ?.firstWhereOrNull((m) => m.id == method.id);
     if (existing == null) return;
     AddPayoutMethodSheet.show(context, existing: existing).then((saved) {
@@ -376,8 +404,9 @@ class _MethodManageRow extends StatelessWidget {
     );
     if (!confirmed) return;
 
-    final result =
-        await Get.find<PayoutMethodsController>().deleteMethod(method.id);
+    final result = await Get.find<PayoutMethodsController>().deleteMethod(
+      method.id,
+    );
     if (result.success) {
       Get.find<RewardsController>().load();
       AppToast.success('rewards.method_deleted'.tr);
@@ -404,8 +433,9 @@ class _FinanceTabs extends StatelessWidget {
       (label: 'rewards.tab_billing'.tr, icon: Icons.receipt_long_rounded),
       (
         label: 'rewards.tab_payout_methods'.tr,
-        icon: Icons.account_balance_wallet_rounded
+        icon: Icons.account_balance_wallet_rounded,
       ),
+      (label: 'rewards.tab_payout_history'.tr, icon: Icons.history_rounded),
     ];
 
     return Container(
@@ -424,9 +454,14 @@ class _FinanceTabs extends StatelessWidget {
                 borderRadius: BorderRadius.circular(12.r),
                 child: AnimatedContainer(
                   duration: const Duration(milliseconds: 220),
-                  padding: EdgeInsets.symmetric(vertical: 11.h, horizontal: 4.w),
+                  padding: EdgeInsets.symmetric(
+                    vertical: 11.h,
+                    horizontal: 4.w,
+                  ),
                   decoration: BoxDecoration(
-                    color: i == selectedTab ? scheme.primary : Colors.transparent,
+                    color: i == selectedTab
+                        ? scheme.primary
+                        : Colors.transparent,
                     borderRadius: BorderRadius.circular(12.r),
                   ),
                   child: Column(
@@ -435,7 +470,9 @@ class _FinanceTabs extends StatelessWidget {
                       Icon(
                         tabs[i].icon,
                         size: 18.w,
-                        color: i == selectedTab ? scheme.onPrimary : scheme.onSurface.withValues(alpha: 0.62),
+                        color: i == selectedTab
+                            ? scheme.onPrimary
+                            : scheme.onSurface.withValues(alpha: 0.62),
                       ),
                       SizedBox(height: 4.h),
                       Text(
@@ -446,7 +483,9 @@ class _FinanceTabs extends StatelessWidget {
                         style: GoogleFonts.beVietnamPro(
                           fontSize: 10.5.sp,
                           fontWeight: FontWeight.w700,
-                          color: i == selectedTab ? scheme.onPrimary : scheme.onSurface.withValues(alpha: 0.68),
+                          color: i == selectedTab
+                              ? scheme.onPrimary
+                              : scheme.onSurface.withValues(alpha: 0.68),
                         ),
                       ),
                     ],
@@ -475,7 +514,7 @@ class _RewardsBody extends StatelessWidget {
         RewardsSectionTitle('rewards.requests'.tr),
         _RequestsCard(controller: controller, data: data),
         SizedBox(height: 18.h),
-          _RequestPayoutCta(controller: controller, data: data),
+        _RequestPayoutCta(controller: controller, data: data),
         SizedBox(height: 18.h),
         InfoBanner(
           variant: InfoBannerVariant.warning,
@@ -605,14 +644,19 @@ class _RequestsCard extends StatelessWidget {
               ],
             ),
             SizedBox(height: 6.h),
-            Builder(builder: (context) {
-              final n = controller.blockingCount(data);
-              if (n == 0) return const SizedBox.shrink();
-              return InfoBanner(
-                title: 'rewards.two_things_blocking'.tr.replaceFirst('Two', '$n'),
-                body: 'rewards.two_things_blocking_body'.tr,
-              );
-            }),
+            Builder(
+              builder: (context) {
+                final n = controller.blockingCount(data);
+                if (n == 0) return const SizedBox.shrink();
+                return InfoBanner(
+                  title: 'rewards.two_things_blocking'.tr.replaceFirst(
+                    'Two',
+                    '$n',
+                  ),
+                  body: 'rewards.two_things_blocking_body'.tr,
+                );
+              },
+            ),
           ],
         ),
       ),

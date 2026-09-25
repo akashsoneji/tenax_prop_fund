@@ -232,7 +232,8 @@ class MethodTypesResponse {
       );
 }
 
-/// One row in the payout history list.
+/// One row of `GET /finance/payouts`. `amount` / `share` arrive pre-formatted
+/// by the server (e.g. "USD 1.00"), so they are shown as-is.
 class PayoutHistoryItem {
   const PayoutHistoryItem({
     required this.id,
@@ -241,6 +242,11 @@ class PayoutHistoryItem {
     required this.currency,
     required this.methodLabel,
     required this.createdAt,
+    this.requestId = '',
+    this.account = '',
+    this.share = '',
+    this.methodType = '',
+    this.paidAt,
     this.updatedAt,
     this.notes,
     this.cancellable = false,
@@ -251,24 +257,42 @@ class PayoutHistoryItem {
   final String currency;
   final String methodLabel;
   final String createdAt;
+  final String requestId;
+  final String account;
+  final String share;
+  final String methodType;
+  final String? paidAt;
   final String? updatedAt;
   final String? notes;
   final bool cancellable;
 
-  factory PayoutHistoryItem.fromJson(Map<String, dynamic> json) =>
-      PayoutHistoryItem(
-        id: json['id'] as int? ?? 0,
-        status: json['status']?.toString() ?? '',
-        amount: json['amount']?.toString() ?? '\$0',
-        currency: json['currency']?.toString() ?? 'USD',
-        methodLabel: json['method_label']?.toString() ??
-            json['payout_method']?['label']?.toString() ??
-            '',
-        createdAt: json['created_at']?.toString() ?? '',
-        updatedAt: json['updated_at']?.toString(),
-        notes: json['notes']?.toString(),
-        cancellable: json['cancellable'] as bool? ?? false,
-      );
+  DateTime? get createdDate => DateTime.tryParse(createdAt)?.toLocal();
+  DateTime? get paidDate =>
+      paidAt == null ? null : DateTime.tryParse(paidAt!)?.toLocal();
+
+  factory PayoutHistoryItem.fromJson(Map<String, dynamic> json) {
+    final notes = json['notes']?.toString();
+    return PayoutHistoryItem(
+      id: (json['id'] as num?)?.toInt() ?? 0,
+      status: json['status']?.toString() ?? '',
+      amount: json['amount']?.toString() ?? '',
+      currency: json['currency']?.toString() ?? 'USD',
+      methodLabel: json['method']?.toString() ??
+          json['method_label']?.toString() ??
+          json['payout_method']?['label']?.toString() ??
+          '',
+      createdAt: json['created_at']?.toString() ?? '',
+      requestId: json['request_id']?.toString() ?? '',
+      account: json['account']?.toString() ?? '',
+      share: json['share']?.toString() ?? '',
+      methodType: json['type']?.toString() ?? '',
+      paidAt: json['paid_at']?.toString(),
+      updatedAt: json['updated_at']?.toString(),
+      notes: (notes == null || notes.trim().isEmpty) ? null : notes,
+      cancellable:
+          json['can_cancel'] as bool? ?? json['cancellable'] as bool? ?? false,
+    );
+  }
 }
 
 /// Paginated payouts list.

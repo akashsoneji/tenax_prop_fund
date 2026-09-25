@@ -22,7 +22,8 @@ class ReferralWarningBanner extends StatelessWidget {
       padding: EdgeInsets.fromLTRB(14.w, 12.h, 14.w, 14.h),
       decoration: BoxDecoration(
         color: AppColors.warningInk.withValues(
-            alpha: scheme.brightness == Brightness.dark ? 0.16 : 0.12),
+          alpha: scheme.brightness == Brightness.dark ? 0.16 : 0.12,
+        ),
         borderRadius: BorderRadius.circular(12.r),
       ),
       child: Column(
@@ -30,8 +31,11 @@ class ReferralWarningBanner extends StatelessWidget {
         children: [
           Row(
             children: [
-              Icon(Icons.warning_amber_rounded,
-                  size: 18.w, color: AppColors.warningInk),
+              Icon(
+                Icons.warning_amber_rounded,
+                size: 18.w,
+                color: AppColors.warningInk,
+              ),
               SizedBox(width: 8.w),
               Expanded(
                 child: Text(

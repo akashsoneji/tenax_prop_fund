@@ -6,6 +6,14 @@ import '../models/reward_models.dart';
 
 /// Loads reward balances, eligibility, accounts, payout history, and method
 /// types from the live finance API.
+/// One page of payout history plus its pagination meta.
+class PayoutHistoryPage {
+  const PayoutHistoryPage({required this.items, required this.meta});
+
+  final List<PayoutHistoryItem> items;
+  final PageMeta meta;
+}
+
 class RewardsRepository {
   RewardsRepository(this._api);
 
@@ -164,6 +172,33 @@ class RewardsRepository {
     return ApiEnvelope.guard<void>(
       () => _api.post<dynamic>(ApiEndpoints.financePayouts, data: payload),
       (_) {},
+    );
+  }
+
+  /// Paged payout requests (`GET /finance/payouts?status=&page=`). `data` is a
+  /// flat list; `meta` carries `current_page` / `has_next` / `total`.
+  Future<ApiResponse<PayoutHistoryPage>> getPayouts({
+    String status = 'all',
+    int page = 1,
+  }) {
+    return ApiEnvelope.guardBody<PayoutHistoryPage>(
+      () => _api.get<Map<String, dynamic>>(
+        ApiEndpoints.financePayouts,
+        query: {'status': status, 'page': page},
+      ),
+      (body) {
+        final list = (body['data'] as List?) ?? const [];
+        final meta = body['meta'] is Map<String, dynamic>
+            ? PageMeta.fromJson(body['meta'] as Map<String, dynamic>)
+            : PageMeta.empty;
+        return PayoutHistoryPage(
+          items: list
+              .whereType<Map<String, dynamic>>()
+              .map(PayoutHistoryItem.fromJson)
+              .toList(),
+          meta: meta,
+        );
+      },
     );
   }
 

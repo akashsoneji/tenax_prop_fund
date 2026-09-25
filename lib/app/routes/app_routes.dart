@@ -38,6 +38,7 @@ abstract class AppRoutes {
   static const notifications = '/notifications';
   static const payoutMethods = '/payout-methods';
   static const referral = '/referral';
+  static const referralHistory = '/referral/history';
   static const support = '/support';
   static const symbols = '/symbols';
   static const chart = '/chart';
