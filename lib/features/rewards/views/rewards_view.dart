@@ -86,9 +86,12 @@ class _RewardsViewState extends State<RewardsView> {
               ),
             ),
             SliverToBoxAdapter(
-              child: SizedBox(
-                width: MediaQuery.sizeOf(context).width,
-                child: _buildTabContent(c),
+              child: SafeArea(
+                top: false,
+                child: SizedBox(
+                  width: MediaQuery.sizeOf(context).width,
+                  child: _buildTabContent(c),
+                ),
               ),
             ),
           ],
@@ -104,12 +107,15 @@ class _RewardsViewState extends State<RewardsView> {
 
     return Padding(
       padding: EdgeInsets.fromLTRB(16.w, 18.h, 16.w, 32.h),
-      child: Obx(
-        () => DataStateBuilder<RewardsData>(
-          state: controller.state,
-          onRetry: controller.load,
-          skeleton: const _RewardsSkeleton(),
-          builder: (data) => _RewardsBody(controller: controller, data: data),
+      child: SafeArea(
+        top: false,
+        child: Obx(
+          () => DataStateBuilder<RewardsData>(
+            state: controller.state,
+            onRetry: controller.load,
+            skeleton: const _RewardsSkeleton(),
+            builder: (data) => _RewardsBody(controller: controller, data: data),
+          ),
         ),
       ),
     );

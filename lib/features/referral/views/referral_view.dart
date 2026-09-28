@@ -39,39 +39,41 @@ class ReferralView extends StatelessWidget {
             ],
           ),
           SliverToBoxAdapter(
-            child: Padding(
-              padding: EdgeInsets.fromLTRB(16.w, 18.h, 16.w, 32.h),
-              child: Obx(
-                () => DataStateBuilder<ReferralData>(
-                  state: c.state,
-                  onRetry: c.load,
-                  skeleton: Column(
-                    crossAxisAlignment: CrossAxisAlignment.stretch,
-                    children: [
-                      HeroSkeleton(height: 250.h),
-                      SizedBox(height: 26.h),
-                      const CardSkeleton(lines: 4),
-                    ],
-                  ),
-                  builder: (data) => Column(
-                    crossAxisAlignment: CrossAxisAlignment.stretch,
-                    children: [
-                      _CodeHeroCard(controller: c, data: data),
-                      SizedBox(height: 26.h),
-                      _SectionTitle('referral.how_you_get_paid'.tr),
-                      const _HowYouGetPaidCard(),
-                      SizedBox(height: 18.h),
-                      ReferralWarningBanner(
-                        title: 'referral.warning_title'.tr,
-                        body: 'referral.warning_body'.tr,
-                      ),
-                      SizedBox(height: 26.h),
-                      _SectionTitle('referral.your_referrals'.tr),
-                      if (data.referrals.isEmpty)
-                        const _EmptyReferralsCard()
-                      else
-                        _ReferralsList(referrals: data.referrals),
-                    ],
+            child: SafeArea(
+              child: Padding(
+                padding: EdgeInsets.fromLTRB(16.w, 18.h, 16.w, 32.h),
+                child: Obx(
+                  () => DataStateBuilder<ReferralData>(
+                    state: c.state,
+                    onRetry: c.load,
+                    skeleton: Column(
+                      crossAxisAlignment: CrossAxisAlignment.stretch,
+                      children: [
+                        HeroSkeleton(height: 250.h),
+                        SizedBox(height: 26.h),
+                        const CardSkeleton(lines: 4),
+                      ],
+                    ),
+                    builder: (data) => Column(
+                      crossAxisAlignment: CrossAxisAlignment.stretch,
+                      children: [
+                        _CodeHeroCard(controller: c, data: data),
+                        SizedBox(height: 26.h),
+                        _SectionTitle('referral.how_you_get_paid'.tr),
+                        const _HowYouGetPaidCard(),
+                        SizedBox(height: 18.h),
+                        ReferralWarningBanner(
+                          title: 'referral.warning_title'.tr,
+                          body: 'referral.warning_body'.tr,
+                        ),
+                        SizedBox(height: 26.h),
+                        _SectionTitle('referral.your_referrals'.tr),
+                        if (data.referrals.isEmpty)
+                          const _EmptyReferralsCard()
+                        else
+                          _ReferralsList(referrals: data.referrals),
+                      ],
+                    ),
                   ),
                 ),
               ),
