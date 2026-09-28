@@ -136,34 +136,46 @@ class _BillingTabContent extends StatelessWidget {
                 children: [
                   Expanded(
                     child: Text(
-                      'Billing history',
+                      'billing.history_title'.tr,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
                       style: GoogleFonts.beVietnamPro(
                         fontSize: 20.sp,
                         fontWeight: FontWeight.w800,
                       ),
                     ),
                   ),
+                  SizedBox(width: 10.w),
                   Obx(
                     () => SizedBox(
-                      width: 118.w,
-                      height: 44.h,
+                      height: 36.h,
                       child: OutlinedButton.icon(
+                        style: OutlinedButton.styleFrom(
+                          // The app theme sets an infinite min width for
+                          // full-width CTAs; this button sits in a Row.
+                          minimumSize: Size(0, 36.h),
+                          tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                          padding: EdgeInsets.symmetric(horizontal: 14.w),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(20.r),
+                          ),
+                        ),
                         onPressed: controller.isExporting.value
                             ? null
                             : () => _exportCsv(context, controller),
                         icon: controller.isExporting.value
                             ? SizedBox(
-                                width: 15.w,
-                                height: 15.w,
+                                width: 14.w,
+                                height: 14.w,
                                 child: const CircularProgressIndicator(
                                   strokeWidth: 2,
                                 ),
                               )
-                            : Icon(Icons.download_rounded, size: 17.w),
+                            : Icon(Icons.download_rounded, size: 16.w),
                         label: Text(
-                          'Export',
+                          'billing.export'.tr,
                           style: GoogleFonts.beVietnamPro(
-                            fontSize: 11.sp,
+                            fontSize: 12.sp,
                             fontWeight: FontWeight.w700,
                           ),
                         ),
@@ -324,17 +336,19 @@ class _FinanceTabs extends StatelessWidget {
                             : scheme.onSurface.withValues(alpha: 0.62),
                       ),
                       SizedBox(height: 4.h),
-                      Text(
-                        tabs[i].label,
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                        textAlign: TextAlign.center,
-                        style: GoogleFonts.beVietnamPro(
-                          fontSize: 10.5.sp,
-                          fontWeight: FontWeight.w700,
-                          color: i == selectedTab
-                              ? scheme.onPrimary
-                              : scheme.onSurface.withValues(alpha: 0.68),
+                      FittedBox(
+                        fit: BoxFit.scaleDown,
+                        child: Text(
+                          tabs[i].label,
+                          maxLines: 1,
+                          textAlign: TextAlign.center,
+                          style: GoogleFonts.beVietnamPro(
+                            fontSize: 10.5.sp,
+                            fontWeight: FontWeight.w700,
+                            color: i == selectedTab
+                                ? scheme.onPrimary
+                                : scheme.onSurface.withValues(alpha: 0.68),
+                          ),
                         ),
                       ),
                     ],

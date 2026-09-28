@@ -8,9 +8,26 @@ import '../models/positions_models.dart';
 
 enum CloseGroup { all, profitable, losing, long, short }
 
+List<TradePosition> positionsForGroup(
+  CloseGroup group,
+  List<TradePosition> positions,
+) {
+  return switch (group) {
+    CloseGroup.all => positions,
+    CloseGroup.profitable =>
+      positions.where((position) => position.profitLoss > 0).toList(),
+    CloseGroup.losing =>
+      positions.where((position) => position.profitLoss < 0).toList(),
+    CloseGroup.long => positions.where((position) => position.isBuy).toList(),
+    CloseGroup.short => positions.where((position) => !position.isBuy).toList(),
+  };
+}
+
+/// [positions] is read inside an [Obx], so pass a getter over the live
+/// socket-backed list — the P/L totals then update tick by tick.
 Future<CloseGroup?> showCloseAllSheet(
   BuildContext context, {
-  required List<TradePosition> positions,
+  required List<TradePosition> Function() positions,
 }) {
   return showModalBottomSheet<CloseGroup>(
     context: context,
@@ -24,7 +41,7 @@ Future<CloseGroup?> showCloseAllSheet(
 class _CloseAllSheet extends StatefulWidget {
   const _CloseAllSheet({required this.positions});
 
-  final List<TradePosition> positions;
+  final List<TradePosition> Function() positions;
 
   @override
   State<_CloseAllSheet> createState() => _CloseAllSheetState();
@@ -33,21 +50,7 @@ class _CloseAllSheet extends StatefulWidget {
 class _CloseAllSheetState extends State<_CloseAllSheet> {
   CloseGroup _selected = CloseGroup.all;
 
-  List<TradePosition> _positionsFor(CloseGroup group) {
-    return switch (group) {
-      CloseGroup.all => widget.positions,
-      CloseGroup.profitable =>
-        widget.positions.where((position) => position.profitLoss > 0).toList(),
-      CloseGroup.losing =>
-        widget.positions.where((position) => position.profitLoss < 0).toList(),
-      CloseGroup.long =>
-        widget.positions.where((position) => position.isBuy).toList(),
-      CloseGroup.short =>
-        widget.positions.where((position) => !position.isBuy).toList(),
-    };
-  }
-
-  double _totalFor(CloseGroup group) => _positionsFor(group).fold(
+  double _totalFor(List<TradePosition> positions) => positions.fold(
         0,
         (total, position) => total + position.profitLoss,
       );
@@ -62,9 +65,13 @@ class _CloseAllSheetState extends State<_CloseAllSheet> {
 
   @override
   Widget build(BuildContext context) {
+    return Obx(() => _buildSheet(context, widget.positions()));
+  }
+
+  Widget _buildSheet(BuildContext context, List<TradePosition> positions) {
     final scheme = Theme.of(context).colorScheme;
-    final selectedPositions = _positionsFor(_selected);
-    final selectedTotal = _totalFor(_selected);
+    final selectedPositions = positionsForGroup(_selected, positions);
+    final selectedTotal = _totalFor(selectedPositions);
 
     return SafeArea(
       top: false,
@@ -108,15 +115,17 @@ class _CloseAllSheetState extends State<_CloseAllSheet> {
                 padding: EdgeInsets.symmetric(horizontal: 16.w),
                 child: Column(
                   children: CloseGroup.values
-                      .map(
-                        (group) => _CloseOption(
+                      .map((group) {
+                        final groupPositions =
+                            positionsForGroup(group, positions);
+                        return _CloseOption(
                           label: _labelFor(group),
-                          total: _totalFor(group),
-                          count: _positionsFor(group).length,
+                          total: _totalFor(groupPositions),
+                          count: groupPositions.length,
                           selected: _selected == group,
                           onTap: () => setState(() => _selected = group),
-                        ),
-                      )
+                        );
+                      })
                       .toList(),
                 ),
               ),
