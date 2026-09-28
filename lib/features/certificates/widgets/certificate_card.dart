@@ -155,7 +155,7 @@ class _MedalSeal extends StatelessWidget {
       height: 46.w,
       decoration: BoxDecoration(
         shape: BoxShape.circle,
-        gradient: earned ? AppTheme.brandGradient(scheme) : null,
+        gradient: earned ? AppTheme.heroGradient(scheme) : null,
         color: earned ? null : scheme.onSurface.withValues(alpha: 0.06),
         border: earned
             ? null

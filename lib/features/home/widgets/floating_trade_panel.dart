@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
+
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
 
@@ -440,9 +440,7 @@ class _FloatingTradePanelState extends State<FloatingTradePanel> {
               textAlignVertical: TextAlignVertical.center,
               keyboardType:
                   const TextInputType.numberWithOptions(decimal: true),
-              inputFormatters: [
-                FilteringTextInputFormatter.allow(RegExp(r'[0-9.]')),
-              ],
+              inputFormatters: const [DecimalPrecisionFormatter(2)],
               onChanged: _onVolumeEdited,
               style: TextStyle(
                 fontSize: 16.sp,

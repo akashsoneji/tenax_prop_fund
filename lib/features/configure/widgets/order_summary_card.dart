@@ -90,7 +90,7 @@ class _PlanHeader extends StatelessWidget {
             width: 40.w,
             height: 40.w,
             decoration: BoxDecoration(
-              gradient: AppTheme.brandGradient(scheme),
+              gradient: AppTheme.heroGradient(scheme),
               borderRadius: BorderRadius.circular(12.r),
             ),
             child: Icon(Icons.workspace_premium_rounded,
