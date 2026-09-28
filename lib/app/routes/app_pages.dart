@@ -17,6 +17,9 @@ import '../../features/referral/views/referral_view.dart';
 import '../../features/support/bindings/support_binding.dart';
 import '../../features/support/views/support_view.dart';
 import '../../features/chart/views/chart_view.dart';
+import '../../features/chart_landscape/bindings/chart_landscape_binding.dart';
+import '../../features/chart_landscape/views/chart_landscape_view.dart';
+import '../../features/chart_landscape/views/rotate_into_landscape_transition.dart';
 import '../../features/symbols/bindings/symbols_binding.dart';
 import '../../features/symbols/views/symbols_view.dart';
 import '../../features/billing/bindings/billing_binding.dart';
@@ -291,6 +294,19 @@ class AppPages {
     GetPage(
       name: AppRoutes.chart,
       page: () => const ChartView(),
+    ),
+    GetPage(
+      name: AppRoutes.chartLandscape,
+      // Symbols come from the caller so the rail's picker lists exactly what
+      // the Charts tab offers.
+      page: () => ChartLandscapeView(
+        symbols: (Get.arguments as List<String>?) ?? const [],
+      ),
+      binding: ChartLandscapeBinding(),
+      // Custom rotate+scale so the screen reads as the device turning into
+      // landscape, rather than an unrelated page sliding in.
+      customTransition: RotateIntoLandscapeTransition(),
+      transitionDuration: const Duration(milliseconds: 420),
     ),
   ];
 }

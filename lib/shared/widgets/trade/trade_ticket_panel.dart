@@ -5,24 +5,42 @@ import 'package:get/get.dart';
 
 import 'dart:math';
 
-import '../../../shared/theme/app_colors.dart';
-import '../../../shared/theme/app_theme.dart';
-import '../../symbols/services/market_watch_v2_service.dart';
-import '../views/pending_order_view.dart';
-import 'notifications_sheet.dart';
-import 'pending_order_widgets.dart';
+import '../../../features/home/views/pending_order_view.dart';
+import '../../../features/home/widgets/notifications_sheet.dart';
+import '../../../features/home/widgets/pending_order_widgets.dart';
+import '../../../features/symbols/services/market_watch_v2_service.dart';
+import '../../theme/app_colors.dart';
+import '../../theme/app_theme.dart';
+import 'trade_ticket.dart';
 
-/// A docked trading order ticket shown below the Markets chart and above the
-/// bottom navigation bar. It exposes Buy / Sell, live spread, order type
-/// (Market / Pending) with an optional TP/SL section, and a volume/lot stepper.
-class FloatingTradePanel extends StatefulWidget {
-  const FloatingTradePanel({
+export 'trade_ticket.dart';
+
+/// The app's single order ticket: Buy / Sell with live prices, the spread
+/// badge, order volume with +/- steppers and lot presets, an optional TP/SL
+/// section and a shortcut to the pending-order screen.
+///
+/// It is presentation-only — every action is handed back through [onSubmit] /
+/// [onSymbolSelected] so the hosting feature's controller owns the business
+/// logic. [layout] switches between the portrait dock (under the chart) and the
+/// landscape rail (beside the chart) without forking the widget.
+///
+/// Sizing: portrait (`docked`) uses ScreenUtil (`.w/.h/.sp/.r`) exactly as
+/// before. The landscape rail does NOT — the root `ScreenUtilInit` is designed
+/// for the PORTRAIT screen (375x812), and the device's own `MediaQuery`
+/// genuinely reports landscape dimensions while this panel is on screen. That
+/// mismatch scaled every dimension in the rail to the wrong size, which is what
+/// showed up as overlapping, oversized text. So rail sizes are plain literal
+/// points instead — see [_u]/[_v]/[_f]/[_rad] below.
+class TradeTicketPanel extends StatefulWidget {
+  const TradeTicketPanel({
     super.key,
     required this.symbol,
     this.symbols = const [],
     this.onSymbolSelected,
     this.spread = 0.8,
     this.onSubmit,
+    this.layout = TradeTicketLayout.docked,
+    this.header,
   });
 
   /// Currently selected market symbol (drives the ticket header).
@@ -40,32 +58,18 @@ class FloatingTradePanel extends StatefulWidget {
   /// Called when the user taps Buy or Sell with the assembled ticket.
   final Future<void> Function(TradeTicket ticket)? onSubmit;
 
+  /// Docked under the chart (portrait) or a rail beside it (landscape).
+  final TradeTicketLayout layout;
+
+  /// Replaces the built-in header row. The landscape rail supplies a richer
+  /// one (instrument + live price) because it has no app bar above it.
+  final Widget? header;
+
   @override
-  State<FloatingTradePanel> createState() => _FloatingTradePanelState();
+  State<TradeTicketPanel> createState() => _TradeTicketPanelState();
 }
 
-/// Immutable snapshot of what the user configured before hitting Buy/Sell.
-class TradeTicket {
-  const TradeTicket({
-    required this.symbol,
-    required this.side,
-    required this.volume,
-    this.takeProfit,
-    this.stopLoss,
-  });
-
-  final String symbol;
-  final TradeSide side;
-  final double volume;
-
-  /// Optional TP/SL prices; null when the TP/SL toggle is off or left unset.
-  final double? takeProfit;
-  final double? stopLoss;
-}
-
-enum TradeSide { buy, sell }
-
-class _FloatingTradePanelState extends State<FloatingTradePanel> {
+class _TradeTicketPanelState extends State<TradeTicketPanel> {
   double _volume = 0.01;
   bool _tpSlEnabled = false;
 
@@ -76,20 +80,35 @@ class _FloatingTradePanelState extends State<FloatingTradePanel> {
   /// Quick-set lot presets shown as chips above the volume field.
   static const List<double> _volumePresets = [0.01, 0.10, 0.50, 1.00];
 
+  bool get _isRail => widget.layout == TradeTicketLayout.rail;
+
+  /// Horizontal / general dimension: ScreenUtil `.w` for the portrait dock,
+  /// a literal point value for the landscape rail (see class doc for why).
+  double _u(double v) => _isRail ? v : v.w;
+
+  /// Vertical dimension: ScreenUtil `.h` for the dock, literal for the rail.
+  double _v(double v) => _isRail ? v : v.h;
+
+  /// Font size: ScreenUtil `.sp` for the dock, literal for the rail.
+  double _f(double v) => _isRail ? v : v.sp;
+
+  /// Corner radius: ScreenUtil `.r` for the dock, literal for the rail.
+  double _rad(double v) => _isRail ? v : v.r;
+
   /// Shared height for the volume field, +/- steppers and Pending button so
   /// they line up on one row.
-  static final double _controlHeight = 44.w;
+  double get _controlHeight => _u(44);
 
   /// Compact height for the TP/SL price pills — deliberately shorter than
   /// [_controlHeight] so turning TP/SL on doesn't push the chart off-screen.
-  static final double _levelHeight = 34.h;
+  double get _levelHeight => _v(34);
 
   final _volumeCtrl = TextEditingController(text: '0.01');
   final _tpCtrl = TextEditingController();
   final _slCtrl = TextEditingController();
 
   @override
-  void didUpdateWidget(covariant FloatingTradePanel oldWidget) {
+  void didUpdateWidget(covariant TradeTicketPanel oldWidget) {
     super.didUpdateWidget(oldWidget);
     // Levels are absolute prices, so they are meaningless on a new instrument
     // (XAUUSD 4372.31 on EURUSD). Drop them and re-seed from the new quote.
@@ -227,17 +246,20 @@ class _FloatingTradePanelState extends State<FloatingTradePanel> {
   }
 
   Widget _buildPanel(ColorScheme scheme) {
+    final divider = BorderSide(color: scheme.primary.withValues(alpha: 0.25));
     return Material(
       color: scheme.surface,
       child: Container(
         width: double.infinity,
-        padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 8.h),
+        padding: EdgeInsets.symmetric(
+          horizontal: _isRail ? _u(10) : _u(12),
+          vertical: _v(8),
+        ),
         decoration: BoxDecoration(
           color: scheme.surface,
           border: Border(
-            top: BorderSide(
-              color: scheme.primary.withValues(alpha: 0.25),
-            ),
+            top: _isRail ? BorderSide.none : divider,
+            left: _isRail ? divider : BorderSide.none,
           ),
         ),
         child: SingleChildScrollView(
@@ -246,45 +268,49 @@ class _FloatingTradePanelState extends State<FloatingTradePanel> {
             mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-            _header(scheme),
-            SizedBox(height: 8.h),
-            _volumeStepper(scheme),
-            SizedBox(height: 6.h),
-            _volumePresetChips(scheme),
-            SizedBox(height: 8.h),
-            _tpSlSection(scheme),
-            SizedBox(height: 8.h),
-            Obx(() {
-              final quote = Get.find<MarketWatchV2Service>()
-                  .priceOf(widget.symbol)
-                  .value;
-              final digits = quote.digits.clamp(0, 8);
-              return Row(
-                children: [
-                  Expanded(
-                    child: _SideButton(
-                      label: 'trade.sell'.tr,
-                      price: quote.bid > 0
-                          ? quote.bid.toStringAsFixed(digits)
-                          : null,
-                      color: AppColors.danger,
-                      onTap: () => _submit(TradeSide.sell),
+              widget.header ?? _header(scheme),
+              SizedBox(height: _v(8)),
+              _volumeStepper(scheme),
+              SizedBox(height: _v(6)),
+              _volumePresetChips(scheme),
+              SizedBox(height: _v(8)),
+              _tpSlSection(scheme),
+              SizedBox(height: _v(8)),
+              Obx(() {
+                final quote = Get.find<MarketWatchV2Service>()
+                    .priceOf(widget.symbol)
+                    .value;
+                final digits = quote.digits.clamp(0, 8);
+                return Row(
+                  children: [
+                    Expanded(
+                      child: _SideButton(
+                        label: 'trade.sell'.tr,
+                        price: quote.bid > 0
+                            ? quote.bid.toStringAsFixed(digits)
+                            : null,
+                        color: AppColors.danger,
+                        compact: _isRail,
+                        isRail: _isRail,
+                        onTap: () => _submit(TradeSide.sell),
+                      ),
                     ),
-                  ),
-                  _spreadBadge(scheme),
-                  Expanded(
-                    child: _SideButton(
-                      label: 'trade.buy'.tr,
-                      price: quote.ask > 0
-                          ? quote.ask.toStringAsFixed(digits)
-                          : null,
-                      color: AppColors.success,
-                      onTap: () => _submit(TradeSide.buy),
+                    _spreadBadge(scheme),
+                    Expanded(
+                      child: _SideButton(
+                        label: 'trade.buy'.tr,
+                        price: quote.ask > 0
+                            ? quote.ask.toStringAsFixed(digits)
+                            : null,
+                        color: AppColors.success,
+                        compact: _isRail,
+                        isRail: _isRail,
+                        onTap: () => _submit(TradeSide.buy),
+                      ),
                     ),
-                  ),
-                ],
-              );
-            }),
+                  ],
+                );
+              }),
             ],
           ),
         ),
@@ -298,9 +324,9 @@ class _FloatingTradePanelState extends State<FloatingTradePanel> {
         Expanded(
           child: InkWell(
             onTap: _openSymbolPicker,
-            borderRadius: BorderRadius.circular(10.r),
+            borderRadius: BorderRadius.circular(_rad(10)),
             child: Padding(
-              padding: EdgeInsets.symmetric(vertical: 4.h, horizontal: 4.w),
+              padding: EdgeInsets.symmetric(vertical: _v(4), horizontal: _u(4)),
               child: Row(
                 children: [
                   Flexible(
@@ -309,14 +335,14 @@ class _FloatingTradePanelState extends State<FloatingTradePanel> {
                       overflow: TextOverflow.ellipsis,
                       style: TextStyle(
                         fontWeight: FontWeight.w700,
-                        fontSize: 15.sp,
+                        fontSize: _f(15),
                         color: scheme.onSurface,
                       ),
                     ),
                   ),
-                  SizedBox(width: 2.w),
+                  SizedBox(width: _u(2)),
                   Icon(Icons.expand_more,
-                      size: 18.w, color: scheme.onSurfaceVariant),
+                      size: _u(18), color: scheme.onSurfaceVariant),
                 ],
               ),
             ),
@@ -324,11 +350,11 @@ class _FloatingTradePanelState extends State<FloatingTradePanel> {
         ),
         InkWell(
           onTap: _openNotifications,
-          borderRadius: BorderRadius.circular(20.r),
+          borderRadius: BorderRadius.circular(_rad(20)),
           child: Padding(
-            padding: EdgeInsets.all(4.w),
+            padding: EdgeInsets.all(_u(4)),
             child: Icon(Icons.notifications_none,
-                size: 22.w, color: scheme.onSurfaceVariant),
+                size: _u(22), color: scheme.onSurfaceVariant),
           ),
         ),
       ],
@@ -340,6 +366,12 @@ class _FloatingTradePanelState extends State<FloatingTradePanel> {
     final selected = await showModalBottomSheet<String>(
       context: context,
       showDragHandle: true,
+      // Landscape leaves ~375pt of height, so there the sheet must be
+      // scrollable and safe-area aware or the list is clipped by the home
+      // indicator. Portrait keeps its original behaviour untouched.
+      isScrollControlled: _isRail,
+      useSafeArea: _isRail,
+      constraints: _isRail ? const BoxConstraints(maxHeight: 260) : null,
       builder: (context) {
         final scheme = Theme.of(context).colorScheme;
         return SafeArea(
@@ -348,11 +380,11 @@ class _FloatingTradePanelState extends State<FloatingTradePanel> {
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
               Padding(
-                padding: EdgeInsets.fromLTRB(20.w, 4.h, 20.w, 12.h),
+                padding: EdgeInsets.fromLTRB(_u(20), _v(4), _u(20), _v(12)),
                 child: Text(
                   'trade.select_symbol'.tr,
                   style: TextStyle(
-                    fontSize: 16.sp,
+                    fontSize: _f(16),
                     fontWeight: FontWeight.w700,
                     color: scheme.onSurface,
                   ),
@@ -367,6 +399,7 @@ class _FloatingTradePanelState extends State<FloatingTradePanel> {
                   itemBuilder: (context, i) {
                     final s = widget.symbols[i];
                     return ListTile(
+                      dense: _isRail,
                       title: Text(
                         s,
                         maxLines: 1,
@@ -390,11 +423,11 @@ class _FloatingTradePanelState extends State<FloatingTradePanel> {
 
   Widget _spreadBadge(ColorScheme scheme) {
     return Container(
-      margin: EdgeInsets.symmetric(horizontal: 8.w),
-      padding: EdgeInsets.symmetric(horizontal: 10.w, vertical: 6.h),
+      margin: EdgeInsets.symmetric(horizontal: _isRail ? _u(6) : _u(8)),
+      padding: EdgeInsets.symmetric(horizontal: _u(10), vertical: _v(6)),
       decoration: BoxDecoration(
         color: scheme.surfaceContainerHighest,
-        borderRadius: BorderRadius.circular(10.r),
+        borderRadius: BorderRadius.circular(_rad(10)),
       ),
       child: Column(
         mainAxisSize: MainAxisSize.min,
@@ -402,16 +435,16 @@ class _FloatingTradePanelState extends State<FloatingTradePanel> {
           Text(
             'trade.spread'.tr,
             style: TextStyle(
-              fontSize: 9.sp,
+              fontSize: _f(9),
               fontWeight: FontWeight.w600,
               color: scheme.onSurfaceVariant,
             ),
           ),
-          SizedBox(height: 2.h),
+          SizedBox(height: _v(2)),
           Text(
             widget.spread.toStringAsFixed(1),
             style: TextStyle(
-              fontSize: 13.sp,
+              fontSize: _f(13),
               fontWeight: FontWeight.w700,
               color: scheme.onSurface,
             ),
@@ -425,14 +458,14 @@ class _FloatingTradePanelState extends State<FloatingTradePanel> {
     return Row(
       children: [
         _stepBtn(scheme, Icons.remove, () => _bumpVolume(-0.01)),
-        SizedBox(width: 8.w),
+        SizedBox(width: _u(8)),
         Expanded(
           child: Container(
             height: _controlHeight,
             alignment: Alignment.center,
             decoration: BoxDecoration(
               color: scheme.surfaceContainerHighest,
-              borderRadius: BorderRadius.circular(10.r),
+              borderRadius: BorderRadius.circular(_rad(10)),
             ),
             child: TextField(
               controller: _volumeCtrl,
@@ -445,7 +478,7 @@ class _FloatingTradePanelState extends State<FloatingTradePanel> {
               ],
               onChanged: _onVolumeEdited,
               style: TextStyle(
-                fontSize: 16.sp,
+                fontSize: _f(16),
                 fontWeight: FontWeight.w700,
                 color: scheme.onSurface,
               ),
@@ -462,10 +495,15 @@ class _FloatingTradePanelState extends State<FloatingTradePanel> {
             ),
           ),
         ),
-        SizedBox(width: 8.w),
+        SizedBox(width: _u(8)),
         _stepBtn(scheme, Icons.add, () => _bumpVolume(0.01)),
-        SizedBox(width: 8.w),
-        _PendingButton(onTap: _openPendingOrder),
+        // Pending lives in the portrait dock only: the landscape rail is a
+        // focused quick-trade surface, and the pending-order screen is a
+        // portrait-authored full page that has no place inside a 300pt rail.
+        if (!_isRail) ...[
+          SizedBox(width: _u(8)),
+          _PendingButton(onTap: _openPendingOrder),
+        ],
       ],
     );
   }
@@ -473,15 +511,15 @@ class _FloatingTradePanelState extends State<FloatingTradePanel> {
   Widget _stepBtn(ColorScheme scheme, IconData icon, VoidCallback onTap) {
     return InkWell(
       onTap: onTap,
-      borderRadius: BorderRadius.circular(10.r),
+      borderRadius: BorderRadius.circular(_rad(10)),
       child: Container(
-        width: _controlHeight - 10 %10,
+        width: _controlHeight,
         height: _controlHeight,
         decoration: BoxDecoration(
           gradient: AppTheme.brandGradient(scheme),
-          borderRadius: BorderRadius.circular(10.r),
+          borderRadius: BorderRadius.circular(_rad(10)),
         ),
-        child: Icon(icon, size: 18.w, color: AppColors.white),
+        child: Icon(icon, size: _u(18), color: AppColors.white),
       ),
     );
   }
@@ -490,11 +528,12 @@ class _FloatingTradePanelState extends State<FloatingTradePanel> {
     return Row(
       children: [
         for (var i = 0; i < _volumePresets.length; i++) ...[
-          if (i > 0) SizedBox(width: 8.w),
+          if (i > 0) SizedBox(width: _u(8)),
           Expanded(
             child: _PresetChip(
               label: _volumePresets[i].toStringAsFixed(2),
               selected: (_volume - _volumePresets[i]).abs() < 0.0001,
+              isRail: _isRail,
               onTap: () => _setVolume(_volumePresets[i]),
             ),
           ),
@@ -515,7 +554,7 @@ class _FloatingTradePanelState extends State<FloatingTradePanel> {
                 maxLines: 1,
                 overflow: TextOverflow.ellipsis,
                 style: TextStyle(
-                  fontSize: 13.sp,
+                  fontSize: _f(13),
                   fontWeight: FontWeight.w700,
                   color: scheme.onSurface,
                 ),
@@ -538,7 +577,7 @@ class _FloatingTradePanelState extends State<FloatingTradePanel> {
           alignment: Alignment.topCenter,
           child: _tpSlEnabled
               ? Padding(
-                  padding: EdgeInsets.only(top: 6.h),
+                  padding: EdgeInsets.only(top: _v(6)),
                   child: Row(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
@@ -553,7 +592,7 @@ class _FloatingTradePanelState extends State<FloatingTradePanel> {
                               _takeProfit = double.tryParse(raw.trim()),
                         ),
                       ),
-                      SizedBox(width: 8.w),
+                      SizedBox(width: _u(8)),
                       Expanded(
                         child: _levelField(
                           scheme,
@@ -593,17 +632,17 @@ class _FloatingTradePanelState extends State<FloatingTradePanel> {
           maxLines: 1,
           overflow: TextOverflow.ellipsis,
           style: TextStyle(
-            fontSize: 10.sp,
+            fontSize: _f(10),
             fontWeight: FontWeight.w600,
             color: scheme.onSurfaceVariant,
           ),
         ),
-        SizedBox(height: 4.h),
+        SizedBox(height: _v(4)),
         Container(
           height: _levelHeight,
           decoration: BoxDecoration(
             color: scheme.surfaceContainerHighest,
-            borderRadius: BorderRadius.circular(10.r),
+            borderRadius: BorderRadius.circular(_rad(10)),
           ),
           child: Row(
             children: [
@@ -620,14 +659,14 @@ class _FloatingTradePanelState extends State<FloatingTradePanel> {
                   textAlignVertical: TextAlignVertical.center,
                   onChanged: onChanged,
                   style: TextStyle(
-                    fontSize: 13.sp,
+                    fontSize: _f(13),
                     fontWeight: FontWeight.w700,
                     color: scheme.onSurface,
                   ),
                   decoration: InputDecoration(
                     hintText: 'trade.not_set'.tr,
                     hintStyle: TextStyle(
-                      fontSize: 12.sp,
+                      fontSize: _f(12),
                       color: scheme.onSurfaceVariant,
                     ),
                     isCollapsed: true,
@@ -635,7 +674,7 @@ class _FloatingTradePanelState extends State<FloatingTradePanel> {
                     border: InputBorder.none,
                     enabledBorder: InputBorder.none,
                     focusedBorder: InputBorder.none,
-                    contentPadding: EdgeInsets.symmetric(horizontal: 2.w),
+                    contentPadding: EdgeInsets.symmetric(horizontal: _u(2)),
                   ),
                 ),
               ),
@@ -650,15 +689,15 @@ class _FloatingTradePanelState extends State<FloatingTradePanel> {
   Widget _levelStepBtn(ColorScheme scheme, IconData icon, VoidCallback onTap) {
     return InkWell(
       onTap: onTap,
-      borderRadius: BorderRadius.circular(10.r),
+      borderRadius: BorderRadius.circular(_rad(10)),
       child: Container(
         width: _levelHeight,
         height: _levelHeight,
         decoration: BoxDecoration(
           gradient: AppTheme.brandGradient(scheme),
-          borderRadius: BorderRadius.circular(10.r),
+          borderRadius: BorderRadius.circular(_rad(10)),
         ),
-        child: Icon(icon, size: 15.w, color: AppColors.white),
+        child: Icon(icon, size: _u(15), color: AppColors.white),
       ),
     );
   }
@@ -669,7 +708,7 @@ class _FloatingTradePanelState extends State<FloatingTradePanel> {
       showDragHandle: true,
       isScrollControlled: true,
       useSafeArea: true,
-      constraints: BoxConstraints.expand(height: 360.h),
+      constraints: BoxConstraints.expand(height: _isRail ? 300 : 360.h),
       builder: (context) => const NotificationsSheet(),
     );
   }
@@ -682,10 +721,12 @@ class _PresetChip extends StatelessWidget {
     required this.label,
     required this.selected,
     required this.onTap,
+    this.isRail = false,
   });
 
   final String label;
   final bool selected;
+  final bool isRail;
   final VoidCallback onTap;
 
   @override
@@ -693,22 +734,22 @@ class _PresetChip extends StatelessWidget {
     final scheme = Theme.of(context).colorScheme;
     return InkWell(
       onTap: onTap,
-      borderRadius: BorderRadius.circular(10.r),
+      borderRadius: BorderRadius.circular(isRail ? 10 : 10.r),
       child: AnimatedContainer(
         duration: const Duration(milliseconds: 180),
         curve: Curves.easeOutCubic,
-        height: 36.h,
+        height: isRail ? 36 : 36.h,
         alignment: Alignment.center,
         decoration: BoxDecoration(
           color: selected ? scheme.primary : scheme.surfaceContainerHighest,
-          borderRadius: BorderRadius.circular(10.r),
+          borderRadius: BorderRadius.circular(isRail ? 10 : 10.r),
         ),
         child: Text(
           label,
           maxLines: 1,
           overflow: TextOverflow.ellipsis,
           style: TextStyle(
-            fontSize: 13.sp,
+            fontSize: isRail ? 13 : 13.sp,
             fontWeight: FontWeight.w700,
             color: selected ? scheme.onPrimary : scheme.onSurface,
           ),
@@ -724,6 +765,8 @@ class _SideButton extends StatelessWidget {
     required this.color,
     required this.onTap,
     this.price,
+    this.compact = false,
+    this.isRail = false,
   });
 
   final String label;
@@ -733,16 +776,21 @@ class _SideButton extends StatelessWidget {
   /// Live side price shown under the label — bid for Sell, ask for Buy.
   final String? price;
 
+  /// Shorter button for the landscape rail, where vertical room is scarce.
+  final bool compact;
+
+  final bool isRail;
+
   @override
   Widget build(BuildContext context) {
     return Material(
       color: color,
-      borderRadius: BorderRadius.circular(14.r),
+      borderRadius: BorderRadius.circular(isRail ? 14 : 14.r),
       child: InkWell(
         onTap: onTap,
-        borderRadius: BorderRadius.circular(14.r),
+        borderRadius: BorderRadius.circular(isRail ? 14 : 14.r),
         child: SizedBox(
-          height: 52.h,
+          height: isRail ? 46 : (compact ? 46.h : 52.h),
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
@@ -752,7 +800,7 @@ class _SideButton extends StatelessWidget {
                 overflow: TextOverflow.ellipsis,
                 style: TextStyle(
                   color: AppColors.white,
-                  fontSize: 15.sp,
+                  fontSize: isRail ? 15 : 15.sp,
                   fontWeight: FontWeight.w700,
                   height: 1.1,
                 ),
@@ -764,7 +812,7 @@ class _SideButton extends StatelessWidget {
                   overflow: TextOverflow.ellipsis,
                   style: TextStyle(
                     color: AppColors.white.withValues(alpha: 0.9),
-                    fontSize: 12.sp,
+                    fontSize: isRail ? 12 : 12.sp,
                     fontWeight: FontWeight.w600,
                     height: 1.2,
                   ),

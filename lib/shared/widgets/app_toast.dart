@@ -151,11 +151,25 @@ class _ToastCardState extends State<_ToastCard>
     final dark = scheme.brightness == Brightness.dark;
     final accent = _accent(scheme);
     final media = MediaQuery.of(context);
+    // The app's root ScreenUtilInit is designed for the PORTRAIT screen
+    // (375x812). This toast is inserted into the app's ROOT overlay, so on the
+    // landscape chart screen it inherits that same portrait-designed scale
+    // against a landscape-shaped MediaQuery — every `.w/.h` comes out skewed on
+    // one axis, which is what made the card look distorted/garbled there. Use
+    // plain literal points there instead, same fix as the landscape trade rail.
+    final isLandscape = media.orientation == Orientation.landscape;
+    final u = isLandscape ? (double v) => v : (double v) => v.w;
+    final v = isLandscape ? (double x) => x : (double x) => x.h;
+    final f = isLandscape ? (double x) => x : (double x) => x.sp;
+    final r = isLandscape ? (double x) => x : (double x) => x.r;
 
     return Positioned(
-      top: media.padding.top + 12.h,
-      left: 16.w,
-      right: 16.w,
+      top: media.padding.top + v(12),
+      left: isLandscape ? null : u(16),
+      right: isLandscape ? u(16) : u(16),
+      // Landscape gives far more width than a toast needs, so it is capped and
+      // pinned to the right instead of stretching edge-to-edge.
+      width: isLandscape ? 340 : null,
       child: SlideTransition(
         position: _slide,
         child: FadeTransition(
@@ -169,7 +183,7 @@ class _ToastCardState extends State<_ToastCard>
               child: Container(
                 decoration: BoxDecoration(
                   color: dark ? AppColors.sheetDark : AppColors.white,
-                  borderRadius: BorderRadius.circular(16.r),
+                  borderRadius: BorderRadius.circular(r(16)),
                   border: Border.all(
                     color: dark
                         ? AppColors.white.withValues(alpha: 0.08)
@@ -179,8 +193,8 @@ class _ToastCardState extends State<_ToastCard>
                     BoxShadow(
                       color: (dark ? AppColors.black : scheme.primary)
                           .withValues(alpha: dark ? 0.45 : 0.16),
-                      blurRadius: 24.r,
-                      offset: Offset(0, 10.h),
+                      blurRadius: r(24),
+                      offset: Offset(0, v(10)),
                     ),
                   ],
                 ),
@@ -189,12 +203,12 @@ class _ToastCardState extends State<_ToastCard>
                   mainAxisSize: MainAxisSize.min,
                   children: [
                     Padding(
-                      padding: EdgeInsets.fromLTRB(12.w, 12.h, 12.w, 12.h),
+                      padding: EdgeInsets.fromLTRB(u(12), v(12), u(12), v(12)),
                       child: Row(
                         children: [
                           Container(
-                            width: 40.w,
-                            height: 40.h,
+                            width: u(40),
+                            height: v(40),
                             decoration: BoxDecoration(
                               gradient: LinearGradient(
                                 colors: [
@@ -204,12 +218,12 @@ class _ToastCardState extends State<_ToastCard>
                                 begin: Alignment.topLeft,
                                 end: Alignment.bottomRight,
                               ),
-                              borderRadius: BorderRadius.circular(12.r),
+                              borderRadius: BorderRadius.circular(r(12)),
                             ),
                             child: Icon(_icon(),
-                                color: AppColors.white, size: 22.w),
+                                color: AppColors.white, size: u(22)),
                           ),
-                          SizedBox(width: 12.w),
+                          SizedBox(width: u(12)),
                           Expanded(
                             child: Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
@@ -220,19 +234,19 @@ class _ToastCardState extends State<_ToastCard>
                                   Text(
                                     widget.title!,
                                     style: TextStyle(
-                                      fontSize: 13.5.sp,
+                                      fontSize: f(13.5),
                                       fontWeight: FontWeight.w800,
                                       color: scheme.onSurface,
                                     ),
                                   ),
-                                  SizedBox(height: 2.h),
+                                  SizedBox(height: v(2)),
                                 ],
                                 Text(
                                   widget.message,
                                   maxLines: 2,
                                   overflow: TextOverflow.ellipsis,
                                   style: TextStyle(
-                                    fontSize: 12.5.sp,
+                                    fontSize: f(12.5),
                                     height: 1.3,
                                     fontWeight: FontWeight.w500,
                                     color: scheme.onSurface
@@ -242,13 +256,13 @@ class _ToastCardState extends State<_ToastCard>
                               ],
                             ),
                           ),
-                          SizedBox(width: 8.w),
+                          SizedBox(width: u(8)),
                           GestureDetector(
                             onTap: widget.onDismiss,
                             behavior: HitTestBehavior.opaque,
                             child: Icon(
                               Icons.close_rounded,
-                              size: 18.w,
+                              size: u(18),
                               color: scheme.onSurface.withValues(alpha: 0.4),
                             ),
                           ),
@@ -260,7 +274,7 @@ class _ToastCardState extends State<_ToastCard>
                       animation: _progress,
                       builder: (context, _) => LinearProgressIndicator(
                         value: 1 - _progress.value,
-                        minHeight: 3.h,
+                        minHeight: v(3),
                         backgroundColor: AppColors.transparent,
                         valueColor: AlwaysStoppedAnimation(
                             accent.withValues(alpha: 0.85)),

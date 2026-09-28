@@ -141,7 +141,10 @@ class MarketWatchV2Service extends GetxService with WidgetsBindingObserver {
   void selectSymbol(String symbol) {
     final key = normalizeSymbol(symbol);
     if (key.isEmpty) return;
-    selectedSymbol.value = key;
+    // Only write when it actually changes: re-assigning the same value still
+    // notifies listeners, and the chart webview rebuilds (and reloads) on any
+    // notification from this observable.
+    if (selectedSymbol.value != key) selectedSymbol.value = key;
     subscribeSymbols([key]);
   }
 

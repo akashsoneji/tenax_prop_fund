@@ -5,6 +5,7 @@ import 'package:get/get.dart';
 import '../../../core/logger/app_logger.dart';
 import '../../../core/state/data_state.dart';
 import '../../../shared/widgets/app_toast.dart';
+import '../../../shared/widgets/trade/trade_ticket.dart';
 import '../../accounts/controllers/accounts_controller.dart';
 import '../../accounts/models/accounts_models.dart';
 import '../../accounts/repositories/accounts_repository.dart';
@@ -232,6 +233,22 @@ class PositionsController extends GetxController {
     tradingAccount.value = account;
     _positionsWs.switchAccount(account);
     _accountWs.switchAccount(account);
+  }
+
+  /// Places the market order described by a [TradeTicket] from the shared
+  /// `TradeTicketPanel`. Every ticket surface (portrait dock, landscape rail)
+  /// submits through here so the side → [OrderType] and TP/SL mapping exists
+  /// exactly once.
+  Future<bool> placeTicket(TradeTicket ticket) {
+    return placeMarketOrder(
+      symbol: ticket.symbol,
+      volume: ticket.volume,
+      orderType: ticket.side == TradeSide.buy
+          ? OrderType.buyMarket
+          : OrderType.sellMarket,
+      takeProfit: ticket.takeProfit,
+      stopLoss: ticket.stopLoss,
+    );
   }
 
   /// Places a Buy/Sell market order for the currently focused trading account.
