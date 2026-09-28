@@ -17,7 +17,7 @@ class SupportContactCard extends StatelessWidget {
     return Container(
       padding: EdgeInsets.fromLTRB(14.w, 14.h, 14.w, 14.h),
       decoration: BoxDecoration(
-        gradient: AppTheme.brandGradient(scheme),
+        gradient: AppTheme.heroGradient(scheme),
         borderRadius: BorderRadius.circular(20.r),
         boxShadow: [
           BoxShadow(

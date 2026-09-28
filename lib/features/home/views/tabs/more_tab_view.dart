@@ -61,8 +61,8 @@ class MoreTabView extends StatelessWidget {
     _Section(Icons.person_rounded, 'more.account', [
       _Item(Icons.account_circle_outlined, 'more.item.profile',
           AppRoutes.profileKyc),
-      _Item(Icons.verified_user_outlined, 'more.item.verify_identity',
-          AppRoutes.verification),
+      // _Item(Icons.verified_user_outlined, 'more.item.verify_identity',
+      //     AppRoutes.verification),
       _Item(Icons.shield_outlined, 'more.item.security', AppRoutes.settings),
     ]),
     _Section(Icons.account_balance_wallet_rounded, 'more.money', [

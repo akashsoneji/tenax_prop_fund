@@ -144,17 +144,14 @@ class _CloseAllBar extends StatelessWidget {
   final List<TradePosition> items;
 
   Future<void> _closeAll(BuildContext context) async {
-    final group = await showCloseAllSheet(context, positions: items);
+    final group = await showCloseAllSheet(
+      context,
+      positions: () => controller.openPositions,
+    );
     if (group == null) return;
-    await controller.closePositions(switch (group) {
-      CloseGroup.all => items,
-      CloseGroup.profitable =>
-        items.where((position) => position.profitLoss > 0).toList(),
-      CloseGroup.losing =>
-        items.where((position) => position.profitLoss < 0).toList(),
-      CloseGroup.long => items.where((position) => position.isBuy).toList(),
-      CloseGroup.short => items.where((position) => !position.isBuy).toList(),
-    });
+    await controller.closePositions(
+      positionsForGroup(group, controller.openPositions),
+    );
   }
 
   @override
