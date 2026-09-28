@@ -65,6 +65,7 @@ Future<void> main() async {
     permanent: true,
   );
 
+
   runApp(TenaxApp(config: config));
 
   // Kick off the background chart warm-up the moment the first frame is up —

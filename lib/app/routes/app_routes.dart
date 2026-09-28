@@ -42,4 +42,5 @@ abstract class AppRoutes {
   static const support = '/support';
   static const symbols = '/symbols';
   static const chart = '/chart';
+  static const chartLandscape = '/chart-landscape';
 }

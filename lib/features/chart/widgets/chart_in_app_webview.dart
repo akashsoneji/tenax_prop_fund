@@ -8,6 +8,7 @@ import 'package:get/get.dart';
 
 import '../../../shared/widgets/app_loader.dart';
 import '../services/chart_preload_service.dart';
+import '../services/chart_warmer.dart';
 
 /// Optimized embedded chart. On first mount it attaches the pre-warmed
 /// [HeadlessInAppWebView] from [ChartPreloadService] (loaded at app boot from
@@ -21,11 +22,17 @@ class ChartInAppWebView extends StatefulWidget {
     required this.url,
     required this.symbol,
     this.onReady,
+    this.warmer,
   });
 
   final String url;
   final String symbol;
   final VoidCallback? onReady;
+
+  /// Warm instance pool to attach from. Defaults to the portrait
+  /// [ChartPreloadService]; the landscape split view passes its own warmer,
+  /// which is sized for the landscape viewport (see [ChartWarmer]).
+  final ChartWarmer? warmer;
 
   @override
   State<ChartInAppWebView> createState() => _ChartInAppWebViewState();
@@ -70,6 +77,18 @@ class _ChartInAppWebViewState extends State<ChartInAppWebView> {
     debugPrint('[Chart] +${_clock.elapsedMilliseconds}ms $message');
   }
 
+  /// Warm-instance pool this webview attaches from: the one the caller injected
+  /// (landscape passes its own, sized for that viewport), else the app-wide
+  /// portrait [ChartPreloadService], else null when neither is registered.
+  ChartWarmer? get _warmer {
+    final injected = widget.warmer;
+    if (injected != null) return injected;
+    if (Get.isRegistered<ChartPreloadService>()) {
+      return Get.find<ChartPreloadService>();
+    }
+    return null;
+  }
+
   /// The symbol currently displayed by the webview. When we attach the warm
   /// headless instance it is already showing the preloaded default symbol, so
   /// we start from that — this prevents a needless JS switch / reload on first
@@ -82,8 +101,8 @@ class _ChartInAppWebViewState extends State<ChartInAppWebView> {
     super.initState();
     // Attach the pre-warmed headless webview if it exists.
     String? warmSymbol;
-    if (Get.isRegistered<ChartPreloadService>()) {
-      final service = Get.find<ChartPreloadService>();
+    final service = _warmer;
+    if (service != null) {
       // Only ONE on-screen webview can host the warm instance; a second screen
       // gets null here and loads its own from cache.
       _headlessWebView = service.claim();
@@ -151,9 +170,7 @@ class _ChartInAppWebViewState extends State<ChartInAppWebView> {
     _pendingSymbolTimer?.cancel();
     // Intentionally NOT disposing the headless webview — it is owned by
     // ChartPreloadService and kept warm for the next open.
-    if (_headlessWebView != null && Get.isRegistered<ChartPreloadService>()) {
-      Get.find<ChartPreloadService>().release();
-    }
+    if (_headlessWebView != null) _warmer?.release();
     super.dispose();
   }
 
@@ -291,6 +308,31 @@ class _ChartInAppWebViewState extends State<ChartInAppWebView> {
     return base.replace(queryParameters: query).toString();
   }
 
+  /// Tells the chart page its viewport just changed. A warm instance is loaded
+  /// off screen at ONE size (e.g. portrait), so attaching it somewhere else
+  /// (e.g. the landscape split view) changes the native view's size without
+  /// the charting library ever finding out — canvases are pixel buffers, they
+  /// do not repaint themselves just because their container resized. Without
+  /// this the chart shows the stale (wrong-size/blank) frame from its warm-up
+  /// until something else forces a redraw — which is why switching the symbol
+  /// "fixed" it: that path recreates the chart, incidentally at the new size.
+  Future<void> _notifyViewportChanged() async {
+    if (_controller == null) return;
+    try {
+      await _controller!.evaluateJavascript(source: '''
+        (function() {
+          window.dispatchEvent(new Event('resize'));
+          if (window.visualViewport) {
+            window.visualViewport.dispatchEvent(new Event('resize'));
+          }
+        })();
+      ''');
+    } catch (_) {
+      // Best effort — a page with no resize listener just keeps its old frame,
+      // which is what would have happened anyway.
+    }
+  }
+
   /// When attaching a pre-warmed headless instance, [onLoadStop] does not fire
   /// again, so poll the load progress for a short window and flip to ready as
   /// soon as the page is complete. Falls through to the loading timeout if the
@@ -298,13 +340,25 @@ class _ChartInAppWebViewState extends State<ChartInAppWebView> {
   Future<void> _markReadyIfLoaded() async {
     // The preload already confirmed a painted canvas — reveal immediately.
     if (_warmAlreadyPainted) {
+      // Give the platform view one layout pass to actually resize before
+      // nudging the page, then reveal once the resulting redraw settles.
+      await WidgetsBinding.instance.endOfFrame;
+      await _notifyViewportChanged();
       await _revealWhenPainted();
       return;
     }
+    // A warm instance was ATTACHED here even though preload had not yet
+    // confirmed a painted canvas — it may still need the same viewport nudge
+    // once it does finish loading at whatever size it now has.
+    var nudged = false;
     for (var attempt = 0; attempt < 20; attempt++) {
       if (!mounted || _controller == null || _isReady) return;
       final progress = await _controller!.getProgress();
       if (progress == 100) {
+        if (_headlessWebView != null && !nudged) {
+          nudged = true;
+          await _notifyViewportChanged();
+        }
         await _revealWhenPainted();
         return;
       }
@@ -441,6 +495,12 @@ class _ChartInAppWebViewState extends State<ChartInAppWebView> {
         cacheMode: CacheMode.LOAD_CACHE_ELSE_NETWORK,
         domStorageEnabled: true,
         databaseEnabled: true,
+        // Without this the native webview layer composites ABOVE Flutter's
+        // Stack on Android (Virtual Display mode) instead of blending into it:
+        // overlay widgets like the fullscreen button silently disappear behind
+        // it, and every internal repaint of the page can flash through as a
+        // visible flicker.
+        useHybridComposition: true,
       );
 
   URLRequest get _fallbackRequest {
@@ -459,6 +519,12 @@ class _ChartInAppWebViewState extends State<ChartInAppWebView> {
       child: Stack(
         children: [
           InAppWebView(
+            // Ties the native platform view's lifetime to the WARMER, not to
+            // this widget. Without it, disposing this widget (leaving the tab,
+            // popping the landscape route) destroys the native webview even
+            // though the Dart-side HeadlessInAppWebView object survives — so
+            // the next attach looked "warm" but was actually a cold reload.
+            keepAlive: _warmer?.keepAlive,
             // Attaching the pre-warmed instance overrides initialUrlRequest /
             // initialSettings; those are only used for the cold fallback.
             headlessWebView: _headlessWebView,
