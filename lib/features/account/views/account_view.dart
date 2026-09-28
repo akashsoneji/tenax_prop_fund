@@ -208,12 +208,12 @@ class _OverviewTab extends StatelessWidget {
           AccountHealthCard(health: data.health),
         ],
         SizedBox(height: 18.h),
-        AppGradientButton(
-          label: 'account.trade_now'.tr,
-          icon: Icons.trending_up_rounded,
-          onPressed: () =>
-              controller.copy(data.tradeUrl, 'account.trade_link_copied'),
-        ),
+        // AppGradientButton(
+        //   label: 'account.trade_now'.tr,
+        //   icon: Icons.trending_up_rounded,
+        //   onPressed: () =>
+        //       controller.copy(data.tradeUrl, 'account.trade_link_copied'),
+        // ),
       ],
     );
   }

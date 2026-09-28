@@ -7,7 +7,9 @@ import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:get/get.dart';
 
 import '../../../app/flavor/flavor_config.dart';
+import '../../../core/network/api_interceptor.dart';
 import '../../settings/controllers/settings_controller.dart';
+import '../../symbols/services/market_watch_v2_service.dart';
 
 /// Pre-warms the Markets-tab chart at app launch using a [HeadlessInAppWebView]
 /// that loads the flavor's REMOTE chart URL (see [FlavorConfig.chartUrl]) off
@@ -41,11 +43,15 @@ class ChartPreloadService extends GetxService {
   HeadlessInAppWebView? claim() {
     if (headlessWebView == null || _claimed) return null;
     _claimed = true;
+    _trace('claimed by on-screen webview (isReady=$isReady)');
     return headlessWebView;
   }
 
   /// Returns the warm instance to the pool when a screen is disposed.
-  void release() => _claimed = false;
+  void release() {
+    _claimed = false;
+    _trace('released back to pool');
+  }
 
   /// Default symbol the Markets tab opens on when nothing was persisted (e.g.
   /// a logged-out or first-run user).
@@ -89,9 +95,20 @@ class ChartPreloadService extends GetxService {
     // chart matches what the tab will ask for — no first-open reload.
     _dark = _resolveDark();
 
-    // Restore the last symbol the user viewed; fall back to the default when
-    // none was ever saved (logged-out / first run).
-    _bootSymbol = await _readLastSymbol();
+    // Logged in → warm the LAST symbol the user viewed; logged out (or nothing
+    // ever saved) → warm [defaultSymbol].
+    _bootSymbol = await _resolveBootSymbol();
+
+    // Keep the app-wide selection in step with the warmed symbol, otherwise the
+    // Markets tab opens on its own default and the warm instance is discarded by
+    // an immediate symbol switch/reload — exactly the cold load the preload
+    // exists to avoid.
+    if (Get.isRegistered<MarketWatchV2Service>()) {
+      Get.find<MarketWatchV2Service>().selectSymbol(_bootSymbol);
+    }
+
+    _loadStartedAt = DateTime.now();
+    _trace('init warming symbol=$_bootSymbol dark=$_dark url=$preloadUrl');
 
     headlessWebView = HeadlessInAppWebView(
       initialUrlRequest: URLRequest(
@@ -101,8 +118,11 @@ class ChartPreloadService extends GetxService {
         cachePolicy: URLRequestCachePolicy.RETURN_CACHE_DATA_ELSE_LOAD,
       ),
       // A real off-screen size is REQUIRED — the default 0x0 makes the chart
-      // skip layout/rendering, so it would still render from scratch on attach.
-      initialSize: const Size(1080, 1920),
+      // skip layout/rendering. It must also match the size the chart will have
+      // ON SCREEN: the charting library re-creates its widget on every resize,
+      // so warming at an arbitrary size (1080x1920) guaranteed a re-init — and
+      // 2-3 visible redraws — the moment the instance was attached.
+      initialSize: _screenSize(),
       initialSettings: InAppWebViewSettings(
         javaScriptEnabled: true,
         transparentBackground: true,
@@ -118,14 +138,11 @@ class ChartPreloadService extends GetxService {
         supportZoom: false,
       ),
       onLoadStart: (controller, url) {
-        if (kDebugMode) {
-          debugPrint('[ChartPreloadService] headless onLoadStart: $url');
-        }
+        _loadStartedAt = DateTime.now();
+        _trace('headless onLoadStart url=$url');
       },
       onLoadStop: (controller, url) {
-        if (kDebugMode) {
-          debugPrint('[ChartPreloadService] headless onLoadStop: $url');
-        }
+        _trace('headless onLoadStop url=$url');
         // HTML finished, but the chart CANVAS is still booting. Flip [isReady]
         // only once it is actually painted so the on-screen webview can attach
         // and reveal instantly instead of polling the canvas behind a loader.
@@ -154,7 +171,10 @@ class ChartPreloadService extends GetxService {
     ''';
     var last = '';
     var stable = 0;
+    var polls = 0;
+    var resizes = 0;
     for (var attempt = 0; attempt < 100; attempt++) {
+      polls++;
       String size = '';
       try {
         final res = await controller.evaluateJavascript(source: canvasSize);
@@ -165,15 +185,51 @@ class ChartPreloadService extends GetxService {
       if (size.isNotEmpty && size == last) {
         if (++stable >= 4) break;
       } else {
+        // Each distinct canvas size is one re-layout of the charting library —
+        // this counter is the measurable proxy for the visible "flicker".
+        if (size.isNotEmpty) {
+          resizes++;
+          _trace('headless canvas resize #$resizes: "$last" -> "$size"');
+        }
         stable = 0;
         last = size;
       }
       await Future.delayed(const Duration(milliseconds: 100));
     }
     isReady = true;
-    if (kDebugMode) {
-      debugPrint('[ChartPreloadService] canvas settled — ready');
-    }
+    _readyAt = DateTime.now();
+    _trace('headless READY canvas=$last polls=$polls resizes=$resizes');
+  }
+
+  /// Wall-clock reference for the trace timestamps: when the headless page
+  /// started loading. Everything after it is reported as `+Nms` so the debug log
+  /// shows exactly where the seconds go.
+  DateTime? _loadStartedAt;
+  DateTime? _readyAt;
+
+  /// Milliseconds the headless warm-up took to reach a settled canvas, or null
+  /// while it is still warming. Read by the on-screen webview for its own trace.
+  int? get warmupMs => (_loadStartedAt == null || _readyAt == null)
+      ? null
+      : _readyAt!.difference(_loadStartedAt!).inMilliseconds;
+
+  /// Logical size of the device screen. The headless instance is warmed at this
+  /// size so attaching it to a full-screen chart is (close to) a no-op resize
+  /// instead of a re-layout that makes the library rebuild the chart widget.
+  Size _screenSize() {
+    final view = WidgetsBinding.instance.platformDispatcher.views.first;
+    final size = view.physicalSize / view.devicePixelRatio;
+    if (size.width <= 0 || size.height <= 0) return const Size(375, 812);
+    return size;
+  }
+
+  void _trace(String message) {
+    if (!kDebugMode) return;
+    final started = _loadStartedAt;
+    final offset = started == null
+        ? ''
+        : '+${DateTime.now().difference(started).inMilliseconds}ms ';
+    debugPrint('[ChartPreload] $offset$message');
   }
 
   /// Persists [symbol] as the last-viewed chart symbol so the NEXT launch warms
@@ -185,8 +241,13 @@ class ChartPreloadService extends GetxService {
     await _storage.write(key: _lastSymbolKey, value: symbol);
   }
 
-  Future<String> _readLastSymbol() async {
+  /// Symbol to warm the chart on: the persisted last-viewed symbol for a
+  /// logged-in user, [defaultSymbol] for a logged-out one (their stored symbol
+  /// belongs to the previous session and must not leak into a fresh launch).
+  Future<String> _resolveBootSymbol() async {
     try {
+      final token = await _storage.read(key: ApiInterceptor.tokenKey);
+      if (token == null || token.isEmpty) return defaultSymbol;
       final saved = await _storage.read(key: _lastSymbolKey);
       if (saved != null && saved.isNotEmpty) return saved;
     } catch (_) {

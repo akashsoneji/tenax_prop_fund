@@ -48,6 +48,28 @@ class _ChartInAppWebViewState extends State<ChartInAppWebView> {
   /// the attached instance can reveal on the first poll instead of waiting.
   bool _warmAlreadyPainted = false;
 
+  /// Wall clock from mount, so every trace line shows where the seconds go.
+  final Stopwatch _clock = Stopwatch()..start();
+
+  /// Counts canvas re-layouts observed while the loader is up. Each one is a
+  /// redraw the user would have seen as a "flicker" had the chart been visible.
+  int _canvasResizes = 0;
+
+  /// Counts chart-library boot messages (`onReady` …) seen on the JS console.
+  /// More than one of these AFTER reveal means the page is re-creating the chart
+  /// widget — that is a genuine visible flicker, not just a boot redraw.
+  int _chartInits = 0;
+
+  /// When the chart library last (re)built its widget. Reveal waits for a quiet
+  /// window after this, so the library's repeated boots happen UNDER the loader
+  /// instead of on screen as 2-3 flickers.
+  DateTime? _lastChartInitAt;
+
+  void _trace(String message) {
+    if (!kDebugMode) return;
+    debugPrint('[Chart] +${_clock.elapsedMilliseconds}ms $message');
+  }
+
   /// The symbol currently displayed by the webview. When we attach the warm
   /// headless instance it is already showing the preloaded default symbol, so
   /// we start from that — this prevents a needless JS switch / reload on first
@@ -75,6 +97,11 @@ class _ChartInAppWebViewState extends State<ChartInAppWebView> {
         _warmAlreadyPainted = true;
       }
       warmSymbol = service.currentSymbol;
+      _trace('initState warm=${_headlessWebView != null} '
+          'preloadReady=${service.isReady} warmupMs=${service.warmupMs} '
+          'warmSymbol=$warmSymbol requested=${widget.symbol}');
+    } else {
+      _trace('initState NO preload service — cold load ${widget.symbol}');
     }
     // A warm instance already shows the preloaded (last-viewed) symbol; a cold
     // fallback loads whatever symbol was requested.
@@ -82,6 +109,10 @@ class _ChartInAppWebViewState extends State<ChartInAppWebView> {
         _headlessWebView != null ? (warmSymbol ?? widget.symbol) : widget.symbol;
     _pendingSymbol =
         widget.symbol != _loadedSymbol ? widget.symbol : null;
+    if (_pendingSymbol != null) {
+      _trace('pending symbol switch on first mount: '
+          '$_loadedSymbol -> $_pendingSymbol (costs an extra redraw)');
+    }
     _startLoadingTimeout();
   }
 
@@ -99,6 +130,7 @@ class _ChartInAppWebViewState extends State<ChartInAppWebView> {
           _hasError = false;
         });
       }
+      _trace('FULL RELOAD (url changed beyond symbol): ${widget.url}');
       _pendingSymbol = widget.symbol;
       _retryCount = 0;
       _startLoadingTimeout();
@@ -141,15 +173,19 @@ class _ChartInAppWebViewState extends State<ChartInAppWebView> {
     if (_pendingSymbol == null || !_isReady || _controller == null) return;
 
     final symbolToApply = _pendingSymbol!;
+    _trace('applying symbol $_loadedSymbol -> $symbolToApply via JS');
     unawaited(updateSymbol(symbolToApply).then((success) {
       if (success) {
+        _trace('symbol switch ok -> $symbolToApply');
         _loadedSymbol = symbolToApply;
         _pendingSymbol = null;
         _retryCount = 0;
         return;
       }
       _retryCount++;
+      _trace('symbol switch MISS (retry $_retryCount) -> $symbolToApply');
       if (_retryCount >= 3) {
+        _trace('JS switch gave up — hard reloading URL for $symbolToApply');
         _loadedSymbol = symbolToApply;
         _controller?.loadUrl(
           urlRequest: URLRequest(url: WebUri(_urlForSymbol(symbolToApply))),
@@ -284,6 +320,7 @@ class _ChartInAppWebViewState extends State<ChartInAppWebView> {
   /// render into an element the probe can't measure, and gating on it there
   /// left the loader up until the 15s timeout ("Chart unavailable").
   Future<void> _revealWhenPainted() async {
+    _trace('reveal start (warmAlreadyPainted=$_warmAlreadyPainted)');
     // The remote chart SPA re-renders a couple of times right after load (shell
     // → library → datafeed redraw). Canvas SIZE stabilises before that content
     // re-render finishes, so a size probe alone reveals too early and the user
@@ -292,6 +329,11 @@ class _ChartInAppWebViewState extends State<ChartInAppWebView> {
     final settle = Future<void>.delayed(const Duration(milliseconds: 700));
     await _waitForStableCanvas(_controller);
     await settle;
+    // The page rebuilds the chart widget several times during boot (each one is
+    // an `onReady` on the JS console). Revealing between two of those rebuilds
+    // is exactly what the user sees as 2-3 flickers, so hold the loader until no
+    // new rebuild has been reported for a quiet window.
+    await _waitForChartInitsToSettle();
     if (!mounted || _isReady) return;
     _loadingTimeout?.cancel();
     setState(() {
@@ -299,6 +341,9 @@ class _ChartInAppWebViewState extends State<ChartInAppWebView> {
       _hasError = false;
       _isReady = true;
     });
+    _trace('REVEALED canvasResizes=$_canvasResizes chartInits=$_chartInits '
+        'symbol=$_loadedSymbol — any redraw logged after this line is a '
+        'user-visible flicker');
     widget.onReady?.call();
     _applyPendingSymbol();
   }
@@ -329,14 +374,44 @@ class _ChartInAppWebViewState extends State<ChartInAppWebView> {
         // Eval can be rejected mid-boot — treat as not-yet-stable.
       }
       if (size.isNotEmpty && size == last) {
-        if (++stable >= _stableTicksNeeded) return;
+        if (++stable >= _stableTicksNeeded) {
+          _trace('canvas stable at "$size" after ${attempt + 1} polls');
+          return;
+        }
       } else {
+        if (size.isNotEmpty) {
+          _canvasResizes++;
+          _trace('canvas resize #$_canvasResizes: "$last" -> "$size"');
+        }
         stable = 0;
         last = size;
       }
       await Future.delayed(const Duration(milliseconds: 100));
     }
   }
+
+  /// Holds until the chart library has stopped rebuilding itself: returns once
+  /// [_quietAfterInit] has passed with no new `onReady`, or after
+  /// [_initSettleMaxWait] regardless, so a page that keeps re-initialising
+  /// forever still reveals instead of sitting behind the loader.
+  Future<void> _waitForChartInitsToSettle() async {
+    final deadline = DateTime.now().add(_initSettleMaxWait);
+    while (mounted && !_isReady && DateTime.now().isBefore(deadline)) {
+      final last = _lastChartInitAt;
+      if (last == null || DateTime.now().difference(last) >= _quietAfterInit) {
+        return;
+      }
+      await Future.delayed(const Duration(milliseconds: 100));
+    }
+    _trace('chart inits never went quiet — revealing anyway '
+        '(chartInits=$_chartInits)');
+  }
+
+  /// Quiet window with no chart rebuild that counts as "boot finished".
+  static const _quietAfterInit = Duration(milliseconds: 1200);
+
+  /// Hard cap on [_waitForChartInitsToSettle] so reveal is never blocked.
+  static const _initSettleMaxWait = Duration(seconds: 6);
 
   /// Consecutive equal-size polls (×100ms) that mark the canvas "settled".
   static const _stableTicksNeeded = 4;
@@ -399,7 +474,7 @@ class _ChartInAppWebViewState extends State<ChartInAppWebView> {
               await _markReadyIfLoaded();
             },
             onLoadStart: (controller, url) {
-              if (kDebugMode) debugPrint('[Chart] onLoadStart -> $url');
+              _trace('onLoadStart -> $url');
               if (!mounted || _isReady) return;
               setState(() {
                 _isLoading = true;
@@ -407,7 +482,7 @@ class _ChartInAppWebViewState extends State<ChartInAppWebView> {
               });
             },
             onLoadStop: (controller, url) {
-              if (kDebugMode) debugPrint('[Chart] onLoadStop  -> $url');
+              _trace('onLoadStop -> $url');
               if (!mounted) return;
               // Keep the loader up until the chart canvas is actually painted so
               // the library's multi-stage boot stays hidden (no visible refresh).
@@ -448,10 +523,20 @@ class _ChartInAppWebViewState extends State<ChartInAppWebView> {
             // below ERROR so the debug panel is not flooded; surface only
             // genuine JS errors when debugging.
             onConsoleMessage: (controller, consoleMessage) {
+              final msg = consoleMessage.message;
+              // `onReady` is emitted once per chart-widget construction, so its
+              // count is the number of times the page built the chart. >1 after
+              // reveal == the visible multi-flicker.
+              if (msg.contains('onReady')) {
+                _chartInits++;
+                _lastChartInitAt = DateTime.now();
+                _trace('chart init #$_chartInits '
+                    '(afterReveal=$_isReady) — each one repaints the chart');
+                return;
+              }
               if (kDebugMode &&
-                  consoleMessage.messageLevel ==
-                      ConsoleMessageLevel.ERROR) {
-                debugPrint('[Chart JS] ${consoleMessage.message}');
+                  consoleMessage.messageLevel == ConsoleMessageLevel.ERROR) {
+                debugPrint('[Chart JS] $msg');
               }
             },
           ),

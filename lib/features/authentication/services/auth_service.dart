@@ -92,7 +92,7 @@ class AuthService {
     return _userFromEnvelope(res.data);
   }
 
-  /// Completes a two-factor login: `POST /settings/two-factor/confirm` with
+  /// Completes a two-factor login: `POST /auth/two-factor` with
   /// `{code}`, authenticated with the `challenge_token` from [login] (the real
   /// session token does not exist yet, so it is sent as the bearer explicitly).
   ///
@@ -104,7 +104,7 @@ class AuthService {
     required String code,
   }) async {
     final res = await _api.post<Map<String, dynamic>>(
-      ApiEndpoints.twoFactorConfirm,
+      ApiEndpoints.twoFactorLoginVerify,
       data: {'code': code, 'device_name': PlatformInfo.deviceName},
       headers: {'Authorization': 'Bearer $challengeToken'},
     );
