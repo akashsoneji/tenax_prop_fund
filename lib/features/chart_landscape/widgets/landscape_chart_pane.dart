@@ -25,6 +25,7 @@ class _LandscapeChartPaneState extends State<LandscapeChartPane> {
 
   late String _symbol = _controller.symbol;
   late bool _ready = _controller.rotationSettled.value;
+  late bool _handingBack = _controller.handingBack.value;
 
   final _subs = <Worker>[];
 
@@ -35,6 +36,12 @@ class _LandscapeChartPaneState extends State<LandscapeChartPane> {
       ever<bool>(_controller.rotationSettled, (settled) {
         if (!mounted || settled == _ready) return;
         setState(() => _ready = settled);
+      }),
+    );
+    _subs.add(
+      ever<bool>(_controller.handingBack, (handing) {
+        if (!mounted || handing == _handingBack) return;
+        setState(() => _handingBack = handing);
       }),
     );
     _subs.add(
@@ -60,11 +67,15 @@ class _LandscapeChartPaneState extends State<LandscapeChartPane> {
       color: scheme.surface,
       // Held back until the device has actually rotated: attaching while the
       // window is still portrait-shaped makes the chart lay out at the wrong
-      // size and rebuild when the rotation lands.
-      child: _ready
+      // size and rebuild when the rotation lands. Also unmounted as soon as
+      // the route starts exiting (_handingBack), releasing the claim so
+      // portrait can reclaim the SAME warm instance before this route
+      // actually pops off screen.
+      child: (_ready && !_handingBack)
           ? ChartInAppWebView(
               url: _controller.urlFor(_symbol),
               symbol: _symbol,
+              warmer: _controller.warmer,
             )
           : const SizedBox.expand(),
     );

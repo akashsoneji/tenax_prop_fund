@@ -295,7 +295,14 @@ class _TradeTicketPanelState extends State<TradeTicketPanel> {
                         onTap: () => _submit(TradeSide.sell),
                       ),
                     ),
-                    _spreadBadge(scheme),
+                    _spreadBadge(
+                      scheme,
+                      quote.spread > 0
+                          ? quote.spread
+                          : (quote.ask > 0 && quote.bid > 0
+                              ? quote.ask - quote.bid
+                              : widget.spread),
+                    ),
                     Expanded(
                       child: _SideButton(
                         label: 'trade.buy'.tr,
@@ -421,7 +428,7 @@ class _TradeTicketPanelState extends State<TradeTicketPanel> {
     if (selected != null) widget.onSymbolSelected?.call(selected);
   }
 
-  Widget _spreadBadge(ColorScheme scheme) {
+  Widget _spreadBadge(ColorScheme scheme, double spread) {
     return Container(
       margin: EdgeInsets.symmetric(horizontal: _isRail ? _u(6) : _u(8)),
       padding: EdgeInsets.symmetric(horizontal: _u(10), vertical: _v(6)),
@@ -442,7 +449,9 @@ class _TradeTicketPanelState extends State<TradeTicketPanel> {
           ),
           SizedBox(height: _v(2)),
           Text(
-            widget.spread.toStringAsFixed(1),
+            spread == spread.roundToDouble()
+                ? spread.toStringAsFixed(0)
+                : spread.toStringAsFixed(1),
             style: TextStyle(
               fontSize: _f(13),
               fontWeight: FontWeight.w700,

@@ -55,6 +55,11 @@ class _ChartInAppWebViewState extends State<ChartInAppWebView> {
   /// the attached instance can reveal on the first poll instead of waiting.
   bool _warmAlreadyPainted = false;
 
+  /// Bumped whenever the platform webview must be torn down and rebuilt from
+  /// scratch (renderer process killed by the OS) — forces Flutter to discard
+  /// the old `InAppWebView` element instead of diffing onto a dead one.
+  int _webviewGeneration = 0;
+
   /// Wall clock from mount, so every trace line shows where the seconds go.
   final Stopwatch _clock = Stopwatch()..start();
 
@@ -409,36 +414,29 @@ class _ChartInAppWebViewState extends State<ChartInAppWebView> {
   /// probe can't measure still shows promptly instead of hanging.
   Future<void> _waitForStableCanvas(InAppWebViewController? controller) async {
     if (controller == null) return;
-    const canvasSize = '''
-      (function() {
-        var c = document.querySelector('canvas');
-        if (!c || !(c.width > 0 && c.height > 0)) return '';
-        return c.width + 'x' + c.height;
-      })();
-    ''';
     var last = '';
     var stable = 0;
     for (var attempt = 0; attempt < _stableMaxTicks; attempt++) {
       if (!mounted || _isReady) return;
-      String size = '';
+      String probe = '';
       try {
-        final res = await controller.evaluateJavascript(source: canvasSize);
-        if (res is String) size = res;
+        final res = await controller.evaluateJavascript(source: paintProbeJs);
+        if (res is String) probe = res;
       } catch (_) {
         // Eval can be rejected mid-boot — treat as not-yet-stable.
       }
-      if (size.isNotEmpty && size == last) {
+      if (probe.isNotEmpty && probe == last) {
         if (++stable >= _stableTicksNeeded) {
-          _trace('canvas stable at "$size" after ${attempt + 1} polls');
+          _trace('canvas stable at "$probe" after ${attempt + 1} polls');
           return;
         }
       } else {
-        if (size.isNotEmpty) {
+        if (probe.isNotEmpty) {
           _canvasResizes++;
-          _trace('canvas resize #$_canvasResizes: "$last" -> "$size"');
+          _trace('canvas change #$_canvasResizes: "$last" -> "$probe"');
         }
         stable = 0;
-        last = size;
+        last = probe;
       }
       await Future.delayed(const Duration(milliseconds: 100));
     }
@@ -474,13 +472,16 @@ class _ChartInAppWebViewState extends State<ChartInAppWebView> {
   static const _stableMaxTicks = 25;
 
   Future<void> _retry() async {
-    if (_controller == null) return;
     setState(() {
       _hasError = false;
       _isLoading = true;
       _isReady = false;
     });
     _startLoadingTimeout();
+    // A render-process crash already tore down the controller — rebuild the
+    // InAppWebView from a cold URL via the widget key instead of calling into
+    // a dead controller.
+    if (_controller == null) return;
     final retryUrl =
         widget.symbol.isNotEmpty ? _urlForSymbol(widget.symbol) : widget.url;
     await _controller!.loadUrl(urlRequest: URLRequest(url: WebUri(retryUrl)));
@@ -519,6 +520,7 @@ class _ChartInAppWebViewState extends State<ChartInAppWebView> {
       child: Stack(
         children: [
           InAppWebView(
+            key: ValueKey(_webviewGeneration),
             // Ties the native platform view's lifetime to the WARMER, not to
             // this widget. Without it, disposing this widget (leaving the tab,
             // popping the landscape route) destroys the native webview even
@@ -583,6 +585,23 @@ class _ChartInAppWebViewState extends State<ChartInAppWebView> {
                     '${request.isForMainFrame} url=${request.url} '
                     'status=${response.statusCode}');
               }
+            },
+            // Low-RAM devices let Android's OOM killer take the WebView
+            // renderer process under memory pressure — without this the
+            // screen just stays on whatever frame it last painted forever.
+            // Show the retry state instead so the user can recover in place.
+            onRenderProcessGone: (controller, detail) {
+              _trace('onRenderProcessGone didCrash=${detail.didCrash}');
+              if (_headlessWebView != null) _warmer?.disposeWarm();
+              _headlessWebView = null;
+              _controller = null;
+              if (!mounted) return;
+              setState(() {
+                _hasError = true;
+                _isLoading = false;
+                _isReady = false;
+                _webviewGeneration++;
+              });
             },
             // The charting library emits noisy INFO/WARNING console messages
             // (e.g. "state ... does not match a schema"). Swallow everything

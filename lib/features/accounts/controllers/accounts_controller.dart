@@ -3,6 +3,7 @@ import 'package:get/get.dart';
 import '../../../core/base/base_controller.dart';
 import '../../../core/network/api_response.dart';
 import '../../home/controllers/home_controller.dart';
+import '../../positions/controllers/positions_controller.dart';
 import '../models/accounts_models.dart';
 import '../repositories/accounts_repository.dart';
 import '../services/primary_account_service.dart';
@@ -37,13 +38,20 @@ class AccountsController extends BaseController<AccountsData> {
   /// The tab switch happens immediately and the persist runs in the background
   /// — the local primary id is updated optimistically by
   /// [PrimaryAccountService.setPrimary], so the Trade tab reads the new account
-  /// without waiting on the network. Home's hero follows the same id.
+  /// without waiting on the network. Home's hero and the Positions/Trade
+  /// header (Floating P/L) both follow the same account.
   Future<void> tradeWithAccount(AccountRow account) async {
     if (Get.isRegistered<HomeController>()) {
       final home = Get.find<HomeController>();
       // A Trade tap is an explicit pick, so it wins over the default focus.
       home.selectAccount(account.id);
       home.selectTab(_tradeTabIndex);
+    }
+    // Re-points the Trade/Positions sockets (balance, equity, floating P&L)
+    // at the picked account — without this the header stays on whichever
+    // account it resolved to at screen init.
+    if (Get.isRegistered<PositionsController>()) {
+      Get.find<PositionsController>().switchToAccount(account);
     }
     if (!Get.isRegistered<PrimaryAccountService>()) return;
     await Get.find<PrimaryAccountService>().setPrimary(account.id);
