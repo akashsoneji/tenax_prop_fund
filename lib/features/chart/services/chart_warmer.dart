@@ -5,6 +5,54 @@ import 'package:flutter/widgets.dart';
 import 'package:flutter_inappwebview/flutter_inappwebview.dart';
 import 'package:get/get.dart';
 
+/// JS readiness probe shared by the warm and the on-screen webview.
+///
+/// Charting libraries stack several `<canvas>` elements (crosshair/overlay,
+/// watermark, the actual OHLC plot). Probing `document.querySelector('canvas')`
+/// grabs whichever is FIRST in the DOM — often a thin overlay that settles to a
+/// stable, non-zero size almost instantly while the real plot canvas is still
+/// empty. That mismatch is what let the on-screen webview reveal a chart whose
+/// header/toolbar were painted but whose candle area was blank, worst on slow
+/// old devices where the real plot canvas takes longer to draw.
+///
+/// This probes the LARGEST canvas by area (almost always the plot pane) and
+/// samples actual pixel data so a canvas that is merely sized but still blank
+/// does not read as "ready".
+const String paintProbeJs = '''
+  (function() {
+    var canvases = document.querySelectorAll('canvas');
+    if (!canvases.length) return '';
+    var target = null;
+    var bestArea = 0;
+    for (var i = 0; i < canvases.length; i++) {
+      var el = canvases[i];
+      var area = el.width * el.height;
+      if (area > bestArea) { bestArea = area; target = el; }
+    }
+    if (!target || !(target.width > 0 && target.height > 0)) return '';
+    var painted = 'unknown';
+    try {
+      var ctx = target.getContext('2d');
+      if (ctx) {
+        // Sample a small grid instead of the whole canvas — cheap enough to
+        // run every 100ms without hurting an already-slow device.
+        var w = target.width, h = target.height, sum = 0, samples = 0;
+        for (var x = 4; x < w; x += Math.max(1, (w / 8) | 0)) {
+          for (var y = 4; y < h; y += Math.max(1, (h / 8) | 0)) {
+            var d = ctx.getImageData(x, y, 1, 1).data;
+            sum += d[0] + d[1] + d[2] + d[3];
+            samples++;
+          }
+        }
+        painted = samples > 0 ? String(sum) : 'unknown';
+      }
+    } catch (e) {
+      painted = 'unknown';
+    }
+    return target.width + 'x' + target.height + ':' + painted;
+  })();
+''';
+
 /// Shared machinery for pre-warming a chart page in an off-screen
 /// [HeadlessInAppWebView] so an on-screen [InAppWebView] can attach an
 /// already-painted instance instead of doing a cold load.
@@ -104,6 +152,16 @@ abstract class ChartWarmer extends GetxService {
         // only once it is painted so the on-screen webview can reveal instantly.
         unawaited(_markReadyWhenPainted(controller));
       },
+      // Low-RAM devices (common on older/entry Android builds) let the OS OOM
+      // killer take the WebView renderer process under memory pressure. Without
+      // this the warm instance silently stays "ready" while its native peer is
+      // gone, so every later attach looks warm but paints nothing — the app
+      // must rebuild it from scratch instead of leaving it for dead.
+      onRenderProcessGone: (controller, detail) {
+        trace('headless renderer GONE (didCrash=${detail.didCrash}) — '
+            'tearing down for a fresh warm-up');
+        disposeWarm();
+      },
     );
 
     await headlessWebView?.run();
@@ -122,6 +180,12 @@ abstract class ChartWarmer extends GetxService {
         allowsInlineMediaPlayback: true,
         mediaPlaybackRequiresUserGesture: false,
         supportZoom: false,
+        // Virtual Display (the default) is measurably less stable across
+        // older Android/WebView builds — the on-screen fallback already uses
+        // Hybrid Composition for this reason; the warm instance must match it
+        // so the SAME compositing mode is in effect whether the chart cold
+        // loads or attaches from warm-up.
+        useHybridComposition: true,
       );
 
   /// Tears the warm instance down and resets the warmer so a later [warmUp]
@@ -145,13 +209,6 @@ abstract class ChartWarmer extends GetxService {
   /// each stage re-lays-out the canvas. Waiting for a STABLE canvas is what lets
   /// the on-screen webview reveal a fully-drawn chart with no visible refresh.
   Future<void> _markReadyWhenPainted(InAppWebViewController controller) async {
-    const canvasSize = '''
-      (function() {
-        var c = document.querySelector('canvas');
-        if (!c || !(c.width > 0 && c.height > 0)) return '';
-        return c.width + 'x' + c.height;
-      })();
-    ''';
     var last = '';
     var stable = 0;
     var polls = 0;
@@ -160,24 +217,25 @@ abstract class ChartWarmer extends GetxService {
       // The instance can be torn down mid-poll (tab left, memory pressure).
       if (headlessWebView == null) return;
       polls++;
-      String size = '';
+      String probe = '';
       try {
-        final res = await controller.evaluateJavascript(source: canvasSize);
-        if (res is String) size = res;
+        final res = await controller.evaluateJavascript(source: paintProbeJs);
+        if (res is String) probe = res;
       } catch (_) {
         // Controller can momentarily reject eval during boot — keep polling.
       }
-      if (size.isNotEmpty && size == last) {
+      if (probe.isNotEmpty && probe == last) {
         if (++stable >= 4) break;
       } else {
-        // Each distinct canvas size is one re-layout of the charting library —
-        // this counter is the measurable proxy for the visible "flicker".
-        if (size.isNotEmpty) {
+        // Each distinct probe value is either a re-layout or a fresh paint of
+        // the charting library's plot canvas — the measurable proxy for the
+        // visible "flicker"/blank-chart window.
+        if (probe.isNotEmpty) {
           resizes++;
-          trace('headless canvas resize #$resizes: "$last" -> "$size"');
+          trace('headless canvas change #$resizes: "$last" -> "$probe"');
         }
         stable = 0;
-        last = size;
+        last = probe;
       }
       await Future.delayed(const Duration(milliseconds: 100));
     }
@@ -186,6 +244,7 @@ abstract class ChartWarmer extends GetxService {
     _readyAt = DateTime.now();
     trace('headless READY canvas=$last polls=$polls resizes=$resizes');
   }
+
 
   /// Logical size of the device screen, independent of the current rotation
   /// (`physicalSize` already follows the device, so callers that need a fixed

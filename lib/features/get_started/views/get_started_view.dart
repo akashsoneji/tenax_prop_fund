@@ -172,16 +172,16 @@ class _BottomSheetCard extends StatelessWidget {
               letterSpacing: 0.2,
             ),
           ),
-          SizedBox(height: 14.h),
-          Text(
-            'get_started.subtitle'.tr,
-            textAlign: TextAlign.center,
-            style: GoogleFonts.beVietnamPro(
-              fontSize: 14.sp,
-              color: onSheetMuted,
-              height: 1.5,
-            ),
-          ),
+          // SizedBox(height: 14.h),
+          // Text(
+          //   'get_started.subtitle'.tr,
+          //   textAlign: TextAlign.center,
+          //   style: GoogleFonts.beVietnamPro(
+          //     fontSize: 14.sp,
+          //     color: onSheetMuted,
+          //     height: 1.5,
+          //   ),
+          // ),
           SizedBox(height: 22.h),
           Row(
             children: [

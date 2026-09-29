@@ -159,6 +159,15 @@ class PositionsController extends GetxController {
   /// Kept in ONE place so it's trivial to swap once tenax adds a global
   /// active-account singleton.
   Future<void> _resolveAccount() async {
+    // Make sure the primary-account id is known BEFORE picking a default, so
+    // the very first resolve on screen open honours `is_primary` instead of
+    // racing ahead to "first funded/active".
+    if (Get.isRegistered<PrimaryAccountService>()) {
+      final svc = Get.find<PrimaryAccountService>();
+      if (svc.primaryAccountId.value == null) await svc.refresh();
+      if (isClosed) return;
+    }
+
     final loadedRows = _loadedAccountRows();
     if (loadedRows != null) {
       _selectAccount(loadedRows);
@@ -202,7 +211,7 @@ class PositionsController extends GetxController {
 
   void _selectAccount(List<AccountRow> rows) {
     accountRows.assignAll(rows);
-    final focusId = _focusedAccountId();
+    final focusId = _focusedAccountId() ?? _primaryAccountId();
     if (focusId != null) {
       final match = rows.where((a) => a.id == focusId);
       if (match.isNotEmpty) {
@@ -216,6 +225,15 @@ class PositionsController extends GetxController {
       orElse: () => rows.first,
     );
     _applyAccount(preferred.login);
+  }
+
+  /// The user's active/primary account id from [PrimaryAccountService]
+  /// (`is_primary` in `GET /mt5accounts/get`), if already loaded. Used as the
+  /// default focus ahead of "first funded/active" so the header (Floating P/L)
+  /// opens on the account the user actually marked primary.
+  int? _primaryAccountId() {
+    if (!Get.isRegistered<PrimaryAccountService>()) return null;
+    return Get.find<PrimaryAccountService>().primaryAccountId.value;
   }
 
   /// The focused account's DB id from the Home dashboard snapshot, if the

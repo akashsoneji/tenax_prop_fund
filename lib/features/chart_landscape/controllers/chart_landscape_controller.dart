@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
 import 'package:get/get.dart';
@@ -6,6 +8,7 @@ import '../../../shared/widgets/trade/trade_ticket.dart';
 import '../../chart/services/chart_preload_service.dart';
 import '../../positions/controllers/positions_controller.dart';
 import '../../symbols/services/market_watch_v2_service.dart';
+import '../services/chart_landscape_preload_service.dart';
 
 /// Orchestrates the landscape full-screen chart + trade split view.
 ///
@@ -28,11 +31,23 @@ class ChartLandscapeController extends GetxController {
     required this._marketWatch,
     required this._positions,
     required this._preload,
+    required this._landscapeWarmer,
   });
 
   final MarketWatchV2Service _marketWatch;
   final PositionsController _positions;
   final ChartPreloadService _preload;
+
+  /// The landscape viewport's OWN warm chart instance — deliberately separate
+  /// from the portrait [ChartPreloadService]. The charting library re-creates
+  /// its widget on every resize, so a single warmer shared between the two
+  /// orientations re-initialised (and on some devices did a full network
+  /// reload) on every round trip. See [ChartLandscapePreloadService].
+  final ChartLandscapePreloadService _landscapeWarmer;
+
+  /// Exposed so [LandscapeChartPane] can pass this orientation's own warm
+  /// pool into `ChartInAppWebView(warmer: ...)`.
+  ChartLandscapePreloadService get warmer => _landscapeWarmer;
 
   /// Whether the trade rail is expanded. Collapsing it gives the chart the full
   /// width for analysis without leaving the screen.
@@ -41,6 +56,19 @@ class ChartLandscapeController extends GetxController {
   /// Guards the orientation restore so an exit via the back pill followed by
   /// the route's own teardown does not re-issue the system calls.
   bool _restored = false;
+
+  /// Guards [exit] against a double call (back pill tap racing the system
+  /// back gesture's [PopScope] callback).
+  bool _exiting = false;
+
+  /// True once [exit] has released the warm chart claim and the landscape
+  /// pane has unmounted it. [LandscapeChartPane] watches this to swap to a
+  /// plain surface BEFORE the route pops — mirrors the Markets tab's own
+  /// entry dance (unmount, wait a frame, THEN navigate) so the claim is
+  /// deterministically free by the time portrait reclaims it, instead of
+  /// racing the pop's transition animation (which was landing a cold reload
+  /// on the portrait chart when returning from landscape).
+  final handingBack = false.obs;
 
   /// Symbol currently displayed, kept in step with the app-wide selection so
   /// leaving landscape lands the user on the same instrument in portrait.
@@ -53,10 +81,10 @@ class ChartLandscapeController extends GetxController {
   /// watch it directly instead of rebuilding inside a reactive builder.
   RxString get selectedSymbol => _marketWatch.selectedSymbol;
 
-  /// Chart URL for [value], built by the shared preload service so asking for
-  /// the warmed symbol returns the exact string it was warmed with — the
-  /// handed-off instance then attaches with no reload.
-  String urlFor(String value) => _preload.urlFor(value);
+  /// Chart URL for [value], built by THIS orientation's own warm pool so
+  /// asking for the warmed symbol returns the exact string it was warmed
+  /// with — the attached instance then shows with no reload.
+  String urlFor(String value) => _landscapeWarmer.urlFor(value);
 
   /// False until the device has finished rotating into landscape.
   ///
@@ -83,11 +111,13 @@ class ChartLandscapeController extends GetxController {
     final view = WidgetsBinding.instance.platformDispatcher.views.first;
     if (view.physicalSize.width > view.physicalSize.height) {
       rotationSettled.value = true;
+      unawaited(_landscapeWarmer.ensureWarm(symbol));
       return;
     }
     _rotationWatcher = _RotationWatcher(() {
       if (isClosed) return;
       rotationSettled.value = true;
+      unawaited(_landscapeWarmer.ensureWarm(symbol));
       _rotationWatcher?.dispose();
       _rotationWatcher = null;
     });
@@ -105,6 +135,16 @@ class ChartLandscapeController extends GetxController {
   /// Restores portrait + normal system chrome and pops. Safe to call from the
   /// back pill, a `PopScope` callback and [onClose] — only the first one acts.
   Future<void> exit() async {
+    if (_exiting) return;
+    _exiting = true;
+    // Unmount the landscape chart and let it release its claim on the shared
+    // warm instance BEFORE popping — one frame is enough for the widget's
+    // dispose() to run. Without this the pop's transition animation keeps the
+    // landscape webview mounted (and the claim held) for hundreds of ms after
+    // this function returns, so the portrait chart's reclaim attempt loses
+    // the race and falls back to a full cold reload.
+    handingBack.value = true;
+    await WidgetsBinding.instance.endOfFrame;
     _restoreOrientation();
     if (Get.key.currentState?.canPop() ?? false) Get.back<void>();
   }
