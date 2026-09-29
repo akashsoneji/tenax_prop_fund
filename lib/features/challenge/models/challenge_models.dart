@@ -1,7 +1,6 @@
 import 'package:flutter/foundation.dart';
 
 enum ChallengeMode { paid, freeTrial }
-enum ChallengeStep { twoStep, oneStep, instant }
 
 @immutable
 class ChallengePlan {
@@ -10,6 +9,7 @@ class ChallengePlan {
     required this.name,
     required this.slug,
     required this.format,
+    required this.formatLabel,
     required this.size,
     required this.price,
     required this.original,
@@ -25,6 +25,9 @@ class ChallengePlan {
   final String name;
   final String slug;
   final String format;
+
+  /// Tab label for [format] as sent by the API (`format_label`, e.g. "2-Step").
+  final String formatLabel;
   final String size;
   final String price;
   final String original;
@@ -38,6 +41,10 @@ class ChallengePlan {
   ChallengeVersion? get defaultVersion =>
       versions.isEmpty ? null : versions.first;
 
+  /// [format] normalized so `2_step`, `2 Step` and `2-step` group together.
+  String get formatKey =>
+      format.trim().toLowerCase().replaceAll('_', '-').replaceAll(' ', '-');
+
   factory ChallengePlan.fromJson(Map<String, dynamic> json) {
     final meta = _map(json['meta']);
     final versions = _maps(json['versions'])
@@ -49,12 +56,19 @@ class ChallengePlan {
     final originalMinor = firstVersion?.priceMinor ?? priceMinor;
     final discount = (meta['discount_percent'] as num?)?.toInt() ?? 0;
     final rows = _map(json['rule_rows']);
+    final format = json['format'] as String? ??
+        meta['format'] as String? ??
+        json['short'] as String? ??
+        '';
 
     return ChallengePlan(
       id: (json['id'] as num?)?.toInt() ?? 0,
       name: json['name'] as String? ?? '',
       slug: json['slug'] as String? ?? '',
-      format: meta['format'] as String? ?? json['short'] as String? ?? '',
+      format: format,
+      formatLabel: json['format_label'] as String? ??
+          meta['short'] as String? ??
+          format,
       size: _sizeLabel(json['popular_size_minor'] ?? 0),
       price: _money(priceMinor),
       original: originalMinor > priceMinor ? _money(originalMinor) : '',
@@ -66,6 +80,28 @@ class ChallengePlan {
           .toList(growable: false),
       challengeRules: _rules(rows['challenge']),
       fundedRules: _rules(rows['funded']),
+    );
+  }
+
+  /// This plan narrowed to one account size: size/price come from [version]
+  /// and [versions] holds only it, so Configure quotes the size that was picked.
+  ChallengePlan forVersion(ChallengeVersion version) {
+    final priceMinor = version.displayedPriceMinor;
+    return ChallengePlan(
+      id: id,
+      name: name,
+      slug: slug,
+      format: format,
+      formatLabel: formatLabel,
+      size: _sizeLabel(version.accountSizeMinor),
+      price: _money(priceMinor),
+      original: version.priceMinor > priceMinor ? _money(version.priceMinor) : '',
+      discountLabel: discountLabel,
+      currency: version.currency,
+      versions: [version],
+      ruleBoxes: ruleBoxes,
+      challengeRules: challengeRules,
+      fundedRules: fundedRules,
     );
   }
 
@@ -478,15 +514,3 @@ class PurchaseResult {
       );
 }
 
-extension ChallengeStepLabel on ChallengeStep {
-  String get label {
-    switch (this) {
-      case ChallengeStep.twoStep:
-        return '2-Step';
-      case ChallengeStep.oneStep:
-        return '1-Step';
-      case ChallengeStep.instant:
-        return 'Instant';
-    }
-  }
-}

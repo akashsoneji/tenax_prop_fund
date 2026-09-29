@@ -23,7 +23,7 @@
             "args": [
                 "--flavor",
                 "tenax",
-                "--dart-define=FLAVOR=tenax",
+                "--dart-define-from-file=config/flavors/tenax.json",
                 "--dart-define=ENV=development"
             ]
         },
@@ -37,7 +37,7 @@
             "args": [
                 "--flavor",
                 "tenax",
-                "--dart-define=FLAVOR=tenax",
+                "--dart-define-from-file=config/flavors/tenax.json",
                 "--dart-define=ENV=production"
             ]
         },
@@ -50,7 +50,7 @@
             "args": [
                 "--flavor",
                 "client_a",
-                "--dart-define=FLAVOR=client_a",
+                "--dart-define-from-file=config/flavors/client_a.json",
                 "--dart-define=ENV=development"
             ]
         },
@@ -63,7 +63,7 @@
             "args": [
                 "--flavor",
                 "client_b",
-                "--dart-define=FLAVOR=client_b",
+                "--dart-define-from-file=config/flavors/client_b.json",
                 "--dart-define=ENV=development"
             ]
         },
@@ -76,7 +76,7 @@
             "args": [
                 "--flavor",
                 "client_c",
-                "--dart-define=FLAVOR=client_c",
+                "--dart-define-from-file=config/flavors/client_c.json",
                 "--dart-define=ENV=development"
             ]
         },
@@ -90,7 +90,7 @@
             "args": [
                 "--flavor",
                 "client_a",
-                "--dart-define=FLAVOR=client_a",
+                "--dart-define-from-file=config/flavors/client_a.json",
                 "--dart-define=ENV=production"
             ]
         },
@@ -104,7 +104,61 @@
             "args": [
                 "--flavor",
                 "client_b",
-                "--dart-define=FLAVOR=client_b",
+                "--dart-define-from-file=config/flavors/client_b.json",
+                "--dart-define=ENV=production"
+            ]
+        },
+        {
+            "name": "Pipze Funded — Debug",
+            "request": "launch",
+            "type": "dart",
+            "program": "lib/main.dart",
+            "preLaunchTask": "prepare-ios-pipze_funded",
+            "args": [
+                "--flavor",
+                "pipze_funded",
+                "--dart-define-from-file=config/flavors/pipze_funded.json",
+                "--dart-define=ENV=development"
+            ]
+        },
+        {
+            "name": "Pipze Funded — Release",
+            "request": "launch",
+            "type": "dart",
+            "program": "lib/main.dart",
+            "flutterMode": "release",
+            "preLaunchTask": "prepare-ios-pipze_funded",
+            "args": [
+                "--flavor",
+                "pipze_funded",
+                "--dart-define-from-file=config/flavors/pipze_funded.json",
+                "--dart-define=ENV=production"
+            ]
+        },
+        {
+            "name": "AlibabaFX Prop — Debug",
+            "request": "launch",
+            "type": "dart",
+            "program": "lib/main.dart",
+            "preLaunchTask": "prepare-ios-alibabafx_prop",
+            "args": [
+                "--flavor",
+                "alibabafx_prop",
+                "--dart-define-from-file=config/flavors/alibabafx_prop.json",
+                "--dart-define=ENV=development"
+            ]
+        },
+        {
+            "name": "AlibabaFX Prop — Release",
+            "request": "launch",
+            "type": "dart",
+            "program": "lib/main.dart",
+            "flutterMode": "release",
+            "preLaunchTask": "prepare-ios-alibabafx_prop",
+            "args": [
+                "--flavor",
+                "alibabafx_prop",
+                "--dart-define-from-file=config/flavors/alibabafx_prop.json",
                 "--dart-define=ENV=production"
             ]
         }

@@ -1,0 +1,2762 @@
+{
+  "info": {
+    "name": "TenaxProp Mobile App \u2014 Full API",
+    "_postman_id": "tenax-prop-mobile-full-api",
+    "description": "Every REST call the Flutter app makes, generated from the repositories in `lib/`.\n\n**Bases**\n- `api_base_url` \u2014 REST mobile API (includes `/api/v1`)\n- `web_base_url` \u2014 portal host; used by Trading + broadcasting auth\n\n**Auth** \u2014 `Authorization: Bearer {{access_token}}` (collection-level). Run *Auth \u2192 Login* first; its test script saves the token.\n\n**Envelope** \u2014 `{ success: bool, message: string, data: any, meta?: {current_page, has_next, total}, errors?: {field: [msg]} }`. Validation errors return HTTP 422 with `errors`.\n\n**Regenerate** \u2014 `python3 docs/tool/build_postman.py`.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "auth": {
+    "type": "bearer",
+    "bearer": [
+      {
+        "key": "token",
+        "value": "{{access_token}}",
+        "type": "string"
+      }
+    ]
+  },
+  "variable": [
+    {
+      "key": "api_base_url",
+      "value": "https://your-domain.com/api/v1"
+    },
+    {
+      "key": "web_base_url",
+      "value": "https://your-domain.com"
+    },
+    {
+      "key": "email",
+      "value": "user@example.com"
+    },
+    {
+      "key": "password",
+      "value": ""
+    },
+    {
+      "key": "access_token",
+      "value": ""
+    },
+    {
+      "key": "challenge_token",
+      "value": ""
+    },
+    {
+      "key": "account_id",
+      "value": "1"
+    },
+    {
+      "key": "mt5_account",
+      "value": "100001"
+    },
+    {
+      "key": "order_id",
+      "value": "1"
+    },
+    {
+      "key": "method_id",
+      "value": "1"
+    },
+    {
+      "key": "payout_id",
+      "value": "1"
+    },
+    {
+      "key": "transaction_id",
+      "value": "1"
+    },
+    {
+      "key": "certificate_id",
+      "value": "1"
+    },
+    {
+      "key": "notification_id",
+      "value": "1"
+    },
+    {
+      "key": "ticket_id",
+      "value": "1"
+    },
+    {
+      "key": "twofa_secret",
+      "value": ""
+    }
+  ],
+  "item": [
+    {
+      "name": "01 \u00b7 Auth",
+      "item": [
+        {
+          "name": "Register \u2014 POST /auth/register",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{api_base_url}}/auth/register",
+              "host": [
+                "{{api_base_url}}"
+              ],
+              "path": [
+                "auth",
+                "register"
+              ]
+            },
+            "description": "Creates the user. Response mirrors login (`access_token` + `user`, `email_verified: false`).\n\n**App source:** `lib/features/authentication/services/auth_service.dart:49`",
+            "auth": {
+              "type": "noauth"
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"first_name\": \"John\",\n  \"last_name\": \"Doe\",\n  \"email\": \"{{email}}\",\n  \"password\": \"{{password}}\",\n  \"country_code\": \"+91\",\n  \"phone\": \"9876543210\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Login \u2014 POST /auth/login",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{api_base_url}}/auth/login",
+              "host": [
+                "{{api_base_url}}"
+              ],
+              "path": [
+                "auth",
+                "login"
+              ]
+            },
+            "description": "Signs in. Two success shapes:\n- normal \u2192 `data.access_token` + `data.user`\n- 2FA on \u2192 `data.two_factor_required: true` + `data.challenge_token` (no user yet). Then call **Two-factor login verify**.\n\nTest script auto-saves `access_token` / `challenge_token`.\n\n**App source:** `lib/features/authentication/services/auth_service.dart:23`",
+            "auth": {
+              "type": "noauth"
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"{{email}}\",\n  \"password\": \"{{password}}\",\n  \"device_name\": \"iPhone 15\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const b = pm.response.json();",
+                  "if (b && b.data) {",
+                  "  if (b.data.access_token) pm.collectionVariables.set('access_token', b.data.access_token);",
+                  "  if (b.data.challenge_token) pm.collectionVariables.set('challenge_token', b.data.challenge_token);",
+                  "}"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Two-factor login verify \u2014 POST /auth/two-factor",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{api_base_url}}/auth/two-factor",
+              "host": [
+                "{{api_base_url}}"
+              ],
+              "path": [
+                "auth",
+                "two-factor"
+              ]
+            },
+            "description": "Completes a login that returned `two_factor_required`. Bearer = `challenge_token`. Response `data` may carry `access_token` + `user`; otherwise the challenge token becomes the session token.\n\n**App source:** `lib/features/authentication/services/auth_service.dart:102`",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{challenge_token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"code\": \"123456\",\n  \"device_name\": \"iPhone 15\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Verify email (OTP) \u2014 POST /auth/verify-email",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{api_base_url}}/auth/verify-email",
+              "host": [
+                "{{api_base_url}}"
+              ],
+              "path": [
+                "auth",
+                "verify-email"
+              ]
+            },
+            "description": "Confirms the post-register OTP. Needs the bearer from register. Returns fresh `access_token` + `user`.\n\n**App source:** `lib/features/authentication/services/auth_service.dart:84`",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"{{email}}\",\n  \"code\": \"123456\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Resend OTP \u2014 POST /auth/resend-otp",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{api_base_url}}/auth/resend-otp",
+              "host": [
+                "{{api_base_url}}"
+              ],
+              "path": [
+                "auth",
+                "resend-otp"
+              ]
+            },
+            "description": "Re-sends the verification/reset OTP.\n\n**App source:** `lib/features/authentication/services/auth_service.dart:138`",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"{{email}}\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Forgot password \u2014 POST /auth/forgot-password",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{api_base_url}}/auth/forgot-password",
+              "host": [
+                "{{api_base_url}}"
+              ],
+              "path": [
+                "auth",
+                "forgot-password"
+              ]
+            },
+            "description": "Always succeeds (never reveals whether the email exists).\n\n**App source:** `lib/features/authentication/services/auth_service.dart:73`",
+            "auth": {
+              "type": "noauth"
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"{{email}}\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Logout \u2014 POST /auth/logout",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{api_base_url}}/auth/logout",
+              "host": [
+                "{{api_base_url}}"
+              ],
+              "path": [
+                "auth",
+                "logout"
+              ]
+            },
+            "description": "Revokes the current token. No body.\n\n**App source:** `lib/features/authentication/services/auth_service.dart:147`"
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "02 \u00b7 Profile & KYC",
+      "item": [
+        {
+          "name": "Get profile \u2014 GET /profile",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{api_base_url}}/profile",
+              "host": [
+                "{{api_base_url}}"
+              ],
+              "path": [
+                "profile"
+              ]
+            },
+            "description": "Profile envelope; user may be under `data.user` or `data`.\n\n**App source:** `lib/features/kyc/repositories/kyc_repository.dart:33`"
+          },
+          "response": []
+        },
+        {
+          "name": "Update profile \u2014 PUT /profile",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{api_base_url}}/profile",
+              "host": [
+                "{{api_base_url}}"
+              ],
+              "path": [
+                "profile"
+              ]
+            },
+            "description": "Updates editable profile fields.\n\n**App source:** `lib/features/kyc/repositories/kyc_repository.dart:57`",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"John Doe\",\n  \"email\": \"{{email}}\",\n  \"phone\": \"9876543210\",\n  \"country_code\": \"+91\",\n  \"city\": \"Ahmedabad\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "KYC status \u2014 GET /kyc",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{api_base_url}}/kyc",
+              "host": [
+                "{{api_base_url}}"
+              ],
+              "path": [
+                "kyc"
+              ]
+            },
+            "description": "Verification state; per-document state lives under `data.submission`.\n\n**App source:** `lib/features/kyc/repositories/kyc_repository.dart:49`"
+          },
+          "response": []
+        },
+        {
+          "name": "Upload KYC documents \u2014 POST /kyc/documents",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{api_base_url}}/kyc/documents",
+              "host": [
+                "{{api_base_url}}"
+              ],
+              "path": [
+                "kyc",
+                "documents"
+              ]
+            },
+            "description": "ONE multipart request. `id_document` + `proof_of_address` are required together; back sides optional. Returns refreshed KYC status.\n\n**App source:** `lib/features/kyc/repositories/kyc_repository.dart:71`",
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                {
+                  "key": "id_document",
+                  "type": "file",
+                  "src": [],
+                  "description": "Required \u2014 ID front"
+                },
+                {
+                  "key": "id_document_back",
+                  "type": "file",
+                  "src": [],
+                  "description": "Optional \u2014 ID back",
+                  "disabled": true
+                },
+                {
+                  "key": "proof_of_address",
+                  "type": "file",
+                  "src": [],
+                  "description": "Required \u2014 address proof front"
+                },
+                {
+                  "key": "proof_of_address_back",
+                  "type": "file",
+                  "src": [],
+                  "description": "Optional \u2014 address proof back",
+                  "disabled": true
+                }
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "03 \u00b7 Dashboard",
+      "item": [
+        {
+          "name": "Dashboard \u2014 GET /dashboard",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{api_base_url}}/dashboard",
+              "host": [
+                "{{api_base_url}}"
+              ],
+              "path": [
+                "dashboard"
+              ]
+            },
+            "description": "Home snapshot: KPIs, live accounts, health, activity, referral + unread badge data.\n\n**App source:** `lib/features/home/repositories/home_repository.dart:22`"
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "04 \u00b7 Accounts & MT5",
+      "item": [
+        {
+          "name": "List accounts \u2014 GET /accounts",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{api_base_url}}/accounts?status=all&phase=all",
+              "host": [
+                "{{api_base_url}}"
+              ],
+              "path": [
+                "accounts"
+              ],
+              "query": [
+                {
+                  "key": "status",
+                  "value": "all"
+                },
+                {
+                  "key": "phase",
+                  "value": "all"
+                }
+              ]
+            },
+            "description": "Account Center list. `status`: all | active | breached | passed | <raw>. `phase`: all | evaluation | verification | funded | breached. Envelope `{data[], meta}`.\n\n**App source:** `lib/features/accounts/repositories/accounts_repository.dart:18`"
+          },
+          "response": []
+        },
+        {
+          "name": "Account overview \u2014 GET /accounts/{{account_id}}/overview",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{api_base_url}}/accounts/{{account_id}}/overview",
+              "host": [
+                "{{api_base_url}}"
+              ],
+              "path": [
+                "accounts",
+                "{{account_id}}",
+                "overview"
+              ]
+            },
+            "description": "Account fields + nested `stats`, `objectives`, `credentials`, `overview`, `chart`.\n\n**App source:** `lib/features/account/repositories/account_repository.dart:17`"
+          },
+          "response": []
+        },
+        {
+          "name": "Account platform & credentials \u2014 GET /accounts/{{account_id}}/platform",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{api_base_url}}/accounts/{{account_id}}/platform?reveal=false",
+              "host": [
+                "{{api_base_url}}"
+              ],
+              "path": [
+                "accounts",
+                "{{account_id}}",
+                "platform"
+              ],
+              "query": [
+                {
+                  "key": "reveal",
+                  "value": "false"
+                }
+              ]
+            },
+            "description": "`data.account.credentials` (login/server/passwords), `data.platform_locked`. `reveal=true` unmasks passwords server-side.\n\n**App source:** `lib/features/account/repositories/account_repository.dart:33`"
+          },
+          "response": []
+        },
+        {
+          "name": "Account reset quote \u2014 GET /accounts/{{account_id}}/reset",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{api_base_url}}/accounts/{{account_id}}/reset",
+              "host": [
+                "{{api_base_url}}"
+              ],
+              "path": [
+                "accounts",
+                "{{account_id}}",
+                "reset"
+              ]
+            },
+            "description": "`data.account` + `data.quote` (pricing + eligibility + payment methods).\n\n**App source:** `lib/features/account/repositories/account_repository.dart:44`"
+          },
+          "response": []
+        },
+        {
+          "name": "Purchase account reset \u2014 POST /accounts/{{account_id}}/reset",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{api_base_url}}/accounts/{{account_id}}/reset",
+              "host": [
+                "{{api_base_url}}"
+              ],
+              "path": [
+                "accounts",
+                "{{account_id}}",
+                "reset"
+              ]
+            },
+            "description": "Buys a reset with the chosen payment method.\n\n**App source:** `lib/features/account/repositories/account_repository.dart:61`",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"confirm\": true,\n  \"payment_method_id\": 1,\n  \"is_manual\": false\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "MT5 accounts (primary selector) \u2014 GET /mt5accounts/get",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{api_base_url}}/mt5accounts/get",
+              "host": [
+                "{{api_base_url}}"
+              ],
+              "path": [
+                "mt5accounts",
+                "get"
+              ]
+            },
+            "description": "`data.accounts[]` (`id, login, is_primary, is_active`) + `data.primary_account_id`.\n\n**App source:** `lib/features/accounts/services/primary_account_service.dart:69`"
+          },
+          "response": []
+        },
+        {
+          "name": "Set primary MT5 account \u2014 POST /mt5accounts/set-primary",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{api_base_url}}/mt5accounts/set-primary",
+              "host": [
+                "{{api_base_url}}"
+              ],
+              "path": [
+                "mt5accounts",
+                "set-primary"
+              ]
+            },
+            "description": "Response `data`: `primary_account_id`, `login`.\n\n**App source:** `lib/features/accounts/services/primary_account_service.dart:89`",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"account_id\": 1\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "05 \u00b7 Challenges & Orders",
+      "item": [
+        {
+          "name": "Challenge plans \u2014 GET /challenges",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{api_base_url}}/challenges?currency=USD",
+              "host": [
+                "{{api_base_url}}"
+              ],
+              "path": [
+                "challenges"
+              ],
+              "query": [
+                {
+                  "key": "currency",
+                  "value": "USD"
+                }
+              ]
+            },
+            "description": "Plans/steps catalogue for the Buy Challenge screen.\n\n**App source:** `lib/features/challenge/repositories/challenge_repository.dart:14`"
+          },
+          "response": []
+        },
+        {
+          "name": "Compare plans \u2014 GET /challenges/compare",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{api_base_url}}/challenges/compare?currency=USD",
+              "host": [
+                "{{api_base_url}}"
+              ],
+              "path": [
+                "challenges",
+                "compare"
+              ],
+              "query": [
+                {
+                  "key": "currency",
+                  "value": "USD"
+                }
+              ]
+            },
+            "description": "Plan comparison matrix.\n\n**App source:** `lib/features/challenge/repositories/challenge_repository.dart:26`"
+          },
+          "response": []
+        },
+        {
+          "name": "Price quote \u2014 POST /challenges/quote",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{api_base_url}}/challenges/quote?currency=USD",
+              "host": [
+                "{{api_base_url}}"
+              ],
+              "path": [
+                "challenges",
+                "quote"
+              ]
+            },
+            "description": "Recalculates the price for a plan + add-ons. `currency` is a query param.\n\n**App source:** `lib/features/challenge/repositories/challenge_repository.dart:36`",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"plan_version_id\": 1,\n  \"addon_ids\": []\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Apply coupon \u2014 POST /challenges/coupon",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{api_base_url}}/challenges/coupon",
+              "host": [
+                "{{api_base_url}}"
+              ],
+              "path": [
+                "challenges",
+                "coupon"
+              ]
+            },
+            "description": "Validates a coupon and returns the discounted quote. Invalid coupon \u2192 top-level `message`.\n\n**App source:** `lib/features/challenge/repositories/challenge_repository.dart:58`",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"plan_version_id\": 1,\n  \"quantity\": 1,\n  \"addon_ids\": [],\n  \"swap_free\": false,\n  \"coupon_code\": \"WELCOME10\",\n  \"currency\": \"USD\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Purchase challenge \u2014 POST /challenges/purchase",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{api_base_url}}/challenges/purchase",
+              "host": [
+                "{{api_base_url}}"
+              ],
+              "path": [
+                "challenges",
+                "purchase"
+              ]
+            },
+            "description": "Creates an order. Response `data`: `order_id`, `path` (free | manual | gateway), optional `gateway_url`.\n\n**App source:** `lib/features/challenge/repositories/challenge_repository.dart:87`",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"plan_version_id\": 1,\n  \"quantity\": 1,\n  \"addon_ids\": [],\n  \"swap_free\": false,\n  \"coupon_code\": null,\n  \"payment_method_id\": 1,\n  \"is_manual\": true,\n  \"currency\": \"USD\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Start free trial \u2014 POST /challenges/free-trial",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{api_base_url}}/challenges/free-trial",
+              "host": [
+                "{{api_base_url}}"
+              ],
+              "path": [
+                "challenges",
+                "free-trial"
+              ]
+            },
+            "description": "Starts a free-trial account. `platform_integration_id` optional.\n\n**App source:** `lib/features/challenge/repositories/challenge_repository.dart:124`",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"plan_version_id\": 1,\n  \"platform_integration_id\": 1\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Order detail \u2014 GET /orders/{{order_id}}",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{api_base_url}}/orders/{{order_id}}",
+              "host": [
+                "{{api_base_url}}"
+              ],
+              "path": [
+                "orders",
+                "{{order_id}}"
+              ]
+            },
+            "description": "Complete-payment screen: `order`, `choices`, `payment_instructions`.\n\n**App source:** `lib/features/payment/repositories/orders_repository.dart:19`"
+          },
+          "response": []
+        },
+        {
+          "name": "Upload payment proof \u2014 POST /orders/{{order_id}}/proof",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{api_base_url}}/orders/{{order_id}}/proof",
+              "host": [
+                "{{api_base_url}}"
+              ],
+              "path": [
+                "orders",
+                "{{order_id}}",
+                "proof"
+              ]
+            },
+            "description": "Manual payment screenshot (multipart). Returns the updated order.\n\n**App source:** `lib/features/payment/repositories/orders_repository.dart:35`",
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                {
+                  "key": "proof",
+                  "type": "file",
+                  "src": [],
+                  "description": "Required \u2014 payment screenshot"
+                },
+                {
+                  "key": "reference",
+                  "value": "TXN123456",
+                  "type": "text",
+                  "description": "Optional \u2014 bank/UTR reference",
+                  "disabled": true
+                }
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "06 \u00b7 Trading (web_base_url)",
+      "description": "These live on the WEB host (`web_base_url`), NOT `/api/v1`. `mt5_account` = MT5 login of the active account. TP/SL are sent in BOTH spellings (`tp`/`take_profit`, `sl`/`stop_loss`).",
+      "item": [
+        {
+          "name": "Market order \u2014 POST /api/user/trade/new-order",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{web_base_url}}/api/user/trade/new-order",
+              "host": [
+                "{{web_base_url}}"
+              ],
+              "path": [
+                "api",
+                "user",
+                "trade",
+                "new-order"
+              ]
+            },
+            "description": "`type`: buy | sell. TP/SL optional and independent.\n\n**App source:** `lib/features/positions/repositories/positions_repository.dart:22`",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"symbol\": \"EURUSD\",\n  \"volume\": 0.01,\n  \"type\": \"buy\",\n  \"mt5_account\": \"{{mt5_account}}\",\n  \"tp\": 1.1,\n  \"take_profit\": 1.1,\n  \"sl\": 1.05,\n  \"stop_loss\": 1.05\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Pending order \u2014 POST /api/user/trade/new-order",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{web_base_url}}/api/user/trade/new-order",
+              "host": [
+                "{{web_base_url}}"
+              ],
+              "path": [
+                "api",
+                "user",
+                "trade",
+                "new-order"
+              ]
+            },
+            "description": "`type`: buy_limit | sell_limit | buy_stop | sell_stop | buy_stop_limit | sell_stop_limit. `stop_limit_price` only for stop-limit types.\n\n**App source:** `lib/features/positions/repositories/positions_repository.dart:54`",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"symbol\": \"EURUSD\",\n  \"volume\": 0.01,\n  \"type\": \"buy_limit\",\n  \"price\": 1.075,\n  \"mt5_account\": \"{{mt5_account}}\",\n  \"stop_limit_price\": 1.074,\n  \"tp\": 1.1,\n  \"take_profit\": 1.1,\n  \"sl\": 1.05,\n  \"stop_loss\": 1.05\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Close position (full/partial) \u2014 POST /api/user/trade/closePositionByPositionId",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{web_base_url}}/api/user/trade/closePositionByPositionId",
+              "host": [
+                "{{web_base_url}}"
+              ],
+              "path": [
+                "api",
+                "user",
+                "trade",
+                "closePositionByPositionId"
+              ]
+            },
+            "description": "Omit `volume` for a full close; pass lots for a partial close.\n\n**App source:** `lib/features/positions/repositories/positions_repository.dart:92`",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"position_id\": 123456,\n  \"mt5_account\": \"{{mt5_account}}\",\n  \"volume\": 0.01\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Close all positions \u2014 POST /api/user/trade/closePositions",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{web_base_url}}/api/user/trade/closePositions",
+              "host": [
+                "{{web_base_url}}"
+              ],
+              "path": [
+                "api",
+                "user",
+                "trade",
+                "closePositions"
+              ]
+            },
+            "description": "Closes every open position on the account.\n\n**App source:** `lib/features/positions/repositories/positions_repository.dart:114`",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"mt5_account\": \"{{mt5_account}}\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Cancel pending order \u2014 POST /api/user/trade/closePendingOrder",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{web_base_url}}/api/user/trade/closePendingOrder",
+              "host": [
+                "{{web_base_url}}"
+              ],
+              "path": [
+                "api",
+                "user",
+                "trade",
+                "closePendingOrder"
+              ]
+            },
+            "description": "\n\n**App source:** `lib/features/positions/repositories/positions_repository.dart:128`",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"order_id\": 123456,\n  \"mt5_account\": \"{{mt5_account}}\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Update position TP/SL \u2014 POST /api/user/trade/update-tp-sl",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{web_base_url}}/api/user/trade/update-tp-sl",
+              "host": [
+                "{{web_base_url}}"
+              ],
+              "path": [
+                "api",
+                "user",
+                "trade",
+                "update-tp-sl"
+              ]
+            },
+            "description": "Send `0` to clear a level; omit a key to leave it unchanged.\n\n**App source:** `lib/features/positions/repositories/positions_repository.dart:148`",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"mt5_account\": \"{{mt5_account}}\",\n  \"position_id\": 123456,\n  \"take_profit\": 1.1,\n  \"stop_loss\": 1.05\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Update pending order TP/SL \u2014 POST /api/user/trade/update-pending-order-tp-sl",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{web_base_url}}/api/user/trade/update-pending-order-tp-sl",
+              "host": [
+                "{{web_base_url}}"
+              ],
+              "path": [
+                "api",
+                "user",
+                "trade",
+                "update-pending-order-tp-sl"
+              ]
+            },
+            "description": "Unset level is sent as `null` (not omitted) so the engine clears it.\n\n**App source:** `lib/features/positions/repositories/positions_repository.dart:173`",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"mt5_account\": \"{{mt5_account}}\",\n  \"order_id\": 123456,\n  \"price\": 1.075,\n  \"stop_loss\": null,\n  \"take_profit\": 1.1\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Trade history \u2014 GET /api/user/trade/tradehistory",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{web_base_url}}/api/user/trade/tradehistory?mt5_account={{mt5_account}}&page=1&per_page=10&from=2026-09-01&to=2026-09-28&_t={{$timestamp}}",
+              "host": [
+                "{{web_base_url}}"
+              ],
+              "path": [
+                "api",
+                "user",
+                "trade",
+                "tradehistory"
+              ],
+              "query": [
+                {
+                  "key": "mt5_account",
+                  "value": "{{mt5_account}}"
+                },
+                {
+                  "key": "page",
+                  "value": "1"
+                },
+                {
+                  "key": "per_page",
+                  "value": "10"
+                },
+                {
+                  "key": "from",
+                  "value": "2026-09-01"
+                },
+                {
+                  "key": "to",
+                  "value": "2026-09-28"
+                },
+                {
+                  "key": "_t",
+                  "value": "{{$timestamp}}"
+                }
+              ]
+            },
+            "description": "`data` is a flat list or `{data, pagination, totals, summary}`. `append=true` is sent for page > 1; `_t` is a cache-buster; `from`/`to` optional (YYYY-MM-DD).\n\n**App source:** `lib/features/positions/repositories/positions_repository.dart:198`"
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "07 \u00b7 Tools & Market data",
+      "item": [
+        {
+          "name": "Instruments / symbols \u2014 GET /tools/symbols",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{api_base_url}}/tools/symbols?q=EUR&account_id={{account_id}}",
+              "host": [
+                "{{api_base_url}}"
+              ],
+              "path": [
+                "tools",
+                "symbols"
+              ],
+              "query": [
+                {
+                  "key": "q",
+                  "value": "EUR"
+                },
+                {
+                  "key": "account_id",
+                  "value": "{{account_id}}"
+                }
+              ]
+            },
+            "description": "`data.symbols[]` + `data.categories[]`. `q` (search) and `account_id` optional.\n\n**App source:** `lib/features/symbols/repositories/symbols_repository.dart:24`"
+          },
+          "response": []
+        },
+        {
+          "name": "Calculators \u2014 GET /tools/calculators",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{api_base_url}}/tools/calculators",
+              "host": [
+                "{{api_base_url}}"
+              ],
+              "path": [
+                "tools",
+                "calculators"
+              ]
+            },
+            "description": "Calculator tabs + field definitions.\n\n**App source:** `lib/features/calculators/repositories/calculators_repository.dart:12`"
+          },
+          "response": []
+        },
+        {
+          "name": "Economic calendar \u2014 GET /tools/calendar",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{api_base_url}}/tools/calendar?currency=ALL",
+              "host": [
+                "{{api_base_url}}"
+              ],
+              "path": [
+                "tools",
+                "calendar"
+              ],
+              "query": [
+                {
+                  "key": "currency",
+                  "value": "ALL"
+                }
+              ]
+            },
+            "description": "`data.events[]` + `data.filters`. `currency` e.g. ALL, USD, EUR.\n\n**App source:** `lib/features/economic_calendar/repositories/economic_calendar_repository.dart:16`"
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "08 \u00b7 Growth (Referral, Offers, Certificates, Competitions)",
+      "item": [
+        {
+          "name": "Referral summary \u2014 GET /growth/referrals",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{api_base_url}}/growth/referrals",
+              "host": [
+                "{{api_base_url}}"
+              ],
+              "path": [
+                "growth",
+                "referrals"
+              ]
+            },
+            "description": "`data.referral` (code, share_url) + `data.stats` (referrals, to_be_paid).\n\n**App source:** `lib/features/referral/repositories/referral_repository.dart:27`"
+          },
+          "response": []
+        },
+        {
+          "name": "Referral commissions \u2014 GET /growth/referrals/commissions",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{api_base_url}}/growth/referrals/commissions?page=1",
+              "host": [
+                "{{api_base_url}}"
+              ],
+              "path": [
+                "growth",
+                "referrals",
+                "commissions"
+              ],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "1"
+                }
+              ]
+            },
+            "description": "Paged. `data[]` flat; `meta.current_page` / `meta.has_next`.\n\n**App source:** `lib/features/referral/repositories/referral_repository.dart:39`"
+          },
+          "response": []
+        },
+        {
+          "name": "Referral withdraw \u2014 POST /growth/referrals/withdraw",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{api_base_url}}/growth/referrals/withdraw",
+              "host": [
+                "{{api_base_url}}"
+              ],
+              "path": [
+                "growth",
+                "referrals",
+                "withdraw"
+              ]
+            },
+            "description": "Withdraw referral earnings to a saved payout method.\n\n**App source:** `lib/features/referral/repositories/referral_repository.dart:80`",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"amount\": 50,\n  \"payout_method_id\": 1\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Offers \u2014 GET /growth/offers",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{api_base_url}}/growth/offers",
+              "host": [
+                "{{api_base_url}}"
+              ],
+              "path": [
+                "growth",
+                "offers"
+              ]
+            },
+            "description": "`data.offers[]` + `data.available_count`.\n\n**App source:** `lib/features/offers/repositories/offers_repository.dart:15`"
+          },
+          "response": []
+        },
+        {
+          "name": "Certificates \u2014 GET /growth/certificates",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{api_base_url}}/growth/certificates",
+              "host": [
+                "{{api_base_url}}"
+              ],
+              "path": [
+                "growth",
+                "certificates"
+              ]
+            },
+            "description": "`data.certificates[]` (criteria[], earned, download_url) + `data.earned_count`.\n\n**App source:** `lib/features/certificates/repositories/certificates_repository.dart:15`"
+          },
+          "response": []
+        },
+        {
+          "name": "Certificate document \u2014 GET /growth/certificates/{{certificate_id}}/download",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{api_base_url}}/growth/certificates/{{certificate_id}}/download",
+              "host": [
+                "{{api_base_url}}"
+              ],
+              "path": [
+                "growth",
+                "certificates",
+                "{{certificate_id}}",
+                "download"
+              ]
+            },
+            "description": "`data`: name, holder, issued_at, verification_code, format (`html`), html.\n\n**App source:** `lib/features/certificates/repositories/certificates_repository.dart:24`"
+          },
+          "response": []
+        },
+        {
+          "name": "Competitions \u2014 GET /growth/competitions",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{api_base_url}}/growth/competitions",
+              "host": [
+                "{{api_base_url}}"
+              ],
+              "path": [
+                "growth",
+                "competitions"
+              ]
+            },
+            "description": "`data.competitions[]` (prizes, rules, leaderboard), `competitions_meta`, `accounts[]`, `stats.cash_pool`.\n\n**App source:** `lib/features/competitions/repositories/competitions_repository.dart:36`"
+          },
+          "response": []
+        },
+        {
+          "name": "Register for competition \u2014 POST /growth/competitions/register",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{api_base_url}}/growth/competitions/register",
+              "host": [
+                "{{api_base_url}}"
+              ],
+              "path": [
+                "growth",
+                "competitions",
+                "register"
+              ]
+            },
+            "description": "Response: user-facing `message`, `data: null`.\n\n**App source:** `lib/features/competitions/repositories/competitions_repository.dart:18`",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"competition_id\": 1,\n  \"trading_account_id\": 1\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "09 \u00b7 Finance (Rewards, Payouts, Billing)",
+      "item": [
+        {
+          "name": "Rewards page \u2014 GET /finance/rewards",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{api_base_url}}/finance/rewards?status=all&page=1",
+              "host": [
+                "{{api_base_url}}"
+              ],
+              "path": [
+                "finance",
+                "rewards"
+              ],
+              "query": [
+                {
+                  "key": "status",
+                  "value": "all"
+                },
+                {
+                  "key": "page",
+                  "value": "1"
+                }
+              ]
+            },
+            "description": "Stats + eligible accounts + methods + payouts. `status`: all | pending | approved | disbursed.\n\n**App source:** `lib/features/rewards/repositories/rewards_repository.dart:23`"
+          },
+          "response": []
+        },
+        {
+          "name": "Payout method types \u2014 GET /finance/method-types",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{api_base_url}}/finance/method-types",
+              "host": [
+                "{{api_base_url}}"
+              ],
+              "path": [
+                "finance",
+                "method-types"
+              ]
+            },
+            "description": "Types (bank / usdt / upi) with field definitions. List under `data.method_types` or `data.types`.\n\n**App source:** `lib/features/payout_methods/repositories/payout_methods_repository.dart:28`"
+          },
+          "response": []
+        },
+        {
+          "name": "Saved payout methods \u2014 GET /finance/methods",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{api_base_url}}/finance/methods",
+              "host": [
+                "{{api_base_url}}"
+              ],
+              "path": [
+                "finance",
+                "methods"
+              ]
+            },
+            "description": "List under `data.methods`.\n\n**App source:** `lib/features/payout_methods/repositories/payout_methods_repository.dart:13`"
+          },
+          "response": []
+        },
+        {
+          "name": "Add payout method \u2014 POST /finance/methods",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{api_base_url}}/finance/methods",
+              "host": [
+                "{{api_base_url}}"
+              ],
+              "path": [
+                "finance",
+                "methods"
+              ]
+            },
+            "description": "`details` keys depend on `type` \u2014 use the field keys from method-types.\n\n**App source:** `lib/features/payout_methods/repositories/payout_methods_repository.dart:45`",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"type\": \"bank\",\n  \"label\": \"HDFC Savings\",\n  \"currency\": \"USD\",\n  \"is_default\": true,\n  \"details\": {\n    \"account_holder\": \"John Doe\",\n    \"account_number\": \"1234567890\",\n    \"ifsc\": \"HDFC0001234\",\n    \"bank_name\": \"HDFC Bank\"\n  }\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Update payout method \u2014 PUT /finance/methods/{{method_id}}",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{api_base_url}}/finance/methods/{{method_id}}",
+              "host": [
+                "{{api_base_url}}"
+              ],
+              "path": [
+                "finance",
+                "methods",
+                "{{method_id}}"
+              ]
+            },
+            "description": "Payout Methods screen sends type/label/currency/details; Rewards screen may send only `label` / `details` / `is_default`.\n\n**App source:** `lib/features/payout_methods/repositories/payout_methods_repository.dart:64`",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"type\": \"bank\",\n  \"label\": \"HDFC Savings\",\n  \"currency\": \"USD\",\n  \"details\": {\n    \"account_number\": \"1234567890\"\n  }\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Delete payout method \u2014 DELETE /finance/methods/{{method_id}}",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{api_base_url}}/finance/methods/{{method_id}}",
+              "host": [
+                "{{api_base_url}}"
+              ],
+              "path": [
+                "finance",
+                "methods",
+                "{{method_id}}"
+              ]
+            },
+            "description": "\n\n**App source:** `lib/features/payout_methods/repositories/payout_methods_repository.dart:83`"
+          },
+          "response": []
+        },
+        {
+          "name": "Request payout \u2014 POST /finance/payouts",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{api_base_url}}/finance/payouts",
+              "host": [
+                "{{api_base_url}}"
+              ],
+              "path": [
+                "finance",
+                "payouts"
+              ]
+            },
+            "description": "422 when no payout cycle is open. `trading_account_id`, `notes`, `current_password` optional.\n\n**App source:** `lib/features/rewards/repositories/rewards_repository.dart:150`",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"amount\": 100,\n  \"currency\": \"USD\",\n  \"payout_method_id\": 1,\n  \"trading_account_id\": 1,\n  \"notes\": \"Monthly payout\",\n  \"current_password\": \"{{password}}\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Payout history \u2014 GET /finance/payouts",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{api_base_url}}/finance/payouts?status=all&page=1",
+              "host": [
+                "{{api_base_url}}"
+              ],
+              "path": [
+                "finance",
+                "payouts"
+              ],
+              "query": [
+                {
+                  "key": "status",
+                  "value": "all"
+                },
+                {
+                  "key": "page",
+                  "value": "1"
+                }
+              ]
+            },
+            "description": "Paged. `data[]` flat; `meta.current_page / has_next / total`.\n\n**App source:** `lib/features/rewards/repositories/rewards_repository.dart:180`"
+          },
+          "response": []
+        },
+        {
+          "name": "Cancel payout \u2014 POST /finance/payouts/{{payout_id}}/cancel",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{api_base_url}}/finance/payouts/{{payout_id}}/cancel",
+              "host": [
+                "{{api_base_url}}"
+              ],
+              "path": [
+                "finance",
+                "payouts",
+                "{{payout_id}}",
+                "cancel"
+              ]
+            },
+            "description": "Cancels a pending payout.\n\n**App source:** `lib/features/rewards/repositories/rewards_repository.dart:206`"
+          },
+          "response": []
+        },
+        {
+          "name": "Billing transactions \u2014 GET /finance/transactions",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{api_base_url}}/finance/transactions?type=all&status=all",
+              "host": [
+                "{{api_base_url}}"
+              ],
+              "path": [
+                "finance",
+                "transactions"
+              ],
+              "query": [
+                {
+                  "key": "type",
+                  "value": "all"
+                },
+                {
+                  "key": "status",
+                  "value": "all"
+                }
+              ]
+            },
+            "description": "`type`: all | <filter name>. `status`: all | \u2026\n\n**App source:** `lib/features/billing/repositories/billing_repository.dart:13`"
+          },
+          "response": []
+        },
+        {
+          "name": "Export billing CSV \u2014 GET /finance/transactions/export",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{api_base_url}}/finance/transactions/export",
+              "host": [
+                "{{api_base_url}}"
+              ],
+              "path": [
+                "finance",
+                "transactions",
+                "export"
+              ]
+            },
+            "description": "Returns raw CSV text.\n\n**App source:** `lib/features/billing/repositories/billing_repository.dart:38`"
+          },
+          "response": []
+        },
+        {
+          "name": "Invoice \u2014 GET /finance/transactions/{{transaction_id}}/invoice",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{api_base_url}}/finance/transactions/{{transaction_id}}/invoice",
+              "host": [
+                "{{api_base_url}}"
+              ],
+              "path": [
+                "finance",
+                "transactions",
+                "{{transaction_id}}",
+                "invoice"
+              ]
+            },
+            "description": "`data`: invoice_number, format, html.\n\n**App source:** `lib/features/billing/repositories/billing_repository.dart:49`"
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "10 \u00b7 Notifications",
+      "item": [
+        {
+          "name": "Notifications feed \u2014 GET /notifications",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{api_base_url}}/notifications?page=1",
+              "host": [
+                "{{api_base_url}}"
+              ],
+              "path": [
+                "notifications"
+              ],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "1"
+                }
+              ]
+            },
+            "description": "Paged. Items: id, type, title, body, event_key, meta, read_at, created_at.\n\n**App source:** `lib/features/notifications/repositories/notifications_repository.dart:25`"
+          },
+          "response": []
+        },
+        {
+          "name": "Unread count \u2014 GET /notifications/unread-count",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{api_base_url}}/notifications/unread-count",
+              "host": [
+                "{{api_base_url}}"
+              ],
+              "path": [
+                "notifications",
+                "unread-count"
+              ]
+            },
+            "description": "`data.count`.\n\n**App source:** `lib/features/notifications/repositories/notifications_repository.dart:49`"
+          },
+          "response": []
+        },
+        {
+          "name": "Mark one read \u2014 POST /notifications/{{notification_id}}/read",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{api_base_url}}/notifications/{{notification_id}}/read",
+              "host": [
+                "{{api_base_url}}"
+              ],
+              "path": [
+                "notifications",
+                "{{notification_id}}",
+                "read"
+              ]
+            },
+            "description": "Returns new unread total in `data.count`.\n\n**App source:** `lib/features/notifications/repositories/notifications_repository.dart:62`"
+          },
+          "response": []
+        },
+        {
+          "name": "Mark all read \u2014 POST /notifications/read-all",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{api_base_url}}/notifications/read-all",
+              "host": [
+                "{{api_base_url}}"
+              ],
+              "path": [
+                "notifications",
+                "read-all"
+              ]
+            },
+            "description": "\n\n**App source:** `lib/features/notifications/repositories/notifications_repository.dart:75`"
+          },
+          "response": []
+        },
+        {
+          "name": "Get preferences \u2014 GET /notifications/preferences",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{api_base_url}}/notifications/preferences",
+              "host": [
+                "{{api_base_url}}"
+              ],
+              "path": [
+                "notifications",
+                "preferences"
+              ]
+            },
+            "description": "`data.catalog[]` + `data.preferences`.\n\n**App source:** `lib/features/notifications/repositories/notifications_repository.dart:85`"
+          },
+          "response": []
+        },
+        {
+          "name": "Save preferences \u2014 PUT /notifications/preferences",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{api_base_url}}/notifications/preferences",
+              "host": [
+                "{{api_base_url}}"
+              ],
+              "path": [
+                "notifications",
+                "preferences"
+              ]
+            },
+            "description": "`preferences` = map of event_key \u2192 channel toggles.\n\n**App source:** `lib/features/notifications/repositories/notifications_repository.dart:97`",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"preferences\": {\n    \"payout_approved\": {\n      \"email\": true,\n      \"push\": true\n    }\n  }\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "11 \u00b7 Support & Help",
+      "item": [
+        {
+          "name": "Trading rules \u2014 GET /support/rules",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{api_base_url}}/support/rules",
+              "host": [
+                "{{api_base_url}}"
+              ],
+              "path": [
+                "support",
+                "rules"
+              ]
+            },
+            "description": "`data.tabs[]` + `data.sections[]`.\n\n**App source:** `lib/features/trading_rules/repositories/trading_rules_repository.dart:15`"
+          },
+          "response": []
+        },
+        {
+          "name": "FAQ \u2014 GET /support/faq",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{api_base_url}}/support/faq",
+              "host": [
+                "{{api_base_url}}"
+              ],
+              "path": [
+                "support",
+                "faq"
+              ]
+            },
+            "description": "`data.items[]` of `{q, a}`.\n\n**App source:** `lib/features/faq/repositories/faq_repository.dart:18`"
+          },
+          "response": []
+        },
+        {
+          "name": "Ticket topics \u2014 GET /support/topics",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{api_base_url}}/support/topics",
+              "host": [
+                "{{api_base_url}}"
+              ],
+              "path": [
+                "support",
+                "topics"
+              ]
+            },
+            "description": "`data.topics[]` of `{value, label}`.\n\n**App source:** `lib/features/support/repositories/support_repository.dart:33`"
+          },
+          "response": []
+        },
+        {
+          "name": "List tickets \u2014 GET /support/tickets",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{api_base_url}}/support/tickets?tab=open",
+              "host": [
+                "{{api_base_url}}"
+              ],
+              "path": [
+                "support",
+                "tickets"
+              ],
+              "query": [
+                {
+                  "key": "tab",
+                  "value": "open"
+                }
+              ]
+            },
+            "description": "`tab`: open | closed | all.\n\n**App source:** `lib/features/support/repositories/support_repository.dart:51`"
+          },
+          "response": []
+        },
+        {
+          "name": "Ticket detail \u2014 GET /support/tickets/{{ticket_id}}",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{api_base_url}}/support/tickets/{{ticket_id}}",
+              "host": [
+                "{{api_base_url}}"
+              ],
+              "path": [
+                "support",
+                "tickets",
+                "{{ticket_id}}"
+              ]
+            },
+            "description": "Ticket + messages thread.\n\n**App source:** `lib/features/support/repositories/support_repository.dart:68`"
+          },
+          "response": []
+        },
+        {
+          "name": "Create ticket \u2014 POST /support/tickets",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{api_base_url}}/support/tickets",
+              "host": [
+                "{{api_base_url}}"
+              ],
+              "path": [
+                "support",
+                "tickets"
+              ]
+            },
+            "description": "`topic` = a value from Ticket topics. `account_login` optional.\n\n**App source:** `lib/features/support/repositories/support_repository.dart:85`",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"topic\": \"trading\",\n  \"subject\": \"Order not executed\",\n  \"message\": \"My order on EURUSD did not execute.\",\n  \"account_login\": \"{{mt5_account}}\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Reply to ticket \u2014 POST /support/tickets/{{ticket_id}}/reply",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{api_base_url}}/support/tickets/{{ticket_id}}/reply",
+              "host": [
+                "{{api_base_url}}"
+              ],
+              "path": [
+                "support",
+                "tickets",
+                "{{ticket_id}}",
+                "reply"
+              ]
+            },
+            "description": "Returns the updated ticket (may be nested under `data.ticket`).\n\n**App source:** `lib/features/support/repositories/support_repository.dart:109`",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"message\": \"Any update on this?\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "12 \u00b7 Settings & Security",
+      "item": [
+        {
+          "name": "Security snapshot \u2014 GET /settings/security",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{api_base_url}}/settings/security",
+              "host": [
+                "{{api_base_url}}"
+              ],
+              "path": [
+                "settings",
+                "security"
+              ]
+            },
+            "description": "two_factor_enabled, two_factor_required, recovery_codes_remaining, prefs, sessions[].\n\n**App source:** `lib/features/settings/repositories/security_repository.dart:15`"
+          },
+          "response": []
+        },
+        {
+          "name": "Save security prefs \u2014 PUT /settings/security",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{api_base_url}}/settings/security",
+              "host": [
+                "{{api_base_url}}"
+              ],
+              "path": [
+                "settings",
+                "security"
+              ]
+            },
+            "description": "\n\n**App source:** `lib/features/settings/repositories/security_repository.dart:22`",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"login_alerts\": true,\n  \"withdrawal_confirmation\": true,\n  \"platform_lock\": false\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Change password \u2014 POST /settings/password",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{api_base_url}}/settings/password",
+              "host": [
+                "{{api_base_url}}"
+              ],
+              "path": [
+                "settings",
+                "password"
+              ]
+            },
+            "description": "Signs the user out of other devices. 422 \u2192 `errors.<field>[0]`.\n\n**App source:** `lib/features/settings/repositories/security_repository.dart:31`",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"current_password\": \"{{password}}\",\n  \"password\": \"NewPass@123\",\n  \"password_confirmation\": \"NewPass@123\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Save beneficiary \u2014 PUT /settings/beneficiary",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{api_base_url}}/settings/beneficiary",
+              "host": [
+                "{{api_base_url}}"
+              ],
+              "path": [
+                "settings",
+                "beneficiary"
+              ]
+            },
+            "description": "\n\n**App source:** `lib/features/settings/repositories/security_repository.dart:47`",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"full_name\": \"Jane Doe\",\n  \"relationship\": \"Spouse\",\n  \"email\": \"jane@example.com\",\n  \"mobile\": \"9876543210\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "2FA \u2014 start enrolment \u2014 POST /settings/two-factor/enrol",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{api_base_url}}/settings/two-factor/enrol",
+              "host": [
+                "{{api_base_url}}"
+              ],
+              "path": [
+                "settings",
+                "two-factor",
+                "enrol"
+              ]
+            },
+            "description": "`data.secret` + `data.qr_url` (otpauth://).\n\n**App source:** `lib/features/settings/repositories/security_repository.dart:65`"
+          },
+          "response": []
+        },
+        {
+          "name": "2FA \u2014 confirm enrolment \u2014 POST /settings/two-factor/confirm",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{api_base_url}}/settings/two-factor/confirm",
+              "host": [
+                "{{api_base_url}}"
+              ],
+              "path": [
+                "settings",
+                "two-factor",
+                "confirm"
+              ]
+            },
+            "description": "Wrong code \u2192 422 `errors.code[]`.\n\n**App source:** `lib/features/settings/repositories/security_repository.dart:76`",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"secret\": \"{{twofa_secret}}\",\n  \"code\": \"123456\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "2FA \u2014 regenerate recovery codes \u2014 POST /settings/two-factor/recovery-codes",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{api_base_url}}/settings/two-factor/recovery-codes",
+              "host": [
+                "{{api_base_url}}"
+              ],
+              "path": [
+                "settings",
+                "two-factor",
+                "recovery-codes"
+              ]
+            },
+            "description": "Codes in `data` (list) or `data.recovery_codes`.\n\n**App source:** `lib/features/settings/repositories/security_repository.dart:87`",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"current_password\": \"{{password}}\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "2FA \u2014 disable \u2014 DELETE /settings/two-factor",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{api_base_url}}/settings/two-factor",
+              "host": [
+                "{{api_base_url}}"
+              ],
+              "path": [
+                "settings",
+                "two-factor"
+              ]
+            },
+            "description": "DELETE with a JSON body.\n\n**App source:** `lib/features/settings/repositories/security_repository.dart:108`",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"current_password\": \"{{password}}\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "13 \u00b7 WebSocket auth (web_base_url)",
+      "item": [
+        {
+          "name": "Broadcasting auth \u2014 POST /api/broadcasting/auth",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{web_base_url}}/api/broadcasting/auth",
+              "host": [
+                "{{web_base_url}}"
+              ],
+              "path": [
+                "api",
+                "broadcasting",
+                "auth"
+              ]
+            },
+            "description": "Pusher private-channel auth used by the WebSocket manager. Returns `{auth}` signature.\n\n**App source:** `lib/core/websocket/pusher_client.dart`",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"socket_id\": \"123.456\",\n  \"channel_name\": \"private-account.{{mt5_account}}\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": []
+        }
+      ]
+    }
+  ]
+}

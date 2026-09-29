@@ -197,18 +197,26 @@ class _PaidBody extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final plans = c.plansForStep(data);
+    final tabs = c.stepTabs(data);
+    final tabKeys = tabs.keys.toList(growable: false);
+    final stepTabs = tabs.length > 1
+        ? [
+            AppSegmentedControl(
+              labels: tabs.values.toList(growable: false),
+              selected: tabKeys.indexOf(c.activeStep(data)).clamp(0, tabKeys.length - 1),
+              onChanged: (i) => c.setStep(tabKeys[i]),
+            ),
+            SizedBox(height: 16.h),
+          ]
+        : const <Widget>[];
     if (plans.isEmpty) {
       return Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
           _CompareLink(),
           SizedBox(height: 14.h),
-          AppSegmentedControl(
-            labels: ChallengeStep.values.map((s) => s.label).toList(),
-            selected: c.step.value.index,
-            onChanged: (i) => c.setStep(ChallengeStep.values[i]),
-          ),
-          SizedBox(height: 28.h),
+          ...stepTabs,
+          SizedBox(height: 12.h),
           const AppEmptyView(
             titleKey: 'challenge.no_plans_title',
             messageKey: 'challenge.no_plans_hint',
@@ -224,12 +232,7 @@ class _PaidBody extends StatelessWidget {
       children: [
         _CompareLink(),
         SizedBox(height: 14.h),
-        AppSegmentedControl(
-          labels: ChallengeStep.values.map((s) => s.label).toList(),
-          selected: c.step.value.index,
-          onChanged: (i) => c.setStep(ChallengeStep.values[i]),
-        ),
-        SizedBox(height: 16.h),
+        ...stepTabs,
         _PlanGrid(c: c, data: data),
         SizedBox(height: 26.h),
         SectionHeader('challenge.challenge_rules'.tr),

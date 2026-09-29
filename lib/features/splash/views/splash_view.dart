@@ -8,6 +8,7 @@ import '../../../app/routes/app_routes.dart';
 import '../../../features/authentication/repositories/auth_repository.dart';
 import '../../../shared/theme/app_colors.dart';
 import '../../../shared/theme/app_theme.dart';
+import '../../../shared/widgets/flavor_logo.dart';
 
 /// Brief branded splash. Checks for a persisted session token: if present the
 /// user skips straight to home, otherwise they land on get-started.
@@ -67,13 +68,18 @@ class _SplashViewState extends State<SplashView> {
                   ),
                 ),
                 alignment: Alignment.center,
-                child: Text(
-                  'tp',
-                  style: GoogleFonts.beVietnamPro(
-                    fontSize: 48.sp,
-                    fontWeight: FontWeight.w800,
-                    fontStyle: FontStyle.italic,
-                    color: AppTheme.accent,
+                clipBehavior: Clip.antiAlias,
+                child: FlavorLogo(
+                  asset: config.splashLogoAsset,
+                  size: 120.w,
+                  fallback: Text(
+                    'tp',
+                    style: GoogleFonts.beVietnamPro(
+                      fontSize: 48.sp,
+                      fontWeight: FontWeight.w800,
+                      fontStyle: FontStyle.italic,
+                      color: AppTheme.accent,
+                    ),
                   ),
                 ),
               ),

@@ -11,6 +11,12 @@
 - Keep the design UNCHANGED — only convert the numeric literal to its ScreenUtil unit; do not alter layout, colors, or values.
 - A screen is NOT "done" until every dimension uses a ScreenUtil unit, so it renders the same proportion on every device.
 
+## Client data isolation — MANDATORY (white-label)
+- A client's build must contain ONLY that client's data. Decompiling one client's app must never reveal another client's URL, name, colors, logo or keys.
+- Client URLs, app name, colors, feature flags and asset paths go ONLY in `config/flavors/<flavor>.json`. Read them via `FlavorConfig` (`lib/app/flavor/flavor_config.dart`). NEVER hardcode a client host, brand name, color, logo path or key in `lib/`.
+- Client images go ONLY in `assets/flavors/<flavor>/`, declared in `pubspec.yaml` with `flavors: [<flavor>]`. Never put a client image in a shared asset folder.
+- Every run/build command uses `--flavor <f> --dart-define-from-file=config/flavors/<f>.json`. See `README.md`.
+
 ## Imported from .cursorrules
 
 # Flutter & Dart Agent Rules (Cursor / Windsurf / Multi-IDE)

@@ -3,6 +3,7 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 
 import '../../../shared/theme/app_colors.dart';
 import '../../../shared/theme/app_theme.dart';
+import '../../../shared/widgets/flavor_logo.dart';
 
 /// Premium brand mark used at the top of the auth screens: a rounded gradient
 /// tile carrying the product glyph, with a soft brand glow. Kept theme-driven
@@ -39,7 +40,11 @@ class BrandBadge extends StatelessWidget {
           width: 1.w,
         ),
       ),
-      child: Icon(icon, color: AppColors.white, size: size * 0.52),
+      clipBehavior: Clip.antiAlias,
+      child: FlavorLogo(
+        size: size,
+        fallback: Icon(icon, color: AppColors.white, size: size * 0.52),
+      ),
     );
   }
 }

@@ -6,10 +6,16 @@ enum Flavor {
   tenax,
   clientA,
   clientB,
-  clientC;
+  clientC,
+  pipzeFunded,
+  alibabafxProp;
 
   static Flavor fromName(String name) {
     switch (name) {
+      case 'pipze_funded':
+        return Flavor.pipzeFunded;
+      case 'alibabafx_prop':
+        return Flavor.alibabafxProp;
       case 'client_a':
         return Flavor.clientA;
       case 'client_b':

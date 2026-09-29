@@ -649,91 +649,70 @@ Do NOT duplicate the Flutter application per client.
 
 ## 17. VS Code `launch.json`
 
-Create `.vscode/launch.json` configurations — one per flavor.
+Every client's config lives in ONE file: `config/flavors/<flavor>.json`. The build passes only that file with `--dart-define-from-file`. That way a build for one client never contains another client's URLs, name, colors or images (see §24).
 
-Working pattern (use this exactly):
+Each launch config uses this pattern:
 
 ```json
 {
-  "version": "0.2.0",
-  "configurations": [
-    {
-      "name": "Client A — Debug",
-      "request": "launch",
-      "type": "dart",
-      "program": "lib/main.dart",
-      "args": [
-        "--flavor", "client_a",
-        "--dart-define=FLAVOR=client_a",
-        "--dart-define=API_BASE_URL=https://api.client_a.com",
-        "--dart-define=WS_URL=wss://ws.client_a.com",
-        "--dart-define=ENV=development"
-      ]
-    },
-    {
-      "name": "Client B — Debug",
-      "request": "launch",
-      "type": "dart",
-      "program": "lib/main.dart",
-      "args": [
-        "--flavor", "client_b",
-        "--dart-define=FLAVOR=client_b",
-        "--dart-define=API_BASE_URL=https://api.client_b.com",
-        "--dart-define=WS_URL=wss://ws.client_b.com",
-        "--dart-define=ENV=development"
-      ]
-    },
-    {
-      "name": "Client A — Release",
-      "request": "launch",
-      "type": "dart",
-      "program": "lib/main.dart",
-      "args": [
-        "--flavor", "client_a",
-        "--dart-define=FLAVOR=client_a",
-        "--dart-define=API_BASE_URL=https://api.client_a.com",
-        "--dart-define=WS_URL=wss://ws.client_a.com",
-        "--dart-define=ENV=production"
-      ],
-      "flutterMode": "release"
-    }
+  "name": "Pipze Funded — Debug",
+  "request": "launch",
+  "type": "dart",
+  "program": "lib/main.dart",
+  "preLaunchTask": "prepare-ios-pipze_funded",
+  "args": [
+    "--flavor", "pipze_funded",
+    "--dart-define-from-file=config/flavors/pipze_funded.json",
+    "--dart-define=ENV=development"
   ]
 }
 ```
 
-The developer selects a config from the VS Code dropdown → press F5 → the matching flavor launches.
+The developer picks a config from the VS Code dropdown and presses F5. The matching flavor launches.
 
-Read env vars in Dart:
-```dart
-const _flavor        = String.fromEnvironment('FLAVOR', defaultValue: 'client_a');
-const _apiBaseUrl    = String.fromEnvironment('API_BASE_URL');
-const _wsUrl         = String.fromEnvironment('WS_URL');
-const _env           = String.fromEnvironment('ENV', defaultValue: 'development');
-```
+`FlavorConfig.fromEnvironment()` in `lib/app/flavor/flavor_config.dart` is the only place that reads these values, through `String.fromEnvironment`. It throws at startup if a required key is missing.
+
+Keys in `config/flavors/<flavor>.json`:
+
+| Key | Example | Required |
+|---|---|---|
+| `FLAVOR` | `pipze_funded` | yes |
+| `APP_NAME` | `Pipze Funded` | yes |
+| `API_BASE_URL` | `https://pipzefunded.com/api/v1` | yes |
+| `WEB_BASE_URL` | `https://pipzefunded.com` | yes |
+| `WS_URL` | `wss://pipzefunded.com/trade-engine/ws` | yes |
+| `CHART_BASE_URL` | `https://pipzefunded.com/mobile-chart` | yes |
+| `PUSHER_HOST` | `pipzefunded.com` | yes |
+| `PUSHER_APP_KEY` | `f316…` | yes |
+| `PRIMARY_COLOR` | `5F259E` (RRGGBB or AARRGGBB) | yes |
+| `SECONDARY_COLOR` | `FDCC29` | yes |
+| `DARK_PRIMARY_COLOR` | `E6A541` | no |
+| `FEATURE_FLAGS` | `trading,challenges,payouts,reports` | no |
+| `LOGO_ASSET` / `SPLASH_LOGO_ASSET` | `assets/flavors/pipze_funded/logo.png` | no |
+
+`ENV` (`development` / `staging` / `production`) is passed separately with `--dart-define=ENV=…`.
 
 ---
 
 ## 18. Build Commands (CI/CD friendly)
 
-Document and use these commands:
-
 ```text
 # Run (debug)
-flutter run --flavor client_a --dart-define=FLAVOR=client_a --dart-define=API_BASE_URL=https://api.client_a.com
+flutter run --flavor pipze_funded --dart-define-from-file=config/flavors/pipze_funded.json --dart-define=ENV=development
 
 # Build APK
-flutter build apk --release --flavor client_a --dart-define=FLAVOR=client_a --dart-define=API_BASE_URL=https://api.client_a.com --dart-define=ENV=production
+flutter build apk --release --flavor pipze_funded --dart-define-from-file=config/flavors/pipze_funded.json --dart-define=ENV=production
 
 # Build App Bundle
-flutter build appbundle --release --flavor client_a --dart-define=FLAVOR=client_a --dart-define=API_BASE_URL=https://api.client_a.com --dart-define=ENV=production
+flutter build appbundle --release --flavor pipze_funded --dart-define-from-file=config/flavors/pipze_funded.json --dart-define=ENV=production
 
 # Build iOS
-flutter build ios --release --flavor client_a --dart-define=FLAVOR=client_a --dart-define=API_BASE_URL=https://api.client_a.com --dart-define=ENV=production
+flutter build ios --release --flavor pipze_funded --dart-define-from-file=config/flavors/pipze_funded.json --dart-define=ENV=production
 ```
 
-Same for `client_b`, `client_c`.
+Replace `pipze_funded` with any flavor: `tenax`, `client_a`, `client_b`, `client_c`, `pipze_funded`, `alibabafx_prop`. The `--flavor` value and the JSON file name must match.
 
-These commands are CI/CD-ready. Document them in `README.md`.
+These commands are CI/CD-ready and are documented in `README.md`.
 
 ---
 
@@ -854,7 +833,12 @@ Do NOT put:
 
 into Dart source code.
 
-Use build configuration (`--dart-define`) for non-secret config and secure storage (`flutter_secure_storage`) for tokens.
+Use build configuration (`--dart-define-from-file=config/flavors/<flavor>.json`) for non-secret config and secure storage (`flutter_secure_storage`) for tokens.
+
+**Client data isolation (hard rule).** A client's build must contain ONLY that client's data. Decompiling the Pipze app must never reveal AlibabaFX's URL, name, colors or logo.
+- Client URLs, name, colors, flags and asset paths live only in `config/flavors/<flavor>.json`. Never write a client host or brand name in `lib/`.
+- Client images live only in `assets/flavors/<flavor>/`, declared in `pubspec.yaml` with `flavors: [<flavor>]`.
+- Before a release, unzip the APK and confirm it has only its own `assets/flavors/<flavor>/` and no other client's strings. The commands are in `README.md`.
 
 Remember: mobile apps cannot keep true secrets fully secret from a determined reverse engineer. Treat secrets accordingly.
 
@@ -931,7 +915,7 @@ Before implementing 100 screens, create a working architectural skeleton:
 1. `pubspec.yaml` with: `get`, `dio`, `web_socket_channel`, `hive`, `flutter_secure_storage`, `logger`, `get_storage`, `path_provider`, `intl`, `json_annotation`, `freezed` (if used), `build_runner`, `json_serializable`.
 2. `Flavor` enum and `FlavorConfig` hierarchy.
 3. `AppTheme` from `BrandConfig` (using `ColorScheme.fromSeed`).
-4. `assets/brand/<flavor>/...` per-flavor assets.
+4. `assets/flavors/<flavor>/...` per-flavor assets (bundled only into that flavor via `pubspec.yaml` `flavors:`).
 5. GetX bindings + initial DI.
 6. Routing (`app_routes.dart`, `app_pages.dart`).
 7. Base reusable widgets in `shared/widgets/`.

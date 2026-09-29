@@ -24,12 +24,17 @@ case "$FLAVOR" in
   client_a) DEFAULT_COLOR="1E88E5" ;;
   client_b) DEFAULT_COLOR="2E7D32" ;;
   client_c) DEFAULT_COLOR="6A1B9A" ;;
+  pipze_funded) DEFAULT_COLOR="5F259E" ;;
+  alibabafx_prop) DEFAULT_COLOR="182430" ;;
   *) echo "Unknown flavor: $FLAVOR" >&2; exit 1 ;;
 esac
 
 SRC_DIR="ios/flavors/$FLAVOR"
 ICONSET_DST="ios/Runner/Assets.xcassets/AppIcon.appiconset"
 LAUNCH_COLORSET="ios/Runner/Assets.xcassets/LaunchBackground.colorset"
+
+# 0. Regenerate the flavor's iOS/Android icons from its logo when the logo changed.
+python3 "$(dirname "$0")/generate_flavor_icons.py" "$FLAVOR" || echo "[icons] generation failed — keeping existing icons."
 
 # 1. App icon — copy the flavor's icon set over the Runner's if provided.
 if [[ -d "$SRC_DIR/AppIcon.appiconset" ]]; then

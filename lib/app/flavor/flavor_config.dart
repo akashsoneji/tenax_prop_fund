@@ -28,6 +28,11 @@ class FlavorConfig {
   /// per-symbol URL is built with [chartUrl].
   final String chartBaseUrl;
   final Color primaryColor;
+
+  /// Brand color used as `primary` in dark mode. Null means [primaryColor] is
+  /// used in both themes; set it when the light brand color would disappear on
+  /// a dark surface (e.g. a navy brand).
+  final Color? darkPrimaryColor;
   final Color secondaryColor;
   final String logoAsset;
   final String splashLogoAsset;
@@ -44,6 +49,7 @@ class FlavorConfig {
     required this.pusherAppKey,
     required this.chartBaseUrl,
     required this.primaryColor,
+    this.darkPrimaryColor,
     required this.secondaryColor,
     required this.logoAsset,
     required this.splashLogoAsset,
@@ -52,7 +58,8 @@ class FlavorConfig {
 
   bool has(String feature) => featureFlags.contains(feature);
 
-  String get assetRoot => 'assets/flavors/${flavor.name}';
+  String get assetRoot =>
+      'assets/flavors/${const String.fromEnvironment('FLAVOR', defaultValue: 'tenax')}';
 
   /// Builds the embedded-chart URL for [symbol]. [dark] picks the chart theme so
   /// it matches the app's current brightness. The remote chart page self-feeds
@@ -91,153 +98,80 @@ class FlavorConfig {
   /// Account equity/margin socket: `{wsUrl}/account` (white_label `/ws/account`).
   String get accountWsUrl => '$_wsBase/account';
 
-  /// Builds the config from compile-time [String.fromEnvironment] values
-  /// injected via `--dart-define` (see `.vscode/launch.json`). Each flavor has
-  /// its own default host so every URL (REST, WebSocket, chart) changes with the
-  /// flavor; a non-empty `--dart-define` still overrides the flavor default so
-  /// staging/QA builds can point anywhere.
-  factory FlavorConfig.fromEnvironment({
-    required String flavorName,
-    required String envName,
-    String apiBaseUrl = '',
-    String wsUrl = '',
-    String chartBaseUrl = '',
-  }) {
-    final flavor = Flavor.fromName(flavorName);
-    final env = appEnvFromName(envName);
-    final endpoints = _FlavorEndpoints.of(flavor);
+  /// Builds the config purely from compile-time defines supplied by
+  /// `--dart-define-from-file=config/flavors/<flavor>.json`.
+  ///
+  /// No client's host, name, colors or asset paths live in Dart source: only
+  /// the JSON file passed at build time is compiled in, so decompiling one
+  /// client's app never reveals another client's data.
+  factory FlavorConfig.fromEnvironment() {
+    const apiBaseUrl = String.fromEnvironment('API_BASE_URL');
+    const webBaseUrl = String.fromEnvironment('WEB_BASE_URL');
+    const wsUrl = String.fromEnvironment('WS_URL');
+    const chartBaseUrl = String.fromEnvironment('CHART_BASE_URL');
+    const pusherHost = String.fromEnvironment('PUSHER_HOST');
+    const pusherAppKey = String.fromEnvironment('PUSHER_APP_KEY');
+    const appName = String.fromEnvironment('APP_NAME');
+    const primaryHex = String.fromEnvironment('PRIMARY_COLOR');
+    const darkPrimaryHex = String.fromEnvironment('DARK_PRIMARY_COLOR');
+    const secondaryHex = String.fromEnvironment('SECONDARY_COLOR');
+    const logoAsset = String.fromEnvironment('LOGO_ASSET');
+    const splashLogoAsset = String.fromEnvironment('SPLASH_LOGO_ASSET');
+    const featureFlags = String.fromEnvironment('FEATURE_FLAGS');
 
-    // Env override wins when provided; otherwise fall back to the flavor host.
-    String pick(String override, String fallback) =>
-        override.isNotEmpty ? override : fallback;
-
-    switch (flavor) {
-      case Flavor.tenax:
-        return FlavorConfig(
-          flavor: flavor,
-          env: env,
-          appName: 'Tenax Prop',
-          apiBaseUrl: pick(apiBaseUrl, endpoints.api),
-          webBaseUrl: endpoints.web,
-          wsUrl: pick(wsUrl, endpoints.ws),
-          pusherHost: endpoints.pusherHost,
-          pusherAppKey: endpoints.pusherAppKey,
-          chartBaseUrl: pick(chartBaseUrl, endpoints.chart),
-          primaryColor: const Color(0xFF5F259E),
-          secondaryColor: const Color(0xFFFDCC29),
-          logoAsset: 'assets/flavors/tenax/logo.png',
-          splashLogoAsset: 'assets/flavors/tenax/splash.png',
-          featureFlags: const {'trading', 'challenges', 'payouts', 'reports'},
-        );
-      case Flavor.clientA:
-        return FlavorConfig(
-          flavor: flavor,
-          env: env,
-          appName: 'Client A',
-          apiBaseUrl: pick(apiBaseUrl, endpoints.api),
-          webBaseUrl: endpoints.web,
-          wsUrl: pick(wsUrl, endpoints.ws),
-          pusherHost: endpoints.pusherHost,
-          pusherAppKey: endpoints.pusherAppKey,
-          chartBaseUrl: pick(chartBaseUrl, endpoints.chart),
-          primaryColor: const Color(0xFF1E88E5),
-          secondaryColor: const Color(0xFFFFC107),
-          logoAsset: 'assets/flavors/clientA/logo.png',
-          splashLogoAsset: 'assets/flavors/clientA/splash.png',
-          featureFlags: const {'trading', 'challenges', 'payouts'},
-        );
-      case Flavor.clientB:
-        return FlavorConfig(
-          flavor: flavor,
-          env: env,
-          appName: 'Client B',
-          apiBaseUrl: pick(apiBaseUrl, endpoints.api),
-          webBaseUrl: endpoints.web,
-          wsUrl: pick(wsUrl, endpoints.ws),
-          pusherHost: endpoints.pusherHost,
-          pusherAppKey: endpoints.pusherAppKey,
-          chartBaseUrl: pick(chartBaseUrl, endpoints.chart),
-          primaryColor: const Color(0xFF2E7D32),
-          secondaryColor: const Color(0xFF00E676),
-          logoAsset: 'assets/flavors/clientB/logo.png',
-          splashLogoAsset: 'assets/flavors/clientB/splash.png',
-          featureFlags: const {'trading', 'reports'},
-        );
-      case Flavor.clientC:
-        return FlavorConfig(
-          flavor: flavor,
-          env: env,
-          appName: 'Client C',
-          apiBaseUrl: pick(apiBaseUrl, endpoints.api),
-          webBaseUrl: endpoints.web,
-          wsUrl: pick(wsUrl, endpoints.ws),
-          pusherHost: endpoints.pusherHost,
-          pusherAppKey: endpoints.pusherAppKey,
-          chartBaseUrl: pick(chartBaseUrl, endpoints.chart),
-          primaryColor: const Color(0xFF6A1B9A),
-          secondaryColor: const Color(0xFFD500F9),
-          logoAsset: 'assets/flavors/clientC/logo.png',
-          splashLogoAsset: 'assets/flavors/clientC/splash.png',
-          featureFlags: const {'trading', 'admin', 'reports'},
-        );
-    }
-  }
-}
-
-/// Per-flavor default endpoints, all derived from a single host so REST, the
-/// WebSocket engine and the web chart always move together. Override any one at
-/// build time with `--dart-define`.
-class _FlavorEndpoints {
-  const _FlavorEndpoints({
-    required this.api,
-    required this.web,
-    required this.ws,
-    required this.chart,
-    required this.pusherHost,
-    required this.pusherAppKey,
-  });
-
-  final String api;
-  final String web;
-  final String ws;
-  final String chart;
-
-  /// Root host of the Pusher realtime engine (e.g. `pipzefunded.com`) — the
-  /// APEX host, not the `my.` app host used for REST.
-  final String pusherHost;
-  final String pusherAppKey;
-
-  /// [host] is the REST/app host; [pusherHost] defaults to it (drop a leading
-  /// `my.`) so the realtime engine is reachable at the apex domain.
-  factory _FlavorEndpoints.forHost(
-    String host, {
-    required String pusherAppKey,
-    String? pusherHost,
-  }) =>
-      _FlavorEndpoints(
-        api: 'https://$host/api/v1',
-        web: 'https://$host',
-        ws: 'wss://$host/trade-engine/ws',
-        chart: 'https://$host/mobile-chart',
-        pusherHost: pusherHost ??
-            (host.startsWith('my.') ? host.substring(3) : host),
-        pusherAppKey: pusherAppKey,
+    const required = {
+      'API_BASE_URL': apiBaseUrl,
+      'WEB_BASE_URL': webBaseUrl,
+      'WS_URL': wsUrl,
+      'CHART_BASE_URL': chartBaseUrl,
+      'PUSHER_HOST': pusherHost,
+      'PUSHER_APP_KEY': pusherAppKey,
+      'APP_NAME': appName,
+      'PRIMARY_COLOR': primaryHex,
+      'SECONDARY_COLOR': secondaryHex,
+    };
+    final missing = [
+      for (final entry in required.entries)
+        if (entry.value.isEmpty) entry.key,
+    ];
+    if (missing.isNotEmpty) {
+      throw StateError(
+        'Missing flavor defines: ${missing.join(', ')}. Build with '
+        '--dart-define-from-file=config/flavors/<flavor>.json',
       );
-
-  static _FlavorEndpoints of(Flavor flavor) {
-    switch (flavor) {
-      case Flavor.tenax:
-        return _FlavorEndpoints.forHost('prop.alibabafx.com',
-            pusherAppKey: 'f31641a17af7835503b4f1e9');
-      case Flavor.clientA:
-        return _FlavorEndpoints.forHost('my.client-a.com',
-            pusherAppKey: 'f31641a17af7835503b4f1e9');
-      case Flavor.clientB:
-        return _FlavorEndpoints.forHost('my.client-b.com',
-            pusherAppKey: 'f31641a17af7835503b4f1e9');
-      case Flavor.clientC:
-        return _FlavorEndpoints.forHost('my.client-c.com',
-            pusherAppKey: 'f31641a17af7835503b4f1e9');
     }
+
+    return FlavorConfig(
+      flavor: Flavor.fromName(
+        const String.fromEnvironment('FLAVOR', defaultValue: 'tenax'),
+      ),
+      env: appEnvFromName(
+        const String.fromEnvironment('ENV', defaultValue: 'development'),
+      ),
+      appName: appName,
+      apiBaseUrl: apiBaseUrl,
+      webBaseUrl: webBaseUrl,
+      wsUrl: wsUrl,
+      pusherHost: pusherHost,
+      pusherAppKey: pusherAppKey,
+      chartBaseUrl: chartBaseUrl,
+      primaryColor: _parseColor(primaryHex),
+      darkPrimaryColor:
+          darkPrimaryHex.isEmpty ? null : _parseColor(darkPrimaryHex),
+      secondaryColor: _parseColor(secondaryHex),
+      logoAsset: logoAsset,
+      splashLogoAsset: splashLogoAsset,
+      featureFlags: {
+        for (final flag in featureFlags.split(','))
+          if (flag.trim().isNotEmpty) flag.trim(),
+      },
+    );
+  }
+
+  /// Parses `AARRGGBB` / `RRGGBB` hex (optional leading `#`).
+  static Color _parseColor(String hex) {
+    final digits = hex.replaceFirst('#', '');
+    final argb = digits.length == 6 ? 'FF$digits' : digits;
+    return Color(int.parse(argb, radix: 16));
   }
 }

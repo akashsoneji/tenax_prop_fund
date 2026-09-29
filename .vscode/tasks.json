@@ -95,6 +95,26 @@
                 "reveal": "silent",
                 "panel": "shared"
             }
+        },
+        {
+            "label": "prepare-ios-pipze_funded",
+            "type": "shell",
+            "command": "bash '${workspaceFolder}/scripts/prepare_ios_flavor.sh' pipze_funded",
+            "problemMatcher": [],
+            "presentation": {
+                "reveal": "silent",
+                "panel": "shared"
+            }
+        },
+        {
+            "label": "prepare-ios-alibabafx_prop",
+            "type": "shell",
+            "command": "bash '${workspaceFolder}/scripts/prepare_ios_flavor.sh' alibabafx_prop",
+            "problemMatcher": [],
+            "presentation": {
+                "reveal": "silent",
+                "panel": "shared"
+            }
         }
     ]
 }

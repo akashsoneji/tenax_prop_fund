@@ -82,9 +82,19 @@ flutter:
   uses-material-design: true
 
   assets:
-    - assets/flavors/clientA/
-    - assets/flavors/clientB/
-    - assets/flavors/clientC/
+    # Each client's images ship ONLY in that client's build.
+    - path: assets/flavors/tenax/
+      flavors: [tenax]
+    - path: assets/flavors/client_a/
+      flavors: [client_a]
+    - path: assets/flavors/client_b/
+      flavors: [client_b]
+    - path: assets/flavors/client_c/
+      flavors: [client_c]
+    - path: assets/flavors/pipze_funded/
+      flavors: [pipze_funded]
+    - path: assets/flavors/alibabafx_prop/
+      flavors: [alibabafx_prop]
     - assets/svg/flags/
 
   # To add assets to your application, add an assets section, like this:

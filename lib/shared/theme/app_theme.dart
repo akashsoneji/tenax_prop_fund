@@ -42,9 +42,10 @@ class AppTheme {
 
   static ThemeData _build(FlavorConfig config, Brightness brightness) {
     final isDark = brightness == Brightness.dark;
-    // Primary is the flavor's brand color in BOTH themes — a flavor must never
-    // see a different hue just because dark mode is on.
-    final primary = config.primaryColor;
+    // Primary is the flavor's brand color in BOTH themes unless the flavor
+    // declares a dedicated dark-mode brand color (e.g. navy brand → gold).
+    final primary =
+        isDark ? (config.darkPrimaryColor ?? config.primaryColor) : config.primaryColor;
     const onPrimary = Colors.white;
 
     // Light-mode surfaces get a subtle warm-lavender bg + white cards for
@@ -55,7 +56,7 @@ class AppTheme {
         isDark ? Colors.white70 : AppColors.inkMutedLight;
 
     final scheme = ColorScheme.fromSeed(
-      seedColor: config.primaryColor,
+      seedColor: primary,
       primary: primary,
       onPrimary: onPrimary,
       secondary: config.secondaryColor,

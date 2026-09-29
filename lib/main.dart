@@ -14,14 +14,6 @@ import 'features/home/controllers/home_controller.dart';
 import 'features/settings/controllers/settings_controller.dart';
 import 'shared/theme/app_theme.dart';
 
-// Injected at build time via --dart-define (see .vscode/launch.json).
-const _flavorName = String.fromEnvironment('FLAVOR', defaultValue: 'tenax');
-const _envName = String.fromEnvironment('ENV', defaultValue: 'development');
-// Empty by default so each flavor's own host (see FlavorConfig) is used; a
-// non-empty --dart-define overrides it for staging/QA builds.
-const _apiBaseUrl = String.fromEnvironment('API_BASE_URL');
-const _wsUrl = String.fromEnvironment('WS_URL');
-const _chartBaseUrl = String.fromEnvironment('CHART_BASE_URL');
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -42,13 +34,8 @@ Future<void> main() async {
     ),
   );
 
-  final config = FlavorConfig.fromEnvironment(
-    flavorName: _flavorName,
-    envName: _envName,
-    apiBaseUrl: _apiBaseUrl,
-    wsUrl: _wsUrl,
-    chartBaseUrl: _chartBaseUrl,
-  );
+  // Values come from --dart-define-from-file=config/flavors/<flavor>.json.
+  final config = FlavorConfig.fromEnvironment();
 
   // Settings must exist before the first build (GetMaterialApp reads theme +
   // locale from it). The rest of the app-wide singletons are registered by

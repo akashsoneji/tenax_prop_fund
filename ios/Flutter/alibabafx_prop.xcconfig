@@ -1,0 +1,3 @@
+#include "Generated.xcconfig"
+FLAVOR_NAME=alibabafx_prop
+LAUNCH_BG_COLOR=182430

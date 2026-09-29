@@ -9,6 +9,7 @@ import '../../../app/routes/app_routes.dart';
 import '../../../shared/theme/app_colors.dart';
 import '../../../shared/theme/app_theme.dart';
 import '../../../shared/widgets/app_gradient_button.dart';
+import '../../../shared/widgets/flavor_logo.dart';
 
 /// Onboarding entry: hero mark + tagline + Get Started / Create Account CTAs.
 /// Single page, no carousel. Adapts to light/dark via [Theme].
@@ -116,14 +117,18 @@ class _LogoMark extends StatelessWidget {
           ),
         ),
         alignment: Alignment.center,
-        child: Text(
-          'tp',
-          style: GoogleFonts.beVietnamPro(
-            fontSize: 44.sp,
-            fontWeight: FontWeight.w800,
-            color: AppTheme.accent,
-            letterSpacing: -1,
-            fontStyle: FontStyle.italic,
+        clipBehavior: Clip.antiAlias,
+        child: FlavorLogo(
+          size: 96.w,
+          fallback: Text(
+            'tp',
+            style: GoogleFonts.beVietnamPro(
+              fontSize: 44.sp,
+              fontWeight: FontWeight.w800,
+              color: AppTheme.accent,
+              letterSpacing: -1,
+              fontStyle: FontStyle.italic,
+            ),
           ),
         ),
       ),

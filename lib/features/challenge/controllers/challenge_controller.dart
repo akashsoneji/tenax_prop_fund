@@ -13,7 +13,9 @@ class ChallengeController extends BaseController<ChallengeData> {
   final ChallengeRepository _repository;
 
   final mode = ChallengeMode.paid.obs;
-  final step = ChallengeStep.twoStep.obs;
+  /// Selected format tab, as a [ChallengePlan.formatKey]. Empty means "first
+  /// tab the API returned".
+  final step = ''.obs;
   final selectedPlan = 0.obs;
   final comparison = Rxn<ChallengeData>();
   final compareSelected = 0.obs;
@@ -47,25 +49,36 @@ class ChallengeController extends BaseController<ChallengeData> {
     );
   }
 
-  void setStep(ChallengeStep value) {
-    step.value = value;
+  void setStep(String formatKey) {
+    step.value = formatKey;
     selectedPlan.value = 0;
   }
 
+  /// The format tabs to show — one per distinct format in the API response,
+  /// in the order the API returned them. Key = [ChallengePlan.formatKey],
+  /// value = its label.
+  Map<String, String> stepTabs(ChallengeData data) => {
+        for (final plan in data.plans)
+          if (plan.formatKey.isNotEmpty) plan.formatKey: plan.formatLabel,
+      };
+
+  /// The selected tab's key, falling back to the first tab when nothing (or a
+  /// format no longer returned by the API) is selected.
+  String activeStep(ChallengeData data) {
+    final tabs = stepTabs(data);
+    if (tabs.containsKey(step.value)) return step.value;
+    return tabs.isEmpty ? '' : tabs.keys.first;
+  }
+
+  /// One entry per account size (plan version) of the plans in the current
+  /// step, so e.g. AFX-INSTANT with 6 versions shows 6 cards ($5K … $200K).
   List<ChallengePlan> plansForStep(ChallengeData data) {
-    final format = switch (step.value) {
-      ChallengeStep.oneStep => '1-step',
-      ChallengeStep.twoStep => '2-step',
-      ChallengeStep.instant => 'instant',
-    };
-    return data.plans.where((plan) {
-      final planFormat = plan.format
-          .trim()
-          .toLowerCase()
-          .replaceAll('_', '-')
-          .replaceAll(' ', '-');
-      return planFormat == format;
-    }).toList();
+    final format = activeStep(data);
+    return data.plans
+        .where((plan) => plan.formatKey == format)
+        .expand((plan) => plan.versions.isEmpty
+        ? [plan]
+        : plan.versions.map(plan.forVersion)).toList();
   }
 
   void selectPlan(int index) {

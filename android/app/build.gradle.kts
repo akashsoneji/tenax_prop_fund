@@ -59,6 +59,16 @@ android {
             applicationIdSuffix = ".clientc"
             resValue("string", "app_name", "Client C")
         }
+        create("pipze_funded") {
+            dimension = "client"
+            applicationIdSuffix = ".pipzefunded"
+            resValue("string", "app_name", "Pipze Funded")
+        }
+        create("alibabafx_prop") {
+            dimension = "client"
+            applicationIdSuffix = ".alibabafxprop"
+            resValue("string", "app_name", "AlibabaFX Prop")
+        }
     }
 }
 
