@@ -5,6 +5,7 @@ import 'package:get/get.dart';
 
 import 'dart:math';
 
+import '../../../features/chart/services/chart_preload_service.dart';
 import '../../../features/home/views/pending_order_view.dart';
 import '../../../features/home/widgets/notifications_sheet.dart';
 import '../../../features/home/widgets/pending_order_widgets.dart';
@@ -236,7 +237,9 @@ class _TradeTicketPanelState extends State<TradeTicketPanel> {
   }
 
   void _openPendingOrder() {
-    Get.to(() => PendingOrderView(symbol: widget.symbol));
+    Get.find<ChartPreloadService>().whileHandedOff(
+      () => Get.to<void>(() => PendingOrderView(symbol: widget.symbol)),
+    );
   }
 
   @override

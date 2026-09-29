@@ -120,7 +120,7 @@ class _ChartInAppWebViewState extends State<ChartInAppWebView> {
         // flicker. _revealWhenPainted clears the loader after the settle wait.
         _warmAlreadyPainted = true;
       }
-      warmSymbol = service.currentSymbol;
+      warmSymbol = service.shownSymbol;
       _trace('initState warm=${_headlessWebView != null} '
           'preloadReady=${service.isReady} warmupMs=${service.warmupMs} '
           'warmSymbol=$warmSymbol requested=${widget.symbol}');
@@ -200,6 +200,7 @@ class _ChartInAppWebViewState extends State<ChartInAppWebView> {
       if (success) {
         _trace('symbol switch ok -> $symbolToApply');
         _loadedSymbol = symbolToApply;
+        if (_headlessWebView != null) _warmer?.noteShownSymbol(symbolToApply);
         _pendingSymbol = null;
         _retryCount = 0;
         return;
@@ -209,6 +210,7 @@ class _ChartInAppWebViewState extends State<ChartInAppWebView> {
       if (_retryCount >= 3) {
         _trace('JS switch gave up — hard reloading URL for $symbolToApply');
         _loadedSymbol = symbolToApply;
+        if (_headlessWebView != null) _warmer?.noteShownSymbol(symbolToApply);
         _controller?.loadUrl(
           urlRequest: URLRequest(url: WebUri(_urlForSymbol(symbolToApply))),
         );
@@ -493,7 +495,8 @@ class _ChartInAppWebViewState extends State<ChartInAppWebView> {
         cacheEnabled: true,
         // Cache-first so a cold open (no preload) still loads the shell + JS
         // bundle from disk on the 2nd+ launch instead of re-downloading it.
-        cacheMode: CacheMode.LOAD_CACHE_ELSE_NETWORK,
+        // Honour the server's cache headers — see ChartWarmer.warmSettings.
+        cacheMode: CacheMode.LOAD_DEFAULT,
         domStorageEnabled: true,
         databaseEnabled: true,
         // Without this the native webview layer composites ABOVE Flutter's
@@ -501,7 +504,7 @@ class _ChartInAppWebViewState extends State<ChartInAppWebView> {
         // overlay widgets like the fullscreen button silently disappear behind
         // it, and every internal repaint of the page can flash through as a
         // visible flicker.
-        useHybridComposition: true,
+        useHybridComposition: false,
       );
 
   URLRequest get _fallbackRequest {

@@ -80,7 +80,7 @@ abstract class ChartWarmer extends GetxService {
   /// i.e. the chart library finished its multi-stage boot.
   bool isReady = false;
 
-  bool _claimed = false;
+  final _claimed = false.obs;
 
   DateTime? _loadStartedAt;
   DateTime? _readyAt;
@@ -93,22 +93,41 @@ abstract class ChartWarmer extends GetxService {
   /// this to avoid a needless symbol switch on first attach.
   String get currentSymbol;
 
+  String? _shownSymbol;
+
+  /// Symbol the warm instance is showing RIGHT NOW. [currentSymbol] is only the
+  /// boot symbol (kept fixed so the preload URL never changes); once an
+  /// on-screen webview switches the page in place via JS, the next screen that
+  /// attaches the same instance must start from this instead.
+  String get shownSymbol => _shownSymbol ?? currentSymbol;
+
+  /// Called by the on-screen webview after it switched the attached warm page.
+  void noteShownSymbol(String symbol) => _shownSymbol = symbol;
+
   /// Hands the warm instance to a caller, or null when it is already in use.
   HeadlessInAppWebView? claim() {
-    if (headlessWebView == null || _claimed) return null;
-    _claimed = true;
+    if (headlessWebView == null || _claimed.value) return null;
+    _claimed.value = true;
     trace('claimed by on-screen webview (isReady=$isReady)');
     return headlessWebView;
   }
 
   /// Returns the warm instance to the pool when a screen is disposed.
   void release() {
-    _claimed = false;
+    _claimed.value = false;
     trace('released back to pool');
   }
 
   /// True while an on-screen webview holds the warm instance.
-  bool get isClaimed => _claimed;
+  bool get isClaimed => _claimed.value;
+
+  /// Completes once no on-screen webview holds the warm instance. A popped
+  /// route's widgets are disposed only after its exit animation, so a screen
+  /// that wants the instance back must wait for this instead of claiming on pop.
+  Future<void> waitUntilReleased() async {
+    if (!_claimed.value) return;
+    await _claimed.stream.firstWhere((claimed) => !claimed);
+  }
 
   /// Milliseconds the warm-up took to reach a settled canvas, or null while it
   /// is still warming.
@@ -134,9 +153,9 @@ abstract class ChartWarmer extends GetxService {
     headlessWebView = HeadlessInAppWebView(
       initialUrlRequest: URLRequest(
         url: WebUri(url),
-        // iOS: serve the cached shell/bundle when present (the chart bundle is
-        // immutable), hitting the network only on a cold cache.
-        cachePolicy: URLRequestCachePolicy.RETURN_CACHE_DATA_ELSE_LOAD,
+        // iOS: follow the server's cache headers (see warmSettings) so a
+        // relaunch never runs a stale cached chart page.
+        cachePolicy: URLRequestCachePolicy.USE_PROTOCOL_CACHE_POLICY,
       ),
       // A real off-screen size is REQUIRED — the default 0x0 makes the chart
       // skip layout/rendering entirely.
@@ -167,14 +186,21 @@ abstract class ChartWarmer extends GetxService {
     await headlessWebView?.run();
   }
 
-  /// Settings shared by every warm instance. Cache-first so the 2nd+ launch
-  /// skips re-downloading the immutable chart bundle.
+  /// Settings shared by every warm instance.
+  ///
+  /// Cache mode MUST follow the server's headers. The chart page is served with
+  /// `Cache-Control: no-cache` and pulls unhashed scripts
+  /// (`charting_library.standalone.js`, `chart-datafeed.js`); forcing
+  /// cache-first made a relaunch run the OLD cached page/scripts against the
+  /// NEW server bundle after every deploy — the toolbar rendered but the chart
+  /// canvas stayed blank. LOAD_DEFAULT still reuses cached files, it just
+  /// revalidates them (a cheap 304 when nothing changed).
   @protected
   InAppWebViewSettings get warmSettings => InAppWebViewSettings(
         javaScriptEnabled: true,
         transparentBackground: true,
         cacheEnabled: true,
-        cacheMode: CacheMode.LOAD_CACHE_ELSE_NETWORK,
+        cacheMode: CacheMode.LOAD_DEFAULT,
         domStorageEnabled: true,
         databaseEnabled: true,
         allowsInlineMediaPlayback: true,
@@ -185,7 +211,10 @@ abstract class ChartWarmer extends GetxService {
         // Hybrid Composition for this reason; the warm instance must match it
         // so the SAME compositing mode is in effect whether the chart cold
         // loads or attaches from warm-up.
-        useHybridComposition: true,
+        // Hybrid composition draws the webview into its own Android surface,
+        // which is what the Samsung Mali driver drops (blank chart pane). TLC
+        // (virtual display) composites through the Flutter surface instead.
+        useHybridComposition: false,
       );
 
   /// Tears the warm instance down and resets the warmer so a later [warmUp]
@@ -196,7 +225,8 @@ abstract class ChartWarmer extends GetxService {
     headlessWebView?.dispose();
     headlessWebView = null;
     isReady = false;
-    _claimed = false;
+    _claimed.value = false;
+    _shownSymbol = null;
     _loadStartedAt = null;
     _readyAt = null;
     trace('warm instance disposed');

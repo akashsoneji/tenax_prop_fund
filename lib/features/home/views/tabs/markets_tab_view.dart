@@ -54,14 +54,10 @@ class _MarketsTabViewState extends State<MarketsTabView> {
       DeviceOrientation.landscapeLeft,
       DeviceOrientation.landscapeRight,
     ]);
-    final preload = Get.find<ChartPreloadService>();
-    preload.fullscreenActive.value = true;
-    // One frame so this tab rebuilds without the webview and dispose() runs
-    // its release() before the next route claims.
-    await WidgetsBinding.instance.endOfFrame;
-    await Get.toNamed<void>(AppRoutes.chartLandscape, arguments: symbols);
-    // Back in portrait: re-mount and re-claim the same warm instance.
-    preload.fullscreenActive.value = false;
+    // Back in portrait the tab re-mounts and re-claims the same warm instance.
+    await Get.find<ChartPreloadService>().whileHandedOff(
+      () => Get.toNamed<void>(AppRoutes.chartLandscape, arguments: symbols),
+    );
   }
 
   @override
@@ -82,13 +78,13 @@ class _MarketsTabViewState extends State<MarketsTabView> {
                   // that rebuilds the webview widget makes the chart reload or
                   // blink, so it owns the narrowest possible listener.
                   const Positioned.fill(child: _PortraitChart()),
-                  Positioned(
-                    top: 8.h,
-                    right: 8.w,
-                    child: ChartFullscreenButton(
-                      onTap: () => _openFullscreen(symbols),
-                    ),
-                  ),
+                  // Positioned(
+                  //   top: 8.h,
+                  //   right: 8.w,
+                  //   child: ChartFullscreenButton(
+                  //     onTap: () => _openFullscreen(symbols),
+                  //   ),
+                  // ),
                 ],
               ),
             ),
@@ -166,6 +162,8 @@ class _PortraitChartState extends State<_PortraitChart> {
   Widget build(BuildContext context) {
     // While full screen owns the warm instance this renders a plain surface:
     // the webview must be GONE, not merely hidden, for the claim to transfer.
+    // Switching bottom tabs must NOT unmount it — the element would be rebuilt
+    // on return, re-running the loader and paint check (a visible reload).
     if (_handedOff) {
       return ColoredBox(color: Theme.of(context).colorScheme.surface);
     }

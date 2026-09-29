@@ -120,6 +120,32 @@ class ChartPreloadService extends ChartWarmer {
     return Size(shortest, longest);
   }
 
+  /// Pushes a route that shows its own chart (e.g. Pending Order) while the
+  /// Charts tab stays mounted underneath.
+  ///
+  /// Two live chart webviews make the platform drop a render surface (the tab's
+  /// chart comes back blank), and the second one could not claim the warm
+  /// instance anyway. So the tab's webview is unmounted first — releasing the
+  /// claim — and the pushed screen attaches the SAME painted instance. The
+  /// previous flag is restored, not forced to false, so a push from inside full
+  /// screen (portrait already handed off) does not remount the tab mid-landscape.
+  Future<T?> whileHandedOff<T>(Future<T?>? Function() push) async {
+    final previous = fullscreenActive.value;
+    fullscreenActive.value = true;
+    // One frame so the tab rebuilds without its webview and release() runs
+    // before the pushed screen claims.
+    await WidgetsBinding.instance.endOfFrame;
+    try {
+      return await push();
+    } finally {
+      // The push resolves when the route STARTS popping; its chart is disposed
+      // only after the exit animation. Remounting the tab before that makes its
+      // claim fail, so it cold-loads a second webview and ends up blank.
+      await waitUntilReleased();
+      fullscreenActive.value = previous;
+    }
+  }
+
   /// Persists [symbol] as the last-viewed chart symbol so the NEXT launch warms
   /// the chart on it. Deliberately does NOT touch [_bootSymbol] — changing it
   /// would alter [preloadUrl] and force a full webview reload (blink) instead of

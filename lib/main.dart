@@ -1,5 +1,7 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_inappwebview/flutter_inappwebview.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
 import 'package:get_storage/get_storage.dart';
@@ -18,6 +20,12 @@ import 'shared/theme/app_theme.dart';
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await GetStorage.init();
+
+  // Debug builds only: lets chrome://inspect attach to the chart WebView so
+  // device-specific page errors can be read. Never enabled in release.
+  if (kDebugMode && defaultTargetPlatform == TargetPlatform.android) {
+    await InAppWebViewController.setWebContentsDebuggingEnabled(true);
+  }
 
   // Draw behind the Android system bars so the 3-button / gesture nav bar area
   // is painted by the app (SafeArea then insets content). The bars themselves
