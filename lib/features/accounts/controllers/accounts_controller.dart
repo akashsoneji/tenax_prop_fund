@@ -57,8 +57,8 @@ class AccountsController extends BaseController<AccountsData> {
     await Get.find<PrimaryAccountService>().setPrimary(account.id);
   }
 
-  /// Trade is the 3rd bottom-nav tab in both flavors' shells.
-  static const _tradeTabIndex = 2;
+  /// Trade is the 2nd bottom-nav tab in both flavors' shells.
+  static const _tradeTabIndex = 1;
 
   @override
   Future<ApiResponse<AccountsData>> fetch() => _repository.getAccounts();

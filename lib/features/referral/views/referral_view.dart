@@ -40,8 +40,9 @@ class ReferralView extends StatelessWidget {
           ),
           SliverToBoxAdapter(
             child: SafeArea(
+              top: false,
               child: Padding(
-                padding: EdgeInsets.fromLTRB(16.w, 18.h, 16.w, 32.h),
+                padding: EdgeInsets.fromLTRB(16.w, 16.h, 16.w, 32.h),
                 child: Obx(
                   () => DataStateBuilder<ReferralData>(
                     state: c.state,
@@ -662,21 +663,9 @@ class _HowYouGetPaidCard extends StatelessWidget {
   const _HowYouGetPaidCard();
 
   static const _steps = [
-    (
-      '1',
-      'They use your code',
-      'The discount applies at their checkout, so they gain too.',
-    ),
-    (
-      '2',
-      'They buy a challenge',
-      'You earn 10% of the fee they pay, on every purchase they ever make.',
-    ),
-    (
-      '3',
-      'It lands in your rewards',
-      'Referral earnings are paid with your normal reward request.',
-    ),
+    ('1', 'referral.step1_title', 'referral.step1_body'),
+    ('2', 'referral.step2_title', 'referral.step2_body'),
+    ('3', 'referral.step3_title', 'referral.step3_body'),
   ];
 
   @override
@@ -692,8 +681,8 @@ class _HowYouGetPaidCard extends StatelessWidget {
             for (var i = 0; i < _steps.length; i++) ...[
               _StepRow(
                 number: _steps[i].$1,
-                title: _steps[i].$2,
-                body: _steps[i].$3,
+                title: _steps[i].$2.tr,
+                body: _steps[i].$3.tr,
               ),
               if (i != _steps.length - 1) Divider(height: 1.h),
             ],

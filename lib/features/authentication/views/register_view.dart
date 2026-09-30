@@ -146,12 +146,12 @@ class _RegisterViewState extends State<RegisterView> {
                 index: 1,
                 child: _field(
                   controller: _firstName,
-                  label: 'First name',
+                  label: 'register.first_name'.tr,
                   icon: Icons.person_outline_rounded,
                   textCapitalization: TextCapitalization.words,
                   autofill: const [AutofillHints.givenName],
                   validator: (val) =>
-                      val == null || val.trim().isEmpty ? 'Required' : null,
+                      val == null || val.trim().isEmpty ? 'register.required'.tr : null,
                 ),
               ),
               SizedBox(height: 14.h),
@@ -159,12 +159,12 @@ class _RegisterViewState extends State<RegisterView> {
                 index: 2,
                 child: _field(
                   controller: _lastName,
-                  label: 'Last name',
+                  label: 'register.last_name'.tr,
                   icon: Icons.person_outline_rounded,
                   textCapitalization: TextCapitalization.words,
                   autofill: const [AutofillHints.familyName],
                   validator: (val) =>
-                      val == null || val.trim().isEmpty ? 'Required' : null,
+                      val == null || val.trim().isEmpty ? 'register.required'.tr : null,
                 ),
               ),
               SizedBox(height: 14.h),

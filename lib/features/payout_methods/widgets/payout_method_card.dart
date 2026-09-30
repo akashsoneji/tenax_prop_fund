@@ -56,7 +56,9 @@ class PayoutMethodCard extends StatelessWidget {
                 ),
                 SizedBox(width: 8.w),
                 Text(
-                  method.isSetUp ? 'Set up' : 'Not set up',
+                  method.isSetUp
+                      ? 'payout_methods.set_up'.tr
+                      : 'payout_methods.not_set_up'.tr,
                   style: GoogleFonts.beVietnamPro(
                     fontSize: 13.sp,
                     fontWeight: FontWeight.w700,

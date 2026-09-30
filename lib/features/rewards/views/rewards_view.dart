@@ -239,8 +239,8 @@ class _BillingTabContent extends StatelessWidget {
     if (!context.mounted) return;
     if (!result.success || result.data == null || result.data!.isEmpty) {
       Get.snackbar(
-        'Export failed',
-        result.message ?? 'Unable to export billing history.',
+        'rewards.export_failed'.tr,
+        result.message ?? 'rewards.export_failed_body'.tr,
         snackPosition: SnackPosition.BOTTOM,
         margin: EdgeInsets.all(16.w),
         borderRadius: 14.r,
@@ -249,16 +249,16 @@ class _BillingTabContent extends StatelessWidget {
     }
 
     final path = await FilePicker.saveFile(
-      dialogTitle: 'Save billing statement',
+      dialogTitle: 'rewards.export_dialog_title'.tr,
       fileName: 'billing_statement.csv',
       bytes: Uint8List.fromList(result.data!.codeUnits),
     );
     if (!context.mounted) return;
     Get.snackbar(
-      path == null ? 'Export cancelled' : 'Export saved',
+      path == null ? 'rewards.export_cancelled'.tr : 'rewards.export_saved'.tr,
       path == null
-          ? 'The CSV file was not saved.'
-          : 'Billing statement saved successfully.',
+          ? 'rewards.export_cancelled_body'.tr
+          : 'rewards.export_saved_body'.tr,
       snackPosition: SnackPosition.BOTTOM,
       margin: EdgeInsets.all(16.w),
       borderRadius: 14.r,

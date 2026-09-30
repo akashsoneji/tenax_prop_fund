@@ -3,8 +3,8 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
 
 import '../../../app/routes/app_routes.dart';
-import '../../../shared/theme/app_colors.dart';
 import '../../../shared/theme/app_text.dart';
+import '../../../shared/widgets/app_confirm_dialog.dart';
 import '../../../shared/widgets/app_text_field.dart';
 import '../../authentication/repositories/auth_repository.dart';
 
@@ -54,101 +54,67 @@ class _DeleteAccountDialogState extends State<_DeleteAccountDialog> {
   @override
   Widget build(BuildContext context) {
     final scheme = Theme.of(context).colorScheme;
-    return AlertDialog(
-      backgroundColor: scheme.surface,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(20.r),
+    return AppDialogFrame(
+      title: 'more.delete_account'.tr,
+      icon: Icons.delete_forever_rounded,
+      destructive: true,
+      message: Text(
+        'more.delete_account_warning'.tr,
+        textAlign: TextAlign.center,
+        style: AppText.body(
+          fontSize: 13.5.sp,
+          height: 1.5,
+          color: scheme.onSurfaceVariant,
+        ),
       ),
-      titlePadding: EdgeInsets.fromLTRB(20.w, 20.h, 20.w, 8.h),
-      contentPadding: EdgeInsets.fromLTRB(20.w, 0, 20.w, 8.h),
-      title: Row(
+      actions: AppDialogActions(
+        confirmLabel: 'more.delete_account'.tr,
+        destructive: true,
+        loading: _submitting,
+        onCancel: () => Get.back<void>(),
+        onConfirm: _submit,
+      ),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Container(
-            width: 36.w,
-            height: 36.w,
-            alignment: Alignment.center,
-            decoration: BoxDecoration(
-              color: AppColors.danger.withValues(alpha: 0.12),
-              borderRadius: BorderRadius.circular(12.r),
-            ),
-            child: Icon(Icons.delete_forever_rounded,
-                size: 20.w, color: AppColors.danger),
-          ),
-          SizedBox(width: 12.w),
-          Expanded(
-            child: Text(
-              'more.delete_account'.tr,
-              maxLines: 2,
-              overflow: TextOverflow.ellipsis,
-              style: AppText.title(fontSize: 16.sp, color: scheme.onSurface),
+          AppTextField(
+            controller: _password,
+            label: 'more.delete_account_password'.tr,
+            hint: 'more.delete_account_password'.tr,
+            obscureText: _obscure,
+            textInputAction: TextInputAction.done,
+            onSubmitted: (_) => _submit(),
+            suffixIcon: IconButton(
+              onPressed: () => setState(() => _obscure = !_obscure),
+              icon: Icon(
+                _obscure
+                    ? Icons.visibility_outlined
+                    : Icons.visibility_off_outlined,
+                size: 20.w,
+              ),
             ),
           ),
+          if (_error != null) ...[
+            SizedBox(height: 8.h),
+            Row(
+              children: [
+                Icon(Icons.error_outline_rounded,
+                    size: 14.w, color: scheme.error),
+                SizedBox(width: 6.w),
+                Expanded(
+                  child: Text(
+                    _error!,
+                    maxLines: 2,
+                    overflow: TextOverflow.ellipsis,
+                    style: AppText.label(fontSize: 12.sp, color: scheme.error),
+                  ),
+                ),
+              ],
+            ),
+          ],
         ],
       ),
-      content: SingleChildScrollView(
-        physics: const BouncingScrollPhysics(),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              'more.delete_account_warning'.tr,
-              style: AppText.body(
-                fontSize: 13.sp,
-                height: 1.4,
-                color: scheme.onSurface.withValues(alpha: 0.7),
-              ),
-            ),
-            SizedBox(height: 16.h),
-            AppTextField(
-              controller: _password,
-              label: 'more.delete_account_password'.tr,
-              hint: 'more.delete_account_password'.tr,
-              obscureText: _obscure,
-              textInputAction: TextInputAction.done,
-              onSubmitted: (_) => _submit(),
-              suffixIcon: IconButton(
-                onPressed: () => setState(() => _obscure = !_obscure),
-                icon: Icon(
-                  _obscure
-                      ? Icons.visibility_outlined
-                      : Icons.visibility_off_outlined,
-                  size: 20.w,
-                ),
-              ),
-            ),
-            if (_error != null) ...[
-              SizedBox(height: 8.h),
-              Text(
-                _error!,
-                style: AppText.label(
-                    fontSize: 12.sp, color: AppColors.danger),
-              ),
-            ],
-          ],
-        ),
-      ),
-      actionsPadding: EdgeInsets.fromLTRB(12.w, 0, 12.w, 12.h),
-      actions: [
-        TextButton(
-          onPressed: _submitting ? null : () => Get.back<void>(),
-          child: Text('common.cancel'.tr),
-        ),
-        TextButton(
-          onPressed: _submitting ? null : _submit,
-          child: _submitting
-              ? SizedBox(
-                  width: 18.w,
-                  height: 18.w,
-                  child: const CircularProgressIndicator(strokeWidth: 2),
-                )
-              : Text(
-                  'common.submit'.tr,
-                  style: AppText.subtitle(
-                      fontSize: 14.sp, color: AppColors.danger),
-                ),
-        ),
-      ],
     );
   }
 }

@@ -153,7 +153,7 @@ class ChallengeController extends BaseController<ChallengeData> {
     } else if (result.isGateway && (result.gatewayUrl?.isNotEmpty ?? false)) {
       Get.toNamed(AppRoutes.gatewayPayment, arguments: result.gatewayUrl);
     } else {
-      AppToast.success('Your trial account is being provisioned.');
+      AppToast.success('challenge.trial_provisioning'.tr);
       Get.until((route) => route.settings.name == AppRoutes.home);
     }
   }

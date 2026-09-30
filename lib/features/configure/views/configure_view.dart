@@ -108,7 +108,7 @@ class ConfigureView extends StatelessWidget {
             strikePrice: c.subtotal > c.total
                 ? '${c.currency} ${c.subtotal}'
                 : null,
-            actionLabel: 'Continue',
+            actionLabel: 'configure.continue'.tr,
             loading: c.purchasing.value,
             onAction: c.purchasing.value ? null : c.continuePressed,
           )),
@@ -373,7 +373,7 @@ class _CouponAction extends StatelessWidget {
         minimumSize: Size(0, 36.h),
       ),
       child: Text(
-        'Apply',
+        'configure.apply'.tr,
         style: GoogleFonts.beVietnamPro(
           fontSize: 14.sp,
           fontWeight: FontWeight.w700,

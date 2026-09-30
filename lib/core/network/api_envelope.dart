@@ -1,4 +1,5 @@
 import 'package:dio/dio.dart';
+import 'package:get/get_utils/get_utils.dart' show Trans;
 
 import '../../shared/widgets/app_toast.dart';
 import 'api_response.dart';
@@ -130,21 +131,21 @@ class ApiEnvelope {
     }
     switch (e.response?.statusCode) {
       case 401:
-        return 'Session expired. Please login again.';
+        return 'errors.session_expired'.tr;
       case 403:
-        return 'You do not have permission to perform this action.';
+        return 'errors.forbidden'.tr;
       case 404:
-        return 'Requested resource not found.';
+        return 'errors.not_found'.tr;
       case 422:
-        return 'Please fix the highlighted fields.';
+        return 'errors.validation'.tr;
       case 500:
-        return 'Something went wrong. Please try again later.';
+        return 'errors.server'.tr;
     }
     if (e.type == DioExceptionType.connectionTimeout ||
         e.type == DioExceptionType.receiveTimeout ||
         e.type == DioExceptionType.connectionError) {
-      return 'Network error. Check your connection and try again.';
+      return 'errors.network'.tr;
     }
-    return 'Something went wrong. Please try again.';
+    return 'state.error'.tr;
   }
 }

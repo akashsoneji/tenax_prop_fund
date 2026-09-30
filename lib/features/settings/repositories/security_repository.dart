@@ -44,6 +44,13 @@ class SecurityRepository {
         ),
       );
 
+  Future<ApiResponse<Beneficiary>> getBeneficiary() => ApiEnvelope.guard(
+        () => _api.get<dynamic>(ApiEndpoints.settingsBeneficiary),
+        (data) => Beneficiary.fromJson(
+          data is Map<String, dynamic> ? data : const {},
+        ),
+      );
+
   Future<ApiResponse<String>> saveBeneficiary({
     required String fullName,
     required String relationship,

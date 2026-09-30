@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:get_storage/get_storage.dart';
+import 'package:intl/intl.dart';
 
 /// User-facing settings (theme mode + locale). Persisted via GetStorage so the
 /// choice survives app restarts. App-wide singletons read these on startup.
@@ -42,6 +43,7 @@ class SettingsController extends GetxController {
     final box = GetStorage();
     await box.write(_localeKey, next.languageCode);
     _locale.value = next;
+    Intl.defaultLocale = next.languageCode;
     Get.updateLocale(next);
     Get.forceAppUpdate();
   }

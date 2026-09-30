@@ -118,7 +118,7 @@ class ConfigureController extends GetxController {
             ? '+\$${(addon.priceMinor / 100).round()}'
             : addon.percentOfFee > 0
                 ? '+${addon.percentOfFee}%'
-                : 'Included';
+                : 'configure.included'.tr;
         return Addon(
           id: '${addon.id}',
           title: addon.name,
@@ -126,7 +126,7 @@ class ConfigureController extends GetxController {
           priceLabel: priceLabel,
           tagLabel: addon.percentOfFee > 0
               ? '${addon.percentOfFee}% of plan fee'
-              : 'Server priced',
+              : 'configure.server_priced'.tr,
           priceMinor: addon.priceMinor,
         );
       }).toList(growable: false);
@@ -282,7 +282,7 @@ class ConfigureController extends GetxController {
       couponDiscount.value =
           ((quote.subtotalMinor - quote.totalMinor) / 100).round();
     } else {
-      couponError.value = res.message ?? 'This coupon code is invalid.';
+      couponError.value = res.message ?? 'configure.coupon_invalid'.tr;
     }
   }
 
@@ -311,11 +311,11 @@ class ConfigureController extends GetxController {
     final versionId = selectedPlan?.defaultVersion?.id;
     final method = selectedPaymentMethod;
     if (versionId == null) {
-      AppToast.error('This plan cannot be purchased right now.');
+      AppToast.error('configure.plan_unavailable'.tr);
       return;
     }
     if (method == null) {
-      AppToast.error('Please choose a payment method.');
+      AppToast.error('configure.choose_payment_method'.tr);
       return;
     }
 
@@ -338,7 +338,7 @@ class ConfigureController extends GetxController {
     if (result.isManual) {
       Get.toNamed(AppRoutes.completePayment, arguments: result.orderId);
     } else if (result.isFree) {
-      AppToast.success('Your account is being provisioned.');
+      AppToast.success('configure.account_provisioning'.tr);
       Get.until((route) => route.settings.name == AppRoutes.home);
     } else if (result.isGateway &&
         (result.gatewayUrl?.isNotEmpty ?? false)) {
@@ -352,29 +352,27 @@ class ConfigureController extends GetxController {
         },
       );
     } else {
-      AppToast.error('This order could not be started. Please try again.');
+      AppToast.error('configure.order_failed'.tr);
     }
   }
 
   List<SummaryRow> get summaryRows => [
-        SummaryRow('Plan', planName),
-        SummaryRow('Account size', accountSize),
+        SummaryRow('configure.plan'.tr, planName),
+        SummaryRow('configure.account_size'.tr, accountSize),
         if (availablePlatforms.isNotEmpty)
-          SummaryRow('Platform', availablePlatforms[platform.value.clamp(0, availablePlatforms.length - 1)]),
-        SummaryRow('Swap',
-            swap.value == 0 ? 'Swap' : 'Swap-Free (+$swapFreePercent%)'),
+          SummaryRow('configure.platform'.tr, availablePlatforms[platform.value.clamp(0, availablePlatforms.length - 1)]),
+        SummaryRow('configure.swap'.tr,
+            swap.value == 0 ? 'configure.swap'.tr : 'configure.swap_free'.tr),
         if (selectedPaymentMethod != null)
-          SummaryRow('Payment method', selectedPaymentMethod!.name),
-        SummaryRow('Currency', currency),
+          SummaryRow('configure.payment_method'.tr, selectedPaymentMethod!.name),
+        SummaryRow('configure.currency'.tr, currency),
         SummaryRow(
-          'Add-ons',
-          selectedAddons.isEmpty
-              ? '0 selected'
-              : '${selectedAddons.length} selected',
+          'configure.addons'.tr,
+          'configure.addons_selected'.trParams({'count': '${selectedAddons.length}'}),
         ),
-        SummaryRow('Quantity', '${quantity.value}'),
+        SummaryRow('configure.quantity'.tr, '${quantity.value}'),
         if (appliedCoupon.value != null)
-          SummaryRow('Discount (${appliedCoupon.value})', '-\$$discount'),
+          SummaryRow('${'configure.discount'.tr} (${appliedCoupon.value})', '-\$$discount'),
       ];
 
   // Form controllers (disposed with the controller).

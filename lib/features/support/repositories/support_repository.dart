@@ -1,3 +1,5 @@
+import 'package:get/get_utils/get_utils.dart' show Trans;
+
 import '../../../core/network/api_client.dart';
 import '../../../core/network/api_endpoints.dart';
 import '../../../core/network/api_envelope.dart';
@@ -96,7 +98,7 @@ class SupportRepository {
             ? data['ticket'] as Map<String, dynamic>
             : (data is Map<String, dynamic> ? data : const {}),
       ),
-      successMessage: 'Ticket submitted. We reply within 24 hours.',
+      successMessage: 'support.ticket_submitted'.tr,
     );
   }
 
@@ -115,7 +117,7 @@ class SupportRepository {
             ? data['ticket'] as Map<String, dynamic>
             : (data is Map<String, dynamic> ? data : const {}),
       ),
-      successMessage: 'Reply sent.',
+      successMessage: 'support.reply_sent'.tr,
     );
   }
 }

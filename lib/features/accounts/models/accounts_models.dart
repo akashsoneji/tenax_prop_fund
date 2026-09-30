@@ -1,3 +1,5 @@
+import 'package:intl/intl.dart';
+
 // Domain models for the "My accounts" (Account Center) screen. Shapes mirror
 // the web portal's Inertia payload (`component: Client/Accounts/Index`), read
 // from `props`: `accounts.data[]`, `counts`, `ownedTotal`, `settlingCount`,
@@ -297,10 +299,9 @@ String _group(int n) {
   return buf.toString();
 }
 
-const _months = [
-  'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
-  'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec',
-];
+List<String> get _months => [
+      for (var m = 1; m <= 12; m++) DateFormat.MMM().format(DateTime(2000, m)),
+    ];
 
 /// Formats an ISO date as `Sep 2, 2026` in local time.
 String _date(dynamic iso) {

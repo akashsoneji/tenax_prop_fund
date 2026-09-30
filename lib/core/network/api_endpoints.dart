@@ -241,8 +241,6 @@ abstract class ApiEndpoints {
   /// password_confirmation}`. Signs the user out of other devices.
   static const settingsPassword = '/settings/password';
 
-  /// Beneficiary details (`POST`). Body: `{full_name, relationship, email,
-  /// mobile}`.
   // ---------------------------------------------------------------------------
   // Finance / Rewards & Payouts
   // ---------------------------------------------------------------------------
@@ -272,6 +270,8 @@ abstract class ApiEndpoints {
   static String financeTransactionInvoice(Object id) =>
       '/finance/transactions/$id/invoice';
 
+  /// Beneficiary details. `GET` returns `data` = `{full_name, relationship,
+  /// email, mobile}`; `PUT` saves the same body.
   static const settingsBeneficiary = '/settings/beneficiary';
 
   /// Starts two-factor enrolment (`POST`). `data` carries `secret` and the

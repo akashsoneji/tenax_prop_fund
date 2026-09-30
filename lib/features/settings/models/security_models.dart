@@ -124,6 +124,28 @@ class SecuritySettings {
       );
 }
 
+/// Response of `GET /settings/beneficiary`.
+class Beneficiary {
+  const Beneficiary({
+    required this.fullName,
+    required this.relationship,
+    required this.email,
+    required this.mobile,
+  });
+
+  final String fullName;
+  final String relationship;
+  final String email;
+  final String mobile;
+
+  factory Beneficiary.fromJson(Map<String, dynamic> json) => Beneficiary(
+        fullName: json['full_name']?.toString() ?? '',
+        relationship: json['relationship']?.toString() ?? '',
+        email: json['email']?.toString() ?? '',
+        mobile: json['mobile']?.toString() ?? '',
+      );
+}
+
 /// Response of `POST /settings/two-factor/enrol`.
 class TwoFactorEnrolment {
   const TwoFactorEnrolment({

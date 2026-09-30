@@ -462,7 +462,10 @@ String _trialDescription(ChallengeData data) {
   final trial = data.trial;
   if (trial == null) return 'challenge.free_trial'.tr;
   final size = trial.accountSizeMinor ~/ 100;
-  return '\$${_sizeK(size)} account, free for ${trial.days} days';
+  return 'challenge.trial_description'.trParams({
+    'size': '\$${_sizeK(size)}',
+    'days': '${trial.days}',
+  });
 }
 
 /// Formats a whole-dollar amount as a compact `$5K`-style label.
@@ -484,12 +487,15 @@ class _TrialStatGrid extends StatelessWidget {
           final rules = data.trialRules.isNotEmpty
               ? data.trialRules
               : [
-                  ChallengeRule('Account size', '\$${(trial?.accountSizeMinor ?? 0) ~/ 100}'),
-                  ChallengeRule('Profit target', '${trial?.profitTargetPercent ?? 0}%'),
-                  ChallengeRule('Daily loss limit', '${trial?.dailyLossPercent ?? 0}%'),
-                  ChallengeRule('Maximum loss', '${trial?.maxLossPercent ?? 0}%'),
-                  ChallengeRule('Minimum trading days', '${trial?.minTradingDays ?? 0}'),
-                  ChallengeRule('Expires after', '${trial?.days ?? 0} days'),
+                  ChallengeRule('challenge.rule_account_size'.tr, '\$${(trial?.accountSizeMinor ?? 0) ~/ 100}'),
+                  ChallengeRule('challenge.rule_profit_target'.tr, '${trial?.profitTargetPercent ?? 0}%'),
+                  ChallengeRule('challenge.rule_daily_loss'.tr, '${trial?.dailyLossPercent ?? 0}%'),
+                  ChallengeRule('challenge.rule_max_loss'.tr, '${trial?.maxLossPercent ?? 0}%'),
+                  ChallengeRule('challenge.rule_min_days'.tr, '${trial?.minTradingDays ?? 0}'),
+                  ChallengeRule(
+                    'challenge.rule_expires_after'.tr,
+                    'challenge.days_count'.trParams({'days': '${trial?.days ?? 0}'}),
+                  ),
                 ];
     return GridView.builder(
       shrinkWrap: true,

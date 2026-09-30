@@ -22,6 +22,8 @@ class SecurityController extends BaseController<SecuritySettings> {
   final savingPrefs = false.obs;
   final savingPassword = false.obs;
   final savingBeneficiary = false.obs;
+  final loadingBeneficiary = false.obs;
+  final beneficiary = Rxn<Beneficiary>();
   final enrolling = false.obs;
   final confirming2fa = false.obs;
   final disabling2fa = false.obs;
@@ -90,21 +92,47 @@ class SecurityController extends BaseController<SecuritySettings> {
         ),
       );
 
+  /// Loads the saved beneficiary so the sheet opens pre-filled. A failure is
+  /// toasted but leaves the form usable, so the user can still enter details.
+  Future<Beneficiary?> loadBeneficiary() async {
+    if (loadingBeneficiary.value) return beneficiary.value;
+    loadingBeneficiary.value = true;
+    final res = await _repository.getBeneficiary();
+    loadingBeneficiary.value = false;
+    if (isClosed) return null;
+    if (!res.success || res.data == null) {
+      AppToast.error(res.message ?? 'settings.security.load_failed'.tr);
+      return beneficiary.value;
+    }
+    beneficiary.value = res.data;
+    return res.data;
+  }
+
   Future<bool> saveBeneficiary({
     required String fullName,
     required String relationship,
     required String email,
     required String mobile,
-  }) =>
-      _runAction(
-        savingBeneficiary,
-        () => _repository.saveBeneficiary(
-          fullName: fullName,
-          relationship: relationship,
-          email: email,
-          mobile: mobile,
-        ),
+  }) async {
+    final ok = await _runAction(
+      savingBeneficiary,
+      () => _repository.saveBeneficiary(
+        fullName: fullName,
+        relationship: relationship,
+        email: email,
+        mobile: mobile,
+      ),
+    );
+    if (ok) {
+      beneficiary.value = Beneficiary(
+        fullName: fullName,
+        relationship: relationship,
+        email: email,
+        mobile: mobile,
       );
+    }
+    return ok;
+  }
 
   Future<TwoFactorEnrolment?> startTwoFactorEnrolment() async {
     if (enrolling.value) return null;

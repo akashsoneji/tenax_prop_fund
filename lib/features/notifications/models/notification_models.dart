@@ -1,3 +1,6 @@
+import 'package:get/get_utils/get_utils.dart' show Trans;
+import 'package:intl/intl.dart';
+
 /// The status flavour of a notification row — drives its leading icon + tint.
 enum NotificationType { warning, info, success, gift }
 
@@ -80,18 +83,18 @@ class AppNotification {
     }
   }
 
-  static const _months = [
-    'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
-    'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec',
-  ];
 
   /// Short timestamp: 'now' / 'Nm' / 'Nh' within a day, else 'MMM d'.
   static String _relativeTime(DateTime when) {
     final diff = DateTime.now().difference(when);
-    if (diff.inMinutes < 1) return 'now';
-    if (diff.inMinutes < 60) return '${diff.inMinutes}m';
-    if (diff.inHours < 24) return '${diff.inHours}h';
-    return '${_months[when.month - 1]} ${when.day}';
+    if (diff.inMinutes < 1) return 'notifications.time_now'.tr;
+    if (diff.inMinutes < 60) {
+      return 'notifications.time_minutes'.trParams({'n': '${diff.inMinutes}'});
+    }
+    if (diff.inHours < 24) {
+      return 'notifications.time_hours'.trParams({'n': '${diff.inHours}'});
+    }
+    return DateFormat.MMMd().format(when);
   }
 }
 

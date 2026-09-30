@@ -122,56 +122,63 @@ class _StatCell extends StatelessWidget {
   Widget build(BuildContext context) {
     final scheme = Theme.of(context).colorScheme;
     return Padding(
-      padding: EdgeInsets.fromLTRB(14.w, 14.h, 12.w, 14.h),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        mainAxisSize: MainAxisSize.min,
+      padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 10.h),
+      child: Row(
         children: [
-          Row(
-            children: [
-              Container(
-                width: 30.w,
-                height: 30.w,
-                decoration: BoxDecoration(
-                  color: tone.withValues(alpha: 0.12),
-                  shape: BoxShape.circle,
-                ),
-                child: Icon(icon, size: 16.w, color: tone),
-              ),
-              const Spacer(),
-              if (delta != null)
-                Flexible(
-                  child: AppPill(
-                    label: delta!,
-                    color: tone,
-                    fontSize: 10.5,
-                    padding:
-                        EdgeInsets.symmetric(horizontal: 8.w, vertical: 3.h),
+          Container(
+            width: 28.w,
+            height: 28.w,
+            decoration: BoxDecoration(
+              color: tone.withValues(alpha: 0.12),
+              shape: BoxShape.circle,
+            ),
+            child: Icon(icon, size: 15.w, color: tone),
+          ),
+          SizedBox(width: 8.w),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                FittedBox(
+                  fit: BoxFit.scaleDown,
+                  alignment: Alignment.centerLeft,
+                  child: Text(
+                    value.isEmpty ? '—' : value,
+                    maxLines: 1,
+                    style: AppText.value(
+                      color: valueColor ?? scheme.onSurface,
+                      fontSize: 15.sp,
+                    ).copyWith(letterSpacing: -0.4),
                   ),
                 ),
-            ],
-          ),
-          SizedBox(height: 10.h),
-          FittedBox(
-            fit: BoxFit.scaleDown,
-            alignment: Alignment.centerLeft,
-            child: Text(
-              value.isEmpty ? '—' : value,
-              maxLines: 1,
-              style: AppText.value(
-                color: valueColor ?? scheme.onSurface,
-                fontSize: 17.sp,
-              ).copyWith(letterSpacing: -0.5),
-            ),
-          ),
-          SizedBox(height: 2.h),
-          Text(
-            label,
-            maxLines: 2,
-            overflow: TextOverflow.ellipsis,
-            style: AppText.label(
-              color: scheme.onSurface.withValues(alpha: 0.58),
-              fontSize: 11.5.sp,
+                SizedBox(height: 1.h),
+                Row(
+                  children: [
+                    Flexible(
+                      child: Text(
+                        label,
+                        maxLines: 2,
+                        overflow: TextOverflow.ellipsis,
+                        style: AppText.label(
+                          color: scheme.onSurface.withValues(alpha: 0.58),
+                          fontSize: 10.5.sp,
+                        ),
+                      ),
+                    ),
+                    if (delta != null) ...[
+                      SizedBox(width: 4.w),
+                      AppPill(
+                        label: delta!,
+                        color: tone,
+                        fontSize: 9,
+                        padding:
+                            EdgeInsets.symmetric(horizontal: 5.w, vertical: 1.h),
+                      ),
+                    ],
+                  ],
+                ),
+              ],
             ),
           ),
         ],

@@ -75,7 +75,7 @@ class CompletePaymentController extends GetxController {
   Future<void> submitProof() async {
     final file = proofFile.value;
     if (file == null) {
-      AppToast.error('Please attach your payment proof first.');
+      AppToast.error('payment.attach_proof_required'.tr);
       return;
     }
     submitting.value = true;

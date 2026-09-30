@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
 
 import '../../../shared/theme/app_colors.dart';
 
@@ -76,11 +77,11 @@ class EconomicEvent {
   String get impactLabel {
     switch (impact) {
       case EventImpact.high:
-        return 'High';
+        return 'economic_calendar.impact_high'.tr;
       case EventImpact.medium:
-        return 'Medium';
+        return 'economic_calendar.impact_medium'.tr;
       case EventImpact.low:
-        return 'Low';
+        return 'economic_calendar.impact_low'.tr;
     }
   }
 }
