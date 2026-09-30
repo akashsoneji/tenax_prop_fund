@@ -3,7 +3,6 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
 
-import '../../../app/flavor/flavor.dart';
 import '../../../app/flavor/flavor_resolver.dart';
 import '../../../features/accounts/views/accounts_view.dart';
 import '../../../shared/theme/app_colors.dart';
@@ -59,7 +58,7 @@ class HomeShellView extends StatelessWidget {
     AccountsView(),
   ];
 
-  bool get _isTenax => FlavorResolver.flavor == Flavor.tenax;
+  bool get _isTenax => FlavorResolver.usesTenaxDesign;
   List<_HomeTab> get _tabs => _isTenax ? _tenaxTabs : _defaultTabs;
   List<Widget> get _tabViews => _isTenax ? _tenaxTabViews : _defaultTabViews;
 
@@ -146,7 +145,7 @@ class _NavItem extends StatelessWidget {
         curve: Curves.easeOutCubic,
         padding: EdgeInsets.symmetric(vertical: 8.h, horizontal: 6.w),
         decoration: BoxDecoration(
-          color: active ? AppTheme.accent : Colors.transparent,
+          color: active ? scheme.secondary : Colors.transparent,
           borderRadius: BorderRadius.circular(16.r),
           boxShadow: active
               ? [

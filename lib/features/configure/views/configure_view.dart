@@ -171,7 +171,7 @@ class _SelectedPlanHeader extends StatelessWidget {
           Text(
             '\$${c.basePrice}',
             style: GoogleFonts.beVietnamPro(
-              color: AppColors.accent,
+              color: Theme.of(context).colorScheme.secondary,
               fontSize: 24.sp,
               fontWeight: FontWeight.w800,
             ),

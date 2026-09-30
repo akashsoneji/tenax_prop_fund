@@ -7,7 +7,7 @@ import 'package:google_fonts/google_fonts.dart';
 
 import '../../../app/routes/app_routes.dart';
 import '../../../shared/theme/app_colors.dart';
-import '../../../shared/theme/app_theme.dart';
+
 import '../../../shared/widgets/app_gradient_button.dart';
 import '../../../shared/widgets/flavor_logo.dart';
 
@@ -125,7 +125,7 @@ class _LogoMark extends StatelessWidget {
             style: GoogleFonts.beVietnamPro(
               fontSize: 44.sp,
               fontWeight: FontWeight.w800,
-              color: AppTheme.accent,
+              color: scheme.secondary,
               letterSpacing: -1,
               fontStyle: FontStyle.italic,
             ),

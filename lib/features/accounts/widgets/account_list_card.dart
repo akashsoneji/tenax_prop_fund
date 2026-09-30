@@ -338,7 +338,7 @@ class _TradeButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Material(
-      color: AppColors.accent,
+      color: Theme.of(context).colorScheme.secondary,
       borderRadius: BorderRadius.circular(11.r),
       child: InkWell(
         onTap: onTap,

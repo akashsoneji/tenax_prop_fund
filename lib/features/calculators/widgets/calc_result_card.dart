@@ -54,7 +54,7 @@ class CalcResultCard extends StatelessWidget {
               style: GoogleFonts.beVietnamPro(
                 fontSize: 30.sp,
                 fontWeight: FontWeight.w800,
-                color: AppTheme.accent,
+                color: scheme.secondary,
               ),
             ),
           ),

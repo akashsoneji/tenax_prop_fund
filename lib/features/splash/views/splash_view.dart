@@ -7,7 +7,7 @@ import '../../../app/flavor/flavor_config.dart';
 import '../../../app/routes/app_routes.dart';
 import '../../../features/authentication/repositories/auth_repository.dart';
 import '../../../shared/theme/app_colors.dart';
-import '../../../shared/theme/app_theme.dart';
+
 import '../../../shared/widgets/flavor_logo.dart';
 
 /// Brief branded splash. Checks for a persisted session token: if present the
@@ -78,7 +78,7 @@ class _SplashViewState extends State<SplashView> {
                       fontSize: 48.sp,
                       fontWeight: FontWeight.w800,
                       fontStyle: FontStyle.italic,
-                      color: AppTheme.accent,
+                      color: config.secondaryColor,
                     ),
                   ),
                 ),

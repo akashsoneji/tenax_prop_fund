@@ -29,6 +29,16 @@ class FlavorResolver {
   /// selected white-label flavor instead of being hardcoded.
   static String get appName => Get.find<FlavorConfig>().appName;
 
+  /// Flavors that ship the full Tenax Prop design (Accounts bottom tab,
+  /// settings button in the Home header). They differ only by config —
+  /// logo, URLs, app name.
+  static const Set<Flavor> _tenaxDesignFlavors = {
+    Flavor.tenax,
+    Flavor.alibabafxProp,
+  };
+
+  static bool get usesTenaxDesign => _tenaxDesignFlavors.contains(flavor);
+
   /// Returns the override registered for the active flavor, or [common] when
   /// this flavor has no override for the screen. `common` is the Tenax Prop
   /// (base) design that every flavor falls back to.

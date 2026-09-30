@@ -83,7 +83,9 @@ class _PriceSummary extends StatelessWidget {
                 bar.price,
                 maxLines: 1,
                 overflow: TextOverflow.ellipsis,
-                style: AppText.value(color: AppTheme.accent, fontSize: 19.sp),
+                style: AppText.value(
+                    color: Theme.of(context).colorScheme.secondary,
+                    fontSize: 19.sp),
               ),
             ),
             if (bar.strikePrice != null) ...[

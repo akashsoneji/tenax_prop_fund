@@ -193,7 +193,7 @@ class _ForceUpdateDialogState extends State<ForceUpdateDialog> {
     final maxCardWidth =
         MediaQuery.of(context).size.width > 600 ? 440.0 : double.infinity;
 
-    // Reuse the app-wide hero gradient (heroInk → primary → heroInkDeep) so
+    // Reuse the app-wide hero gradient (shades of the flavor primary) so
     // the dialog reads as part of the same brand system as the equity card,
     // payout journey card, and other hero surfaces.
     final gradient = AppTheme.heroGradient(scheme);
@@ -241,7 +241,7 @@ class _ForceUpdateDialogState extends State<ForceUpdateDialog> {
                               begin: Alignment.topCenter,
                               end: Alignment.bottomCenter,
                               colors: [
-                                AppColors.brandPurple
+                                scheme.primary
                                     .withValues(alpha: isDark ? 0.22 : 0.10),
                                 Colors.transparent,
                               ],

@@ -100,7 +100,10 @@ class _HeroIcon extends StatelessWidget {
             height: 160.w,
             decoration: BoxDecoration(
               shape: BoxShape.circle,
-              color: AppColors.brandPurple.withValues(alpha: 0.08),
+              color: Theme.of(context)
+                  .colorScheme
+                  .primary
+                  .withValues(alpha: 0.08),
             ),
           ),
           // Inner ring

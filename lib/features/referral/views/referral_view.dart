@@ -512,6 +512,7 @@ class _ShareLinkButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final ink = AppTheme.heroInkOf(Theme.of(context).colorScheme);
     return Material(
       color: AppColors.transparent,
       borderRadius: BorderRadius.circular(15.r),
@@ -534,13 +535,13 @@ class _ShareLinkButton extends StatelessWidget {
               Icon(
                 Icons.ios_share_rounded,
                 size: 17.w,
-                color: AppColors.heroInkDeep,
+                color: ink,
               ),
               SizedBox(width: 10.w),
               Container(
                 width: 1,
                 height: 18.h,
-                color: AppColors.heroInkDeep.withValues(alpha: 0.35),
+                color: ink.withValues(alpha: 0.35),
               ),
               SizedBox(width: 10.w),
               Text(
@@ -548,14 +549,14 @@ class _ShareLinkButton extends StatelessWidget {
                 style: GoogleFonts.beVietnamPro(
                   fontSize: 14.5.sp,
                   fontWeight: FontWeight.w800,
-                  color: AppColors.heroInkDeep,
+                  color: ink,
                 ),
               ),
               const Spacer(),
               Icon(
                 Icons.arrow_forward_rounded,
                 size: 17.w,
-                color: AppColors.heroInkDeep,
+                color: ink,
               ),
               SizedBox(width: 14.w),
             ],
@@ -583,7 +584,7 @@ class _WithdrawButton extends StatelessWidget {
         child: Ink(
           height: 44.h,
           decoration: BoxDecoration(
-            color: AppColors.heroInkDeep,
+            color: AppTheme.heroInkOf(Theme.of(context).colorScheme),
             borderRadius: BorderRadius.circular(15.r),
             border: Border.all(color: AppColors.white.withValues(alpha: 0.18)),
           ),

@@ -233,34 +233,47 @@ class AppTheme {
               bottomLeft: Radius.circular(small),
             );
 
-  /// Brand gradient used by auth CTAs and hero surfaces (deep purple → magenta).
-  /// Kept on-brand: NEVER mixes yellow into the CTA fill (yellow is accent only).
+  /// Brand gradient used by auth CTAs and hero surfaces. Derived purely from
+  /// the flavor's primary so no other brand's hue leaks into the fill.
+  /// Kept on-brand: NEVER mixes the accent into the CTA fill.
   static LinearGradient brandGradient(ColorScheme scheme) => LinearGradient(
         begin: Alignment.topLeft,
         end: Alignment.bottomRight,
-        colors: [scheme.primary, AppColors.brandMagenta],
+        colors: [scheme.primary, _shade(scheme.primary, 0.75)],
       );
 
-  /// Deep hero gradient — top equity card + payout journey card.
+  /// Deep hero gradient — CTAs, top equity card, payout journey card.
+  /// Both ends are darker shades of the flavor's primary.
   static LinearGradient heroGradient(ColorScheme scheme) => LinearGradient(
         begin: Alignment.topLeft,
         end: Alignment.bottomRight,
-        colors: [heroInk, scheme.primary, heroInkDeep],
+        colors: [
+          _shade(scheme.primary, 0.7),
+          scheme.primary,
+          _shade(scheme.primary, 0.5),
+        ],
       );
 
-  /// KYC banner gradient — purple → magenta.
+  /// Deepest shade of the flavor primary — replaces the old static hero ink
+  /// for dark fills / ink-on-white text on hero surfaces.
+  static Color heroInkOf(ColorScheme scheme) => _shade(scheme.primary, 0.5);
+
+  /// Darkens [color] by scaling its HSL lightness by [factor].
+  static Color _shade(Color color, double factor) {
+    final hsl = HSLColor.fromColor(color);
+    return hsl.withLightness((hsl.lightness * factor).clamp(0.0, 1.0)).toColor();
+  }
+
+  /// KYC banner gradient — flavor primary → deeper shade of it.
   static LinearGradient kycGradient(ColorScheme scheme) => LinearGradient(
         begin: Alignment.centerLeft,
         end: Alignment.centerRight,
-        colors: [scheme.primary, AppColors.brandMagentaDeep],
+        colors: [scheme.primary, _shade(scheme.primary, 0.7)],
       );
 
   /// Brand CTA gradient (Create Account button).
-  static LinearGradient ctaGradient(ColorScheme scheme) => LinearGradient(
-        begin: Alignment.topLeft,
-        end: Alignment.bottomRight,
-        colors: [scheme.primary, AppColors.brandMagenta],
-      );
+  static LinearGradient ctaGradient(ColorScheme scheme) =>
+      brandGradient(scheme);
 
   /// Frosted glass card — layer over any surface.
   static Widget glass({

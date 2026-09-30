@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
 
-import '../../../app/flavor/flavor.dart';
 import '../../../app/flavor/flavor_resolver.dart';
 import '../../../app/routes/app_routes.dart';
 import '../../../shared/theme/app_colors.dart';
@@ -59,7 +58,7 @@ class HomeHeader extends GetView<HomeController> {
               ],
             ),
           ),
-          if (FlavorResolver.flavor == Flavor.tenax) ...[
+          if (FlavorResolver.usesTenaxDesign) ...[
             SizedBox(width: 10.w),
             _HeaderButton(
               icon: Icons.settings_outlined,

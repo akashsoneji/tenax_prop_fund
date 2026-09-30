@@ -123,7 +123,7 @@ class _AccountPill extends StatelessWidget {
                 width: 26.w,
                 height: 26.w,
                 decoration: BoxDecoration(
-                  color: AppColors.accent,
+                  color: Theme.of(context).colorScheme.secondary,
                   shape: BoxShape.circle,
                 ),
                 child: Icon(

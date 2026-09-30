@@ -118,8 +118,8 @@ class _Eyebrow extends StatelessWidget {
           Container(
             width: 6.w,
             height: 6.h,
-            decoration: const BoxDecoration(
-              color: AppColors.accent,
+            decoration: BoxDecoration(
+              color: Theme.of(context).colorScheme.secondary,
               shape: BoxShape.circle,
             ),
           ),

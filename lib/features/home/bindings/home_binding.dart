@@ -1,6 +1,5 @@
 import 'package:get/get.dart';
 
-import '../../../app/flavor/flavor.dart';
 import '../../../app/flavor/flavor_config.dart';
 import '../../../app/flavor/flavor_resolver.dart';
 import '../../../core/network/api_client.dart';
@@ -21,9 +20,9 @@ class HomeBinding extends Bindings {
   void dependencies() {
     Get.lazyPut<HomeRepository>(() => HomeRepository(Get.find<ApiClient>()));
 
-    // The tenax flavor replaces the "More" bottom-nav tab with an "Accounts"
+    // Tenax-design flavors replace the "More" bottom-nav tab with an "Accounts"
     // tab rendered inside the shell, so its controller must be available here.
-    if (FlavorResolver.flavor == Flavor.tenax) {
+    if (FlavorResolver.usesTenaxDesign) {
       Get.lazyPut<AccountsRepository>(
         () => AccountsRepository(Get.find<ApiClient>()),
       );

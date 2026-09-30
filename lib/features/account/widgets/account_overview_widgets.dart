@@ -186,7 +186,7 @@ class _HeroStatusPill extends StatelessWidget {
     final dot = switch (tone) {
       AccountTone.up => AppColors.successBright,
       AccountTone.down => AppColors.dangerBright,
-      AccountTone.neutral => AppColors.accent,
+      AccountTone.neutral => Theme.of(context).colorScheme.secondary,
     };
     return AppPill(
       label: label,
