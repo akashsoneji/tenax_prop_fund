@@ -1,12 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
-import 'package:google_fonts/google_fonts.dart';
 
 import '../../../shared/theme/app_colors.dart';
+import '../../../shared/theme/app_text.dart';
 import '../../../shared/theme/app_theme.dart';
 
-/// The sticky purple summary bar pinned to the bottom of the Choose-a-challenge
-/// and Configure screens: plan name + price on the left, a light "Configure"
+/// The sticky summary bar pinned to the bottom of the Choose-a-challenge
+/// and Configure screens: plan name + price on the left, a "Configure"
 /// (or custom label) button on the right. [strikePrice] is optional.
 class ChallengeBottomBar extends StatelessWidget {
   const ChallengeBottomBar({
@@ -31,102 +31,124 @@ class ChallengeBottomBar extends StatelessWidget {
     final scheme = Theme.of(context).colorScheme;
     return Container(
       decoration: BoxDecoration(
-        // gradient:  AppTheme.brandGradient(scheme),
         gradient: AppTheme.heroGradient(scheme),
-        borderRadius: BorderRadius.circular(20.r),
-        boxShadow: [
-          BoxShadow(
-            color: scheme.primary.withValues(alpha: 0.35),
-            blurRadius: 24.r,
-            offset: Offset(0, 12.h),
-          ),
-        ],
-        ),
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20.r)),
+      ),
       child: SafeArea(
         top: false,
         child: Padding(
-          padding: EdgeInsets.fromLTRB(18.w, 14.h, 14.w, 14.h),
+          padding: EdgeInsets.fromLTRB(16.w, 10.h, 12.w, 10.h),
           child: Row(
             children: [
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Text(
-                      planName,
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                      style: GoogleFonts.beVietnamPro(
-                        color: AppColors.white.withValues(alpha: 0.85),
-                        fontSize: 13.sp,
-                        fontWeight: FontWeight.w500,
-                      ),
-                    ),
-                    SizedBox(height: 2.h),
-                    Row(
-                      crossAxisAlignment: CrossAxisAlignment.end,
-                      children: [
-                        Text(
-                          price,
-                          style: GoogleFonts.beVietnamPro(
-                            color: AppTheme.accent,
-                            fontSize: 22.sp,
-                            fontWeight: FontWeight.w800,
-                          ),
-                        ),
-                        if (strikePrice != null) ...[
-                          SizedBox(width: 8.w),
-                          Padding(
-                            padding: EdgeInsets.only(bottom: 3.h),
-                            child: Text(
-                              strikePrice!,
-                              style: GoogleFonts.beVietnamPro(
-                                color: AppColors.white.withValues(alpha: 0.6),
-                                fontSize: 14.sp,
-                                decoration: TextDecoration.lineThrough,
-                              ),
-                            ),
-                          ),
-                        ],
-                      ],
-                    ),
-                  ],
-                ),
-              ),
-              SizedBox(width: 12.w),
-              Material(
-                color: AppColors.white.withValues(alpha: 0.18),
-                borderRadius: BorderRadius.circular(12.r),
-                child: InkWell(
-                  onTap: loading ? null : onAction,
-                  borderRadius: BorderRadius.circular(12.r),
-                  child: Padding(
-                    padding: EdgeInsets.symmetric(
-                        horizontal: 22.w, vertical: 12.h),
-                    child: loading
-                        ? SizedBox(
-                            width: 20.w,
-                            height: 20.w,
-                            child: CircularProgressIndicator(
-                              strokeWidth: 2.2.w,
-                              valueColor:
-                                  const AlwaysStoppedAnimation(AppColors.white),
-                            ),
-                          )
-                        : Text(
-                            actionLabel,
-                            style: GoogleFonts.beVietnamPro(
-                              color: AppColors.white,
-                              fontSize: 15.sp,
-                              fontWeight: FontWeight.w700,
-                            ),
-                          ),
-                  ),
-                ),
+              Expanded(child: _PriceSummary(bar: this)),
+              SizedBox(width: 10.w),
+              _ActionButton(
+                label: actionLabel,
+                loading: loading,
+                onTap: loading ? null : onAction,
               ),
             ],
           ),
+        ),
+      ),
+    );
+  }
+}
+
+class _PriceSummary extends StatelessWidget {
+  const _PriceSummary({required this.bar});
+  final ChallengeBottomBar bar;
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        Text(
+          bar.planName,
+          maxLines: 1,
+          overflow: TextOverflow.ellipsis,
+          style: AppText.body(
+            color: AppColors.white.withValues(alpha: 0.85),
+            fontSize: 12.sp,
+          ),
+        ),
+        SizedBox(height: 1.h),
+        Row(
+          crossAxisAlignment: CrossAxisAlignment.end,
+          children: [
+            Flexible(
+              child: Text(
+                bar.price,
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+                style: AppText.value(color: AppTheme.accent, fontSize: 19.sp),
+              ),
+            ),
+            if (bar.strikePrice != null) ...[
+              SizedBox(width: 6.w),
+              Padding(
+                padding: EdgeInsets.only(bottom: 2.h),
+                child: Text(
+                  bar.strikePrice!,
+                  style: AppText.label(
+                    color: AppColors.white.withValues(alpha: 0.6),
+                    fontSize: 12.5.sp,
+                  ).copyWith(decoration: TextDecoration.lineThrough),
+                ),
+              ),
+            ],
+          ],
+        ),
+      ],
+    );
+  }
+}
+
+class _ActionButton extends StatelessWidget {
+  const _ActionButton({
+    required this.label,
+    required this.loading,
+    required this.onTap,
+  });
+
+  final String label;
+  final bool loading;
+  final VoidCallback? onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    return Material(
+      color: AppColors.white.withValues(alpha: 0.18),
+      borderRadius: BorderRadius.circular(12.r),
+      child: InkWell(
+        onTap: onTap,
+        borderRadius: BorderRadius.circular(12.r),
+        child: Padding(
+          padding: EdgeInsets.symmetric(horizontal: 18.w, vertical: 10.h),
+          child: loading
+              ? SizedBox(
+                  width: 18.w,
+                  height: 18.w,
+                  child: CircularProgressIndicator(
+                    strokeWidth: 2.w,
+                    valueColor: const AlwaysStoppedAnimation(AppColors.white),
+                  ),
+                )
+              : Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Text(
+                      label,
+                      style: AppText.title(
+                          color: AppColors.white, fontSize: 14.sp),
+                    ),
+                    SizedBox(width: 4.w),
+                    Icon(Icons.arrow_forward_rounded,
+                        size: 16.w, color: AppColors.white),
+                  ],
+                ),
         ),
       ),
     );

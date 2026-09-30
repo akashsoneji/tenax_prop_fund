@@ -21,6 +21,7 @@ class KeyValueRow extends StatelessWidget {
     this.showDivider = true,
     this.emphasize = false,
     this.valueColor,
+    this.dense = false,
   });
 
   final String label;
@@ -31,13 +32,20 @@ class KeyValueRow extends StatelessWidget {
   final bool emphasize;
   final Color? valueColor;
 
+  /// Tighter padding and a smaller font for long rule lists.
+  final bool dense;
+
   @override
   Widget build(BuildContext context) {
     final scheme = Theme.of(context).colorScheme;
+    final fontSize = dense ? 13.sp : 14.sp;
     return Column(
       children: [
         Padding(
-          padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 14.h),
+          padding: EdgeInsets.symmetric(
+            horizontal: dense ? 14.w : 16.w,
+            vertical: dense ? 10.h : 14.h,
+          ),
           child: Row(
             children: [
               Expanded(
@@ -45,7 +53,7 @@ class KeyValueRow extends StatelessWidget {
                 child: Text(
                   label,
                   style: GoogleFonts.beVietnamPro(
-                    fontSize: 14.sp,
+                    fontSize: fontSize,
                     color: scheme.onSurface.withValues(alpha: 0.70),
                   ),
                 ),
@@ -60,7 +68,7 @@ class KeyValueRow extends StatelessWidget {
                   value,
                   textAlign: TextAlign.right,
                   style: GoogleFonts.beVietnamPro(
-                    fontSize: 14.sp,
+                    fontSize: fontSize,
                     fontWeight: emphasize ? FontWeight.w800 : FontWeight.w700,
                     color: valueColor ?? scheme.onSurface,
                   ),
@@ -72,7 +80,7 @@ class KeyValueRow extends StatelessWidget {
                   onTap: onInfo,
                   child: Icon(
                     Icons.info_outline_rounded,
-                    size: 17.w,
+                    size: dense ? 15.w : 17.w,
                     color: scheme.onSurface.withValues(alpha: 0.35),
                   ),
                 ),
@@ -84,8 +92,8 @@ class KeyValueRow extends StatelessWidget {
           Divider(
             height: 1.h,
             thickness: 1,
-            indent: 16.w,
-            endIndent: 16.w,
+            indent: dense ? 14.w : 16.w,
+            endIndent: dense ? 14.w : 16.w,
             color: scheme.onSurface.withValues(alpha: 0.06),
           ),
       ],

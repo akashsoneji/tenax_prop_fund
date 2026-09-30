@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
-import 'package:google_fonts/google_fonts.dart';
 
 import '../../../app/flavor/flavor_resolver.dart';
 import '../../../app/routes/app_routes.dart';
 import '../../../shared/theme/app_colors.dart';
+import '../../../shared/theme/app_text.dart';
 import '../../../shared/theme/app_theme.dart';
 import '../../../shared/widgets/app_empty_view.dart';
 import '../../../shared/widgets/app_gradient_button.dart';
@@ -41,7 +41,7 @@ class ChallengeView extends StatelessWidget {
         slivers: [
           PinnedGradientAppBar(title: 'challenge.title'.tr),
           SliverPadding(
-            padding: EdgeInsets.fromLTRB(16.w, 16.h, 16.w, 24.h),
+            padding: EdgeInsets.fromLTRB(16.w, 12.h, 16.w, 16.h),
             sliver: SliverToBoxAdapter(
               child: Obx(
                 () => DataStateBuilder<ChallengeData>(
@@ -137,7 +137,7 @@ class _ChallengeBody extends StatelessWidget {
               onChanged: (i) => c.setMode(
                   i == 0 ? ChallengeMode.paid : ChallengeMode.freeTrial),
             ),
-            SizedBox(height: 18.h),
+            SizedBox(height: 12.h),
           ],
           AnimatedSwitcher(
             duration: AppMotion.base,
@@ -171,14 +171,14 @@ class _ChallengeSkeleton extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        ShimmerBox(height: 44.h, radius: 14.r),
-        SizedBox(height: 18.h),
-        ShimmerBox(height: 44.h, radius: 14.r),
-        SizedBox(height: 16.h),
+        ShimmerBox(height: 40.h, radius: 12.r),
+        SizedBox(height: 12.h),
+        ShimmerBox(height: 40.h, radius: 12.r),
+        SizedBox(height: 12.h),
         const StatGridSkeleton(tiles: 6),
-        SizedBox(height: 26.h),
+        SizedBox(height: 18.h),
         const CardSkeleton(lines: 5),
-        SizedBox(height: 26.h),
+        SizedBox(height: 18.h),
         const CardSkeleton(lines: 4),
       ],
     );
@@ -188,6 +188,9 @@ class _ChallengeSkeleton extends StatelessWidget {
 // ---------------------------------------------------------------------------
 // Paid mode body
 // ---------------------------------------------------------------------------
+
+EdgeInsets get _sectionHeaderPadding =>
+    EdgeInsets.only(left: 2.w, bottom: 8.h);
 
 class _PaidBody extends StatelessWidget {
   const _PaidBody({required this.c, required this.data, super.key});
@@ -203,19 +206,20 @@ class _PaidBody extends StatelessWidget {
         ? [
             AppSegmentedControl(
               labels: tabs.values.toList(growable: false),
-              selected: tabKeys.indexOf(c.activeStep(data)).clamp(0, tabKeys.length - 1),
+              selected: tabKeys
+                  .indexOf(c.activeStep(data))
+                  .clamp(0, tabKeys.length - 1),
               onChanged: (i) => c.setStep(tabKeys[i]),
             ),
-            SizedBox(height: 16.h),
+            SizedBox(height: 12.h),
           ]
         : const <Widget>[];
     if (plans.isEmpty) {
       return Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          _CompareLink(),
-          SizedBox(height: 14.h),
           ...stepTabs,
+          const _CompareLink(),
           SizedBox(height: 12.h),
           const AppEmptyView(
             titleKey: 'challenge.no_plans_title',
@@ -226,104 +230,107 @@ class _PaidBody extends StatelessWidget {
         ],
       );
     }
-    final selectedPlan = plans[c.selectedPlan.value.clamp(0, plans.length - 1)];
+    final selectedPlan =
+        plans[c.selectedPlan.value.clamp(0, plans.length - 1)];
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        _CompareLink(),
-        SizedBox(height: 14.h),
         ...stepTabs,
-        _PlanGrid(c: c, data: data),
-        SizedBox(height: 26.h),
-        SectionHeader('challenge.challenge_rules'.tr),
-        RulesCard(
-          children: [
-            for (var i = 0; i < selectedPlan.challengeRules.length; i++)
-              KeyValueRow(
-                label: selectedPlan.challengeRules[i].label,
-                value: selectedPlan.challengeRules[i].value,
-                showInfo: true,
-                showDivider: i != selectedPlan.challengeRules.length - 1,
-              ),
-          ],
+        _PlanGrid(c: c, plans: plans),
+        SizedBox(height: 10.h),
+        const _CompareLink(),
+        SizedBox(height: 18.h),
+        _RulesSection(
+          title: 'challenge.challenge_rules'.tr,
+          rules: selectedPlan.challengeRules,
         ),
-        SizedBox(height: 26.h),
-        SectionHeader('challenge.funded_reward_rules'.tr),
-        RulesCard(
-          children: [
-            for (var i = 0; i < selectedPlan.fundedRules.length; i++)
-              KeyValueRow(
-                label: selectedPlan.fundedRules[i].label,
-                value: selectedPlan.fundedRules[i].value,
-                showInfo: true,
-                showDivider: i != selectedPlan.fundedRules.length - 1,
-              ),
-          ],
+        SizedBox(height: 18.h),
+        _RulesSection(
+          title: 'challenge.funded_reward_rules'.tr,
+          rules: selectedPlan.fundedRules,
         ),
-        if (data.plans.isNotEmpty) ...[
-          SizedBox(height: 26.h),
+        if (data.plans.isNotEmpty)
           for (final box in selectedPlan.ruleBoxes) ...[
-            SectionHeader(box.title),
-            _RuleBoxCard(box: box),
-            SizedBox(height: 16.h),
+            SizedBox(height: 18.h),
+            SectionHeader(box.title, padding: _sectionHeaderPadding),
+            RulesCard(
+              children: [
+                for (var i = 0; i < box.rows.length; i++)
+                  KeyValueRow(
+                    dense: true,
+                    label: box.rows[i].label,
+                    value: box.rows[i].value,
+                    showInfo: box.rows[i].tip.isNotEmpty,
+                    showDivider: i != box.rows.length - 1,
+                  ),
+              ],
+            ),
           ],
-        ],
       ],
     );
   }
 }
 
-
-class _RuleBoxCard extends StatelessWidget {
-  const _RuleBoxCard({required this.box});
-
-  final ChallengeRuleBox box;
+class _RulesSection extends StatelessWidget {
+  const _RulesSection({required this.title, required this.rules});
+  final String title;
+  final List<ChallengeRule> rules;
 
   @override
   Widget build(BuildContext context) {
-    final scheme = Theme.of(context).colorScheme;
-    return Container(
-      padding: EdgeInsets.all(12.w),
-      decoration: AppTheme.surfaceCard(scheme, radius: 16.r),
-      child: Column(
-        children: [
-          for (var i = 0; i < box.rows.length; i++)
-            KeyValueRow(
-              label: box.rows[i].label,
-              value: box.rows[i].value,
-              showInfo: box.rows[i].tip.isNotEmpty,
-              showDivider: i != box.rows.length - 1,
-            ),
-        ],
-      ),
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        SectionHeader(title, padding: _sectionHeaderPadding),
+        RulesCard(
+          children: [
+            for (var i = 0; i < rules.length; i++)
+              KeyValueRow(
+                dense: true,
+                label: rules[i].label,
+                value: rules[i].value,
+                showInfo: true,
+                showDivider: i != rules.length - 1,
+              ),
+          ],
+        ),
+      ],
     );
   }
 }
 
 class _CompareLink extends StatelessWidget {
+  const _CompareLink();
+
   @override
   Widget build(BuildContext context) {
     final scheme = Theme.of(context).colorScheme;
     return Material(
-      color: Colors.transparent,
+      color: scheme.primary.withValues(alpha: 0.08),
+      borderRadius: BorderRadius.circular(12.r),
       child: InkWell(
-        borderRadius: BorderRadius.circular(14.r),
+        borderRadius: BorderRadius.circular(12.r),
         onTap: () {
           Get.find<ChallengeController>().loadComparison();
           Get.toNamed(AppRoutes.challengeCompare);
         },
-        child: Ink(
-          padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 14.h),
-          decoration: AppTheme.surfaceCard(scheme, radius: 14.r),
-          child: Center(
-            child: Text(
-              'challenge.compare_plans'.tr,
-              style: GoogleFonts.beVietnamPro(
-                fontSize: 14.sp,
-                fontWeight: FontWeight.w700,
-                color: scheme.primary,
+        child: Padding(
+          padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 10.h),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Icon(Icons.compare_arrows_rounded,
+                  size: 18.w, color: scheme.primary),
+              SizedBox(width: 6.w),
+              Flexible(
+                child: Text(
+                  'challenge.compare_plans'.tr,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: AppText.title(color: scheme.primary, fontSize: 13.sp),
+                ),
               ),
-            ),
+            ],
           ),
         ),
       ),
@@ -331,33 +338,45 @@ class _CompareLink extends StatelessWidget {
   }
 }
 
+/// Two-column plan grid whose rows size to their content, so cards stay
+/// compact instead of being forced to a fixed height.
 class _PlanGrid extends StatelessWidget {
-  const _PlanGrid({required this.c, required this.data});
+  const _PlanGrid({required this.c, required this.plans});
   final ChallengeController c;
-  final ChallengeData data;
+  final List<ChallengePlan> plans;
 
   @override
   Widget build(BuildContext context) {
-    final plans = c.plansForStep(data);
-    return GridView.builder(
-      shrinkWrap: true,
-      physics: const NeverScrollableScrollPhysics(),
-      itemCount: plans.length,
-      gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-        crossAxisCount: 2,
-        mainAxisSpacing: 12.w,
-        crossAxisSpacing: 12.w,
-        mainAxisExtent: 92.h,
-      ),
-      itemBuilder: (context, i) => ChallengePlanCard(
+    final rowCount = (plans.length + 1) ~/ 2;
+    return Column(
+      children: [
+        for (var row = 0; row < rowCount; row++) ...[
+          if (row > 0) SizedBox(height: 10.h),
+          IntrinsicHeight(
+            child: Row(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                Expanded(child: _cell(row * 2)),
+                SizedBox(width: 10.w),
+                Expanded(
+                  child: row * 2 + 1 < plans.length
+                      ? _cell(row * 2 + 1)
+                      : const SizedBox.shrink(),
+                ),
+              ],
+            ),
+          ),
+        ],
+      ],
+    );
+  }
+
+  Widget _cell(int i) => ChallengePlanCard(
         plan: plans[i],
         selected: c.selectedPlan.value == i,
         onTap: () => c.selectPlan(i),
-      ),
-    );
-  }
+      );
 }
-
 
 // ---------------------------------------------------------------------------
 // Free-trial body
@@ -372,66 +391,19 @@ class _TrialBody extends StatelessWidget {
   Widget build(BuildContext context) {
     final scheme = Theme.of(context).colorScheme;
     return Container(
-      padding: EdgeInsets.all(18.w),
+      padding: EdgeInsets.all(14.w),
       decoration: BoxDecoration(
         color: scheme.primary.withValues(alpha: 0.06),
-        borderRadius: BorderRadius.circular(18.r),
+        borderRadius: BorderRadius.circular(16.r),
         border: Border.all(color: scheme.primary.withValues(alpha: 0.12)),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          Row(
-            children: [
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      'challenge.free_trial_plan'
-                          .trParams({'app': FlavorResolver.appName}),
-                      style: GoogleFonts.beVietnamPro(
-                        fontSize: 17.sp,
-                        fontWeight: FontWeight.w800,
-                        color: scheme.onSurface,
-                      ),
-                    ),
-                    SizedBox(height: 3.h),
-                    Text(
-                      _trialDescription(data),
-                      style: GoogleFonts.beVietnamPro(
-                        fontSize: 13.sp,
-                        color: scheme.onSurface.withValues(alpha: 0.6),
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-              Column(
-                crossAxisAlignment: CrossAxisAlignment.end,
-                children: [
-                  Text(
-                    r'$0',
-                    style: GoogleFonts.beVietnamPro(
-                      fontSize: 20.sp,
-                      fontWeight: FontWeight.w800,
-                      color: scheme.primary,
-                    ),
-                  ),
-                  Text(
-                    'challenge.no_fee'.tr,
-                    style: GoogleFonts.beVietnamPro(
-                      fontSize: 12.sp,
-                      color: scheme.onSurface.withValues(alpha: 0.5),
-                    ),
-                  ),
-                ],
-              ),
-            ],
-          ),
-          SizedBox(height: 16.h),
+          _TrialHeader(data: data),
+          SizedBox(height: 12.h),
           _TrialStatGrid(data: data),
-          SizedBox(height: 16.h),
+          SizedBox(height: 14.h),
           Obx(
             () => AppGradientButton(
               label: 'challenge.start_free_trial'.tr,
@@ -442,18 +414,73 @@ class _TrialBody extends StatelessWidget {
               },
             ),
           ),
-          SizedBox(height: 12.h),
+          SizedBox(height: 8.h),
           Text(
             'challenge.trial_note'.tr,
             textAlign: TextAlign.center,
-            style: GoogleFonts.beVietnamPro(
-              fontSize: 12.sp,
-              height: 1.4,
+            style: AppText.label(
               color: scheme.onSurface.withValues(alpha: 0.55),
-            ),
+              fontSize: 11.5.sp,
+            ).copyWith(height: 1.35),
           ),
         ],
       ),
+    );
+  }
+}
+
+class _TrialHeader extends StatelessWidget {
+  const _TrialHeader({required this.data});
+  final ChallengeData data;
+
+  @override
+  Widget build(BuildContext context) {
+    final scheme = Theme.of(context).colorScheme;
+    return Row(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Expanded(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                'challenge.free_trial_plan'
+                    .trParams({'app': FlavorResolver.appName}),
+                maxLines: 2,
+                overflow: TextOverflow.ellipsis,
+                style: AppText.heading(color: scheme.onSurface, fontSize: 16.sp),
+              ),
+              SizedBox(height: 2.h),
+              Text(
+                _trialDescription(data),
+                maxLines: 2,
+                overflow: TextOverflow.ellipsis,
+                style: AppText.body(
+                  color: scheme.onSurface.withValues(alpha: 0.6),
+                  fontSize: 12.5.sp,
+                ),
+              ),
+            ],
+          ),
+        ),
+        SizedBox(width: 10.w),
+        Column(
+          crossAxisAlignment: CrossAxisAlignment.end,
+          children: [
+            Text(
+              r'$0',
+              style: AppText.value(color: scheme.primary, fontSize: 19.sp),
+            ),
+            Text(
+              'challenge.no_fee'.tr,
+              style: AppText.label(
+                color: scheme.onSurface.withValues(alpha: 0.5),
+                fontSize: 11.sp,
+              ),
+            ),
+          ],
+        ),
+      ],
     );
   }
 }
@@ -483,29 +510,35 @@ class _TrialStatGrid extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-          final trial = data.trial;
-          final rules = data.trialRules.isNotEmpty
-              ? data.trialRules
-              : [
-                  ChallengeRule('challenge.rule_account_size'.tr, '\$${(trial?.accountSizeMinor ?? 0) ~/ 100}'),
-                  ChallengeRule('challenge.rule_profit_target'.tr, '${trial?.profitTargetPercent ?? 0}%'),
-                  ChallengeRule('challenge.rule_daily_loss'.tr, '${trial?.dailyLossPercent ?? 0}%'),
-                  ChallengeRule('challenge.rule_max_loss'.tr, '${trial?.maxLossPercent ?? 0}%'),
-                  ChallengeRule('challenge.rule_min_days'.tr, '${trial?.minTradingDays ?? 0}'),
-                  ChallengeRule(
-                    'challenge.rule_expires_after'.tr,
-                    'challenge.days_count'.trParams({'days': '${trial?.days ?? 0}'}),
-                  ),
-                ];
+    final trial = data.trial;
+    final rules = data.trialRules.isNotEmpty
+        ? data.trialRules
+        : [
+            ChallengeRule('challenge.rule_account_size'.tr,
+                '\$${(trial?.accountSizeMinor ?? 0) ~/ 100}'),
+            ChallengeRule('challenge.rule_profit_target'.tr,
+                '${trial?.profitTargetPercent ?? 0}%'),
+            ChallengeRule('challenge.rule_daily_loss'.tr,
+                '${trial?.dailyLossPercent ?? 0}%'),
+            ChallengeRule('challenge.rule_max_loss'.tr,
+                '${trial?.maxLossPercent ?? 0}%'),
+            ChallengeRule('challenge.rule_min_days'.tr,
+                '${trial?.minTradingDays ?? 0}'),
+            ChallengeRule(
+              'challenge.rule_expires_after'.tr,
+              'challenge.days_count'.trParams({'days': '${trial?.days ?? 0}'}),
+            ),
+          ];
     return GridView.builder(
       shrinkWrap: true,
+      padding: EdgeInsets.zero,
       physics: const NeverScrollableScrollPhysics(),
       itemCount: rules.length,
       gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
         crossAxisCount: 2,
-        mainAxisSpacing: 12.w,
-        crossAxisSpacing: 12.w,
-        childAspectRatio: 1.8,
+        mainAxisSpacing: 8.h,
+        crossAxisSpacing: 8.w,
+        mainAxisExtent: 56.h,
       ),
       itemBuilder: (context, i) => _TrialStatTile(rule: rules[i]),
     );
@@ -520,7 +553,7 @@ class _TrialStatTile extends StatelessWidget {
   Widget build(BuildContext context) {
     final scheme = Theme.of(context).colorScheme;
     return Container(
-      padding: EdgeInsets.symmetric(horizontal: 14.w, vertical: 12.h),
+      padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 8.h),
       decoration: BoxDecoration(
         color: scheme.brightness == Brightness.dark
             ? AppColors.white.withValues(alpha: 0.05)
@@ -532,27 +565,21 @@ class _TrialStatTile extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          Flexible(
-            child: Text(
-              rule.label,
-              maxLines: 2,
-              overflow: TextOverflow.ellipsis,
-              style: GoogleFonts.beVietnamPro(
-                fontSize: 12.5.sp,
-                color: scheme.onSurface.withValues(alpha: 0.55),
-              ),
+          Text(
+            rule.label,
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+            style: AppText.label(
+              color: scheme.onSurface.withValues(alpha: 0.55),
+              fontSize: 11.5.sp,
             ),
           ),
-          SizedBox(height: 4.h),
+          SizedBox(height: 2.h),
           Text(
             rule.value,
             maxLines: 1,
             overflow: TextOverflow.ellipsis,
-            style: GoogleFonts.beVietnamPro(
-              fontSize: 15.sp,
-              fontWeight: FontWeight.w800,
-              color: scheme.onSurface,
-            ),
+            style: AppText.value(color: scheme.onSurface, fontSize: 14.sp),
           ),
         ],
       ),

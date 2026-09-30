@@ -54,16 +54,8 @@ class AppSegmentedControl extends StatelessWidget {
                   height: double.infinity,
                   decoration: BoxDecoration(
                     gradient: AppTheme.heroGradient(scheme),
-        borderRadius: BorderRadius.circular(20.r),
-        boxShadow: [
-          BoxShadow(
-            color: scheme.primary.withValues(alpha: 0.35),
-            blurRadius: 24.r,
-            offset: Offset(0, 12.h),
-          ),
-        ],
+                    borderRadius: BorderRadius.circular(20.r),
                   ),
-                  
                 ),
               ),
               Row(

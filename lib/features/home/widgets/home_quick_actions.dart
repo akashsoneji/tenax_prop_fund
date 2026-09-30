@@ -14,7 +14,8 @@ class _QuickAction {
 }
 
 const _quickActions = <_QuickAction>[
-  _QuickAction(AppRoutes.challenge, 'home.qa.challenge', Icons.add_rounded),
+  _QuickAction(
+      AppRoutes.challenge, 'home.qa.challenge', Icons.emoji_events_outlined),
   _QuickAction(
       AppRoutes.profileKyc, 'home.qa.kyc', Icons.verified_user_outlined),
   _QuickAction(
