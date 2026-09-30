@@ -13,6 +13,7 @@ import '../../../shared/widgets/app_count_up_text.dart';
 import '../../../shared/widgets/app_pill.dart';
 import '../controllers/home_controller.dart';
 import '../models/dashboard_models.dart';
+import 'home_overview_panel.dart';
 
 /// Formats a minor-currency amount (e.g. cents) as a grouped major string with
 /// a leading currency symbol.
@@ -31,20 +32,14 @@ String formatMinorMoney(int minor, String currency) {
   return '${negative ? '-' : ''}$symbol$buf.${parts[1]}';
 }
 
-/// The bento dashboard: an asymmetric grid of tiles of different sizes. A large
-/// gradient equity tile spans the full width, then balance / accounts sit as a
-/// paired row, followed by KPI tiles and a live-account grid. Every value binds
-/// to the controller snapshot that the Pusher feed patches in real time.
+/// The top of the Home tab: the account card (the Positions Floating P/L header
+/// when available, else the equity tile) followed by the overview panel.
 class HomeBento extends StatelessWidget {
   const HomeBento({super.key, required this.data});
   final DashboardData data;
 
   @override
   Widget build(BuildContext context) {
-    final focus = data.focus;
-    final currency = focus?.currency ?? 'USD';
-    final gap = 12.w;
-
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
@@ -55,52 +50,8 @@ class HomeBento extends StatelessWidget {
           )
         else
           EquityBentoTile(data: data),
-        SizedBox(height: gap),
-        // Balance + Your accounts — paired row.
-        IntrinsicHeight(
-          child: Row(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              Expanded(
-                child: _BentoTile(
-                  icon: Icons.account_balance_wallet_rounded,
-                  label: 'home.balance'.tr,
-                  value: (focus?.balance.isNotEmpty ?? false)
-                      ? focus!.balance
-                      : formatMinorMoney(focus?.balanceMinor ?? 0, currency),
-                  tone: AppColors.success,
-                ),
-              ),
-              SizedBox(width: gap),
-              Expanded(
-                child: _BentoTile(
-                  icon: Icons.layers_rounded,
-                  label: 'home.your_accounts'.tr,
-                  value: '${data.accountCount}',
-                  tone: null,
-                ),
-              ),
-            ],
-          ),
-        ),
-        if (data.kpis.isNotEmpty) ...[
-          SizedBox(height: gap),
-          IntrinsicHeight(
-            child: Row(
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: [
-                for (var i = 0; i < data.kpis.length && i < 2; i++) ...[
-                  if (i > 0) SizedBox(width: gap),
-                  Expanded(child: _KpiBentoTile(kpi: data.kpis[i])),
-                ],
-                if (data.kpis.length == 1) ...[
-                  SizedBox(width: gap),
-                  const Expanded(child: SizedBox.shrink()),
-                ],
-              ],
-            ),
-          ),
-        ],
+        SizedBox(height: 16.h),
+        HomeOverviewPanel(data: data),
       ],
     );
   }
@@ -190,148 +141,6 @@ class EquityBentoTile extends GetView<HomeController> {
               color: AppColors.white.withValues(alpha: 0.3), blurRadius: 20.r),
         ],
       );
-}
-
-/// A generic bento metric tile on the surface: tinted icon chip, value, label.
-class _BentoTile extends StatelessWidget {
-  const _BentoTile({
-    required this.icon,
-    required this.label,
-    required this.value,
-    required this.tone,
-  });
-
-  final IconData icon;
-  final String label;
-  final String value;
-  final Color? tone;
-
-  @override
-  Widget build(BuildContext context) {
-    final scheme = Theme.of(context).colorScheme;
-    final accent = tone ?? scheme.primary;
-    return Container(
-      padding: EdgeInsets.fromLTRB(16.w, 16.h, 16.w, 16.h),
-      decoration: AppTheme.surfaceCard(scheme, radius: 20),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Container(
-            width: 40.w,
-            height: 40.w,
-            decoration: BoxDecoration(
-              color: accent.withValues(alpha: 0.12),
-              borderRadius: BorderRadius.circular(12.r),
-            ),
-            child: Icon(icon, size: 20.w, color: accent),
-          ),
-          SizedBox(height: 14.h),
-          Text(
-            value,
-            maxLines: 1,
-            overflow: TextOverflow.ellipsis,
-            style: TextStyle(
-                fontSize: 19.sp,
-                fontWeight: FontWeight.w800,
-                letterSpacing: -0.6,
-                color: scheme.onSurface),
-          ),
-          SizedBox(height: 2.h),
-          Text(
-            label,
-            maxLines: 1,
-            overflow: TextOverflow.ellipsis,
-            style: TextStyle(
-                fontSize: 12.sp,
-                fontWeight: FontWeight.w600,
-                color: scheme.onSurface.withValues(alpha: 0.6)),
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-/// A KPI tile styled for the bento grid, with a delta pill.
-class _KpiBentoTile extends StatelessWidget {
-  const _KpiBentoTile({required this.kpi});
-  final DashboardKpi kpi;
-
-  @override
-  Widget build(BuildContext context) {
-    final scheme = Theme.of(context).colorScheme;
-    final tone = kpi.isGold
-        ? AppColors.amber
-        : kpi.isDown
-            ? AppColors.dangerBright
-            : kpi.isUp
-                ? AppColors.success
-                : scheme.primary;
-    final isDelta = kpi.hint.trim().isNotEmpty &&
-        (kpi.hint.trim().startsWith('+') ||
-            kpi.hint.trim().startsWith('-') ||
-            kpi.hint.trim().startsWith('−'));
-
-    return Container(
-      padding: EdgeInsets.fromLTRB(16.w, 16.h, 16.w, 16.h),
-      decoration: AppTheme.surfaceCard(scheme, radius: 20),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Row(
-            children: [
-              Container(
-                width: 40.w,
-                height: 40.w,
-                decoration: BoxDecoration(
-                  color: tone.withValues(alpha: 0.12),
-                  borderRadius: BorderRadius.circular(12.r),
-                ),
-                child: Icon(_iconFor(kpi), size: 20.w, color: tone),
-              ),
-              const Spacer(),
-              if (isDelta) AppPill.status(label: kpi.hint, color: tone),
-            ],
-          ),
-          SizedBox(height: 14.h),
-          Text(
-            kpi.value,
-            maxLines: 1,
-            overflow: TextOverflow.ellipsis,
-            style: TextStyle(
-                fontSize: 19.sp,
-                fontWeight: FontWeight.w800,
-                letterSpacing: -0.6,
-                color: kpi.isGold ? AppColors.amber : scheme.onSurface),
-          ),
-          SizedBox(height: 2.h),
-          Text(
-            kpi.hint.isNotEmpty && !isDelta
-                ? '${kpi.label} · ${kpi.hint}'
-                : kpi.label,
-            maxLines: 2,
-            overflow: TextOverflow.ellipsis,
-            style: TextStyle(
-                fontSize: 12.sp,
-                fontWeight: FontWeight.w600,
-                color: scheme.onSurface.withValues(alpha: 0.6)),
-          ),
-        ],
-      ),
-    );
-  }
-
-  IconData _iconFor(DashboardKpi kpi) {
-    final hint = '${kpi.metric} ${kpi.label}'.toLowerCase();
-    if (hint.contains('equity')) return Icons.trending_up_rounded;
-    if (hint.contains('balance')) return Icons.account_balance_wallet_rounded;
-    if (hint.contains('account')) return Icons.layers_rounded;
-    if (hint.contains('day')) return Icons.calendar_today_rounded;
-    if (hint.contains('profit')) return Icons.show_chart_rounded;
-    return Icons.insights_rounded;
-  }
 }
 
 /// The focused-account title, tappable to open the account picker.
@@ -561,90 +370,6 @@ class _HomePulseDotState extends State<HomePulseDot>
             BoxShadow(color: color.withValues(alpha: 0.8), blurRadius: 6.r),
           ],
         ),
-      ),
-    );
-  }
-}
-
-/// The live-account rail — horizontally scrolling bento cards, each with a live
-/// pulse and an animated equity figure plus P/L vs balance.
-class LiveAccountBentoGrid extends StatelessWidget {
-  const LiveAccountBentoGrid({super.key, required this.accounts});
-  final List<DashboardAccount> accounts;
-
-  @override
-  Widget build(BuildContext context) {
-    return SizedBox(
-      height: 118.h,
-      child: ListView.separated(
-        scrollDirection: Axis.horizontal,
-        physics: const BouncingScrollPhysics(),
-        padding: EdgeInsets.zero,
-        itemCount: accounts.length,
-        separatorBuilder: (_, _) => SizedBox(width: 12.w),
-        itemBuilder: (_, i) => SizedBox(
-          width: 190.w,
-          child: _AccountBentoCard(account: accounts[i]),
-        ),
-      ),
-    );
-  }
-}
-
-class _AccountBentoCard extends StatelessWidget {
-  const _AccountBentoCard({required this.account});
-  final DashboardAccount account;
-
-  @override
-  Widget build(BuildContext context) {
-    final scheme = Theme.of(context).colorScheme;
-    final pnlMinor = account.equityMinor - account.balanceMinor;
-    final isProfit = pnlMinor >= 0;
-    final pnlColor = isProfit ? AppColors.success : AppColors.danger;
-    final sign = isProfit ? '+' : '−';
-
-    return Container(
-      padding: EdgeInsets.fromLTRB(14.w, 13.h, 14.w, 13.h),
-      decoration: AppTheme.surfaceCard(scheme, radius: 18),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Row(
-            children: [
-              Expanded(
-                child: Text('${'home.account_hash'.tr}${account.id}',
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                    style: TextStyle(
-                        fontSize: 12.5.sp,
-                        fontWeight: FontWeight.w600,
-                        color: scheme.onSurface.withValues(alpha: 0.6))),
-              ),
-              HomePulseDot(active: true),
-            ],
-          ),
-          SizedBox(height: 8.h),
-          FittedBox(
-            fit: BoxFit.scaleDown,
-            alignment: Alignment.centerLeft,
-            child: AppCountUpText(
-              value: account.equityMinor.toDouble(),
-              formatter: (v) => formatMinorMoney(v.round(), account.currency),
-              style: TextStyle(
-                  fontSize: 17.sp,
-                  fontWeight: FontWeight.w800,
-                  letterSpacing: -0.6,
-                  color: scheme.onSurface),
-            ),
-          ),
-          SizedBox(height: 8.h),
-          AppPill.status(
-            label: '$sign${formatMinorMoney(pnlMinor.abs(), account.currency)}',
-            color: pnlColor,
-            showDot: true,
-          ),
-        ],
       ),
     );
   }

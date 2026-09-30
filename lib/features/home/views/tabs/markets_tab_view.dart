@@ -9,6 +9,7 @@ import '../../../../shared/widgets/trade/trade_ticket_panel.dart';
 import '../../../chart/services/chart_preload_service.dart';
 import '../../../chart/widgets/chart_in_app_webview.dart';
 import '../../../positions/controllers/positions_controller.dart';
+import '../../../symbols/services/favorites_service.dart';
 import '../../../symbols/services/market_watch_v2_service.dart';
 
 /// Markets tab — a full-screen embedded live chart with a docked trade ticket.
@@ -22,14 +23,6 @@ import '../../../symbols/services/market_watch_v2_service.dart';
 class MarketsTabView extends StatefulWidget {
   const MarketsTabView({super.key});
 
-  static const _symbols = <String>[
-    ChartPreloadService.defaultSymbol,
-    'EURUSD',
-    'GBPUSD',
-    'USDJPY',
-    'BTCUSD',
-    'ETHUSD',
-  ];
 
   @override
   State<MarketsTabView> createState() => _MarketsTabViewState();
@@ -63,12 +56,13 @@ class _MarketsTabViewState extends State<MarketsTabView> {
   @override
   Widget build(BuildContext context) {
     final market = Get.find<MarketWatchV2Service>();
+    final favorites = Get.find<FavoritesService>();
     return SafeArea(
       child: Obx(() {
         final symbol = market.selectedSymbol.value;
-        // Union of the presets and the live-selected symbol so the picker always
-        // contains the current one even if it came from the Trade list.
-        final symbols = <String>{symbol, ...MarketsTabView._symbols}.toList();
+        // The picker mirrors the Trade tab's favourites (add/remove reflects
+        // live); the selected symbol is kept so the current one is always listed.
+        final symbols = <String>{symbol, ...favorites.favoriteCodes}.toList();
         return Column(
           children: [
             Expanded(

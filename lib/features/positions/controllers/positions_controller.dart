@@ -209,8 +209,37 @@ class PositionsController extends GetxController {
   }
 
 
+  /// Re-fetches the account list so the switch sheet shows current balance,
+  /// equity and P/L (the cached rows are a snapshot from screen open).
+  Future<void> refreshAccountRows() async {
+    if (isRefreshingAccounts.value) return;
+    isRefreshingAccounts.value = true;
+    final res = await _accountsRepository.getAccounts();
+    if (isClosed) return;
+    isRefreshingAccounts.value = false;
+    final data = res.data;
+    if (!res.success || data == null || data.accounts.isEmpty) return;
+    accountRows.assignAll(_primaryFirst(data.accounts));
+  }
+
+  /// True while the switch sheet is re-fetching the account list.
+  final isRefreshingAccounts = false.obs;
+
+  /// The user's primary account id, if known (badge + ordering in the sheet).
+  int? get primaryAccountId => _primaryAccountId();
+
+  /// Moves the primary account to index 0, keeping the rest in API order.
+  List<AccountRow> _primaryFirst(List<AccountRow> rows) {
+    final primaryId = _primaryAccountId();
+    final sorted = [...rows];
+    final index = sorted.indexWhere((a) => a.id == primaryId);
+    if (index <= 0) return sorted;
+    sorted.insert(0, sorted.removeAt(index));
+    return sorted;
+  }
+
   void _selectAccount(List<AccountRow> rows) {
-    accountRows.assignAll(rows);
+    accountRows.assignAll(_primaryFirst(rows));
     final focusId = _focusedAccountId() ?? _primaryAccountId();
     if (focusId != null) {
       final match = rows.where((a) => a.id == focusId);

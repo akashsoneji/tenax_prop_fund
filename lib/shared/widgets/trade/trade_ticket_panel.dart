@@ -12,6 +12,7 @@ import '../../../features/home/widgets/pending_order_widgets.dart';
 import '../../../features/symbols/services/market_watch_v2_service.dart';
 import '../../theme/app_colors.dart';
 import '../../theme/app_theme.dart';
+import '../symbol_icon.dart';
 import 'trade_ticket.dart';
 
 export 'trade_ticket.dart';
@@ -410,6 +411,7 @@ class _TradeTicketPanelState extends State<TradeTicketPanel> {
                     final s = widget.symbols[i];
                     return ListTile(
                       dense: _isRail,
+                      leading: SymbolIcon(code: s),
                       title: Text(
                         s,
                         maxLines: 1,

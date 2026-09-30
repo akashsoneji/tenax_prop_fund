@@ -95,7 +95,7 @@ class _FavoritesSection extends StatelessWidget {
       final items = favorites.favorites.toList();
       if (items.isEmpty) return const _EmptyWatchlist();
       return Padding(
-        padding: EdgeInsets.fromLTRB(16.w, 18.h, 16.w, 24.h),
+        padding: EdgeInsets.fromLTRB(4.w, 18.h, 8.w, 24.h),
         child: ReorderableListView.builder(
           shrinkWrap: true,
           buildDefaultDragHandles: false,

@@ -6,6 +6,7 @@ import '../../../core/network/api_client.dart';
 import '../../../shared/theme/app_colors.dart';
 import '../../../shared/theme/app_text.dart';
 import '../../../shared/widgets/app_choice_chip.dart';
+import '../../../shared/widgets/symbol_icon.dart';
 import '../controllers/search_instruments_controller.dart';
 import '../models/symbol_models.dart';
 import '../repositories/symbols_repository.dart';
@@ -224,18 +225,7 @@ class _InstrumentRow extends StatelessWidget {
       padding: EdgeInsets.symmetric(vertical: 6.h),
       child: Row(
         children: [
-          Container(
-            width: 40.w,
-            height: 40.w,
-            decoration: BoxDecoration(
-              color: scheme.surfaceContainerHighest
-                  .withValues(alpha: AppColors.alphaMuted),
-              borderRadius: BorderRadius.circular(12.r),
-            ),
-            alignment: Alignment.center,
-            child: Icon(Icons.candlestick_chart_outlined,
-                size: 20.w, color: scheme.onSurfaceVariant),
-          ),
+          SymbolIcon(code: instrument.code, size: 40.w),
           SizedBox(width: 12.w),
           Expanded(
             child: Column(

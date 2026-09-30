@@ -166,6 +166,7 @@ class AccountRow {
     required this.pnl,
     required this.pnlNegative,
     required this.floatingNote,
+    this.floating = '',
     required this.tradingDays,
     required this.leverage,
     required this.started,
@@ -188,6 +189,7 @@ class AccountRow {
   final String pnl; // e.g. '+$99.43'
   final bool pnlNegative;
   final String floatingNote; // e.g. 'incl. +$99.48 floating'
+  final String floating; // e.g. '+$99.48'
   final String tradingDays; // e.g. '3'
   final String leverage; // e.g. '1:100 FX'
   final String started; // e.g. 'Sep 2, 2026'
@@ -213,6 +215,7 @@ class AccountRow {
       floatingNote: floatingMinor != 0
           ? 'incl. ${_signed(floatingMinor)} floating'
           : '',
+      floating: _signed(floatingMinor),
       tradingDays: _int(json['trading_days']).toString(),
       leverage: lev > 0 ? '1:$lev FX' : '—',
       started: _date(json['activated_at'] ?? json['created_at']),

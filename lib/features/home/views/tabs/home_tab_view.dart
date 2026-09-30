@@ -3,7 +3,6 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
 
 import '../../../../app/routes/app_routes.dart';
-import '../../../../shared/theme/app_theme.dart';
 import '../../../../shared/widgets/data_state_builder.dart';
 import '../../../../shared/widgets/fade_slide_in.dart';
 import '../../../../shared/widgets/skeletons/skeletons.dart';
@@ -11,16 +10,17 @@ import '../../controllers/home_controller.dart';
 import '../../models/dashboard_models.dart';
 import '../../widgets/home_bento.dart';
 import '../../widgets/home_header.dart';
+import '../../widgets/home_live_accounts.dart';
+import '../../widgets/home_quick_actions.dart';
 import '../../widgets/home_sections.dart';
 
-/// The Home (Portfolio) tab — a bento-grid dashboard driven entirely by
-/// `HomeController` (GetX). A glass brand header sits above an asymmetric grid:
-/// a large gradient equity tile, paired balance/accounts tiles, KPI tiles, a
-/// live-account grid, quick actions, risk overview, recent activity/trades and
-/// a referral prompt. Live equity ticks arrive over the Pusher socket and patch
-/// the controller state, which rebuilds this view through `DataStateBuilder`.
-/// Fully theme-token driven (light/dark), localized through `.tr`, staggered
-/// in with [FadeSlideIn].
+/// The Home (Portfolio) tab, driven entirely by `HomeController` (GetX). Below
+/// the brand header: the account card (Floating P/L), an overview panel,
+/// quick actions, live accounts, account health, recent trades, recent
+/// activity and the referral banner. Live equity ticks arrive over the Pusher
+/// socket and patch the controller state, which rebuilds this view through
+/// `DataStateBuilder`. Theme-token driven (light/dark), localized through
+/// `.tr`, staggered in with [FadeSlideIn].
 class HomeTabView extends GetView<HomeController> {
   const HomeTabView({super.key});
 
@@ -51,7 +51,7 @@ class HomeTabView extends GetView<HomeController> {
                     child: ListView(
                       physics: const AlwaysScrollableScrollPhysics(
                           parent: BouncingScrollPhysics()),
-                      padding: EdgeInsets.fromLTRB(14.w, 6.h, 14.w, 24.h),
+                      padding: EdgeInsets.fromLTRB(14.w, 6.h, 14.w, 28.h),
                       children: _sections(data),
                     ),
                   ),
@@ -65,52 +65,54 @@ class HomeTabView extends GetView<HomeController> {
   }
 
   List<Widget> _sections(DashboardData data) {
+    final sectionGap = SizedBox(height: 22.h);
+    final labelGap = SizedBox(height: 10.h);
     final blocks = <Widget>[HomeBento(data: data)];
+
+    blocks
+      ..add(sectionGap)
+      ..add(HomeSectionLabel('home.quick_actions'.tr,
+          actionLabel: 'home.recommended'.tr))
+      ..add(labelGap)
+      ..add(const HomeQuickActions());
 
     if (data.liveAccounts.isNotEmpty) {
       blocks
-        ..add(SizedBox(height: 18.h))
+        ..add(sectionGap)
         ..add(HomeSectionLabel('home.live_accounts'.tr))
-        ..add(SizedBox(height: 10.h))
-        ..add(LiveAccountBentoGrid(accounts: data.liveAccounts));
+        ..add(labelGap)
+        ..add(HomeLiveAccountsRail(accounts: data.liveAccounts));
     }
-
-    blocks
-      ..add(SizedBox(height: 18.h))
-      ..add(HomeSectionLabel('home.quick_actions'.tr,
-          actionLabel: 'home.recommended'.tr))
-      ..add(SizedBox(height: 12.h))
-      ..add(const _QuickActions());
 
     if (data.health.isNotEmpty) {
       blocks
-        ..add(SizedBox(height: 18.h))
+        ..add(sectionGap)
         ..add(HomeSectionLabel('home.account_health'.tr,
             actionLabel: data.healthBadge.isEmpty ? null : data.healthBadge))
-        ..add(SizedBox(height: 10.h))
+        ..add(labelGap)
         ..add(HomeRiskOverview(items: data.health));
-    }
-
-    if (data.activity.isNotEmpty) {
-      blocks
-        ..add(SizedBox(height: 18.h))
-        ..add(HomeSectionLabel('home.recent_activity'.tr,
-            actionLabel: 'home.view_all'.tr,
-            onAction: () => Get.toNamed(AppRoutes.notifications)))
-        ..add(SizedBox(height: 10.h))
-        ..add(HomeActivityList(items: data.activity));
     }
 
     if (data.trades.isNotEmpty) {
       blocks
-        ..add(SizedBox(height: 18.h))
+        ..add(sectionGap)
         ..add(HomeSectionLabel('home.recent_trades'.tr))
-        ..add(SizedBox(height: 10.h))
+        ..add(labelGap)
         ..add(HomeRecentTrades(items: data.trades));
     }
 
+    if (data.activity.isNotEmpty) {
+      blocks
+        ..add(sectionGap)
+        ..add(HomeSectionLabel('home.recent_activity'.tr,
+            actionLabel: 'home.view_all'.tr,
+            onAction: () => Get.toNamed(AppRoutes.notifications)))
+        ..add(labelGap)
+        ..add(HomeActivityList(items: data.activity));
+    }
+
     blocks
-      ..add(SizedBox(height: 18.h))
+      ..add(sectionGap)
       ..add(const HomeReferralPrompt());
 
     return [
@@ -120,87 +122,8 @@ class HomeTabView extends GetView<HomeController> {
   }
 }
 
-// ---------------------------------------------------------------------------
-// Quick actions: four shortcut tiles (view-local — small + navigation only)
-// ---------------------------------------------------------------------------
-class _QuickAction {
-  const _QuickAction(this.route, this.labelKey, this.icon);
-  final String route;
-  final String labelKey;
-  final IconData icon;
-}
-
-const _quickActions = <_QuickAction>[
-  _QuickAction(AppRoutes.challenge, 'home.qa.challenge', Icons.add_rounded),
-  _QuickAction(
-      AppRoutes.profileKyc, 'home.qa.kyc', Icons.verified_user_rounded),
-  _QuickAction(AppRoutes.rewards, 'home.qa.reward', Icons.credit_card_rounded),
-  _QuickAction(
-      AppRoutes.tradingRules, 'home.qa.rules', Icons.description_rounded),
-];
-
-class _QuickActions extends StatelessWidget {
-  const _QuickActions();
-
-  @override
-  Widget build(BuildContext context) {
-    return Row(
-      children: [
-        for (var i = 0; i < _quickActions.length; i++) ...[
-          if (i > 0) SizedBox(width: 12.w),
-          Expanded(child: _QuickActionTile(action: _quickActions[i])),
-        ],
-      ],
-    );
-  }
-}
-
-class _QuickActionTile extends StatelessWidget {
-  const _QuickActionTile({required this.action});
-  final _QuickAction action;
-
-  @override
-  Widget build(BuildContext context) {
-    final scheme = Theme.of(context).colorScheme;
-    return Material(
-      color: Colors.transparent,
-      borderRadius: BorderRadius.circular(16.r),
-      child: InkWell(
-        borderRadius: BorderRadius.circular(16.r),
-        onTap: () => Get.toNamed(action.route),
-        child: Container(
-          padding: EdgeInsets.symmetric(vertical: 12.h, horizontal: 8.w),
-          decoration: AppTheme.surfaceCard(scheme, radius: 16),
-          child: Column(
-            children: [
-              Container(
-                width: 40.w,
-                height: 40.w,
-                decoration: BoxDecoration(
-                  color: scheme.primary.withValues(alpha: 0.12),
-                  borderRadius: BorderRadius.circular(12.r),
-                ),
-                child: Icon(action.icon, color: scheme.primary, size: 20.w),
-              ),
-              SizedBox(height: 8.h),
-              Text(
-                action.labelKey.tr,
-                maxLines: 1,
-                overflow: TextOverflow.ellipsis,
-                textAlign: TextAlign.center,
-                style: TextStyle(
-                    fontSize: 12.5.sp,
-                    fontWeight: FontWeight.w700,
-                    color: scheme.onSurface),
-              ),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
-}
-
+/// Loading placeholder mirroring the new layout: account card, overview grid,
+/// quick-action circles, live-account rail and list cards.
 class _HomeSkeleton extends StatelessWidget {
   const _HomeSkeleton();
 
@@ -210,13 +133,33 @@ class _HomeSkeleton extends StatelessWidget {
       physics: const NeverScrollableScrollPhysics(),
       padding: EdgeInsets.fromLTRB(14.w, 8.h, 14.w, 24.h),
       children: [
-        CardSkeleton(lines: 2, height: 150.h),
+        HeroSkeleton(height: 84.h),
         SizedBox(height: 16.h),
         const StatGridSkeleton(tiles: 4),
         SizedBox(height: 22.h),
-        const CardSkeleton(lines: 3),
+        ShimmerBox(width: 130.w, height: 16.h),
+        SizedBox(height: 12.h),
+        Row(
+          mainAxisAlignment: MainAxisAlignment.spaceAround,
+          children: [
+            for (var i = 0; i < 4; i++)
+              ShimmerBox(width: 50.w, height: 50.w, radius: 25.r),
+          ],
+        ),
+        SizedBox(height: 22.h),
+        ShimmerBox(width: 130.w, height: 16.h),
+        SizedBox(height: 10.h),
+        Row(
+          children: [
+            Expanded(child: ShimmerBox(height: 112.h, radius: 18.r)),
+            SizedBox(width: 10.w),
+            Expanded(child: ShimmerBox(height: 112.h, radius: 18.r)),
+          ],
+        ),
+        SizedBox(height: 22.h),
+        CardSkeleton(lines: 3, height: 150.h),
         SizedBox(height: 16.h),
-        const CardSkeleton(lines: 2),
+        CardSkeleton(lines: 3, height: 150.h),
       ],
     );
   }

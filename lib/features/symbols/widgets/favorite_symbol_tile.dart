@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
-import 'package:flutter_svg/flutter_svg.dart';
 import 'package:get/get.dart';
 
 import '../../../shared/theme/app_colors.dart';
 import '../../../shared/theme/app_text.dart';
+import '../../../shared/widgets/symbol_icon.dart';
 import '../models/symbol_models.dart';
 import '../services/market_watch_v2_service.dart';
 
@@ -39,7 +39,7 @@ class FavoriteSymbolTile extends StatelessWidget {
       child: InkWell(
         onTap: onTap,
         child: Container(
-          padding: EdgeInsets.fromLTRB(4.w, 8.h, 12.w, 8.h),
+          padding: EdgeInsets.fromLTRB(0, 8.h, 4.w, 8.h),
           decoration: BoxDecoration(
             border: Border(
               bottom: BorderSide(
@@ -53,13 +53,13 @@ class FavoriteSymbolTile extends StatelessWidget {
               ReorderableDragStartListener(
                 index: index,
                 child: Padding(
-                  padding: EdgeInsets.fromLTRB(4.w, 8.h, 2.w, 8.h),
+                  padding: EdgeInsets.fromLTRB(0, 8.h, 6.w, 8.h),
                   child: Icon(Icons.drag_handle_rounded,
                       size: 20.w,
                       color: scheme.onSurfaceVariant.withValues(alpha: 0.5)),
                 ),
               ),
-              _FlagAvatar(code: instrument.code, tint: scheme.primary),
+              SymbolIcon(code: instrument.code),
               SizedBox(width: 10.w),
               Expanded(child: _identity(scheme)),
               SizedBox(width: 8.w),
@@ -142,8 +142,9 @@ class FavoriteSymbolTile extends StatelessWidget {
 
   Widget _side(String label, String value, Color color, BorderRadius radius) {
     return Container(
-      width: 70.w,
-      height: 36.h,
+      width: 74.w,
+      height: 40.h,
+      padding: EdgeInsets.symmetric(horizontal: 4.w),
       alignment: Alignment.center,
       decoration: BoxDecoration(color: color, borderRadius: radius),
       child: Column(
@@ -153,9 +154,16 @@ class FavoriteSymbolTile extends StatelessWidget {
               style: AppText.base(
                   fontSize: 10.sp, color: Colors.white.withValues(alpha: 0.85))),
           SizedBox(height: 1.h),
-          Text(value,
-              style: AppText.base(
-                  fontSize: 10.sp, fontWeight: FontWeight.w600, color: Colors.white)),
+          FittedBox(
+            fit: BoxFit.scaleDown,
+            child: Text(value,
+                maxLines: 1,
+                style: AppText.base(
+                    fontSize: 13.sp,
+                    fontWeight: FontWeight.w700,
+                    color: Colors.white,
+                    height: 1.1)),
+          ),
         ],
       ),
     );
@@ -171,42 +179,5 @@ class FavoriteSymbolTile extends StatelessWidget {
     }
     if (s.length == 6) return '${s.substring(0, 3)}/${s.substring(3)}';
     return s;
-  }
-}
-
-/// Circular flag/asset avatar. Resolves `assets/svg/flags/<code>.svg`
-/// (lower-cased, suffix stripped); falls back to the symbol's first letter.
-class _FlagAvatar extends StatelessWidget {
-  const _FlagAvatar({required this.code, required this.tint});
-  final String code;
-  final Color tint;
-
-  @override
-  Widget build(BuildContext context) {
-    var clean = code.trim().toLowerCase();
-    if (clean.contains('.')) clean = clean.substring(0, clean.indexOf('.'));
-    final letter = clean.isEmpty ? '?' : clean[0].toUpperCase();
-
-    return Container(
-      width: 32.w,
-      height: 32.w,
-      decoration: BoxDecoration(
-        color: tint.withValues(alpha: 0.10),
-        shape: BoxShape.circle,
-      ),
-      clipBehavior: Clip.antiAlias,
-      child: Padding(
-        padding: EdgeInsets.all(3.w),
-        child: SvgPicture.asset(
-          'assets/svg/flags/$clean.svg',
-          fit: BoxFit.cover,
-          placeholderBuilder: (_) => Center(
-            child: Text(letter,
-                style: AppText.base(
-                    fontSize: 12.sp, fontWeight: FontWeight.w700, color: tint)),
-          ),
-        ),
-      ),
-    );
   }
 }

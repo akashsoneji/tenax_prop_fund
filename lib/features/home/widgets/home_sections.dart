@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/scheduler.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
@@ -7,13 +6,15 @@ import 'package:get/get.dart';
 import '../../../app/routes/app_routes.dart';
 import '../../../core/state/data_state.dart';
 import '../../../shared/theme/app_colors.dart';
+import '../../../shared/theme/app_text.dart';
 import '../../../shared/theme/app_theme.dart';
 import '../../../shared/widgets/app_pill.dart';
 import '../../../shared/widgets/app_toast.dart';
+import '../../../shared/widgets/symbol_icon.dart';
 import '../controllers/home_controller.dart';
 import '../models/dashboard_models.dart';
 
-/// A section heading with an optional trailing action (tappable link) or badge.
+/// A section heading with an optional trailing action link or status badge.
 class HomeSectionLabel extends StatelessWidget {
   const HomeSectionLabel(this.text, {super.key, this.actionLabel, this.onAction});
   final String text;
@@ -24,69 +25,71 @@ class HomeSectionLabel extends StatelessWidget {
   Widget build(BuildContext context) {
     final scheme = Theme.of(context).colorScheme;
     return Row(
-      mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
         Expanded(
           child: Text(
             text,
             maxLines: 1,
             overflow: TextOverflow.ellipsis,
-            style: TextStyle(
-                fontSize: 15.sp,
-                fontWeight: FontWeight.w800,
-                letterSpacing: -0.3,
-                color: scheme.onSurface),
+            style: AppText.heading(color: scheme.onSurface, fontSize: 16.sp)
+                .copyWith(letterSpacing: -0.3),
           ),
         ),
         if (actionLabel != null && onAction != null)
-          GestureDetector(
+          InkWell(
             onTap: onAction,
-            behavior: HitTestBehavior.opaque,
-            child: Text(
-              actionLabel!,
-              style: TextStyle(
-                  fontSize: 14.sp,
-                  fontWeight: FontWeight.w700,
-                  color: scheme.primary),
+            borderRadius: BorderRadius.circular(8.r),
+            child: Padding(
+              padding: EdgeInsets.symmetric(horizontal: 4.w, vertical: 2.h),
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Text(
+                    actionLabel!,
+                    style: AppText.subtitle(
+                        color: scheme.primary, fontSize: 12.5.sp),
+                  ),
+                  Icon(Icons.chevron_right_rounded,
+                      size: 16.w, color: scheme.primary),
+                ],
+              ),
             ),
           )
         else if (actionLabel != null)
-          Container(
+          AppPill(
+            label: actionLabel!,
+            color: AppColors.amber,
+            labelColor: AppColors.warningInk,
+            bgAlpha: 0.16,
+            fontSize: 11.5,
             padding: EdgeInsets.symmetric(horizontal: 10.w, vertical: 4.h),
-            decoration: BoxDecoration(
-              color: AppColors.amber.withValues(alpha: 0.16),
-              borderRadius: BorderRadius.circular(999.r),
-            ),
-            child: Text(
-              actionLabel!,
-              style: TextStyle(
-                  fontSize: 12.sp,
-                  fontWeight: FontWeight.w700,
-                  color: AppColors.warningInk),
-            ),
           ),
       ],
     );
   }
 }
 
-/// A rounded card that stacks children with hairline dividers between them.
-class _SectionCard extends StatelessWidget {
-  const _SectionCard({required this.children});
+/// A grouped surface that stacks rows with inset hairline dividers.
+class _GroupCard extends StatelessWidget {
+  const _GroupCard({required this.children});
   final List<Widget> children;
 
   @override
   Widget build(BuildContext context) {
     final scheme = Theme.of(context).colorScheme;
     return Container(
-      padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 4.h),
+      padding: EdgeInsets.symmetric(horizontal: 14.w, vertical: 4.h),
       decoration: AppTheme.surfaceCard(scheme, radius: 20),
       child: Column(
         children: [
           for (var i = 0; i < children.length; i++) ...[
             if (i > 0)
               Divider(
-                  height: 1.h, color: scheme.onSurface.withValues(alpha: 0.07)),
+                height: 1,
+                thickness: 1,
+                indent: 48.w,
+                color: scheme.onSurface.withValues(alpha: 0.07),
+              ),
             children[i],
           ],
         ],
@@ -95,95 +98,112 @@ class _SectionCard extends StatelessWidget {
   }
 }
 
-/// Account-health — a horizontal row of circular gauge tiles, one per metric.
-/// The ring fills green (OK), amber (Watch) or red (Breach); the centre shows
-/// a status glyph, and the metric name + short detail sit below.
+/// Account health — one grouped card of rows: a status ring on the left, the
+/// metric name + detail with a severity bar, and a status chip on the right.
 class HomeRiskOverview extends StatelessWidget {
   const HomeRiskOverview({super.key, required this.items});
   final List<DashboardHealth> items;
 
   @override
   Widget build(BuildContext context) {
-    return SizedBox(
-      height: 150.h,
-      child: ListView.separated(
-        scrollDirection: Axis.horizontal,
-        physics: const BouncingScrollPhysics(),
-        padding: EdgeInsets.zero,
-        itemCount: items.length,
-        separatorBuilder: (_, _) => SizedBox(width: 12.w),
-        itemBuilder: (_, i) => _RiskGaugeTile(item: items[i]),
-      ),
+    return _GroupCard(
+      children: [for (final item in items) _HealthRow(item: item)],
     );
   }
 }
 
-class _RiskGaugeTile extends StatelessWidget {
-  const _RiskGaugeTile({required this.item});
+class _HealthRow extends StatelessWidget {
+  const _HealthRow({required this.item});
   final DashboardHealth item;
 
   @override
   Widget build(BuildContext context) {
     final scheme = Theme.of(context).colorScheme;
-    // OK ring fills fully, Watch two-thirds, Breach one-third — a quick visual
-    // read of severity even before the label.
+    // OK fills fully, Watch two-thirds, Breach one-third — a quick visual read
+    // of severity even before the label.
     final (color, fill, glyph) = item.isBreach
         ? (AppColors.dangerBright, 0.34, Icons.priority_high_rounded)
         : item.isWatch
             ? (AppColors.amber, 0.66, Icons.warning_amber_rounded)
             : (AppColors.success, 1.0, Icons.check_rounded);
+    final detail =
+        item.line1.isNotEmpty ? item.line1 : item.status.toUpperCase();
 
-    return Container(
-      width: 150.w,
-      padding: EdgeInsets.symmetric(horizontal: 14.w, vertical: 14.h),
-      decoration: AppTheme.surfaceCard(scheme, radius: 18),
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        crossAxisAlignment: CrossAxisAlignment.center,
+    return Padding(
+      padding: EdgeInsets.symmetric(vertical: 12.h),
+      child: Row(
         children: [
           SizedBox(
-            width: 58.w,
-            height: 58.w,
+            width: 36.w,
+            height: 36.w,
             child: Stack(
               alignment: Alignment.center,
               children: [
-                SizedBox(
-                  width: 58.w,
-                  height: 58.w,
+                SizedBox.expand(
                   child: CircularProgressIndicator(
                     value: fill,
-                    strokeWidth: 5.w,
+                    strokeWidth: 3.w,
                     backgroundColor: scheme.onSurface.withValues(alpha: 0.08),
                     valueColor: AlwaysStoppedAnimation(color),
                     strokeCap: StrokeCap.round,
                   ),
                 ),
-                Icon(glyph, size: 22.w, color: color),
+                Icon(glyph, size: 16.w, color: color),
               ],
             ),
           ),
-          SizedBox(height: 10.h),
-          Text(
-            item.name,
-            maxLines: 1,
-            overflow: TextOverflow.ellipsis,
-            textAlign: TextAlign.center,
-            style: TextStyle(
-                fontSize: 13.sp,
-                fontWeight: FontWeight.w700,
-                color: scheme.onSurface),
-          ),
-          SizedBox(height: 3.h),
-          Text(
-            item.line1.isNotEmpty ? item.line1 : item.status.toUpperCase(),
-            maxLines: 2,
-            overflow: TextOverflow.ellipsis,
-            textAlign: TextAlign.center,
-            style: TextStyle(
-                fontSize: 11.5.sp,
-                height: 1.25,
-                fontWeight: FontWeight.w500,
-                color: scheme.onSurface.withValues(alpha: 0.6)),
+          SizedBox(width: 12.w),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Row(
+                  children: [
+                    Expanded(
+                      child: Text(
+                        item.name,
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: AppText.title(
+                            color: scheme.onSurface, fontSize: 13.5.sp),
+                      ),
+                    ),
+                    if (item.status.isNotEmpty) ...[
+                      SizedBox(width: 8.w),
+                      AppPill(
+                        label: item.status.toUpperCase(),
+                        color: color,
+                        fontSize: 9.5,
+                        letterSpacing: 0.4,
+                        padding: EdgeInsets.symmetric(
+                            horizontal: 8.w, vertical: 3.h),
+                      ),
+                    ],
+                  ],
+                ),
+                SizedBox(height: 3.h),
+                Text(
+                  detail,
+                  maxLines: 2,
+                  overflow: TextOverflow.ellipsis,
+                  style: AppText.label(
+                    color: scheme.onSurface.withValues(alpha: 0.58),
+                    fontSize: 11.5.sp,
+                  ).copyWith(height: 1.3),
+                ),
+                SizedBox(height: 7.h),
+                ClipRRect(
+                  borderRadius: BorderRadius.circular(4.r),
+                  child: LinearProgressIndicator(
+                    value: fill,
+                    minHeight: 4.h,
+                    backgroundColor: scheme.onSurface.withValues(alpha: 0.07),
+                    valueColor: AlwaysStoppedAnimation(color),
+                  ),
+                ),
+              ],
+            ),
           ),
         ],
       ),
@@ -191,23 +211,32 @@ class _RiskGaugeTile extends StatelessWidget {
   }
 }
 
-/// Recent-activity — a compact icon-list: a tinted tone dot/icon, the event
-/// title + detail, and a relative-time badge on the right.
+/// Recent activity — a vertical timeline: tone-coloured icon nodes joined by a
+/// connector line, title + detail, and a relative-time badge.
 class HomeActivityList extends StatelessWidget {
   const HomeActivityList({super.key, required this.items});
   final List<DashboardActivity> items;
 
   @override
   Widget build(BuildContext context) {
-    return _SectionCard(
-      children: [for (final item in items) _ActivityRow(item: item)],
+    final scheme = Theme.of(context).colorScheme;
+    return Container(
+      padding: EdgeInsets.fromLTRB(14.w, 14.h, 14.w, 4.h),
+      decoration: AppTheme.surfaceCard(scheme, radius: 20),
+      child: Column(
+        children: [
+          for (var i = 0; i < items.length; i++)
+            _TimelineRow(item: items[i], isLast: i == items.length - 1),
+        ],
+      ),
     );
   }
 }
 
-class _ActivityRow extends StatelessWidget {
-  const _ActivityRow({required this.item});
+class _TimelineRow extends StatelessWidget {
+  const _TimelineRow({required this.item, required this.isLast});
   final DashboardActivity item;
+  final bool isLast;
 
   (Color, IconData) _tone(ColorScheme scheme) {
     switch (item.tone) {
@@ -227,139 +256,104 @@ class _ActivityRow extends StatelessWidget {
   Widget build(BuildContext context) {
     final scheme = Theme.of(context).colorScheme;
     final (tone, icon) = _tone(scheme);
-    return Padding(
-      padding: EdgeInsets.symmetric(vertical: 11.h),
+    return IntrinsicHeight(
       child: Row(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          Container(
-            width: 34.w,
-            height: 34.w,
-            decoration: BoxDecoration(
-              color: tone.withValues(alpha: 0.14),
-              borderRadius: BorderRadius.circular(10.r),
-            ),
-            child: Icon(icon, size: 18.w, color: tone),
+          Column(
+            children: [
+              Container(
+                width: 30.w,
+                height: 30.w,
+                decoration: BoxDecoration(
+                  color: tone.withValues(alpha: 0.14),
+                  shape: BoxShape.circle,
+                ),
+                child: Icon(icon, size: 15.w, color: tone),
+              ),
+              if (!isLast)
+                Expanded(
+                  child: Container(
+                    width: 2.w,
+                    margin: EdgeInsets.symmetric(vertical: 4.h),
+                    decoration: BoxDecoration(
+                      color: scheme.onSurface.withValues(alpha: 0.08),
+                      borderRadius: BorderRadius.circular(2.r),
+                    ),
+                  ),
+                ),
+            ],
           ),
           SizedBox(width: 12.w),
           Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Text(
-                  item.title,
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                  style: TextStyle(
-                      fontSize: 14.sp,
-                      fontWeight: FontWeight.w700,
-                      color: scheme.onSurface),
-                ),
-                if (item.detail.isNotEmpty) ...[
-                  SizedBox(height: 2.h),
-                  Text(
-                    item.detail,
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                    style: TextStyle(
-                        fontSize: 12.5.sp,
-                        color: scheme.onSurface.withValues(alpha: 0.55)),
+            child: Padding(
+              padding: EdgeInsets.only(top: 4.h, bottom: 14.h),
+              child: Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Text(
+                          item.title,
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          style: AppText.title(
+                              color: scheme.onSurface, fontSize: 13.5.sp),
+                        ),
+                        if (item.detail.isNotEmpty) ...[
+                          SizedBox(height: 2.h),
+                          Text(
+                            item.detail,
+                            maxLines: 2,
+                            overflow: TextOverflow.ellipsis,
+                            style: AppText.label(
+                              color: scheme.onSurface.withValues(alpha: 0.55),
+                              fontSize: 12.sp,
+                            ),
+                          ),
+                        ],
+                      ],
+                    ),
                   ),
+                  if (item.when.isNotEmpty) ...[
+                    SizedBox(width: 8.w),
+                    Text(
+                      item.when,
+                      style: AppText.label(
+                        color: scheme.onSurface.withValues(alpha: 0.5),
+                        fontSize: 11.sp,
+                      ),
+                    ),
+                  ],
                 ],
-              ],
+              ),
             ),
           ),
-          if (item.when.isNotEmpty) ...[
-            SizedBox(width: 10.w),
-            Container(
-              padding: EdgeInsets.symmetric(horizontal: 9.w, vertical: 4.h),
-              decoration: BoxDecoration(
-                color: scheme.onSurface.withValues(alpha: 0.05),
-                borderRadius: BorderRadius.circular(999.r),
-              ),
-              child: Text(
-                item.when,
-                style: TextStyle(
-                    fontSize: 11.sp,
-                    fontWeight: FontWeight.w600,
-                    color: scheme.onSurface.withValues(alpha: 0.6)),
-              ),
-            ),
-          ],
         ],
       ),
     );
   }
 }
 
-/// Recent trades — a continuously auto-scrolling horizontal marquee of trade
-/// chips. Pauses honour reduce-motion (renders a static scrollable row).
-class HomeRecentTrades extends StatefulWidget {
+/// Recent trades — a grouped vertical list: symbol avatar, symbol + side chip
+/// and lots, and the net P/L right-aligned in profit/loss colour.
+class HomeRecentTrades extends StatelessWidget {
   const HomeRecentTrades({super.key, required this.items});
   final List<DashboardTrade> items;
 
   @override
-  State<HomeRecentTrades> createState() => _HomeRecentTradesState();
-}
-
-class _HomeRecentTradesState extends State<HomeRecentTrades>
-    with SingleTickerProviderStateMixin {
-  final _controller = ScrollController();
-  Ticker? _ticker;
-  double _offset = 0;
-
-  @override
-  void initState() {
-    super.initState();
-    WidgetsBinding.instance.addPostFrameCallback((_) => _maybeStart());
-  }
-
-  void _maybeStart() {
-    if (!mounted) return;
-    if (MediaQuery.of(context).disableAnimations) return;
-    if (widget.items.length < 2) return;
-    _ticker = createTicker((_) {
-      if (!_controller.hasClients) return;
-      final max = _controller.position.maxScrollExtent;
-      if (max <= 0) return;
-      _offset += 0.5; // px per frame ≈ smooth continuous drift
-      // The list is duplicated, so wrap at the halfway point for a seamless loop.
-      if (_offset >= max / 2) _offset -= max / 2;
-      _controller.jumpTo(_offset);
-    })
-      ..start();
-  }
-
-  @override
-  void dispose() {
-    _ticker?.dispose();
-    _controller.dispose();
-    super.dispose();
-  }
-
-  @override
   Widget build(BuildContext context) {
-    // Duplicate the items so the marquee can loop seamlessly.
-    final loop = widget.items.length < 2
-        ? widget.items
-        : [...widget.items, ...widget.items];
-    return SizedBox(
-      height: 88.h,
-      child: ListView.separated(
-        controller: _controller,
-        scrollDirection: Axis.horizontal,
-        physics: const BouncingScrollPhysics(),
-        padding: EdgeInsets.zero,
-        itemCount: loop.length,
-        separatorBuilder: (_, _) => SizedBox(width: 10.w),
-        itemBuilder: (_, i) => _TradeChip(trade: loop[i]),
-      ),
+    return _GroupCard(
+      children: [for (final trade in items) _TradeRow(trade: trade)],
     );
   }
 }
 
-class _TradeChip extends StatelessWidget {
-  const _TradeChip({required this.trade});
+class _TradeRow extends StatelessWidget {
+  const _TradeRow({required this.trade});
   final DashboardTrade trade;
 
   @override
@@ -367,69 +361,65 @@ class _TradeChip extends StatelessWidget {
     final scheme = Theme.of(context).colorScheme;
     final netColor = trade.isLoss ? AppColors.dangerBright : AppColors.success;
     final sideColor = trade.isBuy ? AppColors.success : AppColors.dangerBright;
-    return Container(
-      width: 172.w,
-      padding: EdgeInsets.fromLTRB(14.w, 12.h, 14.w, 12.h),
-      decoration: AppTheme.surfaceCard(scheme, radius: 16),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+    return Padding(
+      padding: EdgeInsets.symmetric(vertical: 11.h),
+      child: Row(
         children: [
-          Row(
-            children: [
-              Container(
-                width: 30.w,
-                height: 30.w,
-                decoration: BoxDecoration(
-                  color: sideColor.withValues(alpha: 0.14),
-                  borderRadius: BorderRadius.circular(9.r),
-                ),
-                child: Icon(
-                  trade.isBuy
-                      ? Icons.trending_up_rounded
-                      : Icons.trending_down_rounded,
-                  color: sideColor,
-                  size: 17.w,
-                ),
-              ),
-              SizedBox(width: 8.w),
-              Expanded(
-                child: Text(
+          SymbolIcon(code: trade.symbol, size: 34.w),
+          SizedBox(width: 12.w),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Text(
                   trade.symbol,
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
-                  style: TextStyle(
-                      fontSize: 14.sp,
-                      fontWeight: FontWeight.w700,
-                      color: scheme.onSurface),
+                  style:
+                      AppText.title(color: scheme.onSurface, fontSize: 13.5.sp),
                 ),
-              ),
-            ],
+                SizedBox(height: 4.h),
+                Row(
+                  children: [
+                    AppPill(
+                      label: trade.side.toUpperCase(),
+                      color: sideColor,
+                      fontSize: 9.5,
+                      radius: 6,
+                      padding:
+                          EdgeInsets.symmetric(horizontal: 6.w, vertical: 2.h),
+                      leading: Icon(
+                        trade.isBuy
+                            ? Icons.trending_up_rounded
+                            : Icons.trending_down_rounded,
+                        size: 11.w,
+                        color: sideColor,
+                      ),
+                      leadingGap: 3,
+                    ),
+                    SizedBox(width: 6.w),
+                    Flexible(
+                      child: Text(
+                        trade.lots,
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: AppText.label(
+                          color: scheme.onSurface.withValues(alpha: 0.55),
+                          fontSize: 11.5.sp,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ],
+            ),
           ),
-          Row(
-            children: [
-              Expanded(
-                child: Text(
-                  '${trade.side} · ${trade.lots}',
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                  style: TextStyle(
-                      fontSize: 11.5.sp,
-                      fontWeight: FontWeight.w500,
-                      color: scheme.onSurface.withValues(alpha: 0.55)),
-                ),
-              ),
-              SizedBox(width: 6.w),
-              Text(
-                trade.net,
-                maxLines: 1,
-                overflow: TextOverflow.ellipsis,
-                style: TextStyle(
-                    fontSize: 14.sp,
-                    fontWeight: FontWeight.w800,
-                    color: netColor),
-              ),
-            ],
+          SizedBox(width: 8.w),
+          Text(
+            trade.net,
+            maxLines: 1,
+            style: AppText.value(color: netColor, fontSize: 14.sp),
           ),
         ],
       ),
@@ -437,8 +427,9 @@ class _TradeChip extends StatelessWidget {
   }
 }
 
-/// The referral summary card — refer & earn headline, share link with copy, and
-/// pending earnings. Tapping opens the referral screen.
+/// The referral banner — primary-tinted card with the refer & earn headline,
+/// referral count, a copyable share-link field and pending earnings. Tapping
+/// anywhere opens the referral screen.
 class HomeReferralPrompt extends GetView<HomeController> {
   const HomeReferralPrompt({super.key});
 
@@ -451,126 +442,92 @@ class HomeReferralPrompt extends GetView<HomeController> {
         : (referral?.code ?? '');
     final referrals = referral?.referrals ?? 0;
     final pending = referral?.pending ?? '\$0.00';
-    return GestureDetector(
-      onTap: () => Get.toNamed(AppRoutes.referral),
-      behavior: HitTestBehavior.opaque,
-      child: Container(
-        padding: EdgeInsets.all(20.w),
-        decoration: AppTheme.surfaceCard(scheme, radius: 20),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Row(
-              children: [
-                Expanded(
-                  child: Text(
-                    'home.refer_earn'.tr,
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                    style: TextStyle(
-                        fontSize: 18.sp,
-                        fontWeight: FontWeight.w800,
-                        letterSpacing: -0.4,
-                        color: scheme.onSurface),
-                  ),
-                ),
-                SizedBox(width: 10.w),
-                AppPill.status(
-                  label: '$referrals ${'home.referrals'.tr}',
-                  color: scheme.primary,
-                ),
+    final muted = scheme.onSurface.withValues(alpha: 0.6);
+
+    return Material(
+      color: Colors.transparent,
+      child: InkWell(
+        onTap: () => Get.toNamed(AppRoutes.referral),
+        borderRadius: BorderRadius.circular(22.r),
+        child: Ink(
+          padding: EdgeInsets.all(16.w),
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(22.r),
+            gradient: LinearGradient(
+              begin: Alignment.topLeft,
+              end: Alignment.bottomRight,
+              colors: [
+                scheme.primary.withValues(alpha: 0.14),
+                scheme.primary.withValues(alpha: 0.04),
               ],
             ),
-            SizedBox(height: 10.h),
-            Text(
-              'home.refer_earn_desc'.tr,
-              style: TextStyle(
-                  fontSize: 14.sp,
-                  height: 1.35,
-                  fontWeight: FontWeight.w500,
-                  color: scheme.onSurface.withValues(alpha: 0.6)),
-            ),
-            if (link.isNotEmpty) ...[
-              SizedBox(height: 16.h),
-              Container(
-                padding: EdgeInsets.fromLTRB(16.w, 14.h, 16.w, 14.h),
-                decoration: BoxDecoration(
-                  color: scheme.primary.withValues(alpha: 0.05),
-                  borderRadius: BorderRadius.circular(16.r),
-                  border: Border.all(
-                    color: scheme.primary.withValues(alpha: 0.28),
-                    width: 1.2.w,
-                  ),
-                ),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Row(
-                      children: [
-                        Expanded(
-                          child: Text(
-                            'home.your_link'.tr,
-                            style: TextStyle(
-                                fontSize: 14.sp,
-                                fontWeight: FontWeight.w600,
-                                color: scheme.onSurface),
-                          ),
-                        ),
-                        SizedBox(width: 10.w),
-                        GestureDetector(
-                          onTap: () => _copy(link),
-                          behavior: HitTestBehavior.opaque,
-                          child: Text(
-                            'home.copy'.tr,
-                            style: TextStyle(
-                                fontSize: 14.sp,
-                                fontWeight: FontWeight.w700,
-                                color: scheme.primary),
-                          ),
-                        ),
-                      ],
+            border: Border.all(color: scheme.primary.withValues(alpha: 0.20)),
+          ),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Row(
+                children: [
+                  Container(
+                    width: 38.w,
+                    height: 38.w,
+                    decoration: BoxDecoration(
+                      color: scheme.primary,
+                      shape: BoxShape.circle,
                     ),
-                    SizedBox(height: 8.h),
-                    Text(
-                      link,
+                    child: Icon(Icons.card_giftcard_rounded,
+                        size: 19.w, color: scheme.onPrimary),
+                  ),
+                  SizedBox(width: 12.w),
+                  Expanded(
+                    child: Text(
+                      'home.refer_earn'.tr,
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
-                      style: TextStyle(
-                          fontSize: 14.sp,
-                          fontWeight: FontWeight.w500,
-                          fontFamily: 'monospace',
-                          color: scheme.onSurface.withValues(alpha: 0.7)),
+                      style: AppText.heading(
+                              color: scheme.onSurface, fontSize: 16.sp)
+                          .copyWith(letterSpacing: -0.3),
                     ),
-                  ],
-                ),
+                  ),
+                  SizedBox(width: 8.w),
+                  AppPill.status(
+                    label: '$referrals ${'home.referrals'.tr}',
+                    color: scheme.primary,
+                  ),
+                ],
+              ),
+              SizedBox(height: 10.h),
+              Text(
+                'home.refer_earn_desc'.tr,
+                style: AppText.body(color: muted, fontSize: 12.5.sp, height: 1.4),
+              ),
+              if (link.isNotEmpty) ...[
+                SizedBox(height: 12.h),
+                _LinkField(link: link, onCopy: () => _copy(link)),
+              ],
+              SizedBox(height: 12.h),
+              Row(
+                children: [
+                  Icon(Icons.hourglass_bottom_rounded, size: 15.w, color: muted),
+                  SizedBox(width: 6.w),
+                  Expanded(
+                    child: Text(
+                      'home.pending_earnings'.tr,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: AppText.subtitle(color: muted, fontSize: 13.sp),
+                    ),
+                  ),
+                  SizedBox(width: 8.w),
+                  Text(
+                    pending,
+                    style: AppText.value(color: scheme.onSurface, fontSize: 16.sp)
+                        .copyWith(letterSpacing: -0.4),
+                  ),
+                ],
               ),
             ],
-            SizedBox(height: 16.h),
-            Row(
-              children: [
-                Expanded(
-                  child: Text(
-                    'home.pending_earnings'.tr,
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                    style: TextStyle(
-                        fontSize: 15.sp,
-                        fontWeight: FontWeight.w600,
-                        color: scheme.onSurface.withValues(alpha: 0.7)),
-                  ),
-                ),
-                SizedBox(width: 10.w),
-                Text(
-                  pending,
-                  style: TextStyle(
-                      fontSize: 16.sp,
-                      fontWeight: FontWeight.w800,
-                      letterSpacing: -0.4,
-                      color: scheme.onSurface),
-                ),
-              ],
-            ),
-          ],
+          ),
         ),
       ),
     );
@@ -585,5 +542,80 @@ class HomeReferralPrompt extends GetView<HomeController> {
   DashboardReferral? get _referral {
     final s = controller.state;
     return s is DataSuccess<DashboardData> ? s.data.referral : null;
+  }
+}
+
+/// The share-link field: caption + monospace link with an inline copy button.
+class _LinkField extends StatelessWidget {
+  const _LinkField({required this.link, required this.onCopy});
+  final String link;
+  final VoidCallback onCopy;
+
+  @override
+  Widget build(BuildContext context) {
+    final scheme = Theme.of(context).colorScheme;
+    return Container(
+      padding: EdgeInsets.fromLTRB(12.w, 8.h, 6.w, 8.h),
+      decoration: BoxDecoration(
+        color: scheme.surface,
+        borderRadius: BorderRadius.circular(14.r),
+        border: Border.all(color: scheme.onSurface.withValues(alpha: 0.08)),
+      ),
+      child: Row(
+        children: [
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Text(
+                  'home.your_link'.tr,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: AppText.label(
+                    color: scheme.onSurface.withValues(alpha: 0.55),
+                    fontSize: 11.sp,
+                  ),
+                ),
+                SizedBox(height: 2.h),
+                Text(
+                  link,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: AppText.subtitle(
+                    color: scheme.onSurface.withValues(alpha: 0.8),
+                    fontSize: 12.5.sp,
+                  ).copyWith(fontFamily: 'monospace'),
+                ),
+              ],
+            ),
+          ),
+          SizedBox(width: 8.w),
+          Material(
+            color: scheme.primary,
+            borderRadius: BorderRadius.circular(10.r),
+            child: InkWell(
+              onTap: onCopy,
+              borderRadius: BorderRadius.circular(10.r),
+              child: Padding(
+                padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 8.h),
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Icon(Icons.copy_rounded, size: 14.w, color: scheme.onPrimary),
+                    SizedBox(width: 5.w),
+                    Text(
+                      'home.copy'.tr,
+                      style: AppText.title(
+                          color: scheme.onPrimary, fontSize: 12.sp),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
   }
 }
