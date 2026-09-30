@@ -1132,6 +1132,32 @@ We reserve the right to suspend or terminate accounts that violate these terms o
     'settings.security.turn_off': 'Turn off',
     'settings.security.prefs_saved': 'Security preferences saved.',
     'settings.security.save_failed': 'Could not save. Please try again.',
+    // -------------------------------------------------------------------------
+    // App status (maintenance + force update dialog). Consumed by
+    // lib/core/app_status/*.
+    // -------------------------------------------------------------------------
+    'app_status.maintenance_title': 'Under Maintenance',
+    'app_status.maintenance_message':
+        'We are currently improving the app. Please check back in a few minutes.',
+    'app_status.retry': 'Retry',
+    'app_status.update_available': 'Update Available',
+    'app_status.update_message': 'A new version (@version) is available. Update now for the latest features.',
+    'app_status.update_now': 'Update Now',
+    'app_status.download_install': 'Download & Install',
+    'app_status.downloading_title': 'Downloading',
+    'app_status.downloading': 'Downloading @percent%',
+    'app_status.installing': 'Opening installer…',
+    'app_status.tap_install_prompt': 'Tap "Install" when your device asks.',
+    'app_status.please_wait': 'Please wait…',
+    'app_status.download_failed': 'Download failed. Please try again.',
+    'app_status.install_blocked_title': 'Install blocked',
+    'app_status.install_blocked_body':
+        'Your device needs permission to install apps from this source. Enable "Install unknown apps" for this app in Settings, then tap Try Again.',
+    'app_status.try_install_again': 'Try Again',
+    'app_status.open_installer': 'Open Installer',
+    'app_status.whats_new': "WHAT'S NEW",
+    'app_status.remind_later': 'Remind me later',
+    'app_status.in_progress': 'IN PROGRESS',
   };
 
   static const Map<String, String> _hi = {
@@ -2246,5 +2272,28 @@ We reserve the right to suspend or terminate accounts that violate these terms o
     'referral.history_count': '@count कमीशन',
     'referral.history_end': 'आपने सब देख लिया',
     'referral.rate_of_price': '@price का @rate',
+    // App status (maintenance + force update).
+    'app_status.maintenance_title': 'रखरखाव जारी है',
+    'app_status.maintenance_message':
+        'हम ऐप को बेहतर बना रहे हैं। कृपया कुछ मिनटों में फिर से देखें।',
+    'app_status.retry': 'फिर से कोशिश करें',
+    'app_status.update_available': 'अपडेट उपलब्ध है',
+    'app_status.update_message': 'नया वर्शन (@version) उपलब्ध है। नई सुविधाओं के लिए अभी अपडेट करें।',
+    'app_status.update_now': 'अभी अपडेट करें',
+    'app_status.download_install': 'डाउनलोड और इंस्टॉल करें',
+    'app_status.downloading_title': 'डाउनलोड हो रहा है',
+    'app_status.downloading': 'डाउनलोड हो रहा है @percent%',
+    'app_status.installing': 'इंस्टॉलर खोल रहे हैं…',
+    'app_status.tap_install_prompt': 'जब आपका डिवाइस पूछे तब "इंस्टॉल" पर टैप करें।',
+    'app_status.please_wait': 'कृपया प्रतीक्षा करें…',
+    'app_status.download_failed': 'डाउनलोड विफल। कृपया दोबारा कोशिश करें।',
+    'app_status.install_blocked_title': 'इंस्टॉल ब्लॉक है',
+    'app_status.install_blocked_body':
+        'इस स्रोत से ऐप इंस्टॉल करने की अनुमति चाहिए। सेटिंग्स में इस ऐप के लिए "Install unknown apps" चालू करें, फिर "फिर से कोशिश करें" पर टैप करें।',
+    'app_status.try_install_again': 'फिर से कोशिश करें',
+    'app_status.open_installer': 'इंस्टॉलर खोलें',
+    'app_status.whats_new': 'नया क्या है',
+    'app_status.remind_later': 'बाद में याद दिलाएँ',
+    'app_status.in_progress': 'जारी है',
   };
 }

@@ -2,6 +2,8 @@ import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:get/get.dart';
 import 'package:get_storage/get_storage.dart';
 
+import '../../core/app_status/app_status_controller.dart';
+import '../../core/app_status/app_status_service.dart';
 import '../../core/network/api_client.dart';
 import '../../core/network/api_interceptor.dart';
 import '../../core/websocket/websocket_manager.dart';
@@ -88,6 +90,14 @@ class InitialBinding extends Bindings {
     // or alters the main-thread dashboard load.
     Get.put<PrimaryAccountService>(
       PrimaryAccountService(Get.find<ApiClient>()),
+      permanent: true,
+    );
+
+    // Maintenance mode + force-update. Service polls `/mobile-app-details` and
+    // pushes into the controller; the controller drives the overlay + dialog.
+    Get.put<AppStatusService>(AppStatusService(), permanent: true);
+    Get.put<AppStatusController>(
+      AppStatusController(Get.find<AppStatusService>()),
       permanent: true,
     );
 

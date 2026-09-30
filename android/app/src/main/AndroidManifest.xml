@@ -1,6 +1,17 @@
-<manifest xmlns:android="http://schemas.android.com/apk/res/android">
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools">
     <uses-permission android:name="android.permission.CAMERA"/>
     <uses-permission android:name="android.permission.INTERNET" />
+
+    <!--
+      Required for the in-app APK update flow (open_filex → OS installer).
+      Without this permission Android silently refuses to launch the package
+      installer, so the download completes but the install prompt never
+      appears. If a specific flavor ships to Google Play (which forbids this
+      permission for trading apps), override it in that flavor's manifest
+      with tools:node="remove" and rely on a store-URL update instead.
+    -->
+    <uses-permission android:name="android.permission.REQUEST_INSTALL_PACKAGES" />
 
     <uses-feature android:name="android.hardware.camera" android:required="false"/>
     <application
@@ -46,6 +57,20 @@
         <intent>
             <action android:name="android.intent.action.PROCESS_TEXT"/>
             <data android:mimeType="text/plain"/>
+        </intent>
+        <!--
+          Android 11+ package-visibility: without this, resolving the APK
+          installer intent (open_filex → ACTION_VIEW / VIEW_INSTALL) returns
+          null and the install prompt never appears. The download itself
+          finishes because it uses HTTP, not an intent.
+        -->
+        <intent>
+            <action android:name="android.intent.action.VIEW" />
+            <data android:mimeType="application/vnd.android.package-archive" />
+        </intent>
+        <intent>
+            <action android:name="android.intent.action.INSTALL_PACKAGE" />
+            <data android:mimeType="application/vnd.android.package-archive" />
         </intent>
     </queries>
 </manifest>

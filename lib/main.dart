@@ -10,6 +10,9 @@ import 'app/bindings/initial_binding.dart';
 import 'app/flavor/flavor_config.dart';
 import 'app/routes/app_pages.dart';
 import 'app/routes/app_routes.dart';
+import 'core/app_status/app_status_controller.dart';
+import 'core/app_status/app_status_overlay.dart';
+import 'core/app_status/app_status_service.dart';
 import 'core/localization/app_translations.dart';
 import 'features/chart/services/chart_preload_service.dart';
 import 'features/home/controllers/home_controller.dart';
@@ -67,6 +70,12 @@ Future<void> main() async {
   // the earliest point the engine can actually run a headless webview.
   WidgetsBinding.instance.addPostFrameCallback((_) {
     chartPreload.init();
+    // App-status check (maintenance + force-update). Fire-and-forget: the
+    // overlay + dialog listen to the controller and react whenever the state
+    // changes, so blocking startup is unnecessary.
+    if (Get.isRegistered<AppStatusService>()) {
+      Get.find<AppStatusService>().checkAppStatus();
+    }
   });
 }
 
@@ -138,7 +147,17 @@ class TenaxApp extends StatelessWidget {
                   systemNavigationBarIconBrightness:
                       isDark ? Brightness.light : Brightness.dark,
                 ),
-                child: child ?? const SizedBox.shrink(),
+                // Stack the maintenance overlay above every route so it can
+                // take over the whole viewport when the backend flips the
+                // `is_under_maintenance` flag. The overlay renders nothing
+                // while the flag is false, so there is zero cost otherwise.
+                child: Stack(
+                  children: [
+                    child ?? const SizedBox.shrink(),
+                    if (Get.isRegistered<AppStatusController>())
+                      const AppStatusOverlay(),
+                  ],
+                ),
               ),
             );
           },

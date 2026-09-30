@@ -14,6 +14,12 @@
 ///
 /// Paths are relative to `FlavorConfig.apiBaseUrl`.
 abstract class ApiEndpoints {
+  /// App maintenance mode + force-update payload (`GET`). Standard
+  /// `{success, message, data}` envelope where `data` carries `app_version`,
+  /// `is_under_maintenance`, `is_force_update`, `later_date`, `update_url_ios`,
+  /// `update_url_android`, `release_notes`.
+  static const mobileAppDetails = '/mobile-app-details';
+
   // Auth
   static const register = '/auth/register';
   static const login = '/auth/login';
