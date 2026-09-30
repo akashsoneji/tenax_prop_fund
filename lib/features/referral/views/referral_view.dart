@@ -813,7 +813,14 @@ class _EmptyReferralsCard extends StatelessWidget {
       child: Container(
         padding: EdgeInsets.fromLTRB(18.w, 18.h, 18.w, 18.h),
         decoration: BoxDecoration(
-          gradient: AppTheme.brandGradient(scheme),
+          gradient: LinearGradient(
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+            colors: [
+              scheme.primary,
+              Color.lerp(scheme.primary, Colors.black, 0.22)!,
+            ],
+          ),
           borderRadius: BorderRadius.circular(18.r),
         ),
         child: Row(
@@ -827,7 +834,7 @@ class _EmptyReferralsCard extends StatelessWidget {
                     style: GoogleFonts.beVietnamPro(
                       fontSize: 18.sp,
                       fontWeight: FontWeight.w800,
-                      color: Colors.white,
+                      color: scheme.onPrimary,
                     ),
                   ),
                   SizedBox(height: 6.h),
@@ -836,7 +843,7 @@ class _EmptyReferralsCard extends StatelessWidget {
                     style: GoogleFonts.beVietnamPro(
                       fontSize: 13.5.sp,
                       fontWeight: FontWeight.w500,
-                      color: Colors.white.withValues(alpha: 0.85),
+                      color: scheme.onPrimary.withValues(alpha: 0.85),
                     ),
                   ),
                 ],
@@ -848,12 +855,12 @@ class _EmptyReferralsCard extends StatelessWidget {
               height: 46.w,
               decoration: BoxDecoration(
                 shape: BoxShape.circle,
-                color: Colors.white.withValues(alpha: 0.18),
+                color: scheme.onPrimary.withValues(alpha: 0.18),
               ),
               alignment: Alignment.center,
               child: Icon(
                 Icons.groups_rounded,
-                color: Colors.white,
+                color: scheme.onPrimary,
                 size: 24.w,
               ),
             ),

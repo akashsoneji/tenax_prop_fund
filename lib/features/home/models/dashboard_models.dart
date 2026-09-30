@@ -451,6 +451,7 @@ class DashboardAccount {
     required this.equityMinor,
     required this.balanceMinor,
     required this.baselineMinor,
+    this.login = '',
   });
 
   final int id;
@@ -459,6 +460,9 @@ class DashboardAccount {
   final int balanceMinor;
   final int baselineMinor;
 
+  /// MT5 account number. Empty when the `/dashboard` payload omits it.
+  final String login;
+
   DashboardAccount copyWith({int? equityMinor, int? balanceMinor}) =>
       DashboardAccount(
         id: id,
@@ -466,6 +470,7 @@ class DashboardAccount {
         equityMinor: equityMinor ?? this.equityMinor,
         balanceMinor: balanceMinor ?? this.balanceMinor,
         baselineMinor: baselineMinor,
+        login: login,
       );
 
   factory DashboardAccount.fromJson(Map<String, dynamic> json) {
@@ -482,6 +487,7 @@ class DashboardAccount {
       equityMinor: equity != 0 ? equity : baseline,
       balanceMinor: balance != 0 ? balance : baseline,
       baselineMinor: baseline,
+      login: json['login']?.toString() ?? '',
     );
   }
 }

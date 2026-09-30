@@ -6,11 +6,13 @@ import '../../../shared/theme/app_colors.dart';
 import '../../../shared/theme/app_text.dart';
 import '../../../shared/theme/app_theme.dart';
 import '../../../shared/widgets/app_count_up_text.dart';
+import '../../../shared/widgets/app_pill.dart';
+import '../../accounts/services/primary_account_service.dart';
 import '../models/dashboard_models.dart';
 import 'home_bento.dart';
 
-/// Horizontal rail of live accounts — each card shows the account id,
-/// currency, a live pulse, the animated equity and P/L vs balance.
+/// Horizontal rail of compact live-account cards — account id, live pulse,
+/// animated equity, P/L vs balance and currency.
 class HomeLiveAccountsRail extends StatelessWidget {
   const HomeLiveAccountsRail({super.key, required this.accounts});
   final List<DashboardAccount> accounts;
@@ -18,7 +20,7 @@ class HomeLiveAccountsRail extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return SizedBox(
-      height: 112.h,
+      height: 96.h,
       child: ListView.separated(
         scrollDirection: Axis.horizontal,
         physics: const BouncingScrollPhysics(),
@@ -26,7 +28,7 @@ class HomeLiveAccountsRail extends StatelessWidget {
         itemCount: accounts.length,
         separatorBuilder: (_, _) => SizedBox(width: 10.w),
         itemBuilder: (_, i) => SizedBox(
-          width: 180.w,
+          width: 150.w,
           child: _LiveAccountCard(account: accounts[i]),
         ),
       ),
@@ -48,85 +50,89 @@ class _LiveAccountCard extends StatelessWidget {
     final sign = isProfit ? '+' : '−';
 
     return Container(
-      decoration: AppTheme.surfaceCard(scheme, radius: 18),
-      clipBehavior: Clip.antiAlias,
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
+      padding: EdgeInsets.fromLTRB(12.w, 10.h, 12.w, 10.h),
+      decoration: AppTheme.surfaceCard(scheme, radius: 16),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
-          Container(width: 4.w, color: pnlColor),
-          Expanded(
-            child: Padding(
-              padding: EdgeInsets.fromLTRB(12.w, 11.h, 12.w, 11.h),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Row(
-                    children: [
-                      Flexible(
-                        child: Text(
-                          '${'home.account_hash'.tr}${account.id}',
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
-                          style: AppText.subtitle(color: muted, fontSize: 12.sp),
-                        ),
-                      ),
-                      SizedBox(width: 6.w),
-                      _CurrencyChip(currency: account.currency),
-                      const Spacer(),
-                      const HomePulseDot(active: true),
-                    ],
-                  ),
-                  FittedBox(
-                    fit: BoxFit.scaleDown,
-                    alignment: Alignment.centerLeft,
-                    child: AppCountUpText(
-                      value: account.equityMinor.toDouble(),
-                      formatter: (v) =>
-                          formatMinorMoney(v.round(), account.currency),
-                      style: AppText.value(
-                        color: scheme.onSurface,
-                        fontSize: 18.sp,
-                      ).copyWith(letterSpacing: -0.6),
-                    ),
-                  ),
-                  Row(
-                    children: [
-                      Icon(
-                        isProfit
-                            ? Icons.arrow_upward_rounded
-                            : Icons.arrow_downward_rounded,
-                        size: 13.w,
-                        color: pnlColor,
-                      ),
-                      SizedBox(width: 3.w),
-                      Flexible(
-                        child: Text(
-                          '$sign${formatMinorMoney(pnlMinor.abs(), account.currency)}',
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
-                          style: AppText.title(color: pnlColor, fontSize: 12.sp),
-                        ),
-                      ),
-                      SizedBox(width: 4.w),
-                      Flexible(
-                        child: Text(
-                          'home.vs_balance'.tr,
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
-                          style: AppText.label(color: muted, fontSize: 11.sp),
-                        ),
-                      ),
-                    ],
-                  ),
-                ],
+          Row(
+            children: [
+              Container(
+                width: 26.w,
+                height: 26.w,
+                decoration: BoxDecoration(
+                  color: pnlColor.withValues(alpha: 0.12),
+                  shape: BoxShape.circle,
+                ),
+                child: Icon(Icons.account_balance_wallet_rounded,
+                    size: 13.w, color: pnlColor),
               ),
+              SizedBox(width: 8.w),
+              Expanded(
+                child: Obx(
+                  () => Text(
+                    '#${_accountNumber(account)}',
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: AppText.title(color: muted, fontSize: 12.sp),
+                  ),
+                ),
+              ),
+              const HomePulseDot(active: true),
+            ],
+          ),
+          FittedBox(
+            fit: BoxFit.scaleDown,
+            alignment: Alignment.centerLeft,
+            child: AppCountUpText(
+              value: account.equityMinor.toDouble(),
+              formatter: (v) => formatMinorMoney(v.round(), account.currency),
+              style: AppText.value(color: scheme.onSurface, fontSize: 16.sp)
+                  .copyWith(letterSpacing: -0.5),
             ),
+          ),
+          Row(
+            children: [
+              Flexible(
+                child: AppPill(
+                  label:
+                      '$sign${formatMinorMoney(pnlMinor.abs(), account.currency)}',
+                  color: pnlColor,
+                  fontSize: 10.5,
+                  padding: EdgeInsets.symmetric(horizontal: 7.w, vertical: 2.h),
+                  leading: Icon(
+                    isProfit
+                        ? Icons.arrow_upward_rounded
+                        : Icons.arrow_downward_rounded,
+                    size: 11.w,
+                    color: pnlColor,
+                  ),
+                  leadingGap: 2,
+                ),
+              ),
+              SizedBox(width: 6.w),
+              _CurrencyChip(currency: account.currency),
+            ],
           ),
         ],
       ),
     );
   }
+}
+
+/// The MT5 account number for [account]. `/dashboard` usually omits it, so it
+/// is looked up by id in the MT5 accounts list (same id space); the raw id is
+/// the last resort until that background fetch lands.
+String _accountNumber(DashboardAccount account) {
+  if (account.login.isNotEmpty) return account.login;
+  if (Get.isRegistered<PrimaryAccountService>()) {
+    final match = Get.find<PrimaryAccountService>()
+        .accounts
+        .firstWhereOrNull((a) => a.id == account.id);
+    if (match != null && match.login.isNotEmpty) return match.login;
+  }
+  return '${account.id}';
 }
 
 class _CurrencyChip extends StatelessWidget {
