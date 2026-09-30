@@ -3,9 +3,9 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
 
 import '../../../app/routes/app_routes.dart';
+import '../../../shared/theme/app_text.dart';
 import '../../../shared/theme/app_theme.dart';
 import '../../../shared/widgets/data_state_builder.dart';
-import '../../../shared/widgets/pinned_gradient_app_bar.dart';
 import '../../../shared/widgets/skeletons/skeletons.dart';
 import '../controllers/accounts_controller.dart';
 import '../models/accounts_models.dart';
@@ -30,31 +30,48 @@ class AccountsView extends StatelessWidget {
 
     return Scaffold(
       backgroundColor: scheme.surface,
-      body: RefreshIndicator(
-        color: scheme.primary,
-        onRefresh: c.load,
-        child: CustomScrollView(
-          physics: const AlwaysScrollableScrollPhysics(
-            parent: BouncingScrollPhysics(),
-          ),
-          slivers: [
-            PinnedGradientAppBar(title: 'accounts.app_bar'.tr, showBack: false),
-            SliverToBoxAdapter(
-              child: Padding(
-                padding: EdgeInsets.fromLTRB(16.w, 14.h, 16.w, 28.h),
-                child: Obx(
-                  () => DataStateBuilder<AccountsData>(
-                    state: c.state,
-                    onRetry: c.load,
-                    skeleton: const _AccountsSkeleton(),
-                    emptyActionLabel: 'accounts.start_challenge'.tr,
-                    onEmptyAction: () => Get.toNamed(AppRoutes.challenge),
-                    builder: (data) => _AccountsBody(controller: c, data: data),
+      body: SafeArea(
+        bottom: false,
+        child: RefreshIndicator(
+          color: scheme.primary,
+          onRefresh: c.load,
+          child: CustomScrollView(
+            physics: const AlwaysScrollableScrollPhysics(
+              parent: BouncingScrollPhysics(),
+            ),
+            slivers: [
+              SliverToBoxAdapter(
+                child: Padding(
+                  padding: EdgeInsets.fromLTRB(16.w, 8.h, 16.w, 0),
+                  child: Text(
+                    'accounts.app_bar'.tr,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: AppText.title(
+                      color: scheme.onSurface,
+                      fontSize: 22.sp,
+                    ),
                   ),
                 ),
               ),
-            ),
-          ],
+              SliverToBoxAdapter(
+                child: Padding(
+                  padding: EdgeInsets.fromLTRB(16.w, 14.h, 16.w, 28.h),
+                  child: Obx(
+                    () => DataStateBuilder<AccountsData>(
+                      state: c.state,
+                      onRetry: c.load,
+                      skeleton: const _AccountsSkeleton(),
+                      emptyActionLabel: 'accounts.start_challenge'.tr,
+                      onEmptyAction: () => Get.toNamed(AppRoutes.challenge),
+                      builder: (data) =>
+                          _AccountsBody(controller: c, data: data),
+                    ),
+                  ),
+                ),
+              ),
+            ],
+          ),
         ),
       ),
     );

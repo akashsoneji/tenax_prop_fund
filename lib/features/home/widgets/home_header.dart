@@ -7,6 +7,8 @@ import '../../../app/flavor/flavor_resolver.dart';
 import '../../../app/routes/app_routes.dart';
 import '../../../shared/theme/app_colors.dart';
 import '../../../shared/theme/app_theme.dart';
+import '../../../shared/widgets/app_glass.dart';
+import '../../../shared/widgets/flavor_logo.dart';
 import '../controllers/home_controller.dart';
 
 /// The Home top bar: brand mark, app name + welcome line, and glassy action
@@ -22,23 +24,7 @@ class HomeHeader extends GetView<HomeController> {
       padding: EdgeInsets.fromLTRB(16.w, 6.h, 12.w, 8.h),
       child: Row(
         children: [
-          Container(
-            width: 36.w,
-            height: 36.w,
-            decoration: BoxDecoration(
-              gradient: AppTheme.brandGradient(scheme),
-              borderRadius: BorderRadius.circular(12.r),
-              boxShadow: [
-                BoxShadow(
-                  color: scheme.primary.withValues(alpha: 0.35),
-                  blurRadius: 14.r,
-                  offset: Offset(0, 6.h),
-                ),
-              ],
-            ),
-            child: Icon(Icons.change_history_rounded,
-                color: AppColors.white, size: 20.w),
-          ),
+          _HeaderLogo(scheme: scheme),
           SizedBox(width: 10.w),
           Expanded(
             child: Column(
@@ -112,7 +98,57 @@ class HomeHeader extends GetView<HomeController> {
   }
 }
 
-/// A square glassy header action button with an optional overlaid [badge].
+/// Round flavor logo. Dark mode wraps it in a frosted-glass ring; light mode
+/// shows the bare circle with the brand glow.
+class _HeaderLogo extends StatelessWidget {
+  const _HeaderLogo({required this.scheme});
+  final ColorScheme scheme;
+
+  @override
+  Widget build(BuildContext context) {
+    final logo = ClipOval(
+      child: FlavorLogo(
+        size: 32.w,
+        fallback: Container(
+          width: 32.w,
+          height: 32.w,
+          decoration:
+              BoxDecoration(gradient: AppTheme.brandGradient(scheme)),
+          child: Icon(Icons.change_history_rounded,
+              color: AppColors.white, size: 18.w),
+        ),
+      ),
+    );
+    if (scheme.brightness == Brightness.dark) {
+      return AppGlass(
+        width: 38.w,
+        height: 38.w,
+        shape: BoxShape.circle,
+        padding: EdgeInsets.all(3.w),
+        child: logo,
+      );
+    }
+    return Container(
+      width: 38.w,
+      height: 38.w,
+      alignment: Alignment.center,
+      decoration: BoxDecoration(
+        shape: BoxShape.circle,
+        boxShadow: [
+          BoxShadow(
+            color: scheme.primary.withValues(alpha: 0.35),
+            blurRadius: 14.r,
+            offset: Offset(0, 6.h),
+          ),
+        ],
+      ),
+      child: logo,
+    );
+  }
+}
+
+/// Header action button with an optional [badge]: a frosted-glass circle in
+/// dark mode, the original soft square in light mode.
 class _HeaderButton extends StatelessWidget {
   const _HeaderButton({required this.icon, required this.onTap, this.badge});
 
@@ -124,32 +160,33 @@ class _HeaderButton extends StatelessWidget {
   Widget build(BuildContext context) {
     final scheme = Theme.of(context).colorScheme;
     final dark = scheme.brightness == Brightness.dark;
+    final iconWidget = Icon(icon, color: scheme.onSurface, size: 20.w);
+    final surface = dark
+        ? AppGlass(
+            width: 38.w,
+            height: 38.w,
+            shape: BoxShape.circle,
+            child: iconWidget,
+          )
+        : Container(
+            width: 38.w,
+            height: 38.w,
+            alignment: Alignment.center,
+            decoration: BoxDecoration(
+              color: AppColors.trackSoft,
+              borderRadius: BorderRadius.circular(12.r),
+              border: Border.all(color: AppColors.border),
+            ),
+            child: iconWidget,
+          );
     return GestureDetector(
       onTap: onTap,
       behavior: HitTestBehavior.opaque,
-      child: Container(
-        width: 38.w,
-        height: 38.w,
-        decoration: BoxDecoration(
-          color: dark
-              ? AppColors.white.withValues(alpha: 0.06)
-              : AppColors.trackSoft,
-          borderRadius: BorderRadius.circular(12.r),
-          border: Border.all(
-            color: dark
-                ? AppColors.white.withValues(alpha: 0.06)
-                : AppColors.border,
-          ),
-        ),
-        child: Stack(
-          clipBehavior: Clip.none,
-          alignment: Alignment.center,
-          children: [
-            Icon(icon, color: scheme.onSurface, size: 21.w),
-            ?badge,
-          ],
-        ),
+      child: Stack(
+        clipBehavior: Clip.none,
+        children: [surface, ?badge],
       ),
     );
   }
 }
+

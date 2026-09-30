@@ -1,3 +1,5 @@
+import 'package:intl/intl.dart';
+
 // Domain models for the Account detail screen (mobile take on the web
 // `Client/Accounts/Overview|Platform|Reset` pages). Three Inertia endpoints
 // back four tabs:
@@ -683,10 +685,9 @@ String _groupDecimal(String amount) {
   return '${_group(parts[0])}.${parts.length > 1 ? parts[1] : '00'}';
 }
 
-const _months = [
-  'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
-  'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec',
-];
+List<String> get _months => [
+      for (var m = 1; m <= 12; m++) DateFormat.MMM().format(DateTime(2000, m)),
+    ];
 
 String _date(dynamic iso) {
   if (iso is! String || iso.isEmpty) return '';

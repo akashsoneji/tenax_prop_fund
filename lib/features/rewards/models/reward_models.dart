@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
 
 import '../../../shared/theme/app_colors.dart';
 
@@ -414,11 +415,11 @@ extension AccountStatusLabel on AccountStatus {
   String get label {
     switch (this) {
       case AccountStatus.funded:
-        return 'Funded';
+        return 'rewards.status_funded'.tr;
       case AccountStatus.evaluation:
-        return 'Evaluation';
+        return 'rewards.status_evaluation'.tr;
       case AccountStatus.breached:
-        return 'Breached';
+        return 'rewards.status_breached'.tr;
     }
   }
 }

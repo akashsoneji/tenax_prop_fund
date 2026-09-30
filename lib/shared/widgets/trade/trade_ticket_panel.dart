@@ -5,12 +5,13 @@ import 'package:get/get.dart';
 
 import 'dart:math';
 
-import '../../../features/chart/services/chart_preload_service.dart';
+
 import '../../../features/home/views/pending_order_view.dart';
-import '../../../features/home/widgets/notifications_sheet.dart';
+
 import '../../../features/home/widgets/pending_order_widgets.dart';
 import '../../../features/symbols/services/market_watch_v2_service.dart';
 import '../../theme/app_colors.dart';
+import '../app_glass.dart';
 import '../../theme/app_theme.dart';
 import '../symbol_icon.dart';
 import 'trade_ticket.dart';
@@ -237,10 +238,12 @@ class _TradeTicketPanelState extends State<TradeTicketPanel> {
     }
   }
 
+  /// Pushed WITHOUT [ChartPreloadService.whileHandedOff]: handing off unmounts
+  /// the Charts tab's webview, and remounting it on pop re-runs the loader —
+  /// a visible reload every time the user came back. The tab keeps the warm
+  /// instance; the pending screen's own chart (off by default) loads separately.
   void _openPendingOrder() {
-    Get.find<ChartPreloadService>().whileHandedOff(
-      () => Get.to<void>(() => PendingOrderView(symbol: widget.symbol)),
-    );
+    Get.to<void>(() => PendingOrderView(symbol: widget.symbol));
   }
 
   @override
@@ -275,9 +278,8 @@ class _TradeTicketPanelState extends State<TradeTicketPanel> {
               widget.header ?? _header(scheme),
               SizedBox(height: _v(8)),
               _volumeStepper(scheme),
-              SizedBox(height: _v(6)),
-              _volumePresetChips(scheme),
-              SizedBox(height: _v(8)),
+              // SizedBox(height: _v(6)),
+              // _volumePresetChips(scheme),
               _tpSlSection(scheme),
               SizedBox(height: _v(8)),
               Obx(() {
@@ -359,15 +361,7 @@ class _TradeTicketPanelState extends State<TradeTicketPanel> {
             ),
           ),
         ),
-        InkWell(
-          onTap: _openNotifications,
-          borderRadius: BorderRadius.circular(_rad(20)),
-          child: Padding(
-            padding: EdgeInsets.all(_u(4)),
-            child: Icon(Icons.notifications_none,
-                size: _u(22), color: scheme.onSurfaceVariant),
-          ),
-        ),
+        _tpSlToggle(scheme),
       ],
     );
   }
@@ -554,42 +548,52 @@ class _TradeTicketPanelState extends State<TradeTicketPanel> {
     );
   }
 
+  /// Compact "TP/SL" caption + switch. Lives at the end of the built-in header;
+  /// a custom [TradeTicketPanel.header] (landscape rail) has no slot for
+  /// it, so there it falls back to its own row inside [_tpSlSection].
+  Widget _tpSlToggle(ColorScheme scheme) {
+    return Row(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        Text(
+          'trade.tp_sl'.tr,
+          maxLines: 1,
+          overflow: TextOverflow.ellipsis,
+          style: TextStyle(
+            fontSize: _f(13),
+            fontWeight: FontWeight.w700,
+            color: scheme.onSurface,
+          ),
+        ),
+        Transform.scale(
+          scale: 0.85,
+          child: Switch.adaptive(
+            value: _tpSlEnabled,
+            activeThumbColor: scheme.primary,
+            onChanged: _toggleTpSl,
+            materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
+          ),
+        ),
+      ],
+    );
+  }
+
   Widget _tpSlSection(ColorScheme scheme) {
+    final hasOwnToggleRow = widget.header != null;
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        Row(
-          children: [
-            Expanded(
-              child: Text(
-                'trade.tp_sl'.tr,
-                maxLines: 1,
-                overflow: TextOverflow.ellipsis,
-                style: TextStyle(
-                  fontSize: _f(13),
-                  fontWeight: FontWeight.w700,
-                  color: scheme.onSurface,
-                ),
-              ),
-            ),
-            Transform.scale(
-              scale: 0.85,
-              child: Switch.adaptive(
-                value: _tpSlEnabled,
-                activeThumbColor: scheme.primary,
-                onChanged: _toggleTpSl,
-                materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
-              ),
-            ),
-          ],
-        ),
+        if (hasOwnToggleRow) ...[
+          SizedBox(height: _v(8)),
+          Align(alignment: Alignment.centerRight, child: _tpSlToggle(scheme)),
+        ],
         AnimatedSize(
           duration: const Duration(milliseconds: 220),
           curve: Curves.easeOutCubic,
           alignment: Alignment.topCenter,
           child: _tpSlEnabled
               ? Padding(
-                  padding: EdgeInsets.only(top: _v(6)),
+                  padding: EdgeInsets.only(top: _v(8)),
                   child: Row(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
@@ -714,16 +718,6 @@ class _TradeTicketPanelState extends State<TradeTicketPanel> {
     );
   }
 
-  void _openNotifications() {
-    showModalBottomSheet<void>(
-      context: context,
-      showDragHandle: true,
-      isScrollControlled: true,
-      useSafeArea: true,
-      constraints: BoxConstraints.expand(height: _isRail ? 300 : 360.h),
-      builder: (context) => const NotificationsSheet(),
-    );
-  }
 }
 
 /// Selectable lot-size preset chip shown above the volume field. Highlights in
@@ -847,33 +841,46 @@ class _PendingButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final scheme = Theme.of(context).colorScheme;
+    final isDark = scheme.brightness == Brightness.dark;
+    // The flat primary tint vanishes against the dark chart, so dark mode gets
+    // a frosted surface with light content instead.
+    final contentColor = isDark ? scheme.onSurface : scheme.primary;
+    final radius = BorderRadius.circular(10.r);
+    final content = Column(
+      mainAxisSize: MainAxisSize.min,
+      mainAxisAlignment: MainAxisAlignment.center,
+      children: [
+        Icon(Icons.pending_actions, size: 18.w, color: contentColor),
+        SizedBox(height: 2.h),
+        Text(
+          'trade.pending'.tr,
+          style: TextStyle(
+            fontSize: 9.sp,
+            fontWeight: FontWeight.w600,
+            color: contentColor,
+          ),
+        ),
+      ],
+    );
     return InkWell(
       onTap: onTap,
-      borderRadius: BorderRadius.circular(10.r),
-      child: Container(
-        height: 44.h,
-        padding: EdgeInsets.symmetric(horizontal: 10.w),
-        decoration: BoxDecoration(
-          color: scheme.primary.withValues(alpha: 0.12),
-          borderRadius: BorderRadius.circular(10.r),
-        ),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Icon(Icons.pending_actions, size: 18.w, color: scheme.primary),
-            SizedBox(height: 2.h),
-            Text(
-              'trade.pending'.tr,
-              style: TextStyle(
-                fontSize: 9.sp,
-                fontWeight: FontWeight.w600,
-                color: scheme.primary,
+      borderRadius: radius,
+      child: isDark
+          ? AppGlass(
+              height: 44.h,
+              borderRadius: radius,
+              padding: EdgeInsets.symmetric(horizontal: 10.w),
+              child: Center(child: content),
+            )
+          : Container(
+              height: 44.h,
+              padding: EdgeInsets.symmetric(horizontal: 10.w),
+              decoration: BoxDecoration(
+                color: scheme.primary.withValues(alpha: 0.12),
+                borderRadius: radius,
               ),
+              child: content,
             ),
-          ],
-        ),
-      ),
     );
   }
 }

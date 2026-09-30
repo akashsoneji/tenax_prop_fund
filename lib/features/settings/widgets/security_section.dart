@@ -2,18 +2,17 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
 
-import '../../../shared/theme/app_text.dart';
 import '../../../shared/widgets/data_state_builder.dart';
 import '../../../shared/widgets/skeletons/skeletons.dart';
 import '../controllers/security_controller.dart';
 import '../models/security_models.dart';
-import 'active_sessions_list.dart';
 import 'security_rows.dart';
 import 'security_sheets.dart';
 
 /// The Security block of the Settings screen: server-backed toggles, the
 /// two-factor state, and the credential actions (password, beneficiary,
-/// recovery codes) plus the active session list.
+/// recovery codes). Platform lock and active sessions are web-only and are
+/// intentionally not shown on mobile.
 class SecuritySection extends StatelessWidget {
   const SecuritySection({super.key});
 
@@ -46,13 +45,6 @@ class SecuritySection extends StatelessWidget {
                         'settings.security.withdrawal_confirmation_desc'.tr,
                     value: c.withdrawalConfirmation.value,
                     onChanged: (v) => c.setPref(withdrawalConfirmation: v),
-                  ),
-                  SecuritySwitchRow(
-                    icon: Icons.lock_outline_rounded,
-                    title: 'settings.security.platform_lock'.tr,
-                    description: 'settings.security.platform_lock_desc'.tr,
-                    value: c.platformLock.value,
-                    onChanged: (v) => c.setPref(platformLock: v),
                   ),
                 ],
               ),
@@ -93,21 +85,6 @@ class SecuritySection extends StatelessWidget {
                 ),
               ],
             ),
-            if (data.sessions.isNotEmpty) ...[
-              SizedBox(height: 16.h),
-              Text(
-                'settings.security.sessions'.tr,
-                style: AppText.title(
-                  fontSize: 13.sp,
-                  color: Theme.of(context)
-                      .colorScheme
-                      .onSurface
-                      .withValues(alpha: 0.9),
-                ),
-              ),
-              SizedBox(height: 8.h),
-              ActiveSessionsList(sessions: data.sessions),
-            ],
           ],
         ),
       ),

@@ -4,12 +4,15 @@ import 'package:get/get.dart';
 
 import '../../../app/routes/app_routes.dart';
 import '../../../shared/theme/app_colors.dart';
+import '../../../shared/theme/app_text.dart';
 import '../../../shared/theme/app_theme.dart';
 import '../models/billing_models.dart';
 
-/// Billing history as a stack of cards: icon + title + reference on top,
-/// amount on the right, and a footer with a coloured status pill and a
-/// "View invoice" action that opens the invoice viewer.
+/// Billing history as a stack of cards. Every field is rendered in full (no
+/// ellipsis): a status-coloured accent rail, icon + wrapping title with the
+/// amount and status pill on the right, a tinted detail panel listing invoice
+/// number, date and payment method on their own rows, and a "View invoice"
+/// action when the server returned an id.
 class BillingTransactionList extends StatelessWidget {
   const BillingTransactionList({super.key, required this.transactions});
 
@@ -20,15 +23,13 @@ class BillingTransactionList extends StatelessWidget {
     final scheme = Theme.of(context).colorScheme;
     if (transactions.isEmpty) {
       return Container(
-        padding: EdgeInsets.symmetric(vertical: 32.h),
+        padding: EdgeInsets.symmetric(vertical: 32.h, horizontal: 16.w),
         alignment: Alignment.center,
         decoration: AppTheme.surfaceCard(scheme, radius: 18.r),
         child: Text(
           'billing.no_transactions'.tr,
-          style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                fontSize: 14.sp,
-                color: scheme.onSurfaceVariant,
-              ),
+          textAlign: TextAlign.center,
+          style: AppText.body(fontSize: 14.sp, color: scheme.onSurfaceVariant),
         ),
       );
     }
@@ -36,13 +37,20 @@ class BillingTransactionList extends StatelessWidget {
       children: [
         for (final transaction in transactions)
           Padding(
-            padding: EdgeInsets.only(bottom: 10.h),
+            padding: EdgeInsets.only(bottom: 12.h),
             child: _TransactionCard(transaction: transaction),
           ),
       ],
     );
   }
 }
+
+Color _statusColor(BillingStatus status, ColorScheme scheme) =>
+    switch (status) {
+      BillingStatus.paid => AppColors.success,
+      BillingStatus.awaitingPayment => AppColors.amber,
+      BillingStatus.refunded => scheme.primary,
+    };
 
 class _TransactionCard extends StatelessWidget {
   const _TransactionCard({required this.transaction});
@@ -54,87 +62,47 @@ class _TransactionCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final scheme = Theme.of(context).colorScheme;
-    final text = Theme.of(context).textTheme;
     final tint = transaction.isRefund ? AppColors.success : scheme.primary;
+    final statusColor = _statusColor(transaction.status, scheme);
 
     return Material(
       color: AppColors.transparent,
       child: InkWell(
         onTap: transaction.hasInvoice ? _openInvoice : null,
-        borderRadius: BorderRadius.circular(16.r),
+        borderRadius: BorderRadius.circular(18.r),
         child: Ink(
-          padding: EdgeInsets.fromLTRB(14.w, 14.h, 14.w, 12.h),
-          decoration: AppTheme.surfaceCard(scheme, radius: 16.r),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              Row(
-                crossAxisAlignment: CrossAxisAlignment.start,
+          decoration: AppTheme.surfaceCard(scheme, radius: 18.r),
+          child: ClipRRect(
+            borderRadius: BorderRadius.circular(18.r),
+            child: IntrinsicHeight(
+              child: Row(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
-                  Container(
-                    width: 40.w,
-                    height: 40.w,
-                    alignment: Alignment.center,
-                    decoration: BoxDecoration(
-                      color: tint.withValues(alpha: 0.10),
-                      borderRadius: BorderRadius.circular(11.r),
-                    ),
-                    child: Icon(transaction.icon, size: 20.w, color: tint),
-                  ),
-                  SizedBox(width: 12.w),
+                  Container(width: 4.w, color: statusColor),
                   Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          transaction.title,
-                          maxLines: 2,
-                          overflow: TextOverflow.ellipsis,
-                          style: text.titleSmall?.copyWith(
-                            fontSize: 14.sp,
-                            fontWeight: FontWeight.w700,
-                            height: 1.3,
-                            color: scheme.onSurface,
+                    child: Padding(
+                      padding: EdgeInsets.fromLTRB(14.w, 14.h, 14.w, 12.h),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.stretch,
+                        children: [
+                          _Header(
+                            transaction: transaction,
+                            tint: tint,
+                            statusColor: statusColor,
                           ),
-                        ),
-                        SizedBox(height: 4.h),
-                        Text(
-                          transaction.reference,
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
-                          style: text.bodySmall?.copyWith(
-                            fontSize: 11.5.sp,
-                            color: scheme.onSurfaceVariant,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                  SizedBox(width: 10.w),
-                  Text(
-                    transaction.amount,
-                    maxLines: 1,
-                    style: text.titleSmall?.copyWith(
-                      fontSize: 15.sp,
-                      fontWeight: FontWeight.w800,
-                      color: transaction.isRefund
-                          ? AppColors.success
-                          : scheme.onSurface,
+                          SizedBox(height: 12.h),
+                          _DetailPanel(transaction: transaction),
+                          if (transaction.hasInvoice) ...[
+                            SizedBox(height: 10.h),
+                            _ViewInvoiceLink(color: tint),
+                          ],
+                        ],
+                      ),
                     ),
                   ),
                 ],
               ),
-              SizedBox(height: 12.h),
-              Divider(height: 1.h, color: scheme.outlineVariant),
-              SizedBox(height: 10.h),
-              Row(
-                children: [
-                  _StatusPill(status: transaction.status),
-                  const Spacer(),
-                  if (transaction.hasInvoice) _ViewInvoiceLink(color: tint),
-                ],
-              ),
-            ],
+            ),
           ),
         ),
       ),
@@ -142,23 +110,169 @@ class _TransactionCard extends StatelessWidget {
   }
 }
 
-class _StatusPill extends StatelessWidget {
-  const _StatusPill({required this.status});
-  final BillingStatus status;
+class _Header extends StatelessWidget {
+  const _Header({
+    required this.transaction,
+    required this.tint,
+    required this.statusColor,
+  });
+
+  final BillingTransaction transaction;
+  final Color tint;
+  final Color statusColor;
 
   @override
   Widget build(BuildContext context) {
     final scheme = Theme.of(context).colorScheme;
-    final (color, labelKey) = switch (status) {
-      BillingStatus.paid => (AppColors.success, 'billing.status_paid'),
-      BillingStatus.awaitingPayment => (
-          AppColors.amber,
-          'billing.status_awaiting'
+    return Row(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Container(
+          width: 40.w,
+          height: 40.w,
+          alignment: Alignment.center,
+          decoration: BoxDecoration(
+            color: tint.withValues(alpha: 0.10),
+            borderRadius: BorderRadius.circular(12.r),
+          ),
+          child: Icon(transaction.icon, size: 20.w, color: tint),
         ),
-      BillingStatus.refunded => (scheme.primary, 'billing.status_refunded'),
+        SizedBox(width: 12.w),
+        Expanded(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                transaction.title,
+                softWrap: true,
+                style: AppText.subtitle(
+                  fontSize: 14.sp,
+                  color: scheme.onSurface,
+                ).copyWith(fontWeight: FontWeight.w700, height: 1.35),
+              ),
+              SizedBox(height: 6.h),
+              _StatusPill(status: transaction.status, color: statusColor),
+            ],
+          ),
+        ),
+        SizedBox(width: 10.w),
+        Text(
+          transaction.amount,
+          style: AppText.value(
+            fontSize: 15.sp,
+            color: transaction.isRefund ? AppColors.success : scheme.onSurface,
+          ),
+        ),
+      ],
+    );
+  }
+}
+
+/// Invoice / date / method as label–value rows. Values wrap onto extra lines
+/// instead of being cut, and rows with no data are skipped entirely.
+class _DetailPanel extends StatelessWidget {
+  const _DetailPanel({required this.transaction});
+  final BillingTransaction transaction;
+
+  @override
+  Widget build(BuildContext context) {
+    final scheme = Theme.of(context).colorScheme;
+    final rows = <(IconData, String, String)>[
+      if (transaction.invoiceNumber.isNotEmpty)
+        (
+          Icons.receipt_long_outlined,
+          'billing.field_invoice'.tr,
+          transaction.invoiceNumber,
+        ),
+      if (transaction.date.isNotEmpty)
+        (Icons.event_outlined, 'billing.field_date'.tr, transaction.date),
+      if (transaction.method.isNotEmpty)
+        (
+          Icons.account_balance_wallet_outlined,
+          'billing.field_method'.tr,
+          transaction.method,
+        ),
+    ];
+
+    if (rows.isEmpty) {
+      if (transaction.reference.isEmpty) return const SizedBox.shrink();
+      return Text(
+        transaction.reference,
+        softWrap: true,
+        style: AppText.body(fontSize: 12.sp, color: scheme.onSurfaceVariant),
+      );
+    }
+
+    return Container(
+      padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 10.h),
+      decoration: BoxDecoration(
+        color: scheme.onSurface.withValues(alpha: 0.04),
+        borderRadius: BorderRadius.circular(12.r),
+      ),
+      child: Column(
+        children: [
+          for (var i = 0; i < rows.length; i++) ...[
+            if (i > 0) SizedBox(height: 8.h),
+            _DetailRow(icon: rows[i].$1, label: rows[i].$2, value: rows[i].$3),
+          ],
+        ],
+      ),
+    );
+  }
+}
+
+class _DetailRow extends StatelessWidget {
+  const _DetailRow({
+    required this.icon,
+    required this.label,
+    required this.value,
+  });
+
+  final IconData icon;
+  final String label;
+  final String value;
+
+  @override
+  Widget build(BuildContext context) {
+    final scheme = Theme.of(context).colorScheme;
+    final muted = scheme.onSurfaceVariant;
+    return Row(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Icon(icon, size: 15.w, color: muted),
+        SizedBox(width: 8.w),
+        Text(label, style: AppText.label(fontSize: 12.sp, color: muted)),
+        SizedBox(width: 12.w),
+        Expanded(
+          child: Text(
+            value,
+            softWrap: true,
+            textAlign: TextAlign.end,
+            style: AppText.label(
+              fontSize: 12.sp,
+              color: scheme.onSurface,
+            ).copyWith(fontWeight: FontWeight.w600),
+          ),
+        ),
+      ],
+    );
+  }
+}
+
+class _StatusPill extends StatelessWidget {
+  const _StatusPill({required this.status, required this.color});
+  final BillingStatus status;
+  final Color color;
+
+  @override
+  Widget build(BuildContext context) {
+    final labelKey = switch (status) {
+      BillingStatus.paid => 'billing.status_paid',
+      BillingStatus.awaitingPayment => 'billing.status_awaiting',
+      BillingStatus.refunded => 'billing.status_refunded',
     };
     return Container(
-      padding: EdgeInsets.symmetric(horizontal: 10.w, vertical: 4.h),
+      padding: EdgeInsets.symmetric(horizontal: 8.w, vertical: 3.h),
       decoration: BoxDecoration(
         color: color.withValues(alpha: 0.12),
         borderRadius: BorderRadius.circular(20.r),
@@ -171,14 +285,11 @@ class _StatusPill extends StatelessWidget {
             height: 6.w,
             decoration: BoxDecoration(color: color, shape: BoxShape.circle),
           ),
-          SizedBox(width: 6.w),
+          SizedBox(width: 5.w),
           Text(
             labelKey.tr,
-            style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                  fontSize: 11.sp,
-                  fontWeight: FontWeight.w700,
-                  color: color,
-                ),
+            style: AppText.label(fontSize: 10.5.sp, color: color)
+                .copyWith(fontWeight: FontWeight.w700),
           ),
         ],
       ),
@@ -193,17 +304,16 @@ class _ViewInvoiceLink extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Row(
-      mainAxisSize: MainAxisSize.min,
+      mainAxisAlignment: MainAxisAlignment.end,
       children: [
         Icon(Icons.description_outlined, size: 15.w, color: color),
         SizedBox(width: 4.w),
-        Text(
-          'billing.view_invoice'.tr,
-          style: Theme.of(context).textTheme.labelMedium?.copyWith(
-                fontSize: 12.sp,
-                fontWeight: FontWeight.w700,
-                color: color,
-              ),
+        Flexible(
+          child: Text(
+            'billing.view_invoice'.tr,
+            style: AppText.label(fontSize: 12.sp, color: color)
+                .copyWith(fontWeight: FontWeight.w700),
+          ),
         ),
         Icon(Icons.chevron_right_rounded, size: 18.w, color: color),
       ],

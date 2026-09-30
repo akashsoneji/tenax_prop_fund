@@ -4,6 +4,7 @@ import 'package:get/get.dart';
 
 import '../../../app/routes/app_routes.dart';
 import '../../../shared/theme/app_text.dart';
+import '../../../shared/widgets/app_glass.dart';
 
 class _QuickAction {
   const _QuickAction(this.route, this.labelKey, this.icon);
@@ -15,10 +16,11 @@ class _QuickAction {
 const _quickActions = <_QuickAction>[
   _QuickAction(AppRoutes.challenge, 'home.qa.challenge', Icons.add_rounded),
   _QuickAction(
-      AppRoutes.profileKyc, 'home.qa.kyc', Icons.verified_user_rounded),
-  _QuickAction(AppRoutes.rewards, 'home.qa.reward', Icons.credit_card_rounded),
+      AppRoutes.profileKyc, 'home.qa.kyc', Icons.verified_user_outlined),
   _QuickAction(
-      AppRoutes.tradingRules, 'home.qa.rules', Icons.description_rounded),
+      AppRoutes.rewards, 'home.qa.reward', Icons.card_giftcard_rounded),
+  _QuickAction(
+      AppRoutes.tradingRules, 'home.qa.rules', Icons.menu_book_rounded),
 ];
 
 /// App-style shortcut row: four round tinted icon buttons with a caption
@@ -52,25 +54,33 @@ class _QuickActionButton extends StatelessWidget {
         padding: EdgeInsets.symmetric(vertical: 6.h, horizontal: 4.w),
         child: Column(
           children: [
-            Container(
-              width: 50.w,
-              height: 50.w,
-              decoration: BoxDecoration(
+            if (scheme.brightness == Brightness.dark)
+              AppGlass(
+                width: 50.w,
+                height: 50.w,
                 shape: BoxShape.circle,
-                gradient: LinearGradient(
-                  begin: Alignment.topLeft,
-                  end: Alignment.bottomRight,
-                  colors: [
-                    scheme.primary.withValues(alpha: 0.18),
-                    scheme.primary.withValues(alpha: 0.08),
-                  ],
+                child: Icon(action.icon, color: scheme.primary, size: 22.w),
+              )
+            else
+              Container(
+                width: 50.w,
+                height: 50.w,
+                decoration: BoxDecoration(
+                  shape: BoxShape.circle,
+                  gradient: LinearGradient(
+                    begin: Alignment.topLeft,
+                    end: Alignment.bottomRight,
+                    colors: [
+                      scheme.primary.withValues(alpha: 0.18),
+                      scheme.primary.withValues(alpha: 0.08),
+                    ],
+                  ),
+                  border: Border.all(
+                    color: scheme.primary.withValues(alpha: 0.18),
+                  ),
                 ),
-                border: Border.all(
-                  color: scheme.primary.withValues(alpha: 0.18),
-                ),
+                child: Icon(action.icon, color: scheme.primary, size: 22.w),
               ),
-              child: Icon(action.icon, color: scheme.primary, size: 22.w),
-            ),
             SizedBox(height: 8.h),
             Text(
               action.labelKey.tr,

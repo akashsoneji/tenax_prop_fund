@@ -1,8 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
 
 import '../../../shared/theme/app_colors.dart';
 
-/// The full payload the Billing history screen needs
+/// The full payload
 /// controller holds a single `DataState<BillingData>` instead of several
 /// loosely-related Rx lists.
 class BillingData {
@@ -62,18 +63,8 @@ class BillingStat {
 enum BillingFilter { all, challenge, addOn, refund }
 
 extension BillingFilterX on BillingFilter {
-  String get label {
-    switch (this) {
-      case BillingFilter.all:
-        return 'All';
-      case BillingFilter.challenge:
-        return 'Challenge';
-      case BillingFilter.addOn:
-        return 'Add-on';
-      case BillingFilter.refund:
-        return 'Refund';
-    }
-  }
+  String get label =>
+      this == BillingFilter.all ? 'billing.filter_all'.tr : labelKey.tr;
 
   /// Localization key for the type dropdown label.
   String get labelKey {
@@ -124,6 +115,8 @@ class BillingTransaction {
     required this.amount,
     required this.status,
     required this.category,
+    this.date = '',
+    this.method = '',
   });
 
   /// Transaction id used by `GET /finance/transactions/{id}/invoice`.
@@ -143,6 +136,12 @@ class BillingTransaction {
   final BillingStatus status;
   final BillingFilter category;
 
+  /// Creation date as `YYYY-MM-DD`; empty when the API omits it.
+  final String date;
+
+  /// Payment method label, e.g. "Visa ··4821"; empty when unknown.
+  final String method;
+
   /// Maps one row of the `/finance/transactions` array.
   factory BillingTransaction.fromJson(Map<String, dynamic> json) {
     final status = _statusFrom(json['status'] as String?);
@@ -158,6 +157,8 @@ class BillingTransaction {
           : (json['total_minor'] as num?)?.toString() ?? '—',
       status: status,
       category: _categoryFrom(json['item_type'] as String?, status),
+      date: (json['created_at'] as String?)?.split('T').first.trim() ?? '',
+      method: (json['method'] as String?)?.trim() ?? '',
     );
   }
 
@@ -241,11 +242,11 @@ extension BillingStatusX on BillingStatus {
   String get label {
     switch (this) {
       case BillingStatus.paid:
-        return 'Paid';
+        return 'billing.status_paid'.tr;
       case BillingStatus.awaitingPayment:
-        return 'Awaiting payment';
+        return 'billing.status_awaiting'.tr;
       case BillingStatus.refunded:
-        return 'Refunded';
+        return 'billing.status_refunded'.tr;
     }
   }
 

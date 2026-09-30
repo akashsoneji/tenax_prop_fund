@@ -8,6 +8,7 @@ import '../../../../features/authentication/repositories/auth_repository.dart';
 import '../../../../shared/theme/app_colors.dart';
 import '../../../../shared/theme/app_text.dart';
 import '../../../../shared/theme/app_theme.dart';
+import '../../../../shared/widgets/app_confirm_dialog.dart';
 import '../../../../shared/widgets/pinned_gradient_app_bar.dart';
 import '../../widgets/delete_account_dialog.dart';
 
@@ -279,24 +280,14 @@ class _DangerZone extends StatelessWidget {
   }
 
   Future<void> _confirmAndLogout() async {
-    final confirmed = await Get.dialog<bool>(
-      AlertDialog(
-        title: Text('more.logout'.tr),
-        content: Text('more.logout_confirm'.tr),
-        actions: [
-          TextButton(
-            onPressed: () => Get.back(result: false),
-            child: Text('common.cancel'.tr),
-          ),
-          TextButton(
-            onPressed: () => Get.back(result: true),
-            child: Text('more.logout'.tr,
-                style: const TextStyle(color: AppColors.danger)),
-          ),
-        ],
-      ),
+    final confirmed = await AppConfirmDialog.show(
+      title: 'more.logout'.tr,
+      message: TextSpan(text: 'more.logout_confirm'.tr),
+      confirmLabel: 'more.logout'.tr,
+      destructive: true,
+      icon: Icons.logout_rounded,
     );
-    if (confirmed != true) return;
+    if (!confirmed) return;
     await Get.find<AuthRepository>().logout();
     SessionManager.clear();
     Get.offAllNamed(AppRoutes.login);

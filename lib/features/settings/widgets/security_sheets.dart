@@ -123,6 +123,27 @@ class _BeneficiarySheetState extends State<_BeneficiarySheet> {
   final _c = Get.find<SecurityController>();
 
   @override
+  void initState() {
+    super.initState();
+    _prefill(_c.beneficiary.value);
+    _load();
+  }
+
+  Future<void> _load() async {
+    final data = await _c.loadBeneficiary();
+    if (!mounted) return;
+    _prefill(data);
+  }
+
+  void _prefill(Beneficiary? data) {
+    if (data == null) return;
+    _name.text = data.fullName;
+    _relationship.text = data.relationship;
+    _email.text = data.email;
+    _mobile.text = data.mobile;
+  }
+
+  @override
   void dispose() {
     _name.dispose();
     _relationship.dispose();
@@ -132,6 +153,7 @@ class _BeneficiarySheetState extends State<_BeneficiarySheet> {
   }
 
   Future<void> _submit() async {
+    if (_c.loadingBeneficiary.value) return;
     if (_name.text.isEmpty || _email.text.isEmpty) {
       AppToast.error('settings.security.fill_all_fields'.tr);
       return;
@@ -151,6 +173,17 @@ class _BeneficiarySheetState extends State<_BeneficiarySheet> {
       title: 'settings.security.beneficiary'.tr,
       subtitle: 'settings.security.beneficiary_sheet_desc'.tr,
       children: [
+        Obx(
+          () => _c.loadingBeneficiary.value
+              ? Padding(
+                  padding: EdgeInsets.only(bottom: 12.h),
+                  child: LinearProgressIndicator(
+                    minHeight: 2.h,
+                    borderRadius: BorderRadius.circular(2.r),
+                  ),
+                )
+              : const SizedBox.shrink(),
+        ),
         AppTextField(
           controller: _name,
           label: 'settings.security.full_name'.tr,
@@ -179,7 +212,7 @@ class _BeneficiarySheetState extends State<_BeneficiarySheet> {
           () => AppGradientButton(
             label: 'settings.security.save'.tr,
             loading: _c.savingBeneficiary.value,
-            onPressed: _submit,
+            onPressed: _c.loadingBeneficiary.value ? null : _submit,
           ),
         ),
       ],

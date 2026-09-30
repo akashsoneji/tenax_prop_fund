@@ -382,6 +382,11 @@ class _ChartInAppWebViewState extends State<ChartInAppWebView> {
   /// left the loader up until the 15s timeout ("Chart unavailable").
   Future<void> _revealWhenPainted() async {
     _trace('reveal start (warmAlreadyPainted=$_warmAlreadyPainted)');
+    // A warm attach never replays the boot `onReady`s on THIS widget, so the
+    // quiet-window wait below returned instantly and the re-init triggered by
+    // the attach/viewport resize played out on screen as 2-3 refreshes. Start
+    // the quiet window now so any rebuild after this keeps the loader up.
+    _lastChartInitAt = DateTime.now();
     // The remote chart SPA re-renders a couple of times right after load (shell
     // → library → datafeed redraw). Canvas SIZE stabilises before that content
     // re-render finishes, so a size probe alone reveals too early and the user

@@ -8,6 +8,7 @@ import '../../../app/flavor/flavor_resolver.dart';
 import '../../../features/accounts/views/accounts_view.dart';
 import '../../../shared/theme/app_colors.dart';
 import '../../../shared/theme/app_theme.dart';
+
 import '../controllers/home_controller.dart';
 import 'tabs/home_tab_view.dart';
 import 'tabs/markets_tab_view.dart';
@@ -26,16 +27,16 @@ class HomeShellView extends StatelessWidget {
 
   static const _defaultTabs = <_HomeTab>[
     _HomeTab(Icons.home_rounded, 'home.tabs.home'),
-    _HomeTab(Icons.show_chart_rounded, 'home.tabs.markets'),
     _HomeTab(Icons.swap_horiz_rounded, 'home.tabs.trade'),
+    _HomeTab(Icons.show_chart_rounded, 'home.tabs.markets'),
     _HomeTab(Icons.list_alt_rounded, 'home.tabs.positions'),
     _HomeTab(Icons.more_horiz_rounded, 'home.tabs.more'),
   ];
 
   static const _tenaxTabs = <_HomeTab>[
     _HomeTab(Icons.home_rounded, 'home.tabs.home'),
-    _HomeTab(Icons.show_chart_rounded, 'home.tabs.charts'),
     _HomeTab(Icons.swap_horiz_rounded, 'home.tabs.trade'),
+    _HomeTab(Icons.show_chart_rounded, 'home.tabs.charts'),
     _HomeTab(Icons.list_alt_rounded, 'home.tabs.positions'),
     _HomeTab(Icons.groups_2_rounded, 'home.tabs.accounts'),
   ];
@@ -44,16 +45,16 @@ class HomeShellView extends StatelessWidget {
   /// index does, so this list must not be rebuilt on every tab switch.
   static const List<Widget> _defaultTabViews = [
     HomeTabView(),
-    MarketsTabView(),
     TradeTabView(),
+    MarketsTabView(),
     PositionsView(),
     MoreTabView(),
   ];
 
   static const List<Widget> _tenaxTabViews = [
     HomeTabView(),
-    MarketsTabView(),
     TradeTabView(),
+    MarketsTabView(),
     PositionsView(),
     AccountsView(),
   ];
@@ -84,8 +85,8 @@ class HomeShellView extends StatelessWidget {
             border: Border(
               top: BorderSide(
                 color: scheme.brightness == Brightness.dark
-              ? AppColors.white.withValues(alpha: 0.06)
-        : AppColors.track,
+                    ? AppColors.white.withValues(alpha: 0.06)
+                    : AppColors.track,
               ),
             ),
           ),

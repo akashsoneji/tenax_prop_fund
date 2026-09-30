@@ -84,7 +84,7 @@ class _FavoritesSection extends StatelessWidget {
   void _openInMarkets(String code) {
     Get.find<MarketWatchV2Service>().selectSymbol(code);
     Get.find<ChartPreloadService>().saveSymbol(code);
-    Get.find<HomeController>().selectTab(1);
+    Get.find<HomeController>().selectTab(2);
   }
 
   @override

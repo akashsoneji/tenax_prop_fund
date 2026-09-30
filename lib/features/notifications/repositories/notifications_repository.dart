@@ -1,3 +1,5 @@
+import 'package:get/get_utils/get_utils.dart' show Trans;
+
 import '../../../core/network/api_client.dart';
 import '../../../core/network/api_endpoints.dart';
 import '../../../core/network/api_envelope.dart';
@@ -99,7 +101,7 @@ class NotificationsRepository {
         data: {'preferences': prefs.toPreferencesMap()},
       ),
       (_) {},
-      successMessage: 'Preferences saved',
+      successMessage: 'notifications.prefs_saved'.tr,
     );
   }
 }

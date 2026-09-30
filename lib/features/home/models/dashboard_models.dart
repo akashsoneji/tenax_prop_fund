@@ -3,6 +3,10 @@
 /// risk tiles, recent activity, quick actions, referral summary and the light
 /// live-account list). Kept display-oriented so the Home tab binds directly to
 /// it, with a WebSocket layer patching `live_accounts` equity in real time.
+library;
+
+import 'package:get/get.dart';
+
 class DashboardData {
   const DashboardData({
     required this.welcome,
@@ -80,11 +84,13 @@ class DashboardData {
     // real data so the top of the screen is never blank.
     if (welcome.headline.isEmpty) {
       welcome = DashboardWelcome(
-        headline: 'Welcome back',
+        headline: 'home.welcome_back'.tr,
         subtitle: liveAccounts.isEmpty
             ? ''
-            : '${liveAccounts.length} active account'
-                '${liveAccounts.length == 1 ? '' : 's'}',
+            : (liveAccounts.length == 1
+                    ? 'home.active_account_one'
+                    : 'home.active_accounts')
+                .trParams({'count': '${liveAccounts.length}'}),
       );
     }
     if (focus == null && liveAccounts.isNotEmpty) {

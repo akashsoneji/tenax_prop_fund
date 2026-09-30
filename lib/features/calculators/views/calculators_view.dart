@@ -115,7 +115,7 @@ class _CalculatorForm extends StatelessWidget {
                   SizedBox(height: 14.h),
                 ],
                 AppGradientButton(
-                  label: 'Calculate',
+                  label: 'calculators.calculate'.tr,
                   height: 52.h,
                   onPressed: () => c.setField('_calculated', DateTime.now().toIso8601String()),
                 ),

@@ -1,3 +1,5 @@
+import 'package:intl/intl.dart';
+
 /// The full payload the Support screen needs in one fetch, so the controller
 /// holds a single `DataState<SupportData>` instead of several loosely-related
 /// Rx lists. The contact card is static UI; the fetched [topics] feed the
@@ -66,13 +68,7 @@ class SupportTicket {
     return parts.join(' · ');
   }
 
-  static const _months = [
-    'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
-    'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec',
-  ];
-
-  static String _shortDate(DateTime d) =>
-      '${_months[d.month - 1]} ${d.day}';
+  static String _shortDate(DateTime d) => DateFormat.MMMd().format(d);
 
   static TicketStatus _statusFrom(String raw) {
     switch (raw) {

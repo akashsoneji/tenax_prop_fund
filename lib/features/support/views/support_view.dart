@@ -1,26 +1,24 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
-import 'package:google_fonts/google_fonts.dart';
 
 import '../../../shared/theme/app_colors.dart';
+import '../../../shared/theme/app_text.dart';
 import '../../../shared/theme/app_theme.dart';
+
 import '../../../shared/widgets/data_state_builder.dart';
 import '../../../shared/widgets/pinned_gradient_app_bar.dart';
 import '../../../shared/widgets/skeletons/skeletons.dart';
 import '../controllers/support_controller.dart';
 import '../models/support_models.dart';
 import '../widgets/open_ticket_sheet.dart';
-import '../widgets/support_contact_card.dart';
+import '../widgets/support_empty_state.dart';
 import '../widgets/support_ticket_row.dart';
 import '../widgets/ticket_detail_sheet.dart';
 
-/// Full Support screen. Composed of:
-///
-///  * Purple gradient contact card with a 2x2 grid (WhatsApp / Email / FAQ /
-///    Rules).
-///  * "Your tickets" surface card listing ticket rows.
-///  * An outlined "Open a ticket" button that launches the bottom sheet.
+/// Full Support screen: the user's ticket list, with a "+" app-bar action that
+/// launches the "Open a ticket" bottom sheet. Shows an empty state when the
+/// user has no tickets.
 class SupportView extends StatelessWidget {
   const SupportView({super.key});
 
@@ -31,10 +29,21 @@ class SupportView extends StatelessWidget {
 
     return Scaffold(
       backgroundColor: scheme.surface,
+      resizeToAvoidBottomInset: true,
       body: CustomScrollView(
         physics: const BouncingScrollPhysics(),
         slivers: [
-          PinnedGradientAppBar(title: 'support.title'.tr),
+          PinnedGradientAppBar(
+            title: 'support.title'.tr,
+            actions: [
+              IconButton(
+                onPressed: () => _openSheet(context),
+                tooltip: 'support.open_ticket'.tr,
+                icon: Icon(Icons.add_rounded,
+                    color: AppColors.white, size: 26.w),
+              ),
+            ],
+          ),
           SliverToBoxAdapter(
             child: Padding(
               padding: EdgeInsets.fromLTRB(16.w, 18.h, 16.w, 32.h),
@@ -46,18 +55,14 @@ class SupportView extends StatelessWidget {
                   builder: (data) => Column(
                     crossAxisAlignment: CrossAxisAlignment.stretch,
                     children: [
-                      const _Enter(child: SupportContactCard()),
-                      SizedBox(height: 20.h),
-                      const _SectionTitle('Your tickets'),
+                      _SectionTitle('support.your_tickets'.tr),
                       SizedBox(height: 10.h),
-                      _Enter(delay: 0.15, child: _TicketsCard(data: data)),
-                      SizedBox(height: 18.h),
                       _Enter(
-                        delay: 0.25,
-                        child: OutlinedButton(
-                          onPressed: () => _openSheet(context),
-                          child: Text('support.open_ticket'.tr),
-                        ),
+                        child: data.tickets.isEmpty
+                            ? SupportEmptyState(
+                                onOpenTicket: () => _openSheet(context),
+                              )
+                            : _TicketsCard(tickets: data.tickets),
                       ),
                     ],
                   ),
@@ -81,44 +86,30 @@ class SupportView extends StatelessWidget {
 }
 
 class _TicketsCard extends StatelessWidget {
-  const _TicketsCard({required this.data});
-  final SupportData data;
+  const _TicketsCard({required this.tickets});
+  final List<SupportTicket> tickets;
 
   @override
   Widget build(BuildContext context) {
     final scheme = Theme.of(context).colorScheme;
-    final rows = data.tickets;
     return Container(
       padding: EdgeInsets.symmetric(horizontal: 16.w),
-      decoration: AppTheme.surfaceCard(scheme, radius: 18),
-      child: rows.isEmpty
-          ? Padding(
-              padding: EdgeInsets.symmetric(vertical: 26.h),
-              child: Center(
-                child: Text(
-                  'support.no_tickets'.tr,
-                  style: GoogleFonts.beVietnamPro(
-                    fontSize: 13.5.sp,
-                    color: scheme.onSurfaceVariant,
-                  ),
-                ),
+      decoration: AppTheme.surfaceCard(scheme, radius: 18.r),
+      child: Column(
+        children: [
+          for (var i = 0; i < tickets.length; i++)
+            SupportTicketRow(
+              ticket: tickets[i],
+              showDivider: i != tickets.length - 1,
+              onTap: () => showModalBottomSheet(
+                context: context,
+                isScrollControlled: true,
+                backgroundColor: AppColors.transparent,
+                builder: (_) => TicketDetailSheet(ticket: tickets[i]),
               ),
-            )
-          : Column(
-              children: [
-                for (var i = 0; i < rows.length; i++)
-                  SupportTicketRow(
-                    ticket: rows[i],
-                    showDivider: i != rows.length - 1,
-                    onTap: () => showModalBottomSheet(
-                      context: context,
-                      isScrollControlled: true,
-                      backgroundColor: AppColors.transparent,
-                      builder: (_) => TicketDetailSheet(ticket: rows[i]),
-                    ),
-                  ),
-              ],
             ),
+        ],
+      ),
     );
   }
 }
@@ -132,13 +123,9 @@ class _SupportSkeleton extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        HeroSkeleton(height: 124.h),
-        SizedBox(height: 20.h),
         ShimmerBox(width: 140.w, height: 16.h),
         SizedBox(height: 10.h),
         CardSkeleton(lines: 3, height: 140.h),
-        SizedBox(height: 18.h),
-        ShimmerBox(height: 48.h, radius: 14.r),
       ],
     );
   }
@@ -153,27 +140,22 @@ class _SectionTitle extends StatelessWidget {
     final scheme = Theme.of(context).colorScheme;
     return Text(
       text,
-      style: GoogleFonts.beVietnamPro(
-        fontSize: 16.sp,
-        fontWeight: FontWeight.w800,
-        color: scheme.onSurface,
-      ),
+      style: AppText.title(fontSize: 16.sp, color: scheme.onSurface),
     );
   }
 }
 
 /// Subtle fade + rise entrance, mirrors rewards_view.dart.
 class _Enter extends StatelessWidget {
-  const _Enter({required this.child, this.delay = 0.0});
+  const _Enter({required this.child});
   final Widget child;
-  final double delay;
 
   @override
   Widget build(BuildContext context) {
     return TweenAnimationBuilder<double>(
       tween: Tween(begin: 0, end: 1),
       duration: const Duration(milliseconds: 600),
-      curve: Interval(delay, 1.0, curve: AppMotion.enter),
+      curve: AppMotion.enter,
       builder: (context, t, child) {
         return Opacity(
           opacity: t.clamp(0, 1),

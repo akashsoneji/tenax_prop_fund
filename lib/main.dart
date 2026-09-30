@@ -5,6 +5,8 @@ import 'package:flutter_inappwebview/flutter_inappwebview.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
 import 'package:get_storage/get_storage.dart';
+import 'package:intl/date_symbol_data_local.dart';
+import 'package:intl/intl.dart';
 
 import 'app/bindings/initial_binding.dart';
 import 'app/flavor/flavor_config.dart';
@@ -22,6 +24,11 @@ import 'shared/theme/app_theme.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  // Portrait-only app, regardless of the device auto-rotate setting. The
+  // fullscreen chart route temporarily opts into landscape and restores this.
+  await SystemChrome.setPreferredOrientations(const [
+    DeviceOrientation.portraitUp,
+  ]);
   await GetStorage.init();
 
   // Debug builds only: lets chrome://inspect attach to the chart WebView so
@@ -51,7 +58,13 @@ Future<void> main() async {
   // Settings must exist before the first build (GetMaterialApp reads theme +
   // locale from it). The rest of the app-wide singletons are registered by
   // InitialBinding when the first route loads.
-  Get.put<SettingsController>(SettingsController.load(), permanent: true);
+  final settings =
+      Get.put<SettingsController>(SettingsController.load(), permanent: true);
+
+  // DateFormat without an explicit locale reads Intl.defaultLocale, so month
+  // and weekday names follow the in-app language choice.
+  await initializeDateFormatting();
+  Intl.defaultLocale = settings.locale.languageCode;
 
   // Register the chart preload service synchronously so it is available app-
   // wide, but do NOT start the headless webview yet — HeadlessInAppWebView.run()
