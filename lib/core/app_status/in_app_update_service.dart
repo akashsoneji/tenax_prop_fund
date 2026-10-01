@@ -43,7 +43,9 @@ class InAppUpdateService {
       for (final v in uri.queryParameters.values) {
         if (v.endsWith('.apk')) return true;
       }
-    } catch (_) {}
+    } catch (e) {
+      log.w('update url parse failed, using substring check: $e');
+    }
     return lower.contains('.apk');
   }
 

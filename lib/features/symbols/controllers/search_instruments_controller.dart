@@ -34,13 +34,33 @@ class SearchInstrumentsController extends GetxController {
     return Get.find<PrimaryAccountService>().primaryAccountId.value;
   }
 
+  /// Cached result of the current filter; recomputed when the category or the
+  /// loaded list changes, and 150ms after the user stops typing.
+  final RxList<Instrument> _filtered = <Instrument>[].obs;
+  final List<Worker> _workers = [];
+
   @override
   void onInit() {
     super.onInit();
+    _workers.addAll([
+      debounce(query, (_) => _applyFilter(),
+          time: const Duration(milliseconds: 150)),
+      ever(selectedCategory, (_) => _applyFilter()),
+      ever(_all, (_) => _applyFilter()),
+    ]);
     load();
   }
 
+  @override
+  void onClose() {
+    for (final worker in _workers) {
+      worker.dispose();
+    }
+    super.onClose();
+  }
+
   Future<void> load() async {
+    if (isLoading.value) return;
     isLoading.value = true;
     error.value = '';
     final res = await _repository.getInstruments(accountId: _activeAccountId);
@@ -62,16 +82,18 @@ class SearchInstrumentsController extends GetxController {
   void setCategory(String category) => selectedCategory.value = category;
 
   /// Instruments matching the active category pill AND the search text.
-  List<Instrument> get filtered {
+  List<Instrument> get filtered => _filtered;
+
+  void _applyFilter() {
     final cat = selectedCategory.value;
     final q = query.value.toLowerCase();
-    return _all.where((i) {
+    _filtered.assignAll(_all.where((i) {
       final catOk = cat == InstrumentCategory.all || i.category == cat;
       final qOk = q.isEmpty ||
           i.code.toLowerCase().contains(q) ||
           i.name.toLowerCase().contains(q);
       return catOk && qOk;
-    }).toList();
+    }));
   }
 
   /// Toggles a favorite. On add, passes the full [Instrument] (with API

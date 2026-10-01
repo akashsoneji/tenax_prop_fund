@@ -174,12 +174,21 @@ class PositionsController extends GetxController {
       return;
     }
 
+    final gen = ++_accountsGen;
     final res = await _accountsRepository.getAccounts();
     if (isClosed) return;
+    // A newer fetch superseded this one; only skip when an account is already
+    // selected, so order placement never ends up with an empty account.
+    final isStale = gen != _accountsGen;
+    if (isStale && tradingAccount.value.isNotEmpty) return;
     final data = res.data;
     if (!res.success || data == null || data.accounts.isEmpty) return;
     _selectAccount(data.accounts);
   }
+
+  /// Bumped by every accounts fetch; an older reply never overwrites a newer
+  /// account list.
+  int _accountsGen = 0;
 
   List<AccountRow>? _loadedAccountRows() {
     if (!Get.isRegistered<AccountsController>()) return null;
@@ -214,9 +223,11 @@ class PositionsController extends GetxController {
   Future<void> refreshAccountRows() async {
     if (isRefreshingAccounts.value) return;
     isRefreshingAccounts.value = true;
+    final gen = ++_accountsGen;
     final res = await _accountsRepository.getAccounts();
     if (isClosed) return;
     isRefreshingAccounts.value = false;
+    if (gen != _accountsGen) return;
     final data = res.data;
     if (!res.success || data == null || data.accounts.isEmpty) return;
     accountRows.assignAll(_primaryFirst(data.accounts));
@@ -400,18 +411,21 @@ class PositionsController extends GetxController {
   Future<bool> closePosition(TradePosition position, {double? volume}) async {
     if (busy.value) return false;
     busy.value = true;
-    if (volume == null) {
-      _positionsWs.removePositionOptimistic(position.orderId);
+    try {
+      if (volume == null) {
+        _positionsWs.removePositionOptimistic(position.orderId);
+      }
+      final res = await _repository.closePositionByPositionId(
+        positionId: position.orderId,
+        tradingAccount: position.mt5Account.isNotEmpty
+            ? position.mt5Account
+            : tradingAccount.value,
+        volume: volume,
+      );
+      return res.success;
+    } finally {
+      if (!isClosed) busy.value = false;
     }
-    final res = await _repository.closePositionByPositionId(
-      positionId: position.orderId,
-      tradingAccount: position.mt5Account.isNotEmpty
-          ? position.mt5Account
-          : tradingAccount.value,
-      volume: volume,
-    );
-    if (!isClosed) busy.value = false;
-    return res.success;
   }
 
   /// Closes the selected group of positions from the Close All sheet.
@@ -455,6 +469,24 @@ class PositionsController extends GetxController {
   }) async {
     if (busy.value) return false;
     busy.value = true;
+    try {
+      return await _submitTPSL(
+        position,
+        takeProfit: takeProfit,
+        stopLoss: stopLoss,
+        isPending: isPending,
+      );
+    } finally {
+      if (!isClosed) busy.value = false;
+    }
+  }
+
+  Future<bool> _submitTPSL(
+    TradePosition position, {
+    num? takeProfit,
+    num? stopLoss,
+    bool? isPending,
+  }) async {
     final account = position.mt5Account.isNotEmpty
         ? position.mt5Account
         : tradingAccount.value;
@@ -476,7 +508,6 @@ class PositionsController extends GetxController {
             takeProfit: takeProfit,
             stopLoss: stopLoss,
           );
-    if (!isClosed) busy.value = false;
     return res.success;
   }
 
@@ -495,12 +526,15 @@ class PositionsController extends GetxController {
   Future<void> cancelPending(TradePosition order) async {
     if (busy.value) return;
     busy.value = true;
-    _positionsWs.removePendingOptimistic(order.orderId);
-    await _repository.cancelPendingOrder(
-      orderId: order.orderId,
-      tradingAccount: tradingAccount.value,
-    );
-    if (!isClosed) busy.value = false;
+    try {
+      _positionsWs.removePendingOptimistic(order.orderId);
+      await _repository.cancelPendingOrder(
+        orderId: order.orderId,
+        tradingAccount: tradingAccount.value,
+      );
+    } finally {
+      if (!isClosed) busy.value = false;
+    }
   }
 
   /// Applies a date-range filter and reloads history from page 1.
@@ -550,10 +584,12 @@ class PositionsController extends GetxController {
 
   /// Loads the FIRST page of closed-trade history for the current filter.
   Future<void> loadHistory() async {
+    final gen = ++_historyGen;
     historyLoading.value = true;
+    historyLoadingMore.value = false;
     historyError.value = null;
-    final page = await _fetchHistoryPage(1);
-    if (isClosed) return;
+    final page = await _fetchHistoryPage(1, gen);
+    if (isClosed || gen != _historyGen) return;
     _historyLoaded = true;
     historyLoading.value = false;
     if (page == null) return;
@@ -565,17 +601,24 @@ class PositionsController extends GetxController {
     if (historyLoading.value || historyLoadingMore.value || !historyHasMore.value) {
       return;
     }
+    final gen = _historyGen;
     historyLoadingMore.value = true;
-    final page = await _fetchHistoryPage(historyPage.value + 1);
-    if (isClosed) return;
+    final page = await _fetchHistoryPage(historyPage.value + 1, gen);
+    // A filter change reloaded page 1 meanwhile — this page belongs to the old
+    // filter and must not be appended.
+    if (isClosed || gen != _historyGen) return;
     historyLoadingMore.value = false;
     if (page == null) return;
     history.addAll(page.entries);
   }
 
+  /// Bumped by every [loadHistory]; responses from an older generation are
+  /// dropped so an out-of-order reply never mixes two filters.
+  int _historyGen = 0;
+
   /// Shared fetch: runs the request, stores pagination/summary, and surfaces the
-  /// error message. Returns null on failure.
-  Future<HistoryPage?> _fetchHistoryPage(int page) async {
+  /// error message. Returns null on failure or when [gen] is stale.
+  Future<HistoryPage?> _fetchHistoryPage(int page, int gen) async {
     final (from, to) = _historyDates;
     final res = await _repository.getTradeHistory(
       tradingAccount: tradingAccount.value,
@@ -583,7 +626,7 @@ class PositionsController extends GetxController {
       from: from,
       to: to,
     );
-    if (isClosed) return null;
+    if (isClosed || gen != _historyGen) return null;
     final data = res.data;
     if (!res.success || data == null) {
       historyError.value = res.message ?? 'state.error_title'.tr;

@@ -3,6 +3,7 @@ import 'dart:io';
 import 'package:get/get.dart';
 
 import '../../../core/network/api_client.dart';
+import '../../../core/network/api_response.dart';
 import '../../../core/state/data_state.dart';
 import '../../../shared/widgets/app_toast.dart';
 import '../models/order_models.dart';
@@ -43,6 +44,7 @@ class CompletePaymentController extends GetxController {
   Future<void> fetch() async {
     state.value = const DataState.loading();
     final res = await _repository.getOrder(orderId);
+    if (isClosed) return;
     if (res.success && res.data != null) {
       state.value = DataState.success(res.data!);
     } else {
@@ -73,18 +75,24 @@ class CompletePaymentController extends GetxController {
   bool get canSubmit => proofFile.value != null && !submitting.value;
 
   Future<void> submitProof() async {
+    if (submitting.value) return;
     final file = proofFile.value;
     if (file == null) {
       AppToast.error('payment.attach_proof_required'.tr);
       return;
     }
     submitting.value = true;
-    final res = await _repository.submitProof(
-      id: orderId,
-      proof: file,
-      reference: reference.value,
-    );
-    submitting.value = false;
+    final ApiResponse<OrderDetails> res;
+    try {
+      res = await _repository.submitProof(
+        id: orderId,
+        proof: file,
+        reference: reference.value,
+      );
+    } finally {
+      if (!isClosed) submitting.value = false;
+    }
+    if (isClosed) return;
 
     if (res.success && res.data != null) {
       state.value = DataState.success(res.data!);

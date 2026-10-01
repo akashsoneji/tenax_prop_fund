@@ -3,6 +3,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:get/get.dart';
 import 'package:get_storage/get_storage.dart';
 
+import 'package:tenax_prop_flutter/app/flavor/flavor.dart';
 import 'package:tenax_prop_flutter/app/flavor/flavor_config.dart';
 import 'package:tenax_prop_flutter/features/settings/controllers/settings_controller.dart';
 import 'package:tenax_prop_flutter/main.dart';
@@ -22,14 +23,24 @@ void main() {
   });
 
   testWidgets('App builds with a flavor config', (WidgetTester tester) async {
-    final config = FlavorConfig.fromEnvironment(
-      flavorName: 'client_a',
-      envName: 'development',
-      apiBaseUrl: 'https://api.test',
+    const config = FlavorConfig(
+      flavor: Flavor.clientA,
+      env: AppEnv.development,
+      appName: 'Test App',
+      apiBaseUrl: 'https://api.test/api/v1',
+      webBaseUrl: 'https://api.test',
       wsUrl: 'wss://ws.test',
+      pusherHost: 'ws.test',
+      pusherAppKey: 'test-key',
+      chartBaseUrl: 'https://api.test/mobile-chart',
+      primaryColor: Color(0xFF2962FF),
+      secondaryColor: Color(0xFF00C853),
+      logoAsset: '',
+      splashLogoAsset: '',
+      featureFlags: {},
     );
 
-    await tester.pumpWidget(TenaxApp(config: config));
+    await tester.pumpWidget(const TenaxApp(config: config));
     await tester.pump();
     expect(find.text(config.appName), findsWidgets);
 

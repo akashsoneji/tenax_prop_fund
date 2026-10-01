@@ -23,6 +23,7 @@ class ApiInterceptor extends Interceptor {
 
   final FlutterSecureStorage _storage;
   static const tokenKey = 'auth_token';
+  static const _tokenExtraKey = 'authToken';
 
   /// In-memory copy of the token. `null` means "not yet loaded from storage".
   static String? _cachedToken;
@@ -61,6 +62,7 @@ class ApiInterceptor extends Interceptor {
         token != null &&
         token.isNotEmpty) {
       options.headers['Authorization'] = 'Bearer $token';
+      options.extra[_tokenExtraKey] = token;
     }
 
     if (kDebugMode) {
@@ -107,7 +109,11 @@ class ApiInterceptor extends Interceptor {
     }
     final isExpiredSession = err.response?.statusCode == 401 &&
         !_isAuthPath(err.requestOptions.path);
-    if (isExpiredSession) _notifyUnauthorized();
+    // The request went out with a token that has since been replaced (a new
+    // user logged in) — its 401 must not log the new user out.
+    final sentToken = err.requestOptions.extra[_tokenExtraKey] as String?;
+    final isStaleToken = sentToken != null && sentToken != _cachedToken;
+    if (isExpiredSession && !isStaleToken) _notifyUnauthorized();
 
     handler.next(err);
   }

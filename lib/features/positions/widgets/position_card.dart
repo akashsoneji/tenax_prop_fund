@@ -57,7 +57,7 @@ class PositionCard extends StatelessWidget {
               Container(
                 padding: EdgeInsets.symmetric(horizontal: 6.w, vertical: 2.h),
                 decoration: BoxDecoration(
-                  color: sideColor.withOpacity(0.15),
+                  color: sideColor.withValues(alpha: 0.15),
                   borderRadius: BorderRadius.circular(4.r),
                 ),
                 child: Text(
@@ -167,7 +167,7 @@ class PositionCard extends StatelessWidget {
         alignment: Alignment.centerRight,
         padding: EdgeInsets.only(right: 20.w),
         decoration: BoxDecoration(
-          color: red.withOpacity(0.15),
+          color: red.withValues(alpha: 0.15),
           borderRadius: BorderRadius.circular(12.r),
         ),
         child: Icon(Icons.close_rounded, color: red, size: 22.sp),
@@ -180,7 +180,7 @@ class PositionCard extends StatelessWidget {
     return Container(
       padding: EdgeInsets.symmetric(horizontal: 6.w, vertical: 1.h),
       decoration: BoxDecoration(
-        color: color.withOpacity(0.12),
+        color: color.withValues(alpha: 0.12),
         borderRadius: BorderRadius.circular(4.r),
       ),
       child: Text(

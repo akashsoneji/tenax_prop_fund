@@ -127,9 +127,17 @@ class PusherClient {
     _manuallyClosed = false;
     _setState(PusherState.connecting);
     try {
-      _channel = WebSocketChannel.connect(Uri.parse(_url));
-      await _channel!.ready;
-      _channelSub = _channel!.stream.listen(
+      final channel = WebSocketChannel.connect(Uri.parse(_url));
+      _channel = channel;
+      await channel.ready;
+      // disconnect() ran while the handshake was in flight — drop this socket
+      // instead of attaching a listener to it.
+      if (_manuallyClosed) {
+        await channel.sink.close();
+        if (identical(_channel, channel)) _channel = null;
+        return;
+      }
+      _channelSub = channel.stream.listen(
         _onData,
         onError: (Object e) => _onDisconnected(e),
         onDone: () => _onDisconnected('closed'),
@@ -146,7 +154,11 @@ class PusherClient {
   /// channels). Safe to call before the socket is connected — the channel is
   /// remembered and (re)subscribed once `pusher:connection_established` lands.
   Future<void> subscribe(String channel) async {
-    _channels.add(channel);
+    // Already subscribed on the live socket — a repeat call (e.g. app resume)
+    // would only send a duplicate `pusher:subscribe`. Reconnects resubscribe
+    // every remembered channel in `_onEstablished`.
+    final isNew = _channels.add(channel);
+    if (!isNew && isConnected) return;
     await _sendSubscribe(channel);
   }
 

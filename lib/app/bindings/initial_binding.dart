@@ -108,9 +108,13 @@ class InitialBinding extends Bindings {
   }
 
   Future<void> _handleUnauthorized() async {
-    await Get.find<AuthRepository>().clearSession();
-    SessionManager.clear();
-    if (Get.currentRoute == AppRoutes.getStarted) return;
-    Get.offAllNamed(AppRoutes.getStarted);
+    try {
+      await Get.find<AuthRepository>().clearSession();
+    } finally {
+      SessionManager.clear();
+      if (Get.currentRoute != AppRoutes.getStarted) {
+        Get.offAllNamed(AppRoutes.getStarted);
+      }
+    }
   }
 }

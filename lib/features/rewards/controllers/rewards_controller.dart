@@ -271,20 +271,24 @@ class ExtendedRewardsController extends GetxController {
     final details = <String, dynamic>{};
     if (type == 'bank') {
       if (form.bankName.isNotEmpty) details['bank_name'] = form.bankName;
-      if (form.accountName.isNotEmpty)
+      if (form.accountName.isNotEmpty) {
         details['account_name'] = form.accountName;
-      if (form.accountNumber.isNotEmpty)
+      }
+      if (form.accountNumber.isNotEmpty) {
         details['account_number'] = form.accountNumber;
+      }
       if (form.swiftIfsc.isNotEmpty) details['swift_ifsc'] = form.swiftIfsc;
     } else if (type == 'usdt' || type == 'crypto') {
       if (form.network.isNotEmpty) details['network'] = form.network;
-      if (form.accountAddress.isNotEmpty)
+      if (form.accountAddress.isNotEmpty) {
         details['address'] = form.accountAddress;
+      }
       if (form.memo.isNotEmpty) details['memo'] = form.memo;
     } else if (type == 'upi') {
       if (form.upiId.isNotEmpty) details['upi_id'] = form.upiId;
-      if (form.accountHolder.isNotEmpty)
+      if (form.accountHolder.isNotEmpty) {
         details['account_holder'] = form.accountHolder;
+      }
     }
     if (details.isEmpty && form.details.isNotEmpty) {
       details.addAll(form.details);

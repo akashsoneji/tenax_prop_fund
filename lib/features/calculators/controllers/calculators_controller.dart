@@ -27,12 +27,23 @@ class CalculatorsController extends BaseController<CalculatorsData> {
   @override
   Future<ApiResponse<CalculatorsData>> fetch() => _repository.getCalculators();
 
+  Worker? _stateWorker;
+
   @override
   void onInit() {
-    everAll([stateRx], (_) {
+    _stateWorker = everAll([stateRx], (_) {
       if (state is DataSuccess<CalculatorsData>) _selectTab(0);
     });
     super.onInit();
+  }
+
+  @override
+  void onClose() {
+    _stateWorker?.dispose();
+    for (final value in fieldValues.values) {
+      value.close();
+    }
+    super.onClose();
   }
 
   void selectTab(int index) {
@@ -43,7 +54,11 @@ class CalculatorsController extends BaseController<CalculatorsData> {
 
   void _selectTab(int index) {
     selectedTab.value = index;
+    final previous = fieldValues.values.toList();
     fieldValues.clear();
+    for (final value in previous) {
+      value.close();
+    }
     for (final field in selectedDefinition?.fields ?? const <CalculatorField>[]) {
       fieldValues[field.key] = _rx(field.defaultValue);
     }

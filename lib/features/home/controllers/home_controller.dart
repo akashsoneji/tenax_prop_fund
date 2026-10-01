@@ -182,24 +182,39 @@ class HomeController extends BaseController<DashboardData>
   /// dashboard load on the main thread; a manual switch still wins.
   void _loadPrimaryAccount() {
     if (!Get.isRegistered<PrimaryAccountService>()) return;
+    if (_primaryLoading) return;
+    _primaryLoading = true;
     final svc = Get.find<PrimaryAccountService>();
     unawaited(() async {
-      await svc.refresh();
-      if (isClosed) return;
-      final id = svc.primaryAccountId.value;
-      if (id != null) applyPrimaryAccount(id);
+      try {
+        await svc.refresh();
+        if (isClosed) return;
+        final id = svc.primaryAccountId.value;
+        if (id != null) applyPrimaryAccount(id);
+      } finally {
+        _primaryLoading = false;
+      }
     }());
   }
 
   /// Fetches the referral summary from the live `GET /growth/referrals`
   /// endpoint and splices it into the loaded snapshot for the Home card.
   Future<void> _loadReferral() async {
-    final referral = await _repository.getReferralCard();
-    if (isClosed || referral == null) return;
-    final current = state;
-    if (current is! DataSuccess<DashboardData>) return;
-    stateRx.value = DataSuccess(current.data.copyWith(referral: referral));
+    if (_referralLoading) return;
+    _referralLoading = true;
+    try {
+      final referral = await _repository.getReferralCard();
+      if (isClosed || referral == null) return;
+      final current = state;
+      if (current is! DataSuccess<DashboardData>) return;
+      stateRx.value = DataSuccess(current.data.copyWith(referral: referral));
+    } finally {
+      _referralLoading = false;
+    }
   }
+
+  bool _referralLoading = false;
+  bool _primaryLoading = false;
 
   void _loadUnreadCount() {
     if (!isClosed) unreadCount.value = _repository.getUnreadCount();

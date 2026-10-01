@@ -126,6 +126,10 @@ class PositionsWsService extends GetxService with WidgetsBindingObserver {
   ) async {
     if (ch.connecting || ch.channel != null) return;
     final session = _session;
+    final attempt = ++ch.attempt;
+    // A restart / session change while this attempt awaited makes it stale: it
+    // must not touch the channel state now owned by the newer attempt.
+    bool isStale() => attempt != ch.attempt || session != _session;
     ch.connecting = true;
     ch.manuallyClosed = false;
     try {
@@ -134,12 +138,12 @@ class PositionsWsService extends GetxService with WidgetsBindingObserver {
         log.w('positions/${ch.name}: no auth token, skipping connect');
         return;
       }
-      if (session != _session) return;
+      if (isStale()) return;
       final channel = WebSocketChannel.connect(Uri.parse(url));
       await channel.ready;
-      // The session changed while the handshake was in flight — this socket
-      // would auth with the previous user's token, so drop it.
-      if (session != _session) {
+      // The session changed (or the channel was restarted) while the handshake
+      // was in flight — this socket is stale, so drop it.
+      if (isStale()) {
         await channel.sink.close();
         return;
       }
@@ -158,9 +162,9 @@ class PositionsWsService extends GetxService with WidgetsBindingObserver {
       ch.send({'authID': token, 'trading_account': _account});
       ch.startHeartbeat();
     } catch (e) {
-      _onDisconnected(ch, url, onFrame, e);
+      if (attempt == ch.attempt) _onDisconnected(ch, url, onFrame, e);
     } finally {
-      ch.connecting = false;
+      if (attempt == ch.attempt) ch.connecting = false;
     }
   }
 
@@ -466,6 +470,10 @@ class _Channel {
   bool connecting = false;
   bool manuallyClosed = false;
 
+  /// Bumped on every connect and disconnect; an in-flight connect whose value
+  /// no longer matches is stale and must leave the channel state alone.
+  int attempt = 0;
+
   void send(Map<String, dynamic> payload) {
     channel?.sink.add(jsonEncode(payload));
   }
@@ -484,13 +492,17 @@ class _Channel {
 
   void disconnect() {
     manuallyClosed = true;
+    attempt++;
+    connecting = false;
     reconnectTimer?.cancel();
     stopHeartbeat();
     sub?.cancel();
     sub = null;
     try {
       channel?.sink.close();
-    } catch (_) {}
+    } catch (e) {
+      log.w('positions/$name sink close failed: $e');
+    }
     channel = null;
   }
 }

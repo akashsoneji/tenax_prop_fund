@@ -20,6 +20,10 @@ abstract class ApiEndpoints {
   /// `update_url_android`, `release_notes`.
   static const mobileAppDetails = '/mobile-app-details';
 
+  /// Pusher private-channel auth on the web host (sanctum-guarded, bearer
+  /// token). Relative to `FlavorConfig.webBaseUrl`, not [apiBaseUrl].
+  static const broadcastingAuth = '/api/broadcasting/auth';
+
   // Auth
   static const register = '/auth/register';
   static const login = '/auth/login';

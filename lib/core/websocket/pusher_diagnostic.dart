@@ -8,6 +8,7 @@ import 'package:web_socket_channel/web_socket_channel.dart';
 
 import '../../app/flavor/flavor_config.dart';
 import '../logger/app_logger.dart';
+import '../network/api_endpoints.dart';
 import '../network/api_interceptor.dart';
 
 /// Standalone, throwaway diagnostic that walks the ENTIRE Reverb/Pusher private
@@ -59,7 +60,7 @@ class PusherDiagnostic {
   /// Broadcasting-auth path lives on the WEB host (`webBaseUrl`) under `/api`
   /// (sanctum-guarded). The bare `/broadcasting/auth` route is web-session only
   /// and returns 403 for a bearer token.
-  static const _broadcastingAuthPath = '/api/broadcasting/auth';
+  static const _broadcastingAuthPath = ApiEndpoints.broadcastingAuth;
 
   /// Runs the full handshake for the given [accountId]. If [userId] is also
   /// passed, it additionally subscribes to the per-user "all accounts" channel

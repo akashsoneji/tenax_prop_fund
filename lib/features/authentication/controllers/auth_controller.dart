@@ -2,6 +2,8 @@ import 'package:get/get.dart';
 
 import '../../../app/routes/app_routes.dart';
 import '../../../app/session/session_manager.dart';
+import '../../../core/network/api_response.dart';
+import '../models/login_outcome.dart';
 import '../models/user_model.dart';
 import '../repositories/auth_repository.dart';
 import '../widgets/two_factor_dialog.dart';
@@ -23,11 +25,12 @@ class AuthController extends GetxController {
     super.onInit();
     // Rehydrate the in-memory user from secure storage on a warm start.
     _repository.currentUser().then((restored) {
-      if (restored != null) user.value = restored;
+      if (!isClosed && restored != null) user.value = restored;
     });
   }
 
   Future<void> login({required String email, required String password}) async {
+    if (isLoading.value) return;
     errorMessage.value = null;
 
     if (email.isEmpty || !email.contains('@')) {
@@ -40,8 +43,13 @@ class AuthController extends GetxController {
     }
 
     isLoading.value = true;
-    final result = await _repository.login(email: email, password: password);
-    isLoading.value = false;
+    final ApiResponse<LoginOutcome> result;
+    try {
+      result = await _repository.login(email: email, password: password);
+    } finally {
+      if (!isClosed) isLoading.value = false;
+    }
+    if (isClosed) return;
 
     final outcome = result.data;
     if (!result.success || outcome == null) {
@@ -93,6 +101,7 @@ class AuthController extends GetxController {
     required String phone,
     String countryCode = 'IN',
   }) async {
+    if (isLoading.value) return false;
     errorMessage.value = null;
 
     if (firstName.trim().isEmpty || lastName.trim().isEmpty) {
@@ -118,15 +127,20 @@ class AuthController extends GetxController {
     }
 
     isLoading.value = true;
-    final result = await _repository.register(
-      firstName: firstName.trim(),
-      lastName: lastName.trim(),
-      email: email,
-      password: password,
-      countryCode: countryCode,
-      phone: phone.trim(),
-    );
-    isLoading.value = false;
+    final ApiResponse<UserModel> result;
+    try {
+      result = await _repository.register(
+        firstName: firstName.trim(),
+        lastName: lastName.trim(),
+        email: email,
+        password: password,
+        countryCode: countryCode,
+        phone: phone.trim(),
+      );
+    } finally {
+      if (!isClosed) isLoading.value = false;
+    }
+    if (isClosed) return false;
 
     if (result.success && result.data != null) {
       user.value = result.data;
@@ -152,6 +166,10 @@ class AuthController extends GetxController {
     final result = await _repository.verifyEmail(email: email, code: code);
     if (result.success) {
       if (result.data != null) user.value = result.data;
+      // Sign-up lands on Home without going through _completeLogin, so start
+      // the session here: re-auth the permanent sockets with the new token and
+      // fetch the active account for this user.
+      SessionManager.start();
       return null;
     }
     return result.message ?? 'otp.invalid_code'.tr;
@@ -165,6 +183,7 @@ class AuthController extends GetxController {
   }
 
   Future<bool> requestPasswordReset({required String email}) async {
+    if (isLoading.value) return false;
     errorMessage.value = null;
 
     if (!email.contains('@')) {
@@ -172,8 +191,13 @@ class AuthController extends GetxController {
       return false;
     }
     isLoading.value = true;
-    final result = await _repository.forgotPassword(email: email.trim());
-    isLoading.value = false;
+    final ApiResponse<void> result;
+    try {
+      result = await _repository.forgotPassword(email: email.trim());
+    } finally {
+      if (!isClosed) isLoading.value = false;
+    }
+    if (isClosed) return false;
 
     if (!result.success) {
       errorMessage.value = result.message;

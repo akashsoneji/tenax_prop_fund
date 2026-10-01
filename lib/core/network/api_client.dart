@@ -4,6 +4,7 @@ import 'package:dio/dio.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 
 import '../../app/flavor/flavor_config.dart';
+import 'api_endpoints.dart';
 import 'api_interceptor.dart';
 
 /// Thin Dio wrapper. The only place that owns an HTTP client. Controllers must
@@ -185,7 +186,7 @@ class ApiClient {
   /// or `null` if the server did not authorise the channel.
   Future<String?> broadcastingAuth(String socketId, String channel) async {
     final res = await _web.post<dynamic>(
-      '/api/broadcasting/auth',
+      ApiEndpoints.broadcastingAuth,
       data: {'socket_id': socketId, 'channel_name': channel},
       options: Options(
         contentType: Headers.formUrlEncodedContentType,

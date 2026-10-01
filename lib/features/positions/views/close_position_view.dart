@@ -279,7 +279,7 @@ class _ClosePositionViewState extends State<ClosePositionView> {
                   price.bid.toStringAsFixed(digits), AppColors.danger),
             ),
             Container(
-                width: 1, height: 32.h, color: scheme.outline.withOpacity(0.2)),
+                width: 1, height: 32.h, color: scheme.outline.withValues(alpha: 0.2)),
             Expanded(
               child: _priceCol('positions.ask'.tr,
                   price.ask.toStringAsFixed(digits), scheme.onSurface),
@@ -336,9 +336,9 @@ class _ClosePositionViewState extends State<ClosePositionView> {
               width: double.infinity,
               padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 8.h),
               decoration: BoxDecoration(
-                color: scheme.primary.withOpacity(0.1),
+                color: scheme.primary.withValues(alpha: 0.1),
                 borderRadius: BorderRadius.circular(8.r),
-                border: Border.all(color: scheme.primary.withOpacity(0.3)),
+                border: Border.all(color: scheme.primary.withValues(alpha: 0.3)),
               ),
               child: Text(
                 '${'positions.selected'.tr}: ${_effectiveCloseVolume.toStringAsFixed(2)} '
@@ -460,7 +460,7 @@ class _ClosePositionViewState extends State<ClosePositionView> {
               suffixIcon: _stepBtn(scheme, Icons.add, () => onStep(1)),
               enabledBorder: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(10.r),
-                borderSide: BorderSide(color: scheme.outline.withOpacity(0.25)),
+                borderSide: BorderSide(color: scheme.outline.withValues(alpha: 0.25)),
               ),
               focusedBorder: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(10.r),
@@ -530,7 +530,7 @@ class _ClosePositionViewState extends State<ClosePositionView> {
         width: double.infinity,
         padding: EdgeInsets.all(14.w),
         decoration: BoxDecoration(
-          color: color.withOpacity(0.1),
+          color: color.withValues(alpha: 0.1),
           borderRadius: BorderRadius.circular(12.r),
         ),
         child: Column(

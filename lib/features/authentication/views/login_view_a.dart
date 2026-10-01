@@ -4,7 +4,7 @@ import 'package:get/get.dart';
 
 import '../../../app/flavor/flavor_config.dart';
 import '../widgets/auth_scaffold.dart';
-import '../widgets/brand_badge.dart';
+
 import '../widgets/glass_card.dart';
 import '../widgets/login_form.dart';
 

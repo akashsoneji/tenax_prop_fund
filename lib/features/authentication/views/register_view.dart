@@ -5,6 +5,7 @@ import 'package:get/get.dart';
 import 'package:phone_numbers_parser/phone_numbers_parser.dart';
 
 import '../../../app/routes/app_routes.dart';
+import '../../../core/logger/app_logger.dart';
 import '../controllers/auth_controller.dart';
 import '../widgets/animated_field.dart';
 import '../widgets/auth_scaffold.dart';
@@ -64,7 +65,9 @@ class _RegisterViewState extends State<RegisterView> {
       if (number.isValid(type: PhoneNumberType.mobile) || number.isValid()) {
         return true;
       }
-    } catch (_) {}
+    } catch (e) {
+      log.w('phone parse failed, using length fallback: $e');
+    }
     return digits.length >= 7 && digits.length <= 15;
   }
 
@@ -210,10 +213,12 @@ class _RegisterViewState extends State<RegisterView> {
                     ),
                   ),
                   validator: (val) {
-                    if (val == null || val.trim().isEmpty)
+                    if (val == null || val.trim().isEmpty) {
                       return 'register.phone_required'.tr;
-                    if (!_isPhoneValid())
+                    }
+                    if (!_isPhoneValid()) {
                       return 'create_account_validation_phone'.tr;
+                    }
                     return null;
                   },
                 ),

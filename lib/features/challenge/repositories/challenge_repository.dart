@@ -125,8 +125,7 @@ class ChallengeRepository {
         '/challenges/free-trial',
         data: {
           'plan_version_id': planVersionId,
-          if (platformIntegrationId != null)
-            'platform_integration_id': platformIntegrationId,
+          'platform_integration_id': ?platformIntegrationId,
         },
       ),
       (data) => PurchaseResult.fromJson(

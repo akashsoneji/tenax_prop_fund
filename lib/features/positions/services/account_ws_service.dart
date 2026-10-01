@@ -54,6 +54,10 @@ class AccountWsService extends GetxService with WidgetsBindingObserver {
   /// its channel and aborts when it is stale.
   int _session = 0;
 
+  /// Bumped on every connect/restart; an in-flight connect whose value no
+  /// longer matches is stale and must leave the socket state alone.
+  int _attempt = 0;
+
   @override
   void onInit() {
     super.onInit();
@@ -103,9 +107,12 @@ class AccountWsService extends GetxService with WidgetsBindingObserver {
     _sub = null;
     try {
       _channel?.sink.close();
-    } catch (_) {}
+    } catch (e) {
+      log.w('account ws sink close failed: $e');
+    }
     _channel = null;
     isConnected.value = false;
+    _attempt++;
     _connecting = false;
     _reconnectAttempts = 0;
     _connect();
@@ -117,6 +124,8 @@ class AccountWsService extends GetxService with WidgetsBindingObserver {
   Future<void> _connect() async {
     if (_connecting || _channel != null) return;
     final session = _session;
+    final attempt = ++_attempt;
+    bool isStale() => attempt != _attempt || session != _session;
     _connecting = true;
     _manuallyClosed = false;
     try {
@@ -125,12 +134,12 @@ class AccountWsService extends GetxService with WidgetsBindingObserver {
         log.w('account ws: no auth token, skipping connect');
         return;
       }
-      if (session != _session) return;
+      if (isStale()) return;
       final channel = WebSocketChannel.connect(Uri.parse(_config.accountWsUrl));
       await channel.ready;
-      // The session changed while the handshake was in flight — this socket
-      // would auth with the previous user's token, so drop it.
-      if (session != _session) {
+      // The session changed (or the socket was restarted) while the handshake
+      // was in flight — this socket is stale, so drop it.
+      if (isStale()) {
         await channel.sink.close();
         return;
       }
@@ -148,9 +157,9 @@ class AccountWsService extends GetxService with WidgetsBindingObserver {
       _requestData();
       _startHeartbeat();
     } catch (e) {
-      _onDisconnected(e);
+      if (attempt == _attempt) _onDisconnected(e);
     } finally {
-      _connecting = false;
+      if (attempt == _attempt) _connecting = false;
     }
   }
 
@@ -298,12 +307,15 @@ class AccountWsService extends GetxService with WidgetsBindingObserver {
   void onClose() {
     WidgetsBinding.instance.removeObserver(this);
     _manuallyClosed = true;
+    _attempt++;
     _reconnectTimer?.cancel();
     _stopHeartbeat();
     _sub?.cancel();
     try {
       _channel?.sink.close();
-    } catch (_) {}
+    } catch (e) {
+      log.w('account ws sink close failed: $e');
+    }
     _channel = null;
     super.onClose();
   }

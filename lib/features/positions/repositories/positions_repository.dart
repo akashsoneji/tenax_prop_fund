@@ -71,7 +71,7 @@ class PositionsRepository {
           'price': price,
           'mt5_account': tradingAccount,
           // Stop-limit types rest at a second level once the stop is hit.
-          if (limitPrice != null) 'stop_limit_price': limitPrice,
+          'stop_limit_price': ?limitPrice,
           // The web client sends BOTH spellings for each level; the trade host
           // only honours the short key on some builds, so mirror it exactly.
           if (takeProfit != null) ...{
@@ -101,7 +101,7 @@ class PositionsRepository {
         data: {
           'position_id': int.tryParse(positionId) ?? positionId,
           'mt5_account': tradingAccount,
-          if (volume != null) 'volume': volume,
+          'volume': ?volume,
         },
       ),
       (_) => true,
@@ -157,8 +157,8 @@ class PositionsRepository {
         data: {
           'mt5_account': tradingAccount,
           'position_id': int.tryParse(positionId) ?? positionId,
-          if (takeProfit != null) 'take_profit': takeProfit,
-          if (stopLoss != null) 'stop_loss': stopLoss,
+          'take_profit': ?takeProfit,
+          'stop_loss': ?stopLoss,
         },
       ),
       (_) => true,
@@ -210,8 +210,8 @@ class PositionsRepository {
           'page': page,
           'per_page': perPage,
           if (page > 1) 'append': true,
-          if (from != null) 'from': from,
-          if (to != null) 'to': to,
+          'from': ?from,
+          'to': ?to,
           '_t': DateTime.now().millisecondsSinceEpoch,
         },
       ),

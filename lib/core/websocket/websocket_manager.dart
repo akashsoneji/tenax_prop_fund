@@ -55,8 +55,16 @@ class WebSocketManager extends GetxService {
     _setState(WsConnectionState.connecting);
 
     try {
-      _channel = WebSocketChannel.connect(Uri.parse(_config.wsUrl));
-      await _channel!.ready;
+      final channel = WebSocketChannel.connect(Uri.parse(_config.wsUrl));
+      _channel = channel;
+      await channel.ready;
+      // disconnect() ran while the handshake was in flight — drop this socket
+      // instead of marking it connected.
+      if (_manuallyClosed) {
+        await channel.sink.close();
+        if (identical(_channel, channel)) _channel = null;
+        return;
+      }
       _reconnectAttempts = 0;
       _setState(WsConnectionState.connected);
       _startHeartbeat();

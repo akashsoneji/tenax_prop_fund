@@ -3,6 +3,7 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
 
+import '../../../shared/theme/app_colors.dart';
 import '../../../shared/theme/app_theme.dart';
 import '../../../shared/widgets/app_gradient_button.dart';
 import '../../../shared/widgets/pinned_gradient_app_bar.dart';
@@ -289,7 +290,7 @@ class _FeatureRow extends StatelessWidget {
   Color _toneColor(String? tone, ColorScheme scheme) {
     switch (tone) {
       case 'up':
-        return const Color(0xFF16A34A);
+        return AppColors.success;
       case 'gold':
         return const Color(0xFFCA8A04);
       case 'muted':

@@ -58,6 +58,7 @@ class PrimaryAccountService extends GetxService {
   /// user's accounts. The service itself is permanent, so this is what stands in
   /// for disposal between sessions.
   void resetForNewSession() {
+    _session++;
     accounts.clear();
     primaryAccountId.value = null;
   }
@@ -65,12 +66,16 @@ class PrimaryAccountService extends GetxService {
   /// Background refresh of the accounts list + active id. Silent (no toast) so a
   /// transient failure never interrupts the user; safe to call fire-and-forget.
   Future<void> refresh() async {
+    final session = _session;
     final res = await ApiEnvelope.guard<_Mt5AccountsData>(
       () => _api.get<Map<String, dynamic>>(ApiEndpoints.mt5Accounts),
       _Mt5AccountsData.fromData,
       showErrorToast: false,
     );
     final data = res.data;
+    // A logout/login happened while this was in flight — the response belongs
+    // to the previous user.
+    if (session != _session) return;
     if (!res.success || data == null) return;
     accounts.assignAll(data.accounts);
     primaryAccountId.value = data.primaryAccountId ??
@@ -84,6 +89,8 @@ class PrimaryAccountService extends GetxService {
     final previous = primaryAccountId.value;
     if (previous == accountId) return true;
     primaryAccountId.value = accountId;
+    final request = ++_setPrimaryRequest;
+    final session = _session;
 
     final res = await ApiEnvelope.guard<int?>(
       () => _api.post<Map<String, dynamic>>(
@@ -96,13 +103,21 @@ class PrimaryAccountService extends GetxService {
       showErrorToast: false,
     );
 
+    // A newer pick (or a session reset) superseded this request — its result
+    // must not overwrite the newer value.
+    final isLatest = request == _setPrimaryRequest && session == _session;
     if (!res.success) {
-      primaryAccountId.value = previous;
+      if (isLatest && primaryAccountId.value == accountId) {
+        primaryAccountId.value = previous;
+      }
       return false;
     }
-    if (res.data != null) primaryAccountId.value = res.data;
+    if (isLatest && res.data != null) primaryAccountId.value = res.data;
     return true;
   }
+
+  int _session = 0;
+  int _setPrimaryRequest = 0;
 }
 
 /// Parsed `data` block of `GET /mt5accounts/get`.

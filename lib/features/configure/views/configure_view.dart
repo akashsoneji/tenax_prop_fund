@@ -263,11 +263,6 @@ class _CouponField extends StatelessWidget {
       final applied = c.appliedCoupon.value != null;
       final error = c.couponError.value;
       final loading = c.applyingCoupon.value;
-      final borderColor = applied
-          ? AppColors.success
-          : error != null
-              ? scheme.error
-              : scheme.outline.withValues(alpha: 0.4);
 
       return Column(
         crossAxisAlignment: CrossAxisAlignment.start,
