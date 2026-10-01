@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:google_fonts/google_fonts.dart';
 
+import '../theme/app_spacing.dart';
+
 /// The bordered
 ///
 /// Renders a rounded outline with the [label] notched into the top border
@@ -44,7 +46,7 @@ class LabeledFieldShell extends StatelessWidget {
               color: scheme.onSurface.withValues(alpha: 0.55),
             ),
           ),
-          SizedBox(height: 2.h),
+          Gap.vXxs,
           child,
         ],
       ),
@@ -118,7 +120,7 @@ class AppLabeledField extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.center,
               children: [
                 Expanded(child: field),
-                SizedBox(width: 8.w),
+                Gap.hSm,
                 trailing!,
               ],
             ),

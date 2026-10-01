@@ -3,8 +3,9 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
 import 'package:intl/intl.dart';
 
-import '../../../shared/theme/app_theme.dart';
 import '../models/certificate_model.dart';
+import '../../../shared/theme/app_spacing.dart';
+import '../../../shared/widgets/app_card.dart';
 
 /// Holder / issue date / verification code strip shown above the certificate
 /// sheet, so the key facts are readable without zooming into the document.
@@ -15,12 +16,11 @@ class CertificateMetaRow extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final scheme = Theme.of(context).colorScheme;
     final issued = document.issuedAt;
 
-    return Container(
+    return AppCard(
+      radius: 18.r,
       padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 14.h),
-      decoration: AppTheme.surfaceCard(scheme, radius: 18.r),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -30,7 +30,7 @@ class CertificateMetaRow extends StatelessWidget {
               value: document.holder,
             ),
           ),
-          SizedBox(width: 12.w),
+          Gap.hMd,
           Expanded(
             child: _MetaCell(
               label: 'certificates.issuedOn'.tr,
@@ -39,7 +39,7 @@ class CertificateMetaRow extends StatelessWidget {
                   : DateFormat.yMMMd().format(issued.toLocal()),
             ),
           ),
-          SizedBox(width: 12.w),
+          Gap.hMd,
           Expanded(
             child: _MetaCell(
               label: 'certificates.verificationCode'.tr,
@@ -73,7 +73,7 @@ class _MetaCell extends StatelessWidget {
             color: scheme.onSurface.withValues(alpha: 0.55),
           ),
         ),
-        SizedBox(height: 4.h),
+        Gap.vXs,
         Text(
           value.isEmpty ? '—' : value,
           maxLines: 2,

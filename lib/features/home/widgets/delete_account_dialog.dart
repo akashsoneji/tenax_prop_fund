@@ -7,13 +7,17 @@ import '../../../shared/theme/app_text.dart';
 import '../../../shared/widgets/app_confirm_dialog.dart';
 import '../../../shared/widgets/app_text_field.dart';
 import '../../authentication/repositories/auth_repository.dart';
+import '../../../shared/theme/app_spacing.dart';
 
 /// Password-confirmation dialog for account deletion.
 ///
 /// The delete API is not wired yet, so on submit the session is cleared and the
 /// user is returned to login — the same terminal state the real call produces.
 Future<void> showDeleteAccountDialog() async {
-  await Get.dialog<void>(const _DeleteAccountDialog(), barrierDismissible: false);
+  await Get.dialog<void>(
+    const _DeleteAccountDialog(),
+    barrierDismissible: false,
+  );
 }
 
 class _DeleteAccountDialog extends StatefulWidget {
@@ -96,12 +100,15 @@ class _DeleteAccountDialogState extends State<_DeleteAccountDialog> {
             ),
           ),
           if (_error != null) ...[
-            SizedBox(height: 8.h),
+            Gap.vSm,
             Row(
               children: [
-                Icon(Icons.error_outline_rounded,
-                    size: 14.w, color: scheme.error),
-                SizedBox(width: 6.w),
+                Icon(
+                  Icons.error_outline_rounded,
+                  size: 14.w,
+                  color: scheme.error,
+                ),
+                6.horizontalSpace,
                 Expanded(
                   child: Text(
                     _error!,

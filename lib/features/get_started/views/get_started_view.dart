@@ -3,13 +3,14 @@ import 'dart:math' as math;
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
-import 'package:google_fonts/google_fonts.dart';
 
 import '../../../app/routes/app_routes.dart';
 import '../../../shared/theme/app_colors.dart';
 
 import '../../../shared/widgets/app_gradient_button.dart';
 import '../../../shared/widgets/flavor_logo.dart';
+import '../../../shared/theme/app_spacing.dart';
+import '../../../shared/theme/app_text.dart';
 
 /// Onboarding entry: hero mark + tagline + Get Started / Create Account CTAs.
 /// Single page, no carousel. Adapts to light/dark via [Theme].
@@ -24,9 +25,7 @@ class GetStartedView extends StatelessWidget {
     final ringColor = isDark
         ? scheme.primary.withValues(alpha: 0.55)
         : AppColors.border;
-    final sheetColor = isDark
-        ? const Color(0xFF141416)
-        : Colors.white;
+    final sheetColor = isDark ? const Color(0xFF141416) : Colors.white;
     final onSheet = isDark ? Colors.white : Colors.black87;
     final onSheetMuted = isDark ? Colors.white70 : Colors.black54;
 
@@ -91,10 +90,7 @@ class _LogoMark extends StatelessWidget {
       decoration: BoxDecoration(
         shape: BoxShape.circle,
         gradient: RadialGradient(
-          colors: [
-            scheme.primary,
-            scheme.primary.withValues(alpha: 0.85),
-          ],
+          colors: [scheme.primary, scheme.primary.withValues(alpha: 0.85)],
         ),
         boxShadow: [
           BoxShadow(
@@ -122,13 +118,12 @@ class _LogoMark extends StatelessWidget {
           size: 96.w,
           fallback: Text(
             'tp',
-            style: GoogleFonts.beVietnamPro(
+            style: AppText.base(
               fontSize: 44.sp,
               fontWeight: FontWeight.w800,
               color: scheme.secondary,
               letterSpacing: -1,
-              fontStyle: FontStyle.italic,
-            ),
+            ).copyWith(fontStyle: FontStyle.italic),
           ),
         ),
       ),
@@ -169,7 +164,7 @@ class _BottomSheetCard extends StatelessWidget {
           Text(
             'get_started.headline'.tr,
             textAlign: TextAlign.center,
-            style: GoogleFonts.beVietnamPro(
+            style: AppText.base(
               fontSize: 26.sp,
               fontWeight: FontWeight.w800,
               color: onSheet,
@@ -177,7 +172,7 @@ class _BottomSheetCard extends StatelessWidget {
               letterSpacing: 0.2,
             ),
           ),
-          // SizedBox(height: 14.h),
+          // 14.verticalSpace,
           // Text(
           //   'get_started.subtitle'.tr,
           //   textAlign: TextAlign.center,
@@ -187,7 +182,7 @@ class _BottomSheetCard extends StatelessWidget {
           //     height: 1.5,
           //   ),
           // ),
-          SizedBox(height: 22.h),
+          22.verticalSpace,
           Row(
             children: [
               Expanded(
@@ -207,7 +202,7 @@ class _BottomSheetCard extends StatelessWidget {
                   child: Text('get_started.get_started'.tr),
                 ),
               ),
-              SizedBox(width: 12.w),
+              Gap.hMd,
               Expanded(
                 child: AppGradientButton(
                   label: 'get_started.create_account'.tr,

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 
+import '../../theme/app_spacing.dart';
 import '../app_shimmer.dart';
 
 export '../app_shimmer.dart' show AppShimmer, ShimmerBox;
@@ -36,10 +37,10 @@ class CardSkeleton extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           ShimmerBox(width: 140.w, height: 14.h),
-          SizedBox(height: 14.h),
+          14.verticalSpace,
           for (var i = 0; i < lines; i++) ...[
             ShimmerBox(width: i.isEven ? double.infinity : 200.w, height: 10.h),
-            if (i != lines - 1) SizedBox(height: 10.h),
+            if (i != lines - 1) 10.verticalSpace,
           ],
         ],
       ),
@@ -93,38 +94,38 @@ class AccountCardSkeleton extends StatelessWidget {
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
                               ShimmerBox(width: 90.w, height: 9.h),
-                              SizedBox(height: 7.h),
+                              7.verticalSpace,
                               ShimmerBox(width: 150.w, height: 15.h),
                             ],
                           ),
                         ),
-                        SizedBox(width: 10.w),
+                        10.horizontalSpace,
                         ShimmerBox(width: 70.w, height: 22.h, radius: 8.r),
                       ],
                     ),
-                    SizedBox(height: 14.h),
+                    14.verticalSpace,
                     ShimmerBox(height: 58.h, radius: 14.r),
-                    SizedBox(height: 12.h),
+                    Gap.vMd,
                     Row(
                       children: [
                         Expanded(child: ShimmerBox(height: 42.h, radius: 12.r)),
-                        SizedBox(width: 10.w),
+                        10.horizontalSpace,
                         Expanded(child: ShimmerBox(height: 42.h, radius: 12.r)),
                       ],
                     ),
-                    SizedBox(height: 10.h),
+                    10.verticalSpace,
                     Row(
                       children: [
                         Expanded(child: ShimmerBox(height: 42.h, radius: 12.r)),
-                        SizedBox(width: 10.w),
+                        10.horizontalSpace,
                         Expanded(child: ShimmerBox(height: 42.h, radius: 12.r)),
                       ],
                     ),
-                    SizedBox(height: 14.h),
+                    14.verticalSpace,
                     Row(
                       children: [
                         Expanded(child: ShimmerBox(height: 42.h, radius: 12.r)),
-                        SizedBox(width: 10.w),
+                        10.horizontalSpace,
                         Expanded(child: ShimmerBox(height: 42.h, radius: 12.r)),
                       ],
                     ),
@@ -150,18 +151,18 @@ class ListTileSkeleton extends StatelessWidget {
       child: Row(
         children: [
           ShimmerBox(width: 44.w, height: 44.h, radius: 12.r),
-          SizedBox(width: 12.w),
+          Gap.hMd,
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 ShimmerBox(width: double.infinity, height: 12.h),
-                SizedBox(height: 8.h),
+                Gap.vSm,
                 ShimmerBox(width: 120.w, height: 10.h),
               ],
             ),
           ),
-          SizedBox(width: 12.w),
+          Gap.hMd,
           ShimmerBox(width: 56.w, height: 18.h, radius: 6.r),
         ],
       ),
@@ -222,7 +223,7 @@ class _StatTileSkeleton extends StatelessWidget {
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
           ShimmerBox(width: 70.w, height: 10.h),
-          SizedBox(height: 12.h),
+          Gap.vMd,
           ShimmerBox(width: 100.w, height: 18.h),
         ],
       ),

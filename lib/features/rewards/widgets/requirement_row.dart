@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
-import 'package:google_fonts/google_fonts.dart';
 
 import '../../../shared/widgets/app_pill.dart';
 
 import '../models/reward_models.dart';
+import '../../../shared/theme/app_text.dart';
 
 /// A single line in the "What stands between you and a payout" card. Renders
 /// the label on the left, the value on the right, and a thin divider below
@@ -34,7 +34,7 @@ class RequirementRow extends StatelessWidget {
               Expanded(
                 child: Text(
                   requirement.label.tr,
-                  style: GoogleFonts.beVietnamPro(
+                  style: AppText.base(
                     fontSize: 14.sp,
                     fontWeight: FontWeight.w500,
                     color: scheme.onSurface.withValues(alpha: 0.78),
@@ -63,11 +63,6 @@ class _StatusPill extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return AppPill(
-      label: text,
-      color: color,
-      bgAlpha: 0.10,
-      fontSize: 12.5,
-    );
+    return AppPill(label: text, color: color, bgAlpha: 0.10, fontSize: 12.5);
   }
 }

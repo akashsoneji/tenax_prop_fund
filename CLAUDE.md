@@ -105,13 +105,14 @@ Repositories/Services handle data access. Repositories also decide whether data 
 
 ## 3. White Label Architecture (CRITICAL)
 
-Multiple clients/flavors exist:
+The app ships exactly three flavors:
 ```text
-client_a
-client_b
-client_c
-client_d
+tenax
+pipze_funded
+alibabafx_prop
 ```
+
+All three use the SAME UI (the Tenax design). A flavor-specific screen is built only when the user explicitly asks for it.
 
 All clients use the **same Flutter application codebase**.
 
@@ -119,9 +120,9 @@ Do NOT duplicate the complete application per client.
 
 Do NOT create:
 ```dart
-ClientAController
-ClientBController
-ClientCController
+TenaxController
+PipzeFundedController
+AlibabafxPropController
 ```
 when the business logic is the same.
 
@@ -148,7 +149,7 @@ Do NOT hardcode client-specific colors throughout widgets.
 
 Bad:
 ```dart
-if (flavor == 'client_a') {
+if (flavor == 'pipze_funded') {
   color = Colors.blue;
 }
 ```
@@ -171,8 +172,8 @@ LoginScreen
  └── LoginFooter
 
 LoginHeader
- ├── ClientAHeader
- ├── ClientBHeader
+ ├── PipzeFundedHeader
+ ├── AlibabafxPropHeader
  └── DefaultHeader
 ```
 
@@ -182,8 +183,8 @@ But the controller remains a single `LoginController`. Do not duplicate the cont
 Same business, fundamentally different UI:
 
 ```text
-ClientATradingView
-ClientBTradingView
+PipzeFundedTradingView
+AlibabafxPropTradingView
 CommonTradingView
 ```
 
@@ -196,7 +197,7 @@ TradingScreen
      ↓
 FlavorResolver (centralized, no scattered if-else)
      ↓
-ClientATradingView / ClientBTradingView / CommonTradingView
+PipzeFundedTradingView / AlibabafxPropTradingView / CommonTradingView
      ↓
 Shared TradingController
 ```
@@ -295,9 +296,9 @@ project/
 ├── assets/
 │   ├── common/
 │   └── flavors/
-│       ├── client_a/
-│       ├── client_b/
-│       └── client_c/
+│       ├── tenax/
+│       ├── pipze_funded/
+│       └── alibabafx_prop/
 │
 ├── lib/
 │   │
@@ -550,9 +551,9 @@ FlavorConfig
 
 Per-client classes:
 ```dart
-class ClientAConfig extends FlavorConfig { ... }
-class ClientBConfig extends FlavorConfig { ... }
-class ClientCConfig extends FlavorConfig { ... }
+class TenaxConfig extends FlavorConfig { ... }
+class PipzeFundedConfig extends FlavorConfig { ... }
+class AlibabafxPropConfig extends FlavorConfig { ... }
 ```
 
 These configurations must NOT duplicate business logic. They only hold visual/network configuration.
@@ -636,9 +637,9 @@ Both Android and iOS consume the same Dart/Flutter feature architecture.
 
 Support multiple clients as flavors:
 ```text
-client_a
-client_b
-client_c
+tenax
+pipze_funded
+alibabafx_prop
 ```
 
 Use Android product flavors and iOS schemes/configurations appropriately.
@@ -710,7 +711,7 @@ flutter build appbundle --release --flavor pipze_funded --dart-define-from-file=
 flutter build ios --release --flavor pipze_funded --dart-define-from-file=config/flavors/pipze_funded.json --dart-define=ENV=production
 ```
 
-Replace `pipze_funded` with any flavor: `tenax`, `client_a`, `client_b`, `client_c`, `pipze_funded`, `alibabafx_prop`. The `--flavor` value and the JSON file name must match.
+Replace `pipze_funded` with any flavor: `tenax`, `pipze_funded`, `alibabafx_prop`. The `--flavor` value and the JSON file name must match.
 
 These commands are CI/CD-ready and are documented in `README.md`.
 
@@ -718,12 +719,12 @@ These commands are CI/CD-ready and are documented in `README.md`.
 
 ## 19. Flavor Switching Requirement
 
-When the developer changes the selected configuration in `launch.json` (or the build command) from `client_a` to `client_b`, the application must start with:
-- Client B configuration
-- Client B theme
-- Client B assets
-- Client B UI variations
-- Client B API/WebSocket endpoints
+When the developer changes the selected configuration in `launch.json` (or the build command) from `tenax` to `pipze_funded`, the application must start with:
+- Pipze Funded configuration
+- Pipze Funded theme
+- Pipze Funded assets
+- Pipze Funded UI overrides (only if one was explicitly requested)
+- Pipze Funded API/WebSocket endpoints
 
 **without modifying shared feature/controller code.**
 
@@ -735,9 +736,9 @@ If a code change is required to switch flavors, the architecture is wrong — re
 
 If:
 ```text
-Client A Login
-Client B Login
-Client C Login
+Tenax Login
+Pipze Funded Login
+AlibabaFX Prop Login
 ```
 all use the same login API, authentication logic, validation, session management, models, repository, then there MUST be only:
 
@@ -761,7 +762,7 @@ Trading, Orders, Portfolio, Watchlist, Market, Funds, Profile, Notifications, Da
 
 Only create separate controllers if the **actual business behavior is different**.
 
-Example: Client A has a fundamentally different trading workflow.
+Example: one flavor has a fundamentally different trading workflow.
 
 Even then, first try to share a common domain/service layer before duplicating everything.
 
@@ -802,19 +803,19 @@ production
 ```
 from:
 ```text
-client_a
-client_b
-client_c
+tenax
+pipze_funded
+alibabafx_prop
 ```
 
 Do not mix environment and client configuration unnecessarily.
 
 Valid combinations:
 ```text
-client_a + staging
-client_a + production
-client_b + staging
-client_b + production
+tenax + staging
+tenax + production
+pipze_funded + staging
+pipze_funded + production
 ```
 
 API URL and WebSocket URL must be configurable.
@@ -934,15 +935,15 @@ Use these examples as the template for the remaining features.
 
 ## 29. Expected Demonstration
 
-Create an example where `client_a` and `client_b`:
+When a per-flavor design is requested, `tenax` and `pipze_funded` must:
 - share the same `LoginController`
 - share the same `LoginRepository`
 - share the same `ApiService`
 - share the same `LoginModel`
 
 but:
-- `client_a` → blue theme + Layout A
-- `client_b` → green theme + Layout B
+- `tenax` → Tenax palette + common layout
+- `pipze_funded` → Pipze palette + its override layout (only when requested)
 
 Then show clearly how changing the selected flavor in `launch.json` changes the UI without modifying the controller.
 
@@ -980,7 +981,7 @@ long-term maintainability
                          │
               ┌──────────┴──────────┐
               │                     │
-          Client A              Client B
+           Tenax             Pipze Funded
               │                     │
               ▼                     ▼
         Theme / Assets        Theme / Assets

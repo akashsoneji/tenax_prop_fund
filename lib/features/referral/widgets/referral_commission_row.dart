@@ -1,11 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
-import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/intl.dart';
 
-import '../../../shared/theme/app_colors.dart';
+import '../../../shared/theme/app_status_colors.dart';
+import '../../../shared/widgets/app_status_pill.dart';
 import '../models/referral_models.dart';
+import '../../../shared/theme/app_spacing.dart';
+import '../../../shared/theme/app_text.dart';
 
 /// One referral commission row: initials avatar, referred user + plan and a
 /// status pill on the left; earned amount and "rate of price" on the right.
@@ -24,7 +26,7 @@ class ReferralCommissionRow extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           _InitialsAvatar(name: referral.name),
-          SizedBox(width: 12.w),
+          Gap.hMd,
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -36,18 +38,18 @@ class ReferralCommissionRow extends StatelessWidget {
                         referral.name,
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
-                        style: GoogleFonts.beVietnamPro(
+                        style: AppText.base(
                           fontSize: 14.5.sp,
                           fontWeight: FontWeight.w700,
                           color: scheme.onSurface,
                         ),
                       ),
                     ),
-                    SizedBox(width: 8.w),
+                    Gap.hSm,
                     Text(
                       referral.earned,
                       maxLines: 1,
-                      style: GoogleFonts.beVietnamPro(
+                      style: AppText.base(
                         fontSize: 16.sp,
                         fontWeight: FontWeight.w800,
                         color: scheme.onSurface,
@@ -55,7 +57,7 @@ class ReferralCommissionRow extends StatelessWidget {
                     ),
                   ],
                 ),
-                SizedBox(height: 3.h),
+                3.verticalSpace,
                 Row(
                   children: [
                     Expanded(
@@ -66,7 +68,7 @@ class ReferralCommissionRow extends StatelessWidget {
                         style: _meta(scheme),
                       ),
                     ),
-                    SizedBox(width: 8.w),
+                    Gap.hSm,
                     Text(
                       'referral.rate_of_price'.trParams({
                         'rate': referral.rate,
@@ -77,10 +79,13 @@ class ReferralCommissionRow extends StatelessWidget {
                     ),
                   ],
                 ),
-                SizedBox(height: 8.h),
+                Gap.vSm,
                 Row(
                   children: [
-                    _StatusPill(status: referral.status),
+                    AppStatusPill(
+                      label: AppStatusColors.label(referral.status),
+                      color: AppStatusColors.of(referral.status, scheme),
+                    ),
                     const Spacer(),
                     if (date != null) ...[
                       Icon(
@@ -88,7 +93,7 @@ class ReferralCommissionRow extends StatelessWidget {
                         size: 13.w,
                         color: scheme.onSurfaceVariant,
                       ),
-                      SizedBox(width: 4.w),
+                      Gap.hXs,
                       Text(
                         DateFormat('d MMM yyyy').format(date.toLocal()),
                         style: _meta(scheme).copyWith(fontSize: 11.sp),
@@ -104,7 +109,7 @@ class ReferralCommissionRow extends StatelessWidget {
     );
   }
 
-  TextStyle _meta(ColorScheme scheme) => GoogleFonts.beVietnamPro(
+  TextStyle _meta(ColorScheme scheme) => AppText.base(
     fontSize: 12.sp,
     fontWeight: FontWeight.w500,
     color: scheme.onSurfaceVariant,
@@ -140,55 +145,11 @@ class _InitialsAvatar extends StatelessWidget {
       ),
       child: Text(
         _initials,
-        style: GoogleFonts.beVietnamPro(
+        style: AppText.base(
           fontSize: 13.sp,
           fontWeight: FontWeight.w800,
           color: scheme.primary,
         ),
-      ),
-    );
-  }
-}
-
-/// Capitalised status with a leading dot, coloured by outcome.
-class _StatusPill extends StatelessWidget {
-  const _StatusPill({required this.status});
-  final String status;
-
-  @override
-  Widget build(BuildContext context) {
-    final scheme = Theme.of(context).colorScheme;
-    final key = status.toLowerCase();
-    final Color color = switch (key) {
-      'approved' || 'paid' || 'completed' => AppColors.success,
-      'rejected' || 'cancelled' || 'canceled' || 'failed' => scheme.error,
-      _ => AppColors.warningInk,
-    };
-    final label = key.isEmpty ? '-' : key[0].toUpperCase() + key.substring(1);
-    return Container(
-      padding: EdgeInsets.symmetric(horizontal: 8.w, vertical: 3.h),
-      decoration: BoxDecoration(
-        color: color.withValues(alpha: 0.12),
-        borderRadius: BorderRadius.circular(20.r),
-      ),
-      child: Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Container(
-            width: 6.w,
-            height: 6.w,
-            decoration: BoxDecoration(color: color, shape: BoxShape.circle),
-          ),
-          SizedBox(width: 5.w),
-          Text(
-            label,
-            style: GoogleFonts.beVietnamPro(
-              fontSize: 10.5.sp,
-              fontWeight: FontWeight.w700,
-              color: color,
-            ),
-          ),
-        ],
       ),
     );
   }

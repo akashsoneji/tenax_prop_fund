@@ -7,12 +7,18 @@ import '../../../shared/widgets/app_toast.dart';
 import '../controllers/payout_methods_controller.dart';
 import '../models/payout_method.dart';
 import 'add_payout_method_sheet.dart';
+import '../../../shared/theme/app_spacing.dart';
+import '../../../shared/theme/app_text.dart';
 
 /// One saved payout method with edit + delete actions. [onChanged] fires
 /// after a successful edit or delete so the host screen can refresh
 /// dependent data.
 class PayoutMethodManageRow extends StatelessWidget {
-  const PayoutMethodManageRow({super.key, required this.method, this.onChanged});
+  const PayoutMethodManageRow({
+    super.key,
+    required this.method,
+    this.onChanged,
+  });
 
   final PayoutMethod method;
   final VoidCallback? onChanged;
@@ -44,7 +50,7 @@ class PayoutMethodManageRow extends StatelessWidget {
               color: scheme.primary,
             ),
           ),
-          SizedBox(width: 12.w),
+          Gap.hMd,
           Expanded(
             child: Text(
               method.name,
@@ -96,7 +102,7 @@ class PayoutMethodManageRow extends StatelessWidget {
           TextSpan(text: '${'payout_methods.remove'.tr} '),
           TextSpan(
             text: method.name,
-            style: TextStyle(
+            style: AppText.base(
               fontWeight: FontWeight.w700,
               color: scheme.onSurface,
             ),
@@ -107,8 +113,9 @@ class PayoutMethodManageRow extends StatelessWidget {
     );
     if (!confirmed) return;
 
-    final result =
-        await Get.find<PayoutMethodsController>().deleteMethod(method.id);
+    final result = await Get.find<PayoutMethodsController>().deleteMethod(
+      method.id,
+    );
     if (result.success) {
       onChanged?.call();
       AppToast.success('rewards.method_deleted'.tr);

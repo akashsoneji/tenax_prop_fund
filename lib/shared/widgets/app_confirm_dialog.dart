@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
 
+import '../theme/app_spacing.dart';
 import '../theme/app_text.dart';
 import 'app_gradient_button.dart';
 
@@ -138,7 +139,7 @@ class AppDialogFrame extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
             Center(child: _IconBadge(icon: icon, tone: tone)),
-            SizedBox(height: 16.h),
+            Gap.vLg,
             Text(
               title,
               textAlign: TextAlign.center,
@@ -147,14 +148,14 @@ class AppDialogFrame extends StatelessWidget {
               style: AppText.title(fontSize: 18.sp, color: scheme.onSurface),
             ),
             if (message != null) ...[
-              SizedBox(height: 8.h),
+              Gap.vSm,
               message!,
             ],
             if (child != null) ...[
-              SizedBox(height: 18.h),
+              18.verticalSpace,
               child!,
             ],
-            SizedBox(height: 22.h),
+            22.verticalSpace,
             actions,
           ],
         ),
@@ -274,7 +275,7 @@ class AppDialogActions extends StatelessWidget {
     return Row(
       children: [
         Expanded(child: cancel),
-        SizedBox(width: 10.w),
+        10.horizontalSpace,
         Expanded(child: confirm),
       ],
     );

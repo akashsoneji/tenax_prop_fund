@@ -2,10 +2,12 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
 
-import '../../../shared/theme/app_theme.dart';
 import '../../../shared/widgets/app_gradient_button.dart';
 import '../controllers/account_controller.dart';
 import '../models/account_models.dart';
+import '../../../shared/theme/app_spacing.dart';
+import '../../../shared/theme/app_text.dart';
+import '../../../shared/widgets/app_card.dart';
 
 /// Confirm-reset popup: restates the reset price for the login and lets the
 /// user pick the payment method before the purchase is submitted. Mirrors the
@@ -46,39 +48,42 @@ class ResetConfirmDialog extends StatelessWidget {
             mainAxisSize: MainAxisSize.min,
             children: [
               _Header(login: data.login),
-              SizedBox(height: 14.h),
+              14.verticalSpace,
               _PriceBanner(data: data),
-              SizedBox(height: 14.h),
+              14.verticalSpace,
               Text(
                 'account.reset_confirm_blurb'.tr,
-                style: TextStyle(
+                style: AppText.base(
                   fontSize: 12.5.sp,
                   height: 1.45,
                   color: scheme.onSurfaceVariant,
                 ),
               ),
-              SizedBox(height: 16.h),
+              Gap.vLg,
               Text(
                 'account.reset_pay_with'.tr,
-                style: TextStyle(
+                style: AppText.base(
                   fontSize: 13.sp,
                   fontWeight: FontWeight.w700,
                   color: scheme.onSurface,
                 ),
               ),
-              SizedBox(height: 8.h),
+              Gap.vSm,
               _MethodField(controller: controller, data: data),
-              SizedBox(height: 12.h),
+              Gap.vMd,
               Row(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Icon(Icons.info_outline_rounded,
-                      size: 15.w, color: scheme.onSurfaceVariant),
-                  SizedBox(width: 8.w),
+                  Icon(
+                    Icons.info_outline_rounded,
+                    size: 15.w,
+                    color: scheme.onSurfaceVariant,
+                  ),
+                  Gap.hSm,
                   Expanded(
                     child: Text(
                       'account.reset_confirm_note'.tr,
-                      style: TextStyle(
+                      style: AppText.base(
                         fontSize: 11.5.sp,
                         height: 1.45,
                         color: scheme.onSurfaceVariant,
@@ -87,7 +92,7 @@ class ResetConfirmDialog extends StatelessWidget {
                   ),
                 ],
               ),
-              SizedBox(height: 18.h),
+              18.verticalSpace,
               Obx(
                 () => AppGradientButton(
                   label: 'account.reset_confirm_cta'.tr,
@@ -97,12 +102,12 @@ class ResetConfirmDialog extends StatelessWidget {
                       : controller.confirmReset,
                 ),
               ),
-              SizedBox(height: 6.h),
+              6.verticalSpace,
               TextButton(
                 onPressed: Get.back,
                 child: Text(
                   'common.cancel'.tr,
-                  style: TextStyle(
+                  style: AppText.base(
                     fontSize: 13.sp,
                     fontWeight: FontWeight.w600,
                     color: scheme.onSurfaceVariant,
@@ -133,10 +138,13 @@ class _Header extends StatelessWidget {
             color: scheme.primary.withValues(alpha: 0.12),
             borderRadius: BorderRadius.circular(12.r),
           ),
-          child: Icon(Icons.restart_alt_rounded,
-              size: 20.w, color: scheme.primary),
+          child: Icon(
+            Icons.restart_alt_rounded,
+            size: 20.w,
+            color: scheme.primary,
+          ),
         ),
-        SizedBox(width: 12.w),
+        Gap.hMd,
         Expanded(
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
@@ -145,7 +153,7 @@ class _Header extends StatelessWidget {
                 'account.reset_confirm_title'.tr,
                 maxLines: 1,
                 overflow: TextOverflow.ellipsis,
-                style: TextStyle(
+                style: AppText.base(
                   fontSize: 16.sp,
                   fontWeight: FontWeight.w800,
                   color: scheme.onSurface,
@@ -155,7 +163,7 @@ class _Header extends StatelessWidget {
                 '${'account.reset'.tr} $login',
                 maxLines: 1,
                 overflow: TextOverflow.ellipsis,
-                style: TextStyle(
+                style: AppText.base(
                   fontSize: 12.sp,
                   color: scheme.onSurfaceVariant,
                 ),
@@ -166,8 +174,11 @@ class _Header extends StatelessWidget {
         IconButton(
           onPressed: Get.back,
           visualDensity: VisualDensity.compact,
-          icon: Icon(Icons.close_rounded,
-              size: 20.w, color: scheme.onSurfaceVariant),
+          icon: Icon(
+            Icons.close_rounded,
+            size: 20.w,
+            color: scheme.onSurfaceVariant,
+          ),
         ),
       ],
     );
@@ -205,14 +216,14 @@ class _PriceBanner extends StatelessWidget {
               children: [
                 Text(
                   'account.reset_price'.tr.toUpperCase(),
-                  style: TextStyle(
+                  style: AppText.base(
                     fontSize: 10.5.sp,
                     letterSpacing: 0.6,
                     fontWeight: FontWeight.w700,
                     color: scheme.onSurfaceVariant,
                   ),
                 ),
-                SizedBox(height: 4.h),
+                Gap.vXs,
                 Row(
                   crossAxisAlignment: CrossAxisAlignment.end,
                   children: [
@@ -221,23 +232,22 @@ class _PriceBanner extends StatelessWidget {
                         data.resetPrice,
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
-                        style: TextStyle(
+                        style: AppText.base(
                           fontSize: 24.sp,
                           fontWeight: FontWeight.w800,
                           color: scheme.onSurface,
                         ),
                       ),
                     ),
-                    SizedBox(width: 8.w),
+                    Gap.hSm,
                     Padding(
                       padding: EdgeInsets.only(bottom: 3.h),
                       child: Text(
                         data.originalFee,
-                        style: TextStyle(
+                        style: AppText.base(
                           fontSize: 12.5.sp,
-                          decoration: TextDecoration.lineThrough,
                           color: scheme.onSurfaceVariant,
-                        ),
+                        ).copyWith(decoration: TextDecoration.lineThrough),
                       ),
                     ),
                   ],
@@ -254,7 +264,7 @@ class _PriceBanner extends StatelessWidget {
               ),
               child: Text(
                 data.percentLabel,
-                style: TextStyle(
+                style: AppText.base(
                   fontSize: 11.sp,
                   fontWeight: FontWeight.w700,
                   color: scheme.onPrimary,
@@ -282,19 +292,19 @@ class _MethodField extends StatelessWidget {
       return InkWell(
         borderRadius: BorderRadius.circular(14.r),
         onTap: () => _openSheet(context),
-        child: Container(
+        child: AppCard(
+          radius: 14.r,
           padding: EdgeInsets.symmetric(horizontal: 14.w, vertical: 13.h),
-          decoration: AppTheme.surfaceCard(scheme, radius: 14.r),
           child: Row(
             children: [
               Icon(_iconFor(method), size: 18.w, color: scheme.primary),
-              SizedBox(width: 10.w),
+              10.horizontalSpace,
               Expanded(
                 child: Text(
                   method?.name ?? 'account.reset_select_method'.tr,
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
-                  style: TextStyle(
+                  style: AppText.base(
                     fontSize: 14.sp,
                     fontWeight: FontWeight.w600,
                     color: method == null
@@ -304,9 +314,12 @@ class _MethodField extends StatelessWidget {
                 ),
               ),
               if (method != null) _ModeChip(method: method),
-              SizedBox(width: 6.w),
-              Icon(Icons.keyboard_arrow_down_rounded,
-                  size: 20.w, color: scheme.onSurfaceVariant),
+              6.horizontalSpace,
+              Icon(
+                Icons.keyboard_arrow_down_rounded,
+                size: 20.w,
+                color: scheme.onSurfaceVariant,
+              ),
             ],
           ),
         ),
@@ -355,29 +368,31 @@ class _MethodSheet extends StatelessWidget {
                 ),
               ),
             ),
-            SizedBox(height: 14.h),
+            14.verticalSpace,
             Text(
               'account.reset_pay_with'.tr,
-              style: TextStyle(
+              style: AppText.base(
                 fontSize: 15.sp,
                 fontWeight: FontWeight.w800,
                 color: scheme.onSurface,
               ),
             ),
-            SizedBox(height: 12.h),
+            Gap.vMd,
             Flexible(
               child: ListView.separated(
                 shrinkWrap: true,
                 physics: const BouncingScrollPhysics(),
                 itemCount: data.paymentMethods.length,
-                separatorBuilder: (_, _) => SizedBox(height: 8.h),
+                separatorBuilder: (_, _) => Gap.vSm,
                 itemBuilder: (_, i) {
                   final method = data.paymentMethods[i];
                   return Obx(
                     () => _MethodTile(
                       method: method,
                       selected: identical(
-                          controller.selectedResetMethod.value, method),
+                        controller.selectedResetMethod.value,
+                        method,
+                      ),
                       onTap: () {
                         controller.selectResetMethod(method);
                         Navigator.of(context).pop();
@@ -427,13 +442,13 @@ class _MethodTile extends StatelessWidget {
         child: Row(
           children: [
             Icon(_iconFor(method), size: 18.w, color: scheme.primary),
-            SizedBox(width: 10.w),
+            10.horizontalSpace,
             Expanded(
               child: Text(
                 method.name,
                 maxLines: 1,
                 overflow: TextOverflow.ellipsis,
-                style: TextStyle(
+                style: AppText.base(
                   fontSize: 14.sp,
                   fontWeight: FontWeight.w600,
                   color: scheme.onSurface,
@@ -441,7 +456,7 @@ class _MethodTile extends StatelessWidget {
               ),
             ),
             _ModeChip(method: method),
-            SizedBox(width: 8.w),
+            Gap.hSm,
             Icon(
               selected
                   ? Icons.radio_button_checked_rounded
@@ -474,7 +489,7 @@ class _ModeChip extends StatelessWidget {
       ),
       child: Text(
         label,
-        style: TextStyle(
+        style: AppText.base(
           fontSize: 10.5.sp,
           fontWeight: FontWeight.w700,
           color: scheme.primary,

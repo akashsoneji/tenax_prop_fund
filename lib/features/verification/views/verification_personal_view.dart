@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
-import 'package:google_fonts/google_fonts.dart';
 
 import '../../../app/routes/app_routes.dart';
 import '../../../shared/theme/app_colors.dart';
@@ -14,6 +13,8 @@ import '../controllers/verification_controller.dart';
 import '../models/verification_models.dart';
 import '../widgets/exit_verification_dialog.dart';
 import '../widgets/verify_mobile_dialog.dart';
+import '../../../shared/theme/app_spacing.dart';
+import '../../../shared/theme/app_text.dart';
 
 /// Step 1 form: personal details with an inline phone "Send OTP" action that
 /// flips to a green check once verified.
@@ -47,7 +48,7 @@ class VerificationPersonalView extends GetView<VerificationController> {
             actions: [
               IconButton(
                 onPressed: _confirmExit,
-        icon: const Icon(Icons.cancel_outlined, color: AppColors.white),
+                icon: const Icon(Icons.cancel_outlined, color: AppColors.white),
               ),
             ],
           ),
@@ -57,24 +58,30 @@ class VerificationPersonalView extends GetView<VerificationController> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
-                  Text('verification.personal_details'.tr,
-                      style: GoogleFonts.beVietnamPro(
-                          fontSize: 20.sp, fontWeight: FontWeight.w700)),
-                  SizedBox(height: 18.h),
+                  Text(
+                    'verification.personal_details'.tr,
+                    style: AppText.base(
+                      fontSize: 20.sp,
+                      fontWeight: FontWeight.w700,
+                    ),
+                  ),
+                  18.verticalSpace,
                   AppLabeledField(
-                      controller: controller.firstName,
-                      label: 'verification.first_name'.tr),
-                  SizedBox(height: 16.h),
+                    controller: controller.firstName,
+                    label: 'verification.first_name'.tr,
+                  ),
+                  Gap.vLg,
                   AppLabeledField(
-                      controller: controller.lastName,
-                      label: 'verification.last_name'.tr),
-                  SizedBox(height: 16.h),
+                    controller: controller.lastName,
+                    label: 'verification.last_name'.tr,
+                  ),
+                  Gap.vLg,
                   AppLabeledField(
                     controller: controller.email,
                     label: 'verification.email'.tr,
                     keyboardType: TextInputType.emailAddress,
                   ),
-                  SizedBox(height: 16.h),
+                  Gap.vLg,
                   Obx(
                     () => AppLabeledField(
                       controller: controller.phone,
@@ -88,8 +95,11 @@ class VerificationPersonalView extends GetView<VerificationController> {
                                 color: scheme.onSurface.withValues(alpha: 0.15),
                                 borderRadius: BorderRadius.circular(7.r),
                               ),
-                              child: Icon(Icons.check_rounded,
-                                  size: 16.w, color: Colors.white),
+                              child: Icon(
+                                Icons.check_rounded,
+                                size: 16.w,
+                                color: Colors.white,
+                              ),
                             )
                           : _SendOtpAction(
                               loading: controller.sendingOtp.value,
@@ -97,7 +107,7 @@ class VerificationPersonalView extends GetView<VerificationController> {
                             ),
                     ),
                   ),
-                  SizedBox(height: 16.h),
+                  Gap.vLg,
                   Row(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
@@ -112,7 +122,7 @@ class VerificationPersonalView extends GetView<VerificationController> {
                           ),
                         ),
                       ),
-                      SizedBox(width: 14.w),
+                      14.horizontalSpace,
                       Expanded(
                         child: Obx(
                           () => AppLabeledDropdown(
@@ -126,7 +136,7 @@ class VerificationPersonalView extends GetView<VerificationController> {
                       ),
                     ],
                   ),
-                  SizedBox(height: 16.h),
+                  Gap.vLg,
                   AppLabeledField(
                     controller: controller.address,
                     label: 'verification.residence_address'.tr,
@@ -157,8 +167,9 @@ class VerificationPersonalView extends GetView<VerificationController> {
   Future<void> _save() async {
     final ok = await controller.savePersonalDetails();
     if (!ok) return;
-    controller.steps[0] =
-        controller.steps[0].copyWith(status: VerificationStatus.completed);
+    controller.steps[0] = controller.steps[0].copyWith(
+      status: VerificationStatus.completed,
+    );
     controller.steps.refresh();
     if (!controller.steps[1].status.isCompleted) {
       Get.offNamed(AppRoutes.verificationDocuments);
@@ -188,13 +199,18 @@ class _SendOtpAction extends StatelessWidget {
               width: 16.w,
               height: 16.w,
               child: CircularProgressIndicator(
-                  strokeWidth: 2, color: scheme.primary),
+                strokeWidth: 2,
+                color: scheme.primary,
+              ),
             )
-          : Text('verification.send_otp'.tr,
-              style: GoogleFonts.beVietnamPro(
-                  fontSize: 14.sp,
-                  fontWeight: FontWeight.w700,
-                  color: scheme.primary)),
+          : Text(
+              'verification.send_otp'.tr,
+              style: AppText.base(
+                fontSize: 14.sp,
+                fontWeight: FontWeight.w700,
+                color: scheme.primary,
+              ),
+            ),
     );
   }
 }

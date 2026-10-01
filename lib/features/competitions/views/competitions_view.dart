@@ -14,6 +14,7 @@ import '../widgets/competition_card.dart';
 import '../widgets/competition_register_sheet.dart';
 import '../widgets/competition_status_tabs.dart';
 import '../widgets/competitions_hero.dart';
+import '../../../shared/theme/app_spacing.dart';
 
 /// Competitions screen — cash-pool hero, a status filter and one card per
 /// competition from `GET /growth/competitions`. Loading/error/empty come from
@@ -79,7 +80,7 @@ class _CompetitionsBody extends GetView<CompetitionsController> {
             liveCount: liveCount,
           ),
         ),
-        SizedBox(height: 20.h),
+        20.verticalSpace,
         FadeSlideIn(
           order: 1,
           child: Obx(
@@ -89,7 +90,7 @@ class _CompetitionsBody extends GetView<CompetitionsController> {
             ),
           ),
         ),
-        SizedBox(height: 16.h),
+        Gap.vLg,
         Obx(() {
           final visible = controller.visible;
           if (visible.isEmpty) {
@@ -104,7 +105,7 @@ class _CompetitionsBody extends GetView<CompetitionsController> {
             padding: EdgeInsets.zero,
             physics: const NeverScrollableScrollPhysics(),
             itemCount: visible.length,
-            separatorBuilder: (_, _) => SizedBox(height: 14.h),
+            separatorBuilder: (_, _) => 14.verticalSpace,
             itemBuilder: (context, index) {
               final competition = visible[index];
               return FadeSlideIn(
@@ -134,7 +135,6 @@ class _CompetitionsBody extends GetView<CompetitionsController> {
   }
 }
 
-
 // ---------------------------------------------------------------------------
 // Shimmer skeleton matching the screen's shape.
 // ---------------------------------------------------------------------------
@@ -147,13 +147,13 @@ class _CompetitionsSkeleton extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
         HeroSkeleton(height: 74.h),
-        SizedBox(height: 20.h),
+        20.verticalSpace,
         ShimmerBox(width: 240.w, height: 40.h),
-        SizedBox(height: 16.h),
+        Gap.vLg,
         CardSkeleton(lines: 3, height: 190.h),
-        SizedBox(height: 14.h),
+        14.verticalSpace,
         CardSkeleton(lines: 3, height: 190.h),
-        SizedBox(height: 14.h),
+        14.verticalSpace,
         CardSkeleton(lines: 3, height: 190.h),
       ],
     );

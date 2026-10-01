@@ -4,12 +4,14 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
 
 import '../../../shared/theme/app_colors.dart';
-import '../../../shared/theme/app_theme.dart';
 import '../../../shared/widgets/app_gradient_button.dart';
 import '../../../shared/widgets/pinned_gradient_app_bar.dart';
 import '../../symbols/services/market_watch_v2_service.dart';
 import '../controllers/positions_controller.dart';
 import '../models/positions_models.dart';
+import '../../../shared/theme/app_spacing.dart';
+import '../../../shared/theme/app_text.dart';
+import '../../../shared/widgets/app_card.dart';
 
 /// Close / Modify screen for one open position — logic ported from the
 /// white_label Close-Position screen so both apps behave identically:
@@ -102,8 +104,7 @@ class _ClosePositionViewState extends State<ClosePositionView> {
     super.dispose();
   }
 
-  double get _entryPrice =>
-      double.tryParse(widget.position.entryPrice) ?? 0;
+  double get _entryPrice => double.tryParse(widget.position.entryPrice) ?? 0;
 
   double get _liveBid => _market.priceOf(widget.position.symbol).value.bid;
   double get _liveAsk => _market.priceOf(widget.position.symbol).value.ask;
@@ -114,37 +115,41 @@ class _ClosePositionViewState extends State<ClosePositionView> {
   /// white_label: TP = entry ±100 ticks in the PROFIT direction, SL = entry
   /// ±50 ticks in the LOSS direction (direction flips for Sell).
   void _seedTp() {
-    final base = _entryPrice != 0 ? _entryPrice : (_isBuy ? _liveAsk : _liveBid);
+    final base = _entryPrice != 0
+        ? _entryPrice
+        : (_isBuy ? _liveAsk : _liveBid);
     final dir = _isBuy ? 1 : -1;
     _tpPrice = _round(base + dir * 100 * _tick);
     _tpCtrl.text = _fmt(_tpPrice);
   }
 
   void _seedSl() {
-    final base = _entryPrice != 0 ? _entryPrice : (_isBuy ? _liveAsk : _liveBid);
+    final base = _entryPrice != 0
+        ? _entryPrice
+        : (_isBuy ? _liveAsk : _liveBid);
     final dir = _isBuy ? 1 : -1;
     _slPrice = _round(base - dir * 50 * _tick);
     _slCtrl.text = _fmt(_slPrice);
   }
 
   void _stepTp(int steps) => setState(() {
-        _tpPrice = _round((_tpPrice + steps * _tick).clamp(0, double.infinity));
-        _tpCtrl.text = _fmt(_tpPrice);
-        _tpCtrl.selection =
-            TextSelection.collapsed(offset: _tpCtrl.text.length);
-      });
+    _tpPrice = _round((_tpPrice + steps * _tick).clamp(0, double.infinity));
+    _tpCtrl.text = _fmt(_tpPrice);
+    _tpCtrl.selection = TextSelection.collapsed(offset: _tpCtrl.text.length);
+  });
 
   void _stepSl(int steps) => setState(() {
-        _slPrice = _round((_slPrice + steps * _tick).clamp(0, double.infinity));
-        _slCtrl.text = _fmt(_slPrice);
-        _slCtrl.selection =
-            TextSelection.collapsed(offset: _slCtrl.text.length);
-      });
+    _slPrice = _round((_slPrice + steps * _tick).clamp(0, double.infinity));
+    _slCtrl.text = _fmt(_slPrice);
+    _slCtrl.selection = TextSelection.collapsed(offset: _slCtrl.text.length);
+  });
 
   // Typed input — update the numeric state without rewriting the field (so the
   // caret and half-typed values like "1.16" are preserved).
-  void _onTpTyped(String s) => setState(() => _tpPrice = double.tryParse(s) ?? 0);
-  void _onSlTyped(String s) => setState(() => _slPrice = double.tryParse(s) ?? 0);
+  void _onTpTyped(String s) =>
+      setState(() => _tpPrice = double.tryParse(s) ?? 0);
+  void _onSlTyped(String s) =>
+      setState(() => _slPrice = double.tryParse(s) ?? 0);
 
   /// Potential P&L if the position closed exactly at [target].
   double _potentialPnl(double target) {
@@ -167,7 +172,8 @@ class _ClosePositionViewState extends State<ClosePositionView> {
   /// P&L for the FULL position from the live socket; falls back to snapshot.
   double get _fullPnl {
     final live = _controller.rawPositions.firstWhereOrNull(
-        (p) => p.position.toString() == widget.position.orderId);
+      (p) => p.position.toString() == widget.position.orderId,
+    );
     return live?.profit ?? widget.position.profitLoss;
   }
 
@@ -182,9 +188,11 @@ class _ClosePositionViewState extends State<ClosePositionView> {
   bool get _isPartial => _effectiveCloseVolume < _totalVolume;
 
   bool get _tpModified =>
-      _tpEnabled != (_originalTp != 0) || (_tpEnabled && _tpPrice != _originalTp);
+      _tpEnabled != (_originalTp != 0) ||
+      (_tpEnabled && _tpPrice != _originalTp);
   bool get _slModified =>
-      _slEnabled != (_originalSl != 0) || (_slEnabled && _slPrice != _originalSl);
+      _slEnabled != (_originalSl != 0) ||
+      (_slEnabled && _slPrice != _originalSl);
 
   bool get _hasTpSl => _tpEnabled || _slEnabled;
   bool get _isModify => _hasTpSl && (_tpModified || _slModified);
@@ -235,13 +243,13 @@ class _ClosePositionViewState extends State<ClosePositionView> {
             sliver: SliverList(
               delegate: SliverChildListDelegate([
                 _header(scheme),
-                SizedBox(height: 16.h),
+                Gap.vLg,
                 _bidAsk(scheme),
-                SizedBox(height: 16.h),
+                Gap.vLg,
                 _partialSection(scheme),
-                SizedBox(height: 16.h),
+                Gap.vLg,
                 _tpSlSection(scheme),
-                SizedBox(height: 16.h),
+                Gap.vLg,
                 _pnlCard(scheme),
               ]),
             ),
@@ -256,7 +264,7 @@ class _ClosePositionViewState extends State<ClosePositionView> {
     final p = widget.position;
     return Text(
       '${p.isBuy ? 'positions.buy'.tr : 'positions.sell'.tr} ${p.volume} ${p.symbol}',
-      style: TextStyle(
+      style: AppText.base(
         color: scheme.onSurfaceVariant,
         fontSize: 13.sp,
         fontWeight: FontWeight.w500,
@@ -266,23 +274,32 @@ class _ClosePositionViewState extends State<ClosePositionView> {
 
   Widget _bidAsk(ColorScheme scheme) {
     final rx = _market.priceOf(widget.position.symbol);
-    return Container(
+    return AppCard(
+      radius: 12.r,
       padding: EdgeInsets.symmetric(vertical: 14.h),
-      decoration: AppTheme.surfaceCard(scheme, radius: 12.r),
       child: Obx(() {
         final price = rx.value;
         final digits = widget.position.digits;
         return Row(
           children: [
             Expanded(
-              child: _priceCol('positions.bid'.tr,
-                  price.bid.toStringAsFixed(digits), AppColors.danger),
+              child: _priceCol(
+                'positions.bid'.tr,
+                price.bid.toStringAsFixed(digits),
+                AppColors.danger,
+              ),
             ),
             Container(
-                width: 1, height: 32.h, color: scheme.outline.withValues(alpha: 0.2)),
+              width: 1,
+              height: 32.h,
+              color: scheme.outline.withValues(alpha: 0.2),
+            ),
             Expanded(
-              child: _priceCol('positions.ask'.tr,
-                  price.ask.toStringAsFixed(digits), scheme.onSurface),
+              child: _priceCol(
+                'positions.ask'.tr,
+                price.ask.toStringAsFixed(digits),
+                scheme.onSurface,
+              ),
             ),
           ],
         );
@@ -293,33 +310,44 @@ class _ClosePositionViewState extends State<ClosePositionView> {
   Widget _priceCol(String label, String value, Color color) {
     return Column(
       children: [
-        Text(label,
-            style: TextStyle(
-                color: Theme.of(context).colorScheme.onSurfaceVariant,
-                fontSize: 12.sp)),
-        SizedBox(height: 4.h),
-        Text(value,
-            style: TextStyle(
-                color: color, fontSize: 18.sp, fontWeight: FontWeight.w700)),
+        Text(
+          label,
+          style: AppText.base(
+            color: Theme.of(context).colorScheme.onSurfaceVariant,
+            fontSize: 12.sp,
+          ),
+        ),
+        Gap.vXs,
+        Text(
+          value,
+          style: AppText.base(
+            color: color,
+            fontSize: 18.sp,
+            fontWeight: FontWeight.w700,
+          ),
+        ),
       ],
     );
   }
 
   Widget _partialSection(ColorScheme scheme) {
-    return Container(
+    return AppCard(
+      radius: 12.r,
       padding: EdgeInsets.all(14.w),
-      decoration: AppTheme.surfaceCard(scheme, radius: 12.r),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Row(
             children: [
               Expanded(
-                child: Text('positions.partial_close'.tr,
-                    style: TextStyle(
-                        color: scheme.onSurface,
-                        fontSize: 14.sp,
-                        fontWeight: FontWeight.w600)),
+                child: Text(
+                  'positions.partial_close'.tr,
+                  style: AppText.base(
+                    color: scheme.onSurface,
+                    fontSize: 14.sp,
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
               ),
               Switch(
                 value: _partial,
@@ -331,22 +359,25 @@ class _ClosePositionViewState extends State<ClosePositionView> {
             ],
           ),
           if (_partial) ...[
-            SizedBox(height: 8.h),
+            Gap.vSm,
             Container(
               width: double.infinity,
               padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 8.h),
               decoration: BoxDecoration(
                 color: scheme.primary.withValues(alpha: 0.1),
                 borderRadius: BorderRadius.circular(8.r),
-                border: Border.all(color: scheme.primary.withValues(alpha: 0.3)),
+                border: Border.all(
+                  color: scheme.primary.withValues(alpha: 0.3),
+                ),
               ),
               child: Text(
                 '${'positions.selected'.tr}: ${_effectiveCloseVolume.toStringAsFixed(2)} '
                 '${'trade.lot'.tr} (${(_effectiveCloseVolume / _totalVolume * 100).toStringAsFixed(1)}%)',
-                style: TextStyle(
-                    color: scheme.primary,
-                    fontSize: 13.sp,
-                    fontWeight: FontWeight.w600),
+                style: AppText.base(
+                  color: scheme.primary,
+                  fontSize: 13.sp,
+                  fontWeight: FontWeight.w600,
+                ),
               ),
             ),
             Slider(
@@ -364,9 +395,9 @@ class _ClosePositionViewState extends State<ClosePositionView> {
   }
 
   Widget _tpSlSection(ColorScheme scheme) {
-    return Container(
+    return AppCard(
+      radius: 12.r,
       padding: EdgeInsets.all(14.w),
-      decoration: AppTheme.surfaceCard(scheme, radius: 12.r),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
@@ -386,7 +417,7 @@ class _ClosePositionViewState extends State<ClosePositionView> {
               pnl: _potentialPnl(_tpPrice),
               valid: _tpValid,
             ),
-          SizedBox(height: 10.h),
+          10.verticalSpace,
           _toggleRow('positions.stop_loss'.tr, _slEnabled, (v) {
             setState(() {
               _slEnabled = v;
@@ -413,11 +444,14 @@ class _ClosePositionViewState extends State<ClosePositionView> {
     return Row(
       children: [
         Expanded(
-          child: Text(label,
-              style: TextStyle(
-                  color: scheme.onSurface,
-                  fontSize: 14.sp,
-                  fontWeight: FontWeight.w600)),
+          child: Text(
+            label,
+            style: AppText.base(
+              color: scheme.onSurface,
+              fontSize: 14.sp,
+              fontWeight: FontWeight.w600,
+            ),
+          ),
         ),
         Switch(value: value, onChanged: onChanged),
       ],
@@ -443,10 +477,9 @@ class _ClosePositionViewState extends State<ClosePositionView> {
             controller: controller,
             onChanged: onTyped,
             textAlign: TextAlign.center,
-            keyboardType:
-                const TextInputType.numberWithOptions(decimal: true),
+            keyboardType: const TextInputType.numberWithOptions(decimal: true),
             inputFormatters: [_DecimalFormatter(_digits)],
-            style: TextStyle(
+            style: AppText.base(
               color: valid ? scheme.onSurface : AppColors.danger,
               fontSize: 20.sp,
               fontWeight: FontWeight.w700,
@@ -460,7 +493,9 @@ class _ClosePositionViewState extends State<ClosePositionView> {
               suffixIcon: _stepBtn(scheme, Icons.add, () => onStep(1)),
               enabledBorder: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(10.r),
-                borderSide: BorderSide(color: scheme.outline.withValues(alpha: 0.25)),
+                borderSide: BorderSide(
+                  color: scheme.outline.withValues(alpha: 0.25),
+                ),
               ),
               focusedBorder: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(10.r),
@@ -468,20 +503,25 @@ class _ClosePositionViewState extends State<ClosePositionView> {
               ),
             ),
           ),
-          SizedBox(height: 4.h),
+          Gap.vXs,
           Row(
             children: [
               Expanded(
-                child: Text(label,
-                    style: TextStyle(
-                        color: scheme.onSurfaceVariant, fontSize: 12.sp)),
+                child: Text(
+                  label,
+                  style: AppText.base(
+                    color: scheme.onSurfaceVariant,
+                    fontSize: 12.sp,
+                  ),
+                ),
               ),
               Text(
                 '${pnl >= 0 ? '+' : '-'}\$${pnl.abs().toStringAsFixed(2)}',
-                style: TextStyle(
-                    color: pnlColor,
-                    fontSize: 13.sp,
-                    fontWeight: FontWeight.w700),
+                style: AppText.base(
+                  color: pnlColor,
+                  fontSize: 13.sp,
+                  fontWeight: FontWeight.w700,
+                ),
               ),
             ],
           ),
@@ -490,9 +530,10 @@ class _ClosePositionViewState extends State<ClosePositionView> {
               padding: EdgeInsets.only(top: 4.h),
               child: Align(
                 alignment: Alignment.centerLeft,
-                child: Text('positions.invalid_level'.tr,
-                    style:
-                        TextStyle(color: AppColors.danger, fontSize: 11.sp)),
+                child: Text(
+                  'positions.invalid_level'.tr,
+                  style: AppText.base(color: AppColors.danger, fontSize: 11.sp),
+                ),
               ),
             ),
         ],
@@ -537,23 +578,27 @@ class _ClosePositionViewState extends State<ClosePositionView> {
           children: [
             Row(
               children: [
-                Icon(positive ? Icons.trending_up : Icons.trending_down,
-                    color: color, size: 20.sp),
-                SizedBox(width: 8.w),
+                Icon(
+                  positive ? Icons.trending_up : Icons.trending_down,
+                  color: color,
+                  size: 20.sp,
+                ),
+                Gap.hSm,
                 Expanded(
                   child: Text(
                     '${'positions.current_pnl'.tr}: ${_money(full)}',
-                    style: TextStyle(
-                        color: color,
-                        fontSize: 15.sp,
-                        fontWeight: FontWeight.w700),
+                    style: AppText.base(
+                      color: color,
+                      fontSize: 15.sp,
+                      fontWeight: FontWeight.w700,
+                    ),
                   ),
                 ),
               ],
             ),
-            SizedBox(height: 8.h),
+            Gap.vSm,
             _breakdownRow('positions.full_position'.tr, _money(full), color),
-            SizedBox(height: 2.h),
+            Gap.vXxs,
             _breakdownRow(
               'positions.closing'.tr,
               '${_effectiveCloseVolume.toStringAsFixed(2)} ${'trade.lot'.tr}'
@@ -570,15 +615,19 @@ class _ClosePositionViewState extends State<ClosePositionView> {
     final scheme = Theme.of(context).colorScheme;
     return Row(
       children: [
-        Text(label,
-            style: TextStyle(
-                color: scheme.onSurfaceVariant, fontSize: 12.sp)),
+        Text(
+          label,
+          style: AppText.base(color: scheme.onSurfaceVariant, fontSize: 12.sp),
+        ),
         const Spacer(),
-        Text(value,
-            style: TextStyle(
-                color: valueColor,
-                fontSize: 12.sp,
-                fontWeight: FontWeight.w600)),
+        Text(
+          value,
+          style: AppText.base(
+            color: valueColor,
+            fontSize: 12.sp,
+            fontWeight: FontWeight.w600,
+          ),
+        ),
       ],
     );
   }
@@ -610,7 +659,8 @@ class _ClosePositionViewState extends State<ClosePositionView> {
               style: ElevatedButton.styleFrom(
                 backgroundColor: color,
                 shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(14.r)),
+                  borderRadius: BorderRadius.circular(14.r),
+                ),
                 elevation: 0,
               ),
               child: busy
@@ -618,14 +668,17 @@ class _ClosePositionViewState extends State<ClosePositionView> {
                       width: 20.w,
                       height: 20.w,
                       child: const CircularProgressIndicator(
-                          strokeWidth: 2, color: Colors.white),
+                        strokeWidth: 2,
+                        color: Colors.white,
+                      ),
                     )
                   : Text(
                       _closeLabel(positive, pnl),
-                      style: TextStyle(
-                          color: Colors.white,
-                          fontSize: 15.sp,
-                          fontWeight: FontWeight.w700),
+                      style: AppText.base(
+                        color: Colors.white,
+                        fontSize: 15.sp,
+                        fontWeight: FontWeight.w700,
+                      ),
                     ),
             ),
           );
@@ -658,7 +711,9 @@ class _DecimalFormatter extends TextInputFormatter {
 
   @override
   TextEditingValue formatEditUpdate(
-      TextEditingValue oldValue, TextEditingValue newValue) {
+    TextEditingValue oldValue,
+    TextEditingValue newValue,
+  ) {
     final text = newValue.text;
     if (text.isEmpty) return newValue;
     // At most one dot, only digits + dot, and limited fraction length.

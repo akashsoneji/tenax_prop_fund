@@ -4,12 +4,13 @@ import 'package:get/get.dart';
 
 import '../../../shared/theme/app_colors.dart';
 import '../../../shared/theme/app_text.dart';
-import '../../../shared/theme/app_theme.dart';
 import '../../../shared/widgets/app_count_up_text.dart';
 import '../../../shared/widgets/app_pill.dart';
 import '../../accounts/services/primary_account_service.dart';
 import '../models/dashboard_models.dart';
 import 'home_bento.dart';
+import '../../../shared/theme/app_spacing.dart';
+import '../../../shared/widgets/app_card.dart';
 
 /// Horizontal rail of compact live-account cards — account id, live pulse,
 /// animated equity, P/L vs balance and currency.
@@ -26,7 +27,7 @@ class HomeLiveAccountsRail extends StatelessWidget {
         physics: const BouncingScrollPhysics(),
         padding: EdgeInsets.zero,
         itemCount: accounts.length,
-        separatorBuilder: (_, _) => SizedBox(width: 10.w),
+        separatorBuilder: (_, _) => 10.horizontalSpace,
         itemBuilder: (_, i) => SizedBox(
           width: 150.w,
           child: _LiveAccountCard(account: accounts[i]),
@@ -49,9 +50,9 @@ class _LiveAccountCard extends StatelessWidget {
     final pnlColor = isProfit ? AppColors.success : AppColors.danger;
     final sign = isProfit ? '+' : '−';
 
-    return Container(
+    return AppCard(
+      radius: 16,
       padding: EdgeInsets.fromLTRB(12.w, 10.h, 12.w, 10.h),
-      decoration: AppTheme.surfaceCard(scheme, radius: 16),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -65,10 +66,13 @@ class _LiveAccountCard extends StatelessWidget {
                   color: pnlColor.withValues(alpha: 0.12),
                   shape: BoxShape.circle,
                 ),
-                child: Icon(Icons.account_balance_wallet_rounded,
-                    size: 13.w, color: pnlColor),
+                child: Icon(
+                  Icons.account_balance_wallet_rounded,
+                  size: 13.w,
+                  color: pnlColor,
+                ),
               ),
-              SizedBox(width: 8.w),
+              Gap.hSm,
               Expanded(
                 child: Obx(
                   () => Text(
@@ -88,8 +92,10 @@ class _LiveAccountCard extends StatelessWidget {
             child: AppCountUpText(
               value: account.equityMinor.toDouble(),
               formatter: (v) => formatMinorMoney(v.round(), account.currency),
-              style: AppText.value(color: scheme.onSurface, fontSize: 16.sp)
-                  .copyWith(letterSpacing: -0.5),
+              style: AppText.value(
+                color: scheme.onSurface,
+                fontSize: 16.sp,
+              ).copyWith(letterSpacing: -0.5),
             ),
           ),
           Row(
@@ -111,7 +117,7 @@ class _LiveAccountCard extends StatelessWidget {
                   leadingGap: 2,
                 ),
               ),
-              SizedBox(width: 6.w),
+              6.horizontalSpace,
               _CurrencyChip(currency: account.currency),
             ],
           ),
@@ -127,9 +133,9 @@ class _LiveAccountCard extends StatelessWidget {
 String _accountNumber(DashboardAccount account) {
   if (account.login.isNotEmpty) return account.login;
   if (Get.isRegistered<PrimaryAccountService>()) {
-    final match = Get.find<PrimaryAccountService>()
-        .accounts
-        .firstWhereOrNull((a) => a.id == account.id);
+    final match = Get.find<PrimaryAccountService>().accounts.firstWhereOrNull(
+      (a) => a.id == account.id,
+    );
     if (match != null && match.login.isNotEmpty) return match.login;
   }
   return '${account.id}';

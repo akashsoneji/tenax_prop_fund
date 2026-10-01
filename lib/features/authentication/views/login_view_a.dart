@@ -7,6 +7,7 @@ import '../widgets/auth_scaffold.dart';
 
 import '../widgets/glass_card.dart';
 import '../widgets/login_form.dart';
+import '../../../shared/theme/app_spacing.dart';
 
 /// Layout A: animated mesh gradient hero + frosted-glass form card.
 /// The primary "Sign in" CTA lives INSIDE the form (original position) —
@@ -26,9 +27,9 @@ class LoginViewA extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          SizedBox(height: 4.h),
+          Gap.vXs,
           // Center(child: const BrandBadge()),
-          // SizedBox(height: 18.h),
+          // 18.verticalSpace,
           // Text(
           //   config.appName,
           //   textAlign: TextAlign.center,
@@ -37,7 +38,7 @@ class LoginViewA extends StatelessWidget {
           //     letterSpacing: 0.4,
           //   ),
           // ),
-          // SizedBox(height: 4.h),
+          // Gap.vXs,
           Text(
             'app.tagline'.tr,
             textAlign: TextAlign.center,
@@ -45,7 +46,7 @@ class LoginViewA extends StatelessWidget {
               color: scheme.onSurface.withValues(alpha: 0.55),
             ),
           ),
-          SizedBox(height: 22.h),
+          22.verticalSpace,
           const GlassCard(child: LoginForm()),
         ],
       ),

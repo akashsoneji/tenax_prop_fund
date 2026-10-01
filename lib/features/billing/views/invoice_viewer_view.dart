@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
 
-import '../../../shared/theme/app_theme.dart';
 import '../../../shared/widgets/app_gradient_button.dart';
 import '../../../shared/widgets/data_state_builder.dart';
 import '../../../shared/widgets/pinned_gradient_app_bar.dart';
@@ -10,6 +9,7 @@ import '../../../shared/widgets/skeletons/skeletons.dart';
 import '../controllers/invoice_viewer_controller.dart';
 import '../models/billing_models.dart';
 import '../widgets/invoice_web_view.dart';
+import '../../../shared/widgets/app_card.dart';
 
 /// Invoice viewer opened from a Billing row. The server-rendered invoice sits
 /// on a white card (it's a printable light sheet); a bottom bar offers Share
@@ -101,7 +101,7 @@ class _ActionBar extends StatelessWidget {
               ),
             ),
           ),
-          SizedBox(width: 10.w),
+          10.horizontalSpace,
           Expanded(
             child: AppGradientButton(
               label: 'billing.invoice_download'.tr,
@@ -121,14 +121,9 @@ class _InvoiceSkeleton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final scheme = Theme.of(context).colorScheme;
     return Padding(
       padding: EdgeInsets.fromLTRB(12.w, 12.h, 12.w, 12.h),
-      child: AppShimmer(
-        child: Container(
-          decoration: AppTheme.surfaceCard(scheme, radius: 14.r),
-        ),
-      ),
+      child: AppShimmer(child: AppCard(radius: 14.r)),
     );
   }
 }

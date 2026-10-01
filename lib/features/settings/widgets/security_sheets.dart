@@ -12,6 +12,7 @@ import '../../../shared/widgets/app_toast.dart';
 import '../controllers/security_controller.dart';
 import '../models/security_models.dart';
 import 'security_sheet_scaffold.dart';
+import '../../../shared/theme/app_spacing.dart';
 
 void showChangePasswordSheet() =>
     showSecuritySheet(const _ChangePasswordSheet());
@@ -26,8 +27,8 @@ void showRecoveryCodesSheet() => showSecuritySheet(const _RecoveryCodesSheet());
 /// Starts enrolment first — the sheet needs the server's secret/QR before it
 /// has anything to show, so a failed enrol never opens an empty sheet.
 Future<void> showTwoFactorEnrolSheet() async {
-  final enrolment =
-      await Get.find<SecurityController>().startTwoFactorEnrolment();
+  final enrolment = await Get.find<SecurityController>()
+      .startTwoFactorEnrolment();
   if (enrolment == null) return;
   await showSecuritySheet(_TwoFactorEnrolSheet(enrolment: enrolment));
 }
@@ -81,13 +82,13 @@ class _ChangePasswordSheetState extends State<_ChangePasswordSheet> {
           label: 'settings.security.current_password'.tr,
           obscureText: true,
         ),
-        SizedBox(height: 12.h),
+        Gap.vMd,
         AppTextField(
           controller: _next,
           label: 'settings.security.new_password'.tr,
           obscureText: true,
         ),
-        SizedBox(height: 12.h),
+        Gap.vMd,
         AppTextField(
           controller: _confirm,
           label: 'settings.security.confirm_password'.tr,
@@ -95,7 +96,7 @@ class _ChangePasswordSheetState extends State<_ChangePasswordSheet> {
           textInputAction: TextInputAction.done,
           onSubmitted: (_) => _submit(),
         ),
-        SizedBox(height: 20.h),
+        20.verticalSpace,
         Obx(
           () => AppGradientButton(
             label: 'settings.security.update_password'.tr,
@@ -188,18 +189,18 @@ class _BeneficiarySheetState extends State<_BeneficiarySheet> {
           controller: _name,
           label: 'settings.security.full_name'.tr,
         ),
-        SizedBox(height: 12.h),
+        Gap.vMd,
         AppTextField(
           controller: _relationship,
           label: 'settings.security.relationship'.tr,
         ),
-        SizedBox(height: 12.h),
+        Gap.vMd,
         AppTextField(
           controller: _email,
           label: 'settings.security.email'.tr,
           keyboardType: TextInputType.emailAddress,
         ),
-        SizedBox(height: 12.h),
+        Gap.vMd,
         AppTextField(
           controller: _mobile,
           label: 'settings.security.mobile'.tr,
@@ -207,7 +208,7 @@ class _BeneficiarySheetState extends State<_BeneficiarySheet> {
           textInputAction: TextInputAction.done,
           onSubmitted: (_) => _submit(),
         ),
-        SizedBox(height: 20.h),
+        20.verticalSpace,
         Obx(
           () => AppGradientButton(
             label: 'settings.security.save'.tr,
@@ -258,12 +259,12 @@ class _TwoFactorEnrolSheetState extends State<_TwoFactorEnrolSheet> {
       subtitle: 'settings.security.enrol_sheet_desc'.tr,
       children: [
         _QrCard(enrolment: widget.enrolment),
-        SizedBox(height: 12.h),
+        Gap.vMd,
         _CopyField(
           label: 'settings.security.secret_key'.tr,
           value: widget.enrolment.secret,
         ),
-        SizedBox(height: 16.h),
+        Gap.vLg,
         AppTextField(
           controller: _code,
           label: 'settings.security.auth_code'.tr,
@@ -271,7 +272,7 @@ class _TwoFactorEnrolSheetState extends State<_TwoFactorEnrolSheet> {
           textInputAction: TextInputAction.done,
           onSubmitted: (_) => _submit(),
         ),
-        SizedBox(height: 20.h),
+        20.verticalSpace,
         Obx(
           () => AppGradientButton(
             label: 'settings.security.confirm_enable'.tr,
@@ -323,7 +324,7 @@ class _TwoFactorDisableSheetState extends State<_TwoFactorDisableSheet> {
           textInputAction: TextInputAction.done,
           onSubmitted: (_) => _submit(),
         ),
-        SizedBox(height: 20.h),
+        20.verticalSpace,
         Obx(
           () => AppGradientButton(
             label: 'settings.security.turn_off'.tr,
@@ -397,7 +398,7 @@ class _RecoveryCodesSheetState extends State<_RecoveryCodesSheet> {
               ],
             ),
           ),
-          SizedBox(height: 20.h),
+          20.verticalSpace,
           AppGradientButton(
             label: 'settings.security.copy_codes'.tr,
             icon: Icons.copy_rounded,
@@ -421,7 +422,7 @@ class _RecoveryCodesSheetState extends State<_RecoveryCodesSheet> {
           textInputAction: TextInputAction.done,
           onSubmitted: (_) => _submit(),
         ),
-        SizedBox(height: 20.h),
+        20.verticalSpace,
         Obx(
           () => AppGradientButton(
             label: 'settings.security.show_codes'.tr,
@@ -456,8 +457,9 @@ class _QrCard extends StatelessWidget {
           decoration: BoxDecoration(
             color: Colors.white,
             borderRadius: BorderRadius.circular(16.r),
-            border:
-                Border.all(color: scheme.outlineVariant.withValues(alpha: 0.5)),
+            border: Border.all(
+              color: scheme.outlineVariant.withValues(alpha: 0.5),
+            ),
           ),
           child: SizedBox(
             width: 180.w,
@@ -466,7 +468,7 @@ class _QrCard extends StatelessWidget {
           ),
         ),
 
-        SizedBox(height: 10.h),
+        10.verticalSpace,
         Text(
           'settings.security.scan_hint'.tr,
           textAlign: TextAlign.center,
@@ -548,31 +550,24 @@ class _CopyField extends StatelessWidget {
                     color: scheme.onSurface.withValues(alpha: 0.55),
                   ),
                 ),
-                SizedBox(height: 4.h),
+                Gap.vXs,
                 Text(
                   value,
                   maxLines: 2,
                   overflow: TextOverflow.ellipsis,
-                  style: AppText.body(
-                    fontSize: 12.sp,
-                    color: scheme.onSurface,
-                  ),
+                  style: AppText.body(fontSize: 12.sp, color: scheme.onSurface),
                 ),
               ],
             ),
           ),
-          SizedBox(width: 10.w),
+          10.horizontalSpace,
           GestureDetector(
             onTap: () {
               Clipboard.setData(ClipboardData(text: value));
               AppToast.success('settings.security.copied'.tr);
             },
             behavior: HitTestBehavior.opaque,
-            child: Icon(
-              Icons.copy_rounded,
-              size: 18.sp,
-              color: scheme.primary,
-            ),
+            child: Icon(Icons.copy_rounded, size: 18.sp, color: scheme.primary),
           ),
         ],
       ),

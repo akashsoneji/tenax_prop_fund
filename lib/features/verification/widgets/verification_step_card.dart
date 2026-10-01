@@ -1,12 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
-import 'package:google_fonts/google_fonts.dart';
 
 import '../../../../shared/theme/app_colors.dart';
 import '../../../../shared/theme/app_theme.dart';
 import '../../../../shared/widgets/app_pill.dart';
 import '../models/verification_models.dart';
+import '../../../shared/theme/app_spacing.dart';
+import '../../../shared/theme/app_text.dart';
 
 /// A verification step card mirroring the white_label KYC timeline card: a
 /// rounded gradient icon box, a "Step N" pill, a Completed/Incomplete status
@@ -30,10 +31,10 @@ class VerificationStepCard extends StatelessWidget {
   final bool showStepLabel;
 
   IconData get _headerIcon => switch (step.index) {
-        1 => Icons.person_outline_rounded,
-        2 => Icons.badge_outlined,
-        _ => Icons.account_balance_outlined,
-      };
+    1 => Icons.person_outline_rounded,
+    2 => Icons.badge_outlined,
+    _ => Icons.account_balance_outlined,
+  };
 
   @override
   Widget build(BuildContext context) {
@@ -62,24 +63,25 @@ class VerificationStepCard extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               _IconBox(icon: _headerIcon, highlighted: highlighted),
-              SizedBox(width: 12.w),
+              Gap.hMd,
               Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     if (showStepLabel) ...[
                       _StepPill(
-                        label: 'verification.step_short'
-                            .trParams({'index': '${step.index}'}),
+                        label: 'verification.step_short'.trParams({
+                          'index': '${step.index}',
+                        }),
                         highlighted: highlighted,
                       ),
-                      SizedBox(height: 6.h),
+                      6.verticalSpace,
                     ],
                     Text(
                       step.title.tr,
                       maxLines: 2,
                       overflow: TextOverflow.ellipsis,
-                      style: GoogleFonts.beVietnamPro(
+                      style: AppText.base(
                         fontSize: 17.sp,
                         fontWeight: FontWeight.w700,
                         color: onCard,
@@ -89,11 +91,11 @@ class VerificationStepCard extends StatelessWidget {
                   ],
                 ),
               ),
-              SizedBox(width: 8.w),
+              Gap.hSm,
               _StatusPill(status: step.status, highlighted: highlighted),
             ],
           ),
-          SizedBox(height: 14.h),
+          14.verticalSpace,
           for (final b in step.benefits)
             _FeatureRow(label: b.tr, onCard: onCard),
         ],
@@ -155,7 +157,7 @@ class _StepPill extends StatelessWidget {
         label,
         maxLines: 1,
         overflow: TextOverflow.ellipsis,
-        style: GoogleFonts.beVietnamPro(
+        style: AppText.base(
           fontSize: 11.sp,
           fontWeight: FontWeight.w600,
           color: fg,
@@ -216,7 +218,9 @@ class _FeatureRow extends StatelessWidget {
     final circleBg = onCard == AppColors.white
         ? AppColors.white.withValues(alpha: 0.15)
         : scheme.primary.withValues(alpha: 0.10);
-    final iconColor = onCard == AppColors.white ? AppColors.white : scheme.primary;
+    final iconColor = onCard == AppColors.white
+        ? AppColors.white
+        : scheme.primary;
     return Padding(
       padding: EdgeInsets.only(bottom: 12.h),
       child: Row(
@@ -226,19 +230,16 @@ class _FeatureRow extends StatelessWidget {
             height: 32.w,
             width: 32.w,
             alignment: Alignment.center,
-            decoration: BoxDecoration(
-              shape: BoxShape.circle,
-              color: circleBg,
-            ),
+            decoration: BoxDecoration(shape: BoxShape.circle, color: circleBg),
             child: Icon(Icons.check_rounded, size: 17.w, color: iconColor),
           ),
-          SizedBox(width: 12.w),
+          Gap.hMd,
           Expanded(
             child: Text(
               label,
               maxLines: 2,
               overflow: TextOverflow.ellipsis,
-              style: GoogleFonts.beVietnamPro(
+              style: AppText.base(
                 fontSize: 13.sp,
                 fontWeight: FontWeight.w500,
                 color: onCard.withValues(alpha: 0.9),

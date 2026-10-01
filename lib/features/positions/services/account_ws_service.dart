@@ -1,22 +1,20 @@
-import 'dart:async';
 import 'dart:convert';
-import 'dart:math';
 import 'dart:typed_data';
 
-import 'package:flutter/widgets.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:get/get.dart';
-import 'package:web_socket_channel/web_socket_channel.dart';
 
 import '../../../app/flavor/flavor_config.dart';
 import '../../../core/logger/app_logger.dart';
 import '../../../core/network/api_interceptor.dart';
 import '../../../core/websocket/message_pack_decoder.dart';
+import '../../../core/websocket/websocket_manager.dart';
+import '../../../core/websocket/ws_connection.dart';
 import '../models/positions_models.dart';
 
-/// Owns the ONE `/account` socket that streams live equity/margin for the active
-/// trading account. Styled like [MarketWatchV2Service]: self-connecting
-/// [GetxService] with reconnect/backoff/heartbeat and MessagePack/JSON decode.
+/// Streams live equity/margin for the active trading account over the
+/// `/account` socket. The socket itself is owned by [WebSocketManager]; this
+/// service only speaks the protocol and decodes frames.
 ///
 /// Protocol ported VERBATIM from white_label `account_websocket_service.dart`:
 /// - After connect, send `{authID, trading_account}`.
@@ -27,50 +25,34 @@ import '../models/positions_models.dart';
 ///   arrays, binary MessagePack or JSON.
 ///
 /// The controller reads [account] (a granular `Obx`) for the summary strip.
-class AccountWsService extends GetxService with WidgetsBindingObserver {
-  AccountWsService(this._config, this._storage);
+class AccountWsService extends GetxService {
+  AccountWsService(this._config, this._storage, this._sockets);
 
   final FlavorConfig _config;
   final FlutterSecureStorage _storage;
+  final WebSocketManager _sockets;
 
   /// Live account snapshot. Starts empty; patched on every `ac` frame that
   /// matches the subscribed account.
   final Rx<AccountInfo> account = AccountInfo.empty().obs;
 
-  final RxBool isConnected = false.obs;
+  RxBool get isConnected => _socket.isConnected;
 
   String _account = '0';
 
-  WebSocketChannel? _channel;
-  StreamSubscription<dynamic>? _sub;
-  Timer? _reconnectTimer;
-  Timer? _heartbeatTimer;
-  int _reconnectAttempts = 0;
-  bool _manuallyClosed = false;
-  bool _connecting = false;
-
-  /// Bumped by [resetForNewSession]. A connect that was already in flight when
-  /// the session changed reads the OLD token, so it checks this before adopting
-  /// its channel and aborts when it is stale.
-  int _session = 0;
-
-  /// Bumped on every connect/restart; an in-flight connect whose value no
-  /// longer matches is stale and must leave the socket state alone.
-  int _attempt = 0;
+  late final WsConnection _socket = _sockets.open(
+    name: 'account',
+    url: () => _config.accountWsUrl,
+    connectGate: _hasToken,
+    onOpen: _authenticate,
+    onMessage: _onMessage,
+    heartbeat: () => const <String, dynamic>{},
+  );
 
   @override
   void onInit() {
     super.onInit();
-    WidgetsBinding.instance.addObserver(this);
-    _connect();
-  }
-
-  @override
-  void didChangeAppLifecycleState(AppLifecycleState state) {
-    if (state == AppLifecycleState.resumed && _channel == null) {
-      _reconnectTimer?.cancel();
-      _connect();
-    }
+    _socket.connect();
   }
 
   /// Re-auth for a new trading account (called on account switch / first
@@ -80,10 +62,9 @@ class AccountWsService extends GetxService with WidgetsBindingObserver {
     if (account.isEmpty || account == _account) return;
     _account = account;
     this.account.value = AccountInfo.empty();
-    // Full restart: tear the current socket down and open a fresh one for the
-    // new account (mirrors the dashboard set-primary flow), instead of only
-    // re-authing on the stale connection.
-    _reconnect();
+    // Full restart for the new account (mirrors the dashboard set-primary
+    // flow) instead of re-authing on the stale connection.
+    _socket.restart();
   }
 
   /// Forgets the bound trading account and the last snapshot, then restarts the
@@ -91,100 +72,25 @@ class AccountWsService extends GetxService with WidgetsBindingObserver {
   /// → the connect attempt is skipped and the socket stays down) and again after
   /// login, so the next user never inherits the previous user's stream.
   void resetForNewSession() {
-    _session++;
     _account = '0';
     account.value = AccountInfo.empty();
-    _reconnect();
+    _socket.restart();
   }
-
-  /// Closes the live socket and immediately opens a new one. A deliberate
-  /// restart, so [_manuallyClosed] is cleared by [_connect] and the reconnect
-  /// backoff is reset.
-  void _reconnect() {
-    _reconnectTimer?.cancel();
-    _stopHeartbeat();
-    _sub?.cancel();
-    _sub = null;
-    try {
-      _channel?.sink.close();
-    } catch (e) {
-      log.w('account ws sink close failed: $e');
-    }
-    _channel = null;
-    isConnected.value = false;
-    _attempt++;
-    _connecting = false;
-    _reconnectAttempts = 0;
-    _connect();
-  }
-
 
   Future<String?> _authToken() => _storage.read(key: ApiInterceptor.tokenKey);
 
-  Future<void> _connect() async {
-    if (_connecting || _channel != null) return;
-    final session = _session;
-    final attempt = ++_attempt;
-    bool isStale() => attempt != _attempt || session != _session;
-    _connecting = true;
-    _manuallyClosed = false;
-    try {
-      final token = await _authToken();
-      if (token == null || token.isEmpty) {
-        log.w('account ws: no auth token, skipping connect');
-        return;
-      }
-      if (isStale()) return;
-      final channel = WebSocketChannel.connect(Uri.parse(_config.accountWsUrl));
-      await channel.ready;
-      // The session changed (or the socket was restarted) while the handshake
-      // was in flight — this socket is stale, so drop it.
-      if (isStale()) {
-        await channel.sink.close();
-        return;
-      }
-      _channel = channel;
-      _reconnectAttempts = 0;
-      isConnected.value = true;
-
-      _sub = channel.stream.listen(
-        _onMessage,
-        onError: (Object e) => _onDisconnected(e),
-        onDone: () => _onDisconnected('closed'),
-        cancelOnError: true,
-      );
-
-      _requestData();
-      _startHeartbeat();
-    } catch (e) {
-      if (attempt == _attempt) _onDisconnected(e);
-    } finally {
-      if (attempt == _attempt) _connecting = false;
-    }
-  }
-
-  void _requestData() async {
-    final session = _session;
+  Future<bool> _hasToken() async {
     final token = await _authToken();
-    if (token == null || token.isEmpty || _channel == null) return;
-    if (session != _session) return;
-    _send({'authID': token, 'trading_account': _account});
+    if (token != null && token.isNotEmpty) return true;
+    log.w('account ws: no auth token, skipping connect');
+    return false;
   }
 
-  void _send(Map<String, dynamic> payload) {
-    _channel?.sink.add(jsonEncode(payload));
-  }
-
-  void _startHeartbeat() {
-    _heartbeatTimer?.cancel();
-    _heartbeatTimer = Timer.periodic(const Duration(seconds: 20), (_) {
-      if (_channel != null) _send(const {});
-    });
-  }
-
-  void _stopHeartbeat() {
-    _heartbeatTimer?.cancel();
-    _heartbeatTimer = null;
+  Future<bool> _authenticate(WsConnection socket) async {
+    final token = await _authToken();
+    if (token == null || token.isEmpty) return false;
+    socket.send({'authID': token, 'trading_account': _account});
+    return true;
   }
 
   void _onMessage(dynamic message) {
@@ -284,39 +190,9 @@ class AccountWsService extends GetxService with WidgetsBindingObserver {
     return v is num ? v.toDouble() : (double.tryParse(v.toString()) ?? 0.0);
   }
 
-  void _onDisconnected(Object reason) {
-    _sub?.cancel();
-    _sub = null;
-    _channel = null;
-    isConnected.value = false;
-    _stopHeartbeat();
-    if (_manuallyClosed) return;
-    log.w('account ws disconnected: $reason — reconnecting');
-    _reconnectAttempts++;
-    final exponent = _reconnectAttempts.clamp(1, 5);
-    final base = (1 << exponent).clamp(1, 30);
-    final jitterMs = Random().nextInt(1000);
-    _reconnectTimer?.cancel();
-    _reconnectTimer = Timer(
-      Duration(seconds: base, milliseconds: jitterMs),
-      _connect,
-    );
-  }
-
   @override
   void onClose() {
-    WidgetsBinding.instance.removeObserver(this);
-    _manuallyClosed = true;
-    _attempt++;
-    _reconnectTimer?.cancel();
-    _stopHeartbeat();
-    _sub?.cancel();
-    try {
-      _channel?.sink.close();
-    } catch (e) {
-      log.w('account ws sink close failed: $e');
-    }
-    _channel = null;
+    _sockets.release('account');
     super.onClose();
   }
 }

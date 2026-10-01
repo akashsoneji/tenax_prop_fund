@@ -4,6 +4,7 @@ import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
 
 import '../theme/app_colors.dart';
+import '../theme/app_spacing.dart';
 import '../theme/app_theme.dart';
 
 /// The ONE top bar
@@ -54,7 +55,7 @@ class PinnedGradientAppBar extends StatelessWidget {
         children: [
           if (showBack) ...[
             _CircleBack(onTap: onBack ?? Get.back),
-            SizedBox(width: 8.w),
+            Gap.hSm,
           ],
           Expanded(
             child: Text(

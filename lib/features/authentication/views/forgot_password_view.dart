@@ -13,6 +13,8 @@ import '../widgets/animated_field.dart';
 import '../widgets/auth_scaffold.dart';
 import '../widgets/glass_card.dart';
 import '../../../shared/widgets/app_gradient_button.dart';
+import '../../../shared/theme/app_spacing.dart';
+import '../../../shared/theme/app_text.dart';
 
 /// Forgot password: hero illustration of an inbox, animated entry, post-send
 /// success state with a confetti burst and resend countdown.
@@ -35,6 +37,7 @@ class _ForgotPasswordViewState extends State<ForgotPasswordView> {
       _email.text = passed;
     }
   }
+
   int _resendIn = 0;
   Timer? _ticker;
   late final ConfettiController _confetti = ConfettiController(
@@ -53,6 +56,7 @@ class _ForgotPasswordViewState extends State<ForgotPasswordView> {
     _resendIn = 60;
     _ticker?.cancel();
     _ticker = Timer.periodic(const Duration(seconds: 1), (t) {
+      if (!mounted) return t.cancel();
       setState(() {
         _resendIn -= 1;
         if (_resendIn <= 0) t.cancel();
@@ -62,9 +66,7 @@ class _ForgotPasswordViewState extends State<ForgotPasswordView> {
 
   Future<void> _submit() async {
     final controller = Get.find<AuthController>();
-    final ok = await controller.requestPasswordReset(
-      email: _email.text.trim(),
-    );
+    final ok = await controller.requestPasswordReset(email: _email.text.trim());
     if (!ok || !mounted) return;
 
     setState(() => _sent = true);
@@ -82,26 +84,23 @@ class _ForgotPasswordViewState extends State<ForgotPasswordView> {
   /// repo doesn't have. Falls back to a Material icon when even the network
   /// asset is missing in production.
   Widget get _illustration => Container(
-        width: 160.w,
-        height: 160.h,
-        decoration: BoxDecoration(
-          shape: BoxShape.circle,
-          color: Theme.of(context)
-              .colorScheme
-              .primary
-              .withValues(alpha: 0.08),
-        ),
-        child: LottieBuilder.network(
-          'https://assets10.lottiefiles.com/packages/lf20_obhph3sh.json',
-          width: 120.w,
-          height: 120.h,
-          errorBuilder: (_, _, _) => Icon(
-            Icons.mark_email_unread_rounded,
-            size: 72.w,
-            color: Theme.of(context).colorScheme.primary,
-          ),
-        ),
-      );
+    width: 160.w,
+    height: 160.h,
+    decoration: BoxDecoration(
+      shape: BoxShape.circle,
+      color: Theme.of(context).colorScheme.primary.withValues(alpha: 0.08),
+    ),
+    child: LottieBuilder.network(
+      'https://assets10.lottiefiles.com/packages/lf20_obhph3sh.json',
+      width: 120.w,
+      height: 120.h,
+      errorBuilder: (_, _, _) => Icon(
+        Icons.mark_email_unread_rounded,
+        size: 72.w,
+        color: Theme.of(context).colorScheme.primary,
+      ),
+    ),
+  );
 
   @override
   Widget build(BuildContext context) {
@@ -111,7 +110,9 @@ class _ForgotPasswordViewState extends State<ForgotPasswordView> {
     return Stack(
       children: [
         AuthScaffold(
-          heroTitle: _sent ? 'forgot_password.check_inbox'.tr : 'forgot_password.title'.tr,
+          heroTitle: _sent
+              ? 'forgot_password.check_inbox'.tr
+              : 'forgot_password.title'.tr,
           heroSubtitle: 'forgot_password.subtitle'.tr,
           showTicker: false,
           child: GlassCard(
@@ -119,7 +120,7 @@ class _ForgotPasswordViewState extends State<ForgotPasswordView> {
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
                 Center(child: _illustration),
-                SizedBox(height: 16.h),
+                Gap.vLg,
                 AnimatedField(
                   index: 0,
                   child: TextField(
@@ -131,30 +132,36 @@ class _ForgotPasswordViewState extends State<ForgotPasswordView> {
                       hintText: 'login.email_hint'.tr,
                       prefixIcon: const Icon(Icons.alternate_email_rounded),
                       filled: true,
-                      fillColor:
-                          scheme.surfaceContainerHighest.withValues(alpha: 0.85),
+                      fillColor: scheme.surfaceContainerHighest.withValues(
+                        alpha: 0.85,
+                      ),
                       contentPadding: EdgeInsets.symmetric(
-                          horizontal: 16.w, vertical: 18.h),
+                        horizontal: 16.w,
+                        vertical: 18.h,
+                      ),
                       enabledBorder: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(16.r),
                         borderSide: BorderSide(
-                            color: scheme.outline.withValues(alpha: 0.18)),
+                          color: scheme.outline.withValues(alpha: 0.18),
+                        ),
                       ),
                       focusedBorder: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(16.r),
-                        borderSide:
-                            BorderSide(color: scheme.primary, width: 1.6.w),
+                        borderSide: BorderSide(
+                          color: scheme.primary,
+                          width: 1.6.w,
+                        ),
                       ),
                     ),
                   ),
                 ),
-                SizedBox(height: 8.h),
+                Gap.vSm,
                 if (_sent)
                   Padding(
                     padding: EdgeInsets.symmetric(vertical: 6.h),
                     child: Text(
                       'forgot_password.spam_tip'.tr,
-                      style: TextStyle(
+                      style: AppText.base(
                         fontSize: 12.sp,
                         color: scheme.onSurface.withValues(alpha: 0.6),
                       ),
@@ -170,7 +177,7 @@ class _ForgotPasswordViewState extends State<ForgotPasswordView> {
                             padding: EdgeInsets.only(top: 8.h),
                             child: Text(
                               msg,
-                              style: TextStyle(
+                              style: AppText.base(
                                 color: scheme.error,
                                 fontWeight: FontWeight.w600,
                               ),
@@ -178,7 +185,7 @@ class _ForgotPasswordViewState extends State<ForgotPasswordView> {
                           ),
                   );
                 }),
-                SizedBox(height: 16.h),
+                Gap.vLg,
                 Obx(
                   () => AppGradientButton(
                     label: _sent
@@ -189,13 +196,13 @@ class _ForgotPasswordViewState extends State<ForgotPasswordView> {
                   ),
                 ),
                 if (_sent) ...[
-                  SizedBox(height: 12.h),
+                  Gap.vMd,
                   Center(
                     child: TextButton(
                       onPressed: null,
                       child: Text(
                         '${'common.resend'.tr} ${'otp.resend_in'.tr} ${_resendIn}s',
-                        style: TextStyle(
+                        style: AppText.base(
                           color: scheme.onSurface.withValues(alpha: 0.6),
                         ),
                       ),

@@ -5,6 +5,7 @@ import 'package:get/get.dart';
 import '../../../shared/theme/app_text.dart';
 import '../../../shared/theme/app_theme.dart';
 import '../../../shared/widgets/app_gradient_button.dart';
+import '../../../shared/widgets/app_card.dart';
 
 /// Shown on the Support screen when the user has never opened a ticket:
 /// a layered ticket thumbnail, headline, helper line and an "Open a ticket"
@@ -17,15 +18,15 @@ class SupportEmptyState extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final scheme = Theme.of(context).colorScheme;
-    return Container(
+    return AppCard(
+      radius: 20.r,
       width: double.infinity,
       padding: EdgeInsets.fromLTRB(20.w, 28.h, 20.w, 20.h),
-      decoration: AppTheme.surfaceCard(scheme, radius: 20.r),
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
           const _TicketThumbnail(),
-          SizedBox(height: 18.h),
+          18.verticalSpace,
           Text(
             'support.no_tickets'.tr,
             textAlign: TextAlign.center,
@@ -33,7 +34,7 @@ class SupportEmptyState extends StatelessWidget {
             overflow: TextOverflow.ellipsis,
             style: AppText.title(fontSize: 17.sp, color: scheme.onSurface),
           ),
-          SizedBox(height: 6.h),
+          6.verticalSpace,
           Text(
             'support.no_tickets_hint'.tr,
             textAlign: TextAlign.center,
@@ -45,7 +46,7 @@ class SupportEmptyState extends StatelessWidget {
               color: scheme.onSurfaceVariant,
             ),
           ),
-          SizedBox(height: 20.h),
+          20.verticalSpace,
           AppGradientButton(
             label: 'support.open_ticket'.tr,
             icon: Icons.add_rounded,

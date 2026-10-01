@@ -4,6 +4,7 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import '../../../shared/theme/app_colors.dart';
 import '../../../shared/theme/app_text.dart';
 import '../../../shared/theme/app_theme.dart';
+import '../../../shared/theme/app_spacing.dart';
 
 /// The sticky summary bar pinned to the bottom of the Choose-a-challenge
 /// and Configure screens: plan name + price on the left, a "Configure"
@@ -41,7 +42,7 @@ class ChallengeBottomBar extends StatelessWidget {
           child: Row(
             children: [
               Expanded(child: _PriceSummary(bar: this)),
-              SizedBox(width: 10.w),
+              10.horizontalSpace,
               _ActionButton(
                 label: actionLabel,
                 loading: loading,
@@ -74,7 +75,7 @@ class _PriceSummary extends StatelessWidget {
             fontSize: 12.sp,
           ),
         ),
-        SizedBox(height: 1.h),
+        1.verticalSpace,
         Row(
           crossAxisAlignment: CrossAxisAlignment.end,
           children: [
@@ -84,12 +85,13 @@ class _PriceSummary extends StatelessWidget {
                 maxLines: 1,
                 overflow: TextOverflow.ellipsis,
                 style: AppText.value(
-                    color: Theme.of(context).colorScheme.secondary,
-                    fontSize: 19.sp),
+                  color: Theme.of(context).colorScheme.secondary,
+                  fontSize: 19.sp,
+                ),
               ),
             ),
             if (bar.strikePrice != null) ...[
-              SizedBox(width: 6.w),
+              6.horizontalSpace,
               Padding(
                 padding: EdgeInsets.only(bottom: 2.h),
                 child: Text(
@@ -144,11 +146,16 @@ class _ActionButton extends StatelessWidget {
                     Text(
                       label,
                       style: AppText.title(
-                          color: AppColors.white, fontSize: 14.sp),
+                        color: AppColors.white,
+                        fontSize: 14.sp,
+                      ),
                     ),
-                    SizedBox(width: 4.w),
-                    Icon(Icons.arrow_forward_rounded,
-                        size: 16.w, color: AppColors.white),
+                    Gap.hXs,
+                    Icon(
+                      Icons.arrow_forward_rounded,
+                      size: 16.w,
+                      color: AppColors.white,
+                    ),
                   ],
                 ),
         ),

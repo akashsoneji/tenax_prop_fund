@@ -190,5 +190,5 @@ Future<T?> showAppBottomSheet<T>({
 ```
 
 ## 3. White-Labeling & Multi-Theme Rules
-- Never branch code in the UI for white-label styling (e.g. `if (flavor == 'client_a')`).
+- Never branch code in the UI for white-label styling (e.g. `if (flavor == 'pipze_funded')`).
 - Define all flavor styling in `AppTheme` / `ThemeData` / `ThemeExtension` so swapping themes changes the entire look automatically.

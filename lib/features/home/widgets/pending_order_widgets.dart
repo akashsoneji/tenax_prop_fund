@@ -3,6 +3,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 
 import '../../../shared/theme/app_colors.dart';
+import '../../../shared/theme/app_spacing.dart';
 
 /// Live Bid/Ask pill shown in the Pending Order app bar.
 class PendingOrderQuotePill extends StatelessWidget {
@@ -42,7 +43,7 @@ class PendingOrderQuotePill extends StatelessWidget {
             value: bid.toStringAsFixed(digits),
             valueColor: AppColors.danger,
           ),
-          SizedBox(width: 8.w),
+          Gap.hSm,
           Container(
             width: 1.w,
             height: 22.h,
@@ -50,7 +51,7 @@ class PendingOrderQuotePill extends StatelessWidget {
               alpha: AppColors.alphaFaint,
             ),
           ),
-          SizedBox(width: 8.w),
+          Gap.hSm,
           _QuoteCell(
             label: askLabel,
             value: ask.toStringAsFixed(digits),
@@ -88,7 +89,7 @@ class _QuoteCell extends StatelessWidget {
             height: 1.1,
           ),
         ),
-        SizedBox(height: 1.h),
+        1.verticalSpace,
         Text(
           value,
           style: textTheme.titleSmall?.copyWith(
@@ -135,7 +136,7 @@ class PendingOrderSectionHeader extends StatelessWidget {
           ),
           child: Icon(icon, color: scheme.primary, size: 16.w),
         ),
-        SizedBox(width: 8.w),
+        Gap.hSm,
         Expanded(
           child: Text(
             title,
@@ -178,7 +179,7 @@ class PendingOrderLotPresets extends StatelessWidget {
         scrollDirection: Axis.horizontal,
         physics: const BouncingScrollPhysics(),
         itemCount: presets.length,
-        separatorBuilder: (_, _) => SizedBox(width: 6.w),
+        separatorBuilder: (_, _) => 6.horizontalSpace,
         itemBuilder: (context, index) {
           final value = presets[index];
           final selected = (volume - value).abs() < 0.000001;
@@ -273,7 +274,11 @@ class PendingOrderTypeSelector extends StatelessWidget {
                   ),
                 ),
                 trailing: selected
-                    ? Icon(Icons.check_rounded, size: 18.w, color: scheme.primary)
+                    ? Icon(
+                        Icons.check_rounded,
+                        size: 18.w,
+                        color: scheme.primary,
+                      )
                     : null,
                 onTap: () {
                   Navigator.of(sheetContext).pop();
@@ -281,7 +286,7 @@ class PendingOrderTypeSelector extends StatelessWidget {
                 },
               );
             }),
-            SizedBox(height: 8.h),
+            Gap.vSm,
           ],
         ),
       ),
@@ -300,7 +305,9 @@ class PendingOrderTypeSelector extends StatelessWidget {
           color: scheme.surfaceContainerHighest.withValues(alpha: 0.55),
           borderRadius: BorderRadius.circular(14.r),
           border: Border.all(
-            color: scheme.outlineVariant.withValues(alpha: AppColors.alphaFaint),
+            color: scheme.outlineVariant.withValues(
+              alpha: AppColors.alphaFaint,
+            ),
           ),
         ),
         child: Row(
@@ -318,7 +325,7 @@ class PendingOrderTypeSelector extends StatelessWidget {
                       fontWeight: FontWeight.w700,
                     ),
                   ),
-                  SizedBox(height: 2.h),
+                  Gap.vXxs,
                   Text(
                     selectedLabel,
                     maxLines: 1,

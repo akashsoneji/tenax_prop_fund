@@ -9,6 +9,7 @@ import '../controllers/payout_methods_controller.dart';
 import '../models/payout_method.dart';
 import 'add_payout_method_sheet.dart';
 import 'payout_method_manage_row.dart';
+import '../../../shared/theme/app_spacing.dart';
 
 /// Payout methods list with Add / Edit / Delete, backed by
 /// [PayoutMethodsController] (GET list, POST create, PUT update, DELETE).
@@ -45,11 +46,11 @@ class PayoutMethodsManager extends StatelessWidget {
               Text(
                 'rewards.tab_payout_methods'.tr,
                 style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                      fontSize: 20.sp,
-                      fontWeight: FontWeight.w800,
-                    ),
+                  fontSize: 20.sp,
+                  fontWeight: FontWeight.w800,
+                ),
               ),
-              SizedBox(height: 14.h),
+              14.verticalSpace,
             ],
             AppGradientButton(
               label: 'rewards.add_method'.tr,
@@ -57,7 +58,7 @@ class PayoutMethodsManager extends StatelessWidget {
               height: 44.h,
               onPressed: () => _openAddSheet(context),
             ),
-            SizedBox(height: 16.h),
+            Gap.vLg,
             for (final m in methods)
               PayoutMethodManageRow(method: m, onChanged: onChanged),
           ],

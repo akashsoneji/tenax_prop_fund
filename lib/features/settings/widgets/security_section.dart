@@ -8,6 +8,7 @@ import '../controllers/security_controller.dart';
 import '../models/security_models.dart';
 import 'security_rows.dart';
 import 'security_sheets.dart';
+import '../../../shared/theme/app_spacing.dart';
 
 /// The Security block of the Settings screen: server-backed toggles, the
 /// two-factor state, and the credential actions (password, beneficiary,
@@ -49,7 +50,7 @@ class SecuritySection extends StatelessWidget {
                 ],
               ),
             ),
-            SizedBox(height: 12.h),
+            Gap.vMd,
             SecurityGroup(
               children: [
                 SecurityActionRow(
@@ -97,8 +98,9 @@ class SecuritySection extends StatelessWidget {
           ? 'settings.security.two_factor_required'.tr
           : 'settings.security.two_factor_desc'.tr;
     }
-    return 'settings.security.codes_remaining'
-        .trParams({'count': '${data.recoveryCodesRemaining}'});
+    return 'settings.security.codes_remaining'.trParams({
+      'count': '${data.recoveryCodesRemaining}',
+    });
   }
 }
 
@@ -111,7 +113,7 @@ class _SecuritySkeleton extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
         ShimmerBox(height: 190.h, radius: 18.r),
-        SizedBox(height: 12.h),
+        Gap.vMd,
         ShimmerBox(height: 190.h, radius: 18.r),
       ],
     );

@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
-import 'package:google_fonts/google_fonts.dart';
 
 import '../../../shared/widgets/app_info_banner.dart';
 import '../../../shared/widgets/data_state_builder.dart';
@@ -12,6 +11,8 @@ import '../../../shared/widgets/section_header.dart';
 import '../../../shared/widgets/skeletons/skeletons.dart';
 import '../controllers/economic_calendar_controller.dart';
 import '../models/economic_event.dart';
+import '../../../shared/theme/app_spacing.dart';
+import '../../../shared/theme/app_text.dart';
 
 /// Economic calendar — events grouped by day in surface cards, each row with a
 /// currency chip, title, forecast/previous detail and an impact label. Closes
@@ -51,7 +52,7 @@ class EconomicCalendarView extends StatelessWidget {
                           return Column(
                             crossAxisAlignment: CrossAxisAlignment.stretch,
                             children: [
-                              if (d > 0) SizedBox(height: 24.h),
+                              if (d > 0) Gap.vXl,
                               FadeSlideIn(
                                 order: d * 2,
                                 child: SectionHeader(day.label),
@@ -63,8 +64,7 @@ class EconomicCalendarView extends StatelessWidget {
                                     for (var i = 0; i < day.events.length; i++)
                                       _EventRow(
                                         event: day.events[i],
-                                        showDivider:
-                                            i != day.events.length - 1,
+                                        showDivider: i != day.events.length - 1,
                                       ),
                                   ],
                                 ),
@@ -73,7 +73,7 @@ class EconomicCalendarView extends StatelessWidget {
                           );
                         },
                       ),
-                      SizedBox(height: 22.h),
+                      22.verticalSpace,
                       FadeSlideIn(
                         order: 12,
                         child: AppInfoBanner(
@@ -110,23 +110,23 @@ class _EventRow extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               _CurrencyChip(code: event.currency),
-              SizedBox(width: 12.w),
+              Gap.hMd,
               Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
                       event.title,
-                      style: GoogleFonts.beVietnamPro(
+                      style: AppText.base(
                         fontSize: 15.sp,
                         fontWeight: FontWeight.w700,
                         color: scheme.onSurface,
                       ),
                     ),
-                    SizedBox(height: 4.h),
+                    Gap.vXs,
                     Text(
                       event.detail,
-                      style: GoogleFonts.beVietnamPro(
+                      style: AppText.base(
                         fontSize: 12.5.sp,
                         height: 1.35,
                         color: scheme.onSurface.withValues(alpha: 0.55),
@@ -135,10 +135,10 @@ class _EventRow extends StatelessWidget {
                   ],
                 ),
               ),
-              SizedBox(width: 10.w),
+              10.horizontalSpace,
               Text(
                 event.impactLabel,
-                style: GoogleFonts.beVietnamPro(
+                style: AppText.base(
                   fontSize: 13.sp,
                   fontWeight: FontWeight.w700,
                   color: event.impactColor(scheme),
@@ -177,7 +177,7 @@ class _CurrencyChip extends StatelessWidget {
       alignment: Alignment.center,
       child: Text(
         code,
-        style: GoogleFonts.beVietnamPro(
+        style: AppText.base(
           fontSize: 12.5.sp,
           fontWeight: FontWeight.w700,
           color: scheme.primary,

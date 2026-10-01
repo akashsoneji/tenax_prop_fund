@@ -45,14 +45,16 @@ class InitialBinding extends Bindings {
       ApiClient(_config, Get.find<FlutterSecureStorage>()),
       permanent: true,
     );
-    Get.put<WebSocketManager>(
-      WebSocketManager(_config),
+    // Single owner of every socket in the app. Services below open named
+    // connections through it; it reconnects them all on app resume.
+    final sockets = Get.put<WebSocketManager>(
+      WebSocketManager(),
       permanent: true,
     );
     // Live market-watch socket. Permanent + self-connecting (see its onInit)
     // so ticks are flowing from app open and survive background/foreground.
     Get.put<MarketWatchV2Service>(
-      MarketWatchV2Service(_config, Get.find<FlutterSecureStorage>()),
+      MarketWatchV2Service(_config, Get.find<FlutterSecureStorage>(), sockets),
       permanent: true,
     );
     // Favorited instruments store — persists metadata + keeps the socket
@@ -67,11 +69,11 @@ class InitialBinding extends Bindings {
     // `/account` (equity/margin). Permanent + self-connecting so the Positions
     // summary keeps ticking regardless of which tab is showing.
     Get.put<PositionsWsService>(
-      PositionsWsService(_config, Get.find<FlutterSecureStorage>()),
+      PositionsWsService(_config, Get.find<FlutterSecureStorage>(), sockets),
       permanent: true,
     );
     Get.put<AccountWsService>(
-      AccountWsService(_config, Get.find<FlutterSecureStorage>()),
+      AccountWsService(_config, Get.find<FlutterSecureStorage>(), sockets),
       permanent: true,
     );
 

@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
 
-import '../../../shared/theme/app_theme.dart';
 import '../../../shared/widgets/app_gradient_button.dart';
 import '../../../shared/widgets/data_state_builder.dart';
 import '../../../shared/widgets/pinned_gradient_app_bar.dart';
@@ -11,6 +10,8 @@ import '../controllers/certificate_viewer_controller.dart';
 import '../models/certificate_model.dart';
 import '../widgets/certificate_meta_row.dart';
 import '../widgets/certificate_web_view.dart';
+import '../../../shared/theme/app_spacing.dart';
+import '../../../shared/widgets/app_card.dart';
 
 /// Single-certificate viewer. Shows the rendered document in a pinch-zoomable
 /// WebView with the holder/issue/verification facts above it, and a bottom
@@ -69,7 +70,7 @@ class _Document extends StatelessWidget {
       child: Column(
         children: [
           CertificateMetaRow(document: document),
-          SizedBox(height: 14.h),
+          14.verticalSpace,
           Expanded(
             child: ClipRRect(
               borderRadius: BorderRadius.circular(18.r),
@@ -82,7 +83,7 @@ class _Document extends StatelessWidget {
               ),
             ),
           ),
-          SizedBox(height: 12.h),
+          Gap.vMd,
         ],
       ),
     );
@@ -123,7 +124,7 @@ class _ActionBar extends StatelessWidget {
               ),
             ),
           ),
-          SizedBox(width: 12.w),
+          Gap.hMd,
           Expanded(
             child: AppGradientButton(
               label: 'certificates.download'.tr,
@@ -146,20 +147,15 @@ class _CertificateViewerSkeleton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final scheme = Theme.of(context).colorScheme;
     return Padding(
       padding: EdgeInsets.fromLTRB(16.w, 16.h, 16.w, 16.h),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
           CardSkeleton(lines: 2, height: 78.h),
-          SizedBox(height: 14.h),
+          14.verticalSpace,
           Expanded(
-            child: AppShimmer(
-              child: Container(
-                decoration: AppTheme.surfaceCard(scheme, radius: 18.r),
-              ),
-            ),
+            child: AppShimmer(child: AppCard(radius: 18.r)),
           ),
         ],
       ),

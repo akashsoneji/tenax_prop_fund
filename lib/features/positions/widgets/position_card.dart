@@ -3,9 +3,11 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
 
 import '../../../shared/theme/app_colors.dart';
-import '../../../shared/theme/app_theme.dart';
 import '../models/positions_models.dart';
 import '../views/close_position_view.dart';
+import '../../../shared/theme/app_spacing.dart';
+import '../../../shared/theme/app_text.dart';
+import '../../../shared/widgets/app_card.dart';
 
 /// A slim, dense position/pending/history row — ported from the white_label
 /// iQuote card. Two compact rows: side chip · symbol · volume ─ P/L, then
@@ -45,10 +47,10 @@ class PositionCard extends StatelessWidget {
     final sideColor = isBuy ? green : red;
     final actionable = !isHistory;
 
-    final card = Container(
+    final card = AppCard(
+      radius: 12.r,
       margin: EdgeInsets.only(bottom: 8.h),
       padding: EdgeInsets.fromLTRB(12.w, 8.h, 12.w, 8.h),
-      decoration: AppTheme.surfaceCard(scheme, radius: 12.r),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -62,14 +64,14 @@ class PositionCard extends StatelessWidget {
                 ),
                 child: Text(
                   isBuy ? 'positions.buy'.tr : 'positions.sell'.tr,
-                  style: TextStyle(
+                  style: AppText.base(
                     color: sideColor,
                     fontSize: 10.sp,
                     fontWeight: FontWeight.w700,
                   ),
                 ),
               ),
-              SizedBox(width: 8.w),
+              Gap.hSm,
               Expanded(
                 child: Row(
                   children: [
@@ -78,17 +80,17 @@ class PositionCard extends StatelessWidget {
                         position.symbol,
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
-                        style: TextStyle(
+                        style: AppText.base(
                           color: scheme.onSurface,
                           fontSize: 14.sp,
                           fontWeight: FontWeight.w700,
                         ),
                       ),
                     ),
-                    SizedBox(width: 8.w),
+                    Gap.hSm,
                     Text(
                       position.volume.toString(),
-                      style: TextStyle(
+                      style: AppText.base(
                         color: scheme.onSurfaceVariant,
                         fontSize: 12.sp,
                         fontWeight: FontWeight.w500,
@@ -97,10 +99,10 @@ class PositionCard extends StatelessWidget {
                   ],
                 ),
               ),
-              SizedBox(width: 8.w),
+              Gap.hSm,
               Text(
                 '${isPositive ? '' : '-'}\$${position.profitLoss.abs().toStringAsFixed(2)}',
-                style: TextStyle(
+                style: AppText.base(
                   color: isPositive ? green : red,
                   fontSize: 14.sp,
                   fontWeight: FontWeight.w700,
@@ -108,20 +110,29 @@ class PositionCard extends StatelessWidget {
               ),
             ],
           ),
-          SizedBox(height: 4.h),
+          Gap.vXs,
           Row(
             children: [
               Text(
                 position.entryPrice,
-                style: TextStyle(color: scheme.onSurfaceVariant, fontSize: 11.sp),
+                style: AppText.base(
+                  color: scheme.onSurfaceVariant,
+                  fontSize: 11.sp,
+                ),
               ),
-              SizedBox(width: 4.w),
-              Icon(Icons.arrow_forward,
-                  color: scheme.onSurfaceVariant, size: 11.sp),
-              SizedBox(width: 4.w),
+              Gap.hXs,
+              Icon(
+                Icons.arrow_forward,
+                color: scheme.onSurfaceVariant,
+                size: 11.sp,
+              ),
+              Gap.hXs,
               Text(
                 position.currentPrice,
-                style: TextStyle(color: scheme.onSurfaceVariant, fontSize: 11.sp),
+                style: AppText.base(
+                  color: scheme.onSurfaceVariant,
+                  fontSize: 11.sp,
+                ),
               ),
               Expanded(
                 child: Row(
@@ -131,7 +142,7 @@ class PositionCard extends StatelessWidget {
                       _pill('TP', position.takeProfit, green),
                     if (_hasPrice(position.takeProfit) &&
                         _hasPrice(position.stopLoss))
-                      SizedBox(width: 6.w),
+                      6.horizontalSpace,
                     if (_hasPrice(position.stopLoss))
                       _pill('SL', position.stopLoss, red),
                   ],
@@ -185,7 +196,7 @@ class PositionCard extends StatelessWidget {
       ),
       child: Text(
         '$label $value',
-        style: TextStyle(
+        style: AppText.base(
           color: color,
           fontSize: 10.sp,
           fontWeight: FontWeight.w600,

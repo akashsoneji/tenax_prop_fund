@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
-import 'package:google_fonts/google_fonts.dart';
 
 import '../../../app/routes/app_routes.dart';
 import '../../../shared/theme/app_colors.dart';
@@ -14,6 +13,9 @@ import '../models/referral_models.dart';
 import '../widgets/referral_commission_row.dart';
 import '../widgets/referral_warning_banner.dart';
 import '../widgets/referral_withdraw_sheet.dart';
+import '../../../shared/theme/app_spacing.dart';
+import '../../../shared/theme/app_text.dart';
+import '../../../shared/widgets/app_card.dart';
 
 /// Refer & earn screen: referral-code hero, a 2x2 stat grid, a "How you get
 /// paid" explainer, a funded-account warning and the empty referrals state.
@@ -51,7 +53,7 @@ class ReferralView extends StatelessWidget {
                       crossAxisAlignment: CrossAxisAlignment.stretch,
                       children: [
                         HeroSkeleton(height: 250.h),
-                        SizedBox(height: 26.h),
+                        26.verticalSpace,
                         const CardSkeleton(lines: 4),
                       ],
                     ),
@@ -59,15 +61,15 @@ class ReferralView extends StatelessWidget {
                       crossAxisAlignment: CrossAxisAlignment.stretch,
                       children: [
                         _CodeHeroCard(controller: c, data: data),
-                        SizedBox(height: 26.h),
+                        26.verticalSpace,
                         _SectionTitle('referral.how_you_get_paid'.tr),
                         const _HowYouGetPaidCard(),
-                        SizedBox(height: 18.h),
+                        18.verticalSpace,
                         ReferralWarningBanner(
                           title: 'referral.warning_title'.tr,
                           body: 'referral.warning_body'.tr,
                         ),
-                        SizedBox(height: 26.h),
+                        26.verticalSpace,
                         _SectionTitle('referral.your_referrals'.tr),
                         if (data.referrals.isEmpty)
                           const _EmptyReferralsCard()
@@ -99,7 +101,7 @@ class _SectionTitle extends StatelessWidget {
       padding: EdgeInsets.only(bottom: 12.h),
       child: Text(
         text,
-        style: GoogleFonts.beVietnamPro(
+        style: AppText.base(
           fontSize: 17.sp,
           fontWeight: FontWeight.w800,
           color: scheme.onSurface,
@@ -174,15 +176,15 @@ class _CodeHeroCard extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             _HeroHeader(),
-            SizedBox(height: 12.h),
+            Gap.vMd,
             _CodePill(code: data.referralCode, onCopy: controller.copyCode),
-            SizedBox(height: 10.h),
+            10.verticalSpace,
             _HeroStatsStrip(data: data),
-            SizedBox(height: 10.h),
+            10.verticalSpace,
             _HeroMetaRow(data: data),
-            SizedBox(height: 10.h),
+            10.verticalSpace,
             _ShareLinkButton(onTap: controller.shareLink),
-            SizedBox(height: 10.h),
+            10.verticalSpace,
             _WithdrawButton(onTap: () => showReferralWithdrawSheet(data)),
           ],
         ),
@@ -211,7 +213,7 @@ class _HeroHeader extends StatelessWidget {
             color: _heroAccent,
           ),
         ),
-        SizedBox(width: 12.w),
+        Gap.hMd,
         Expanded(
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
@@ -220,14 +222,14 @@ class _HeroHeader extends StatelessWidget {
                 'referral.your_referral_code'.tr.toUpperCase(),
                 maxLines: 1,
                 overflow: TextOverflow.ellipsis,
-                style: GoogleFonts.beVietnamPro(
+                style: AppText.base(
                   fontSize: 11.sp,
                   fontWeight: FontWeight.w700,
                   letterSpacing: 1.6,
                   color: AppColors.white.withValues(alpha: 0.88),
                 ),
               ),
-              SizedBox(height: 5.h),
+              5.verticalSpace,
               Container(
                 width: 28.w,
                 height: 2.h,
@@ -278,7 +280,7 @@ class _CodePill extends StatelessWidget {
               code,
               maxLines: 1,
               overflow: TextOverflow.ellipsis,
-              style: GoogleFonts.beVietnamPro(
+              style: AppText.base(
                 fontSize: 21.sp,
                 fontWeight: FontWeight.w800,
                 letterSpacing: 1.2,
@@ -308,10 +310,10 @@ class _CodePill extends StatelessWidget {
                       size: 15.w,
                       color: AppColors.white,
                     ),
-                    SizedBox(width: 6.w),
+                    6.horizontalSpace,
                     Text(
                       'referral.copy_code'.tr,
-                      style: GoogleFonts.beVietnamPro(
+                      style: AppText.base(
                         fontSize: 12.5.sp,
                         fontWeight: FontWeight.w700,
                         color: AppColors.white,
@@ -422,20 +424,20 @@ class _HeroMetaRow extends StatelessWidget {
                     item.$1,
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
-                    style: GoogleFonts.beVietnamPro(
+                    style: AppText.base(
                       fontSize: 10.sp,
                       fontWeight: FontWeight.w600,
                       color: AppColors.white.withValues(alpha: 0.6),
                     ),
                   ),
-                  SizedBox(height: 3.h),
+                  3.verticalSpace,
                   FittedBox(
                     fit: BoxFit.scaleDown,
                     alignment: Alignment.centerLeft,
                     child: Text(
                       item.$2,
                       maxLines: 1,
-                      style: GoogleFonts.beVietnamPro(
+                      style: AppText.base(
                         fontSize: 12.sp,
                         fontWeight: FontWeight.w800,
                         height: 1.0,
@@ -473,25 +475,25 @@ class _HeroStatCell extends StatelessWidget {
         mainAxisSize: MainAxisSize.min,
         children: [
           Icon(icon, size: 15.w, color: _heroAccent),
-          SizedBox(height: 6.h),
+          6.verticalSpace,
           Text(
             label,
             maxLines: 1,
             overflow: TextOverflow.ellipsis,
-            style: GoogleFonts.beVietnamPro(
+            style: AppText.base(
               fontSize: 10.sp,
               fontWeight: FontWeight.w600,
               color: AppColors.white.withValues(alpha: 0.74),
             ),
           ),
-          SizedBox(height: 3.h),
+          3.verticalSpace,
           FittedBox(
             fit: BoxFit.scaleDown,
             alignment: Alignment.centerLeft,
             child: Text(
               value,
               maxLines: 1,
-              style: GoogleFonts.beVietnamPro(
+              style: AppText.base(
                 fontSize: 16.sp,
                 fontWeight: FontWeight.w800,
                 height: 1.0,
@@ -532,33 +534,25 @@ class _ShareLinkButton extends StatelessWidget {
           child: Row(
             children: [
               const Spacer(),
-              Icon(
-                Icons.ios_share_rounded,
-                size: 17.w,
-                color: ink,
-              ),
-              SizedBox(width: 10.w),
+              Icon(Icons.ios_share_rounded, size: 17.w, color: ink),
+              10.horizontalSpace,
               Container(
                 width: 1,
                 height: 18.h,
                 color: ink.withValues(alpha: 0.35),
               ),
-              SizedBox(width: 10.w),
+              10.horizontalSpace,
               Text(
                 'referral.share_link'.tr,
-                style: GoogleFonts.beVietnamPro(
+                style: AppText.base(
                   fontSize: 14.5.sp,
                   fontWeight: FontWeight.w800,
                   color: ink,
                 ),
               ),
               const Spacer(),
-              Icon(
-                Icons.arrow_forward_rounded,
-                size: 17.w,
-                color: ink,
-              ),
-              SizedBox(width: 14.w),
+              Icon(Icons.arrow_forward_rounded, size: 17.w, color: ink),
+              14.horizontalSpace,
             ],
           ),
         ),
@@ -596,13 +590,13 @@ class _WithdrawButton extends StatelessWidget {
                 size: 17.w,
                 color: AppColors.white,
               ),
-              SizedBox(width: 10.w),
+              10.horizontalSpace,
               Flexible(
                 child: Text(
                   'referral.withdraw'.tr,
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
-                  style: GoogleFonts.beVietnamPro(
+                  style: AppText.base(
                     fontSize: 14.5.sp,
                     fontWeight: FontWeight.w800,
                     color: AppColors.white,
@@ -640,10 +634,10 @@ class _HistoryAction extends StatelessWidget {
             mainAxisSize: MainAxisSize.min,
             children: [
               Icon(Icons.history_rounded, size: 16.w, color: AppColors.white),
-              SizedBox(width: 5.w),
+              5.horizontalSpace,
               Text(
                 'referral.history'.tr,
-                style: GoogleFonts.beVietnamPro(
+                style: AppText.base(
                   fontSize: 12.5.sp,
                   fontWeight: FontWeight.w700,
                   color: AppColors.white,
@@ -671,12 +665,11 @@ class _HowYouGetPaidCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final scheme = Theme.of(context).colorScheme;
     return _Enter(
       delayMs: 120,
-      child: Container(
+      child: AppCard(
+        radius: 18,
         padding: EdgeInsets.symmetric(horizontal: 16.w),
-        decoration: AppTheme.surfaceCard(scheme, radius: 18),
         child: Column(
           children: [
             for (var i = 0; i < _steps.length; i++) ...[
@@ -722,30 +715,30 @@ class _StepRow extends StatelessWidget {
             alignment: Alignment.center,
             child: Text(
               number,
-              style: GoogleFonts.beVietnamPro(
+              style: AppText.base(
                 fontSize: 14.sp,
                 fontWeight: FontWeight.w800,
                 color: scheme.primary,
               ),
             ),
           ),
-          SizedBox(width: 12.w),
+          Gap.hMd,
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
                   title,
-                  style: GoogleFonts.beVietnamPro(
+                  style: AppText.base(
                     fontSize: 15.sp,
                     fontWeight: FontWeight.w700,
                     color: scheme.onSurface,
                   ),
                 ),
-                SizedBox(height: 4.h),
+                Gap.vXs,
                 Text(
                   body,
-                  style: GoogleFonts.beVietnamPro(
+                  style: AppText.base(
                     fontSize: 13.sp,
                     height: 1.4,
                     fontWeight: FontWeight.w500,
@@ -770,12 +763,11 @@ class _ReferralsList extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final scheme = Theme.of(context).colorScheme;
     return _Enter(
       delayMs: 160,
-      child: Container(
+      child: AppCard(
+        radius: 18,
         padding: EdgeInsets.symmetric(horizontal: 14.w),
-        decoration: AppTheme.surfaceCard(scheme, radius: 18),
         child: Column(
           children: [
             for (var i = 0; i < referrals.length; i++) ...[
@@ -821,16 +813,16 @@ class _EmptyReferralsCard extends StatelessWidget {
                 children: [
                   Text(
                     'referral.empty_title'.tr,
-                    style: GoogleFonts.beVietnamPro(
+                    style: AppText.base(
                       fontSize: 18.sp,
                       fontWeight: FontWeight.w800,
                       color: scheme.onPrimary,
                     ),
                   ),
-                  SizedBox(height: 6.h),
+                  6.verticalSpace,
                   Text(
                     'referral.empty_hint'.tr,
-                    style: GoogleFonts.beVietnamPro(
+                    style: AppText.base(
                       fontSize: 13.5.sp,
                       fontWeight: FontWeight.w500,
                       color: scheme.onPrimary.withValues(alpha: 0.85),
@@ -839,7 +831,7 @@ class _EmptyReferralsCard extends StatelessWidget {
                 ],
               ),
             ),
-            SizedBox(width: 12.w),
+            Gap.hMd,
             Container(
               width: 46.w,
               height: 46.w,

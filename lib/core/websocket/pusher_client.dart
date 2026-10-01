@@ -1,10 +1,9 @@
 import 'dart:async';
 import 'dart:convert';
-import 'dart:math';
-
-import 'package:web_socket_channel/web_socket_channel.dart';
 
 import '../logger/app_logger.dart';
+import 'websocket_manager.dart';
+import 'ws_connection.dart';
 
 /// Connection lifecycle of the Pusher socket, surfaced so the UI can show a
 /// "live" indicator.
@@ -80,29 +79,37 @@ typedef PusherAuthResolver = Future<String?> Function(
     String socketId, String channel);
 
 /// A minimal Pusher/Soketi protocol client dedicated to the Home dashboard's
-/// live account feed. It is deliberately NOT the generic [WebSocketManager]:
-/// the wire format (`{event, channel, data}` where `data` is a stringified JSON
-/// blob) and the handshake (`pusher:connection_established` → `pusher:subscribe`
-/// → `pusher:ping/pong`) are Pusher-specific.
+/// live account feed. The socket is owned by [WebSocketManager]; this class only
+/// speaks the Pusher wire format (`{event, channel, data}` where `data` is a
+/// stringified JSON blob) and handshake (`pusher:connection_established` →
+/// `pusher:subscribe` → `pusher:ping/pong`).
 ///
-/// The client owns exactly one socket, reconnects with exponential backoff,
-/// resubscribes on reconnect, and exposes a broadcast [accountStates] stream of
+/// Resubscribes on reconnect and exposes a broadcast [accountStates] stream of
 /// decoded [AccountStateEvent]s plus a [states] stream for the connection badge.
 class PusherClient {
-  PusherClient(this._url, {this.authResolver});
+  PusherClient(String url, WebSocketManager sockets, {this.authResolver})
+      : _sockets = sockets {
+    _socket = sockets.open(
+      name: _socketName,
+      url: () => url,
+      onMessage: _onData,
+      onClosed: _onClosed,
+      heartbeat: () => const {'event': 'pusher:ping', 'data': <String, dynamic>{}},
+      heartbeatInterval: const Duration(seconds: 25),
+    );
+  }
 
-  final String _url;
+  static const _socketName = 'pusher';
+
+  final WebSocketManager _sockets;
+  late final WsConnection _socket;
 
   /// Resolves the private-channel auth signature. Left null until the
   /// broadcasting-auth endpoint is wired; subscriptions are attempted unsigned.
   final PusherAuthResolver? authResolver;
 
-  WebSocketChannel? _channel;
-  StreamSubscription? _channelSub;
-  Timer? _reconnectTimer;
-  int _reconnectAttempts = 0;
-  bool _manuallyClosed = false;
   String? _socketId;
+  bool _manuallyClosed = false;
 
   final _channels = <String>{};
 
@@ -126,28 +133,9 @@ class PusherClient {
     }
     _manuallyClosed = false;
     _setState(PusherState.connecting);
-    try {
-      final channel = WebSocketChannel.connect(Uri.parse(_url));
-      _channel = channel;
-      await channel.ready;
-      // disconnect() ran while the handshake was in flight — drop this socket
-      // instead of attaching a listener to it.
-      if (_manuallyClosed) {
-        await channel.sink.close();
-        if (identical(_channel, channel)) _channel = null;
-        return;
-      }
-      _channelSub = channel.stream.listen(
-        _onData,
-        onError: (Object e) => _onDisconnected(e),
-        onDone: () => _onDisconnected('closed'),
-        cancelOnError: true,
-      );
-      // Connection is only "established" once the server sends its socket_id;
-      // until then we stay in `connecting`.
-    } catch (e) {
-      _onDisconnected(e);
-    }
+    // Connection is only "established" once the server sends its socket_id;
+    // until then we stay in `connecting`.
+    await _socket.connect();
   }
 
   /// Subscribes to a channel (resolving auth first for `private-`/`presence-`
@@ -230,9 +218,9 @@ class PusherClient {
   void _onEstablished(dynamic data) {
     final decoded = _decodeData(data);
     _socketId = decoded?['socket_id']?.toString();
-    _reconnectAttempts = 0;
     _setState(PusherState.connected);
-    _startHeartbeat();
+    // Starts the 25s pusher:ping heartbeat and resets the reconnect backoff.
+    _socket.markConnected();
     // (Re)subscribe every remembered channel now that we have a socket_id.
     for (final channel in _channels) {
       _sendSubscribe(channel);
@@ -265,57 +253,34 @@ class PusherClient {
     return null;
   }
 
-  Timer? _heartbeat;
-  void _startHeartbeat() {
-    _heartbeat?.cancel();
-    _heartbeat = Timer.periodic(const Duration(seconds: 25), (_) {
-      _send({'event': 'pusher:ping', 'data': {}});
-    });
-  }
-
   void _send(Map<String, dynamic> payload) {
-    if (_state == PusherState.connected && _channel != null) {
-      _channel!.sink.add(jsonEncode(payload));
-    }
+    if (_state == PusherState.connected) _socket.send(payload);
   }
 
-  void _onDisconnected(Object reason) {
-    _heartbeat?.cancel();
-    _channelSub?.cancel();
-    _channel = null;
+  /// Socket dropped: the manager reconnects with backoff; a fresh
+  /// `connection_established` will move us back to connected.
+  void _onClosed() {
     _socketId = null;
     if (_manuallyClosed) {
       _setState(PusherState.disconnected);
       return;
     }
-    log.w('Pusher disconnected: $reason — scheduling reconnect');
-    _scheduleReconnect();
-  }
-
-  void _scheduleReconnect() {
+    log.w('Pusher disconnected — scheduling reconnect');
     _setState(PusherState.reconnecting);
-    _reconnectAttempts++;
-    final exponent = _reconnectAttempts.clamp(1, 5);
-    final base = (1 << exponent).clamp(1, 30);
-    final jitterMs = Random().nextInt(1000);
-    _reconnectTimer?.cancel();
-    _reconnectTimer =
-        Timer(Duration(seconds: base, milliseconds: jitterMs), connect);
   }
 
   Future<void> disconnect() async {
     _manuallyClosed = true;
-    _heartbeat?.cancel();
-    _reconnectTimer?.cancel();
-    await _channelSub?.cancel();
-    await _channel?.sink.close();
-    _channel = null;
+    await _socket.close();
     _socketId = null;
     _setState(PusherState.disconnected);
   }
 
   Future<void> dispose() async {
-    await disconnect();
+    _manuallyClosed = true;
+    await _sockets.release(_socketName);
+    _socketId = null;
+    _setState(PusherState.disconnected);
     _channels.clear();
     await _stateController.close();
     await _accountController.close();

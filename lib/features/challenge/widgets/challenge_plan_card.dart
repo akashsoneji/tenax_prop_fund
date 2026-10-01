@@ -5,6 +5,7 @@ import '../../../shared/theme/app_colors.dart';
 import '../../../shared/theme/app_text.dart';
 import '../../../shared/theme/app_theme.dart';
 import '../models/challenge_models.dart';
+import '../../../shared/theme/app_spacing.dart';
 
 /// A selectable account-size price card in the Paid grid. When [selected] it
 /// gains a brand-purple border, soft glow and a check mark; otherwise a plain
@@ -74,10 +75,10 @@ class ChallengePlanCard extends StatelessWidget {
                   ),
                 ],
               ),
-              SizedBox(height: 2.h),
+              Gap.vXxs,
               _PriceRow(plan: plan),
               if (plan.discountLabel.isNotEmpty) ...[
-                SizedBox(height: 6.h),
+                6.verticalSpace,
                 _DiscountPill(label: plan.discountLabel),
               ],
             ],
@@ -103,12 +104,14 @@ class _PriceRow extends StatelessWidget {
             plan.price,
             maxLines: 1,
             overflow: TextOverflow.ellipsis,
-            style: AppText.title(color: scheme.primary, fontSize: 15.sp)
-                .copyWith(fontWeight: FontWeight.w800),
+            style: AppText.title(
+              color: scheme.primary,
+              fontSize: 15.sp,
+            ).copyWith(fontWeight: FontWeight.w800),
           ),
         ),
         if (plan.original.isNotEmpty) ...[
-          SizedBox(width: 6.w),
+          6.horizontalSpace,
           Flexible(
             child: Padding(
               padding: EdgeInsets.only(bottom: 1.h),
@@ -146,8 +149,10 @@ class _DiscountPill extends StatelessWidget {
         label,
         maxLines: 1,
         overflow: TextOverflow.ellipsis,
-        style: AppText.label(color: scheme.primary, fontSize: 10.5.sp)
-            .copyWith(fontWeight: FontWeight.w700),
+        style: AppText.label(
+          color: scheme.primary,
+          fontSize: 10.5.sp,
+        ).copyWith(fontWeight: FontWeight.w700),
       ),
     );
   }

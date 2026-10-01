@@ -1,12 +1,8 @@
 /// Available white-label clients. Business logic is identical across all of
 /// them — only theme, assets and some UI vary per flavor.
 enum Flavor {
-  /// Base flavor. "Tenax Prop" — carries the default design that every screen
-  /// falls back to. Other flavors override only the screens they want to differ.
+  /// "Tenax Prop". All flavors share one UI; they differ only by config.
   tenax,
-  clientA,
-  clientB,
-  clientC,
   pipzeFunded,
   alibabafxProp;
 
@@ -16,12 +12,6 @@ enum Flavor {
         return Flavor.pipzeFunded;
       case 'alibabafx_prop':
         return Flavor.alibabafxProp;
-      case 'client_a':
-        return Flavor.clientA;
-      case 'client_b':
-        return Flavor.clientB;
-      case 'client_c':
-        return Flavor.clientC;
       case 'tenax':
       default:
         return Flavor.tenax;

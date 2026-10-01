@@ -6,6 +6,8 @@ import '../../../shared/theme/app_colors.dart';
 import '../../../shared/theme/app_theme.dart';
 import '../../../shared/widgets/app_pill.dart';
 import '../models/accounts_models.dart';
+import '../../../shared/theme/app_spacing.dart';
+import '../../../shared/theme/app_text.dart';
 
 /// One account card, redesigned compact for mobile. A tone-coloured status rail
 /// runs down the left edge; the header pairs the plan eyebrow + login with a
@@ -25,10 +27,10 @@ class AccountListCard extends StatelessWidget {
   final VoidCallback onDashboard;
 
   Color _toneColor(ColorScheme scheme) => switch (account.tone) {
-        AccountTone.up => AppColors.success,
-        AccountTone.down => AppColors.danger,
-        AccountTone.neutral => scheme.onSurfaceVariant,
-      };
+    AccountTone.up => AppColors.success,
+    AccountTone.down => AppColors.danger,
+    AccountTone.neutral => scheme.onSurfaceVariant,
+  };
 
   @override
   Widget build(BuildContext context) {
@@ -64,15 +66,15 @@ class AccountListCard extends StatelessWidget {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     _Header(account: account),
-                    SizedBox(height: 9.h),
+                    9.verticalSpace,
                     _PnlRow(account: account),
-                    SizedBox(height: 9.h),
+                    9.verticalSpace,
                     _StatStrip(account: account),
-                    SizedBox(height: 10.h),
+                    10.verticalSpace,
                     Row(
                       children: [
                         Expanded(child: _TradeButton(onTap: onTrade)),
-                        SizedBox(width: 8.w),
+                        Gap.hSm,
                         Expanded(child: _DashboardButton(onTap: onDashboard)),
                       ],
                     ),
@@ -108,19 +110,19 @@ class _Header extends StatelessWidget {
                 account.planName.toUpperCase(),
                 maxLines: 1,
                 overflow: TextOverflow.ellipsis,
-                style: TextStyle(
+                style: AppText.base(
                   fontSize: 9.5.sp,
                   fontWeight: FontWeight.w700,
                   letterSpacing: 0.7,
                   color: scheme.onSurfaceVariant,
                 ),
               ),
-              SizedBox(height: 3.h),
+              3.verticalSpace,
               RichText(
                 maxLines: 1,
                 overflow: TextOverflow.ellipsis,
                 text: TextSpan(
-                  style: TextStyle(
+                  style: AppText.base(
                     fontSize: 15.sp,
                     fontWeight: FontWeight.w800,
                     color: scheme.onSurface,
@@ -128,7 +130,7 @@ class _Header extends StatelessWidget {
                   children: [
                     TextSpan(
                       text: account.login,
-                      style: TextStyle(color: scheme.primary),
+                      style: AppText.base(color: scheme.primary),
                     ),
                     TextSpan(text: '  ·  ${account.accountSize}'),
                   ],
@@ -137,7 +139,7 @@ class _Header extends StatelessWidget {
             ],
           ),
         ),
-        SizedBox(width: 8.w),
+        Gap.hSm,
         _StatusPill(label: account.statusLabel, tone: account.tone),
       ],
     );
@@ -172,37 +174,37 @@ class _PnlRow extends StatelessWidget {
             size: 16.w,
             color: color,
           ),
-          SizedBox(width: 7.w),
+          7.horizontalSpace,
           Text(
             'accounts.total_pl'.tr,
             maxLines: 1,
             overflow: TextOverflow.ellipsis,
-            style: TextStyle(
+            style: AppText.base(
               fontSize: 10.sp,
               fontWeight: FontWeight.w600,
               color: scheme.onSurfaceVariant,
             ),
           ),
-          SizedBox(width: 8.w),
+          Gap.hSm,
           Text(
             account.pnl.isEmpty ? '—' : account.pnl,
             maxLines: 1,
             overflow: TextOverflow.ellipsis,
-            style: TextStyle(
+            style: AppText.base(
               fontSize: 14.sp,
               fontWeight: FontWeight.w800,
               color: color,
             ),
           ),
           if (account.floatingNote.isNotEmpty) ...[
-            SizedBox(width: 8.w),
+            Gap.hSm,
             Expanded(
               child: Text(
                 account.floatingNote,
                 maxLines: 1,
                 overflow: TextOverflow.ellipsis,
                 textAlign: TextAlign.right,
-                style: TextStyle(
+                style: AppText.base(
                   fontSize: 9.5.sp,
                   fontWeight: FontWeight.w600,
                   color: scheme.onSurfaceVariant,
@@ -304,7 +306,7 @@ class _StatCell extends StatelessWidget {
             child: Text(
               value.isEmpty ? '—' : value,
               maxLines: 1,
-              style: TextStyle(
+              style: AppText.base(
                 fontSize: 12.5.sp,
                 fontWeight: FontWeight.w800,
                 color: scheme.onSurface,
@@ -312,13 +314,13 @@ class _StatCell extends StatelessWidget {
               ),
             ),
           ),
-          SizedBox(height: 3.h),
+          3.verticalSpace,
           Text(
             label.toUpperCase(),
             maxLines: 1,
             overflow: TextOverflow.ellipsis,
             textAlign: TextAlign.center,
-            style: TextStyle(
+            style: AppText.base(
               fontSize: 8.5.sp,
               fontWeight: FontWeight.w700,
               letterSpacing: 0.3,
@@ -349,12 +351,15 @@ class _TradeButton extends StatelessWidget {
           child: Row(
             mainAxisSize: MainAxisSize.min,
             children: [
-              Icon(Icons.trending_up_rounded,
-                  size: 16.w, color: AppColors.black),
-              SizedBox(width: 6.w),
+              Icon(
+                Icons.trending_up_rounded,
+                size: 16.w,
+                color: AppColors.black,
+              ),
+              6.horizontalSpace,
               Text(
                 'accounts.trade'.tr,
-                style: TextStyle(
+                style: AppText.base(
                   fontSize: 13.sp,
                   fontWeight: FontWeight.w700,
                   color: AppColors.black,
@@ -392,12 +397,15 @@ class _DashboardButton extends StatelessWidget {
             child: Row(
               mainAxisSize: MainAxisSize.min,
               children: [
-                Icon(Icons.dashboard_rounded,
-                    size: 15.w, color: AppColors.white),
-                SizedBox(width: 6.w),
+                Icon(
+                  Icons.dashboard_rounded,
+                  size: 15.w,
+                  color: AppColors.white,
+                ),
+                6.horizontalSpace,
                 Text(
                   'accounts.dashboard'.tr,
-                  style: TextStyle(
+                  style: AppText.base(
                     fontSize: 13.sp,
                     fontWeight: FontWeight.w700,
                     color: AppColors.white,

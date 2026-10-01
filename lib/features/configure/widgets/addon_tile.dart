@@ -1,11 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
-import 'package:google_fonts/google_fonts.dart';
 
 import '../../../shared/theme/app_colors.dart';
 import '../../../shared/theme/app_theme.dart';
 import '../models/configure_models.dart';
+import '../../../shared/theme/app_spacing.dart';
+import '../../../shared/theme/app_text.dart';
 
 /// A single add-on row on the Configure screen: a leading check circle, the
 /// add-on title + description + tag, and the price on the right. Selecting it
@@ -39,32 +40,32 @@ class AddonTile extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   _CheckCircle(selected: selected),
-                  SizedBox(width: 12.w),
+                  Gap.hMd,
                   Expanded(
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
                           addon.title.tr,
-                          style: GoogleFonts.beVietnamPro(
+                          style: AppText.base(
                             fontSize: 14.5.sp,
                             fontWeight: FontWeight.w700,
                             color: scheme.onSurface,
                           ),
                         ),
-                        SizedBox(height: 3.h),
+                        3.verticalSpace,
                         Text(
                           addon.description.tr,
-                          style: GoogleFonts.beVietnamPro(
+                          style: AppText.base(
                             fontSize: 12.5.sp,
                             height: 1.35,
                             color: scheme.onSurface.withValues(alpha: 0.55),
                           ),
                         ),
-                        SizedBox(height: 4.h),
+                        Gap.vXs,
                         Text(
                           addon.tagLabel.tr,
-                          style: GoogleFonts.beVietnamPro(
+                          style: AppText.base(
                             fontSize: 12.5.sp,
                             fontWeight: FontWeight.w600,
                             color: scheme.primary,
@@ -73,10 +74,10 @@ class AddonTile extends StatelessWidget {
                       ],
                     ),
                   ),
-                  SizedBox(width: 10.w),
+                  10.horizontalSpace,
                   Text(
                     addon.priceLabel,
-                    style: GoogleFonts.beVietnamPro(
+                    style: AppText.base(
                       fontSize: 14.sp,
                       fontWeight: FontWeight.w800,
                       color: scheme.primary,
@@ -116,7 +117,10 @@ class _CheckCircle extends StatelessWidget {
         gradient: selected ? AppTheme.brandGradient(scheme) : null,
         border: selected
             ? null
-            : Border.all(color: scheme.onSurface.withValues(alpha: 0.25), width: 1.5.w),
+            : Border.all(
+                color: scheme.onSurface.withValues(alpha: 0.25),
+                width: 1.5.w,
+              ),
       ),
       child: selected
           ? Icon(Icons.check_rounded, size: 15.w, color: AppColors.white)

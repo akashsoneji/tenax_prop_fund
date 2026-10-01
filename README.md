@@ -7,11 +7,10 @@ One Flutter codebase that ships as a separate app for each client (flavor).
 | Flavor | Config file | Assets folder |
 |---|---|---|
 | `tenax` | `config/flavors/tenax.json` | `assets/flavors/tenax/` |
-| `client_a` | `config/flavors/client_a.json` | `assets/flavors/client_a/` |
-| `client_b` | `config/flavors/client_b.json` | `assets/flavors/client_b/` |
-| `client_c` | `config/flavors/client_c.json` | `assets/flavors/client_c/` |
 | `pipze_funded` | `config/flavors/pipze_funded.json` | `assets/flavors/pipze_funded/` |
 | `alibabafx_prop` | `config/flavors/alibabafx_prop.json` | `assets/flavors/alibabafx_prop/` |
+
+All three flavors use the same UI, the same controllers and the same functionality. They differ only by config: colours, logo, app name and URLs.
 
 ## Run & build
 
@@ -65,6 +64,89 @@ Note: the JSON files are **not secret**. Anything inside a client's own app can 
 4. Add the Android `productFlavor` in `android/app/build.gradle.kts` and the iOS scheme (`scripts/setup_ios_flavors.sh`).
 5. Add the value to `Flavor` / `Flavor.fromName` in `lib/app/flavor/flavor.dart`.
 6. Add Debug and Release entries to `.vscode/launch.json`.
+
+## Per-flavor UI (one controller, many designs)
+
+Each feature has **one** binding, controller, repository and set of models, and every flavor uses them. Only the UI can change per flavor.
+
+```text
+lib/features/<feature>/
+├── bindings/      controllers/      models/      repositories/
+├── views/
+│   ├── <feature>_view.dart                  # common design (Tenax base)
+│   └── flavor_overrides/
+│       └── <feature>_view_<flavor>.dart     # only when the layout really differs
+└── widgets/
+    ├── <part>.dart                          # shared parts
+    └── flavor_overrides/
+        └── <part>_<flavor>.dart             # small per-flavor widget variant
+```
+
+Pick the cheapest option that works:
+
+1. Only the colour, logo, name or a URL is different: put it in `config/flavors/<f>.json` and read it through `FlavorConfig`. Don't add a new file.
+2. Only a text, icon or image is different: put it in config or under `assets/flavors/<f>/`.
+3. One small widget is different: add `widgets/flavor_overrides/<part>_<flavor>.dart`.
+4. The whole screen layout is different: add `views/flavor_overrides/<feature>_view_<flavor>.dart`.
+5. The business logic is different: only then consider a separate controller.
+
+Today no flavor has an override: every flavor gets the same screens. Steps 3–4 are only for when a flavor-specific design is explicitly requested.
+
+The choice between views happens only in `lib/app/flavor/flavor_resolver.dart`, through `FlavorResolver.resolve(common:, overrides:)`. Never write `if (flavor == …)` inside a widget. To give one flavor its own screen:
+
+1. Add `features/<feature>/views/flavor_overrides/<feature>_view_<flavor>.dart`. Build it from the shared widgets and the same controller as the common view.
+2. Register it in the resolver, e.g. `overrides: {Flavor.pipzeFunded: const LoginViewPipze()}` in `FlavorResolver.loginView()`.
+
+Nothing else changes: the binding, controller, repository and route stay shared.
+
+## Reusable UI + flavors
+
+### Rules
+
+- **One UI for all three flavors.** `tenax`, `pipze_funded` and `alibabafx_prop` ship the same screens, controllers and behaviour. The only differences are config (colours, logo, app name, URLs). A flavor-specific screen is added only when explicitly requested, and only through `FlavorResolver` (see above). `Flavor.<x>` is never checked outside `lib/app/flavor/`.
+- **Shared UI never imports feature code.** Widgets in `lib/shared/` take plain values (strings, colours, callbacks, child widgets), and each feature maps its own model onto them. The one exception is `lib/shared/bindings/positions_binding.dart`, because a binding has to know the classes it wires.
+- **Reusable never costs speed.**
+  - Shared widgets are `StatelessWidget`s with no `Obx` or `Get.find` inside. The feature wraps only the changing value in `Obx` and passes it in (e.g. `AppSymbolCard(quote: Obx(() => AppSymbolQuote(...)))`). A price tick then rebuilds one tile, not the list.
+  - Live tiles (`AppPriceTile`, `AppMetricStrip`) sit in a `RepaintBoundary`.
+  - `AppText` caches the font per weight, so styles are built once, not on every rebuild.
+- **Same look, exact values.** A one-off design (a unique radius, colour or padding) stays a private widget in its feature rather than being bent onto a shared one.
+- Spacing tokens live in `lib/shared/theme/app_spacing.dart`. Use `Gap.vLg` / `Gap.hSm`, or `14.verticalSpace` for values off the scale, instead of `SizedBox(height: 14.h)`.
+
+### Catalogue (`lib/shared/`)
+
+**Text**
+- `AppText.heading` / `title` / `subtitle` / `body` / `regular` / `label` / `value` are weight roles. Pass `fontSize: 13.sp`, `color`, `height` and `letterSpacing` per call.
+- `AppText.base(...)` takes any exact size/weight. Add `.copyWith(...)` for extras like `decoration` or `fontStyle`.
+- `AppLabel` is a one-line, ellipsized text for dynamic values in a `Row`.
+
+**Buttons**
+- `AppButton`: brand gradient CTA.
+- `AppButton.outlined`, `AppButton.text`, `AppButton.tonal`: the other variants. All support `loading`, `icon`, `expand` and `height`.
+- `AppIconButton`: header icon tile with an optional `badge`.
+- `AppGradientButton` is still available; `AppButton` wraps it.
+
+**Containers**
+- `AppCard`: surface card. `radius` is passed as-is, `onTap` adds ink.
+- `AppBottomSheet` + `AppBottomSheet.show(...)` + `AppSheetGrabber`.
+- `AppOptionCard`, `AppInfoBanner`, `AppEmptyView`, `AppComingSoon`, `AppBrandBadge`.
+
+**Status & data**
+- `AppStatusPill` with `AppStatusColors.of(status, scheme)` / `.label(status)`. This is the one status→colour map.
+- `AppPill`, `AppChoiceChip`, `AppSegmentedControl`, `AppStatTile` / `AppStatGrid`, `KeyValueRow`, `IconLeadingRow`, `SectionHeader`.
+
+**Lists**
+- `history/`: `AppHistoryRow`, `AppHistoryEmpty`, `AppLoadMoreButton`.
+- `market/`: `AppSymbolCard`, `AppSymbolQuote`, `AppPriceTile`, `AppMetricStrip`, `AppSymbolListSkeleton`.
+
+**Forms & states**
+- `AppTextField`, `AppLabeledField`, `AppLabeledDropdown`, `AppCheckbox`, `UploadDropzone`.
+- `DataStateBuilder` with the shimmer skeletons in `skeletons/`, `AppToast`, `AppConfirmDialog`.
+
+### Enforced by tests
+
+- `test/architecture/reusable_ui_guard_test.dart` fails on a raw `GoogleFonts.` / `TextStyle(` in `lib/features`, on any `Flavor.` check outside `lib/app/flavor/`, and on a raw `OutlinedButton` / `TextButton` / `FilledButton` beyond the listed one-off designs.
+- `test/goldens/` renders every shared widget for all 3 flavors in light and dark (`flutter test test/goldens`). Re-record with `--update-goldens` only for an intended design change.
+- `test/goldens/shared_widgets_layout_test.dart` checks for overflow and clipping at 320 and 375 px.
 
 ## API docs
 

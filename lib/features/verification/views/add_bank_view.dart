@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
-import 'package:google_fonts/google_fonts.dart';
 
 import '../../../app/routes/app_routes.dart';
 import '../../../shared/theme/app_colors.dart';
@@ -15,6 +14,8 @@ import '../controllers/add_bank_controller.dart';
 import '../controllers/verification_controller.dart';
 import '../models/verification_models.dart';
 import '../widgets/verify_mobile_dialog.dart';
+import '../../../shared/theme/app_spacing.dart';
+import '../../../shared/theme/app_text.dart';
 
 /// "Add bank" screen: account type/currency/holder fields, IBAN + code,
 /// account numbers, swift code, a proof upload, and a "Send OTP" CTA.
@@ -29,8 +30,7 @@ class AddBankView extends GetView<AddBankController> {
     // step complete and return to the overview. Standalone use just pops.
     if (Get.isRegistered<VerificationController>()) {
       final vc = Get.find<VerificationController>();
-      vc.steps[2] =
-          vc.steps[2].copyWith(status: VerificationStatus.completed);
+      vc.steps[2] = vc.steps[2].copyWith(status: VerificationStatus.completed);
       vc.steps.refresh();
       Get.until((route) => route.settings.name == AppRoutes.verification);
     } else {
@@ -52,7 +52,7 @@ class AddBankView extends GetView<AddBankController> {
             actions: [
               IconButton(
                 onPressed: Get.back,
-        icon: const Icon(Icons.cancel_outlined, color: AppColors.white),
+                icon: const Icon(Icons.cancel_outlined, color: AppColors.white),
               ),
             ],
           ),
@@ -70,7 +70,7 @@ class AddBankView extends GetView<AddBankController> {
                       onChanged: (v) => controller.accountType.value = v,
                     ),
                   ),
-                  SizedBox(height: 16.h),
+                  Gap.vLg,
                   Obx(
                     () => AppLabeledDropdown(
                       label: 'verification.currency'.tr,
@@ -79,15 +79,17 @@ class AddBankView extends GetView<AddBankController> {
                       onChanged: (v) => controller.currency.value = v,
                     ),
                   ),
-                  SizedBox(height: 16.h),
+                  Gap.vLg,
                   AppLabeledField(
-                      controller: controller.accountHolder,
-                      label: 'verification.account_holder'.tr),
-                  SizedBox(height: 16.h),
+                    controller: controller.accountHolder,
+                    label: 'verification.account_holder'.tr,
+                  ),
+                  Gap.vLg,
                   AppLabeledField(
-                      controller: controller.beneficiaryBank,
-                      label: 'verification.beneficiary_bank'.tr),
-                  SizedBox(height: 16.h),
+                    controller: controller.beneficiaryBank,
+                    label: 'verification.beneficiary_bank'.tr,
+                  ),
+                  Gap.vLg,
                   Row(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
@@ -102,7 +104,7 @@ class AddBankView extends GetView<AddBankController> {
                           ),
                         ),
                       ),
-                      SizedBox(width: 14.w),
+                      14.horizontalSpace,
                       Expanded(
                         child: Obx(
                           () => AppLabeledDropdown(
@@ -116,29 +118,33 @@ class AddBankView extends GetView<AddBankController> {
                       ),
                     ],
                   ),
-                  SizedBox(height: 16.h),
+                  Gap.vLg,
                   AppLabeledField(
                     controller: controller.accountNumber,
                     label: 'verification.bank_account_number'.tr,
                     keyboardType: TextInputType.number,
                   ),
-                  SizedBox(height: 16.h),
+                  Gap.vLg,
                   AppLabeledField(
                     controller: controller.confirmAccountNumber,
                     label: 'verification.confirm_bank_account_number'.tr,
                     keyboardType: TextInputType.number,
                   ),
-                  SizedBox(height: 16.h),
+                  Gap.vLg,
                   AppLabeledField(
                     controller: controller.swiftCode,
                     label: 'verification.swift_code'.tr,
                     keyboardType: TextInputType.number,
                   ),
-                  SizedBox(height: 22.h),
-                  Text('verification.add_proof'.tr,
-                      style: GoogleFonts.beVietnamPro(
-                          fontSize: 18.sp, fontWeight: FontWeight.w700)),
-                  SizedBox(height: 12.h),
+                  22.verticalSpace,
+                  Text(
+                    'verification.add_proof'.tr,
+                    style: AppText.base(
+                      fontSize: 18.sp,
+                      fontWeight: FontWeight.w700,
+                    ),
+                  ),
+                  Gap.vMd,
                   Obx(
                     () => UploadDropzone(
                       onTap: controller.pickProof,
@@ -154,7 +160,9 @@ class AddBankView extends GetView<AddBankController> {
       ),
       bottomNavigationBar: BottomActionBar(
         child: AppGradientButton(
-            label: 'verification.send_otp'.tr, onPressed: _sendOtp),
+          label: 'verification.send_otp'.tr,
+          onPressed: _sendOtp,
+        ),
       ),
     );
   }

@@ -1,13 +1,15 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
-import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/intl.dart';
 
-import '../../../shared/theme/app_colors.dart';
+import '../../../shared/theme/app_status_colors.dart';
 import '../../../shared/theme/app_theme.dart';
+import '../../../shared/widgets/app_status_pill.dart';
 import '../controllers/payout_history_controller.dart';
 import '../models/reward_models.dart';
+import '../../../shared/theme/app_spacing.dart';
+import '../../../shared/theme/app_text.dart';
 
 /// One payout request: request id + status pill, amount, method / account /
 /// share details and the requested / paid dates. Shows a Cancel action when
@@ -40,7 +42,7 @@ class PayoutHistoryCard extends StatelessWidget {
           Row(
             children: [
               _MethodIcon(type: item.methodType),
-              SizedBox(width: 12.w),
+              Gap.hMd,
               Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
@@ -51,7 +53,7 @@ class PayoutHistoryCard extends StatelessWidget {
                       overflow: TextOverflow.ellipsis,
                       style: _strong(scheme, 14.5),
                     ),
-                    SizedBox(height: 2.h),
+                    Gap.vXxs,
                     Text(
                       [
                         item.methodLabel,
@@ -64,23 +66,30 @@ class PayoutHistoryCard extends StatelessWidget {
                   ],
                 ),
               ),
-              SizedBox(width: 8.w),
+              Gap.hSm,
               Column(
                 crossAxisAlignment: CrossAxisAlignment.end,
                 children: [
                   Text(item.amount, maxLines: 1, style: _strong(scheme, 16)),
-                  SizedBox(height: 4.h),
-                  _StatusPill(status: item.status),
+                  Gap.vXs,
+                  AppStatusPill(
+                    label: AppStatusColors.label(item.status),
+                    color: AppStatusColors.of(
+                      item.status,
+                      scheme,
+                      info: const {'approved'},
+                    ),
+                  ),
                 ],
               ),
             ],
           ),
-          SizedBox(height: 12.h),
+          Gap.vMd,
           Divider(
             height: 1.h,
             color: scheme.outlineVariant.withValues(alpha: 0.6),
           ),
-          SizedBox(height: 10.h),
+          10.verticalSpace,
           _DetailRow(
             label: 'rewards.payout_account'.tr,
             value: item.account.isEmpty ? '—' : item.account,
@@ -97,11 +106,11 @@ class PayoutHistoryCard extends StatelessWidget {
               value: _formatDate(item.paidDate),
             ),
           if (item.notes != null) ...[
-            SizedBox(height: 6.h),
+            6.verticalSpace,
             Text(item.notes!, style: _muted(scheme, 12)),
           ],
           if (item.cancellable) ...[
-            SizedBox(height: 10.h),
+            10.verticalSpace,
             _CancelButton(item: item, onCancel: onCancel),
           ],
         ],
@@ -113,13 +122,13 @@ class PayoutHistoryCard extends StatelessWidget {
       date == null ? '—' : DateFormat('d MMM yyyy, HH:mm').format(date);
 }
 
-TextStyle _strong(ColorScheme scheme, double size) => GoogleFonts.beVietnamPro(
+TextStyle _strong(ColorScheme scheme, double size) => AppText.base(
   fontSize: size.sp,
   fontWeight: FontWeight.w800,
   color: scheme.onSurface,
 );
 
-TextStyle _muted(ColorScheme scheme, double size) => GoogleFonts.beVietnamPro(
+TextStyle _muted(ColorScheme scheme, double size) => AppText.base(
   fontSize: size.sp,
   fontWeight: FontWeight.w500,
   color: scheme.onSurfaceVariant,
@@ -138,14 +147,14 @@ class _DetailRow extends StatelessWidget {
       child: Row(
         children: [
           Text(label, style: _muted(scheme, 12)),
-          SizedBox(width: 12.w),
+          Gap.hMd,
           Expanded(
             child: Text(
               value,
               maxLines: 1,
               overflow: TextOverflow.ellipsis,
               textAlign: TextAlign.end,
-              style: GoogleFonts.beVietnamPro(
+              style: AppText.base(
                 fontSize: 12.5.sp,
                 fontWeight: FontWeight.w600,
                 color: scheme.onSurface,
@@ -182,51 +191,6 @@ class _MethodIcon extends StatelessWidget {
   }
 }
 
-/// Capitalised status with a leading dot, coloured by outcome.
-class _StatusPill extends StatelessWidget {
-  const _StatusPill({required this.status});
-  final String status;
-
-  @override
-  Widget build(BuildContext context) {
-    final scheme = Theme.of(context).colorScheme;
-    final key = status.toLowerCase();
-    final Color color = switch (key) {
-      'paid' || 'disbursed' || 'completed' => AppColors.success,
-      'approved' => AppColors.info,
-      'rejected' || 'cancelled' || 'canceled' || 'failed' => scheme.error,
-      _ => AppColors.warningInk,
-    };
-    final label = key.isEmpty ? '-' : key[0].toUpperCase() + key.substring(1);
-    return Container(
-      padding: EdgeInsets.symmetric(horizontal: 8.w, vertical: 3.h),
-      decoration: BoxDecoration(
-        color: color.withValues(alpha: 0.12),
-        borderRadius: BorderRadius.circular(20.r),
-      ),
-      child: Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Container(
-            width: 6.w,
-            height: 6.w,
-            decoration: BoxDecoration(color: color, shape: BoxShape.circle),
-          ),
-          SizedBox(width: 5.w),
-          Text(
-            label,
-            style: GoogleFonts.beVietnamPro(
-              fontSize: 10.5.sp,
-              fontWeight: FontWeight.w700,
-              color: color,
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-}
-
 class _CancelButton extends StatelessWidget {
   const _CancelButton({required this.item, required this.onCancel});
   final PayoutHistoryItem item;
@@ -256,7 +220,7 @@ class _CancelButton extends StatelessWidget {
               )
             : Text(
                 'rewards.history_cancel'.tr,
-                style: GoogleFonts.beVietnamPro(
+                style: AppText.base(
                   fontSize: 13.sp,
                   fontWeight: FontWeight.w700,
                 ),

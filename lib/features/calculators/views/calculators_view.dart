@@ -52,7 +52,7 @@ class CalculatorsView extends GetView<CalculatorsController> {
                     selectedIndex: controller.selectedTab.value,
                     onSelected: controller.selectTab,
                   ),
-                  SizedBox(height: 18.h),
+                  18.verticalSpace,
                   _CalculatorForm(definition: controller.selectedDefinition!),
                 ]),
               ),
@@ -68,7 +68,7 @@ class _CalculatorForm extends StatelessWidget {
   const _CalculatorForm({required this.definition});
   final CalculatorDefinition definition;
 
-    @override
+  @override
   Widget build(BuildContext context) {
     final c = Get.find<CalculatorsController>();
     final scheme = Theme.of(context).colorScheme;
@@ -95,13 +95,18 @@ class _CalculatorForm extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
                 if (definition.note.isNotEmpty) ...[
-                  Text(definition.note, style: Theme.of(context).textTheme.bodyMedium),
-                  SizedBox(height: 14.h),
+                  Text(
+                    definition.note,
+                    style: Theme.of(context).textTheme.bodyMedium,
+                  ),
+                  14.verticalSpace,
                 ],
                 for (final field in fields) ...[
                   if (field.isSelect)
                     CalcSymbolDropdown(
-                      value: c.field(field.key).isEmpty ? field.options.first : c.field(field.key),
+                      value: c.field(field.key).isEmpty
+                          ? field.options.first
+                          : c.field(field.key),
                       items: field.options,
                       onChanged: (value) => c.setField(field.key, value),
                       label: field.label,
@@ -112,23 +117,26 @@ class _CalculatorForm extends StatelessWidget {
                       value: c.field(field.key),
                       onChanged: (value) => c.setField(field.key, value),
                     ),
-                  SizedBox(height: 14.h),
+                  14.verticalSpace,
                 ],
                 AppGradientButton(
                   label: 'calculators.calculate'.tr,
                   height: 52.h,
-                  onPressed: () => c.setField('_calculated', DateTime.now().toIso8601String()),
+                  onPressed: () => c.setField(
+                    '_calculated',
+                    DateTime.now().toIso8601String(),
+                  ),
                 ),
               ],
             ),
           ),
-          SizedBox(height: 18.h),
+          18.verticalSpace,
           CalcResultCard(
             headline: c.formatResult(),
             subtitle: definition.label,
           ),
           if (c.calculators?.disclaimer.isNotEmpty == true) ...[
-            SizedBox(height: 14.h),
+            14.verticalSpace,
             CalcNoteBanner(text: c.calculators!.disclaimer),
           ],
         ],
@@ -136,4 +144,3 @@ class _CalculatorForm extends StatelessWidget {
     });
   }
 }
-

@@ -1,11 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
-import 'package:google_fonts/google_fonts.dart';
 
 import '../../../shared/theme/app_colors.dart';
 import '../../../shared/widgets/app_gradient_button.dart';
 import '../controllers/support_controller.dart';
+import '../../../shared/theme/app_spacing.dart';
+import '../../../shared/theme/app_text.dart';
 
 /// The "Open a ticket" bottom sheet: white rounded top with a red circular
 /// close X, a Topic dropdown, an Account dropdown, a multiline Message field,
@@ -39,7 +40,7 @@ class OpenTicketSheet extends StatelessWidget {
                     Expanded(
                       child: Text(
                         'support.open_ticket'.tr,
-                        style: GoogleFonts.beVietnamPro(
+                        style: AppText.base(
                           fontSize: 18.sp,
                           fontWeight: FontWeight.w800,
                           color: scheme.onSurface,
@@ -49,32 +50,32 @@ class OpenTicketSheet extends StatelessWidget {
                     _CloseButton(onTap: Get.back),
                   ],
                 ),
-                SizedBox(height: 16.h),
+                Gap.vLg,
                 _Label('support.field_topic'.tr),
                 _TopicDropdown(c: c),
-                SizedBox(height: 14.h),
+                14.verticalSpace,
                 _Label('support.field_subject'.tr),
                 TextField(
                   onChanged: c.setSubject,
-                  style: GoogleFonts.beVietnamPro(color: scheme.onSurface),
+                  style: AppText.base(color: scheme.onSurface),
                   decoration: InputDecoration(
                     hintText: 'support.subject_hint'.tr,
                   ),
                 ),
-                SizedBox(height: 14.h),
+                14.verticalSpace,
                 _Label('support.field_message'.tr),
                 TextField(
                   minLines: 4,
                   maxLines: 6,
                   onChanged: c.setMessage,
-                  style: GoogleFonts.beVietnamPro(color: scheme.onSurface),
+                  style: AppText.base(color: scheme.onSurface),
                   decoration: InputDecoration(
                     hintText: 'support.ticket_hint'.tr,
                   ),
                 ),
-                SizedBox(height: 16.h),
+                Gap.vLg,
                 _RuleAnswerBox(),
-                SizedBox(height: 18.h),
+                18.verticalSpace,
                 Obx(
                   () => AppGradientButton(
                     label: 'support.send'.tr,
@@ -106,7 +107,7 @@ class _Label extends StatelessWidget {
       padding: EdgeInsets.only(bottom: 6.h, left: 2.w),
       child: Text(
         text,
-        style: GoogleFonts.beVietnamPro(
+        style: AppText.base(
           fontSize: 13.sp,
           fontWeight: FontWeight.w700,
           color: scheme.onSurfaceVariant,
@@ -134,7 +135,7 @@ class _TopicDropdown extends StatelessWidget {
         isExpanded: true,
         hint: Text('support.select_topic'.tr),
         borderRadius: BorderRadius.circular(12.r),
-        style: GoogleFonts.beVietnamPro(
+        style: AppText.base(
           fontSize: 14.sp,
           fontWeight: FontWeight.w600,
           color: scheme.onSurface,
@@ -168,23 +169,23 @@ class _RuleAnswerBox extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Icon(Icons.verified_outlined, color: scheme.primary, size: 20.w),
-          SizedBox(width: 10.w),
+          10.horizontalSpace,
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
                   'support.rule_answer_title'.tr,
-                  style: GoogleFonts.beVietnamPro(
+                  style: AppText.base(
                     fontSize: 13.5.sp,
                     fontWeight: FontWeight.w800,
                     color: scheme.onSurface,
                   ),
                 ),
-                SizedBox(height: 3.h),
+                3.verticalSpace,
                 Text(
                   'support.rule_answer_body'.tr,
-                  style: GoogleFonts.beVietnamPro(
+                  style: AppText.base(
                     fontSize: 12.5.sp,
                     height: 1.35,
                     color: scheme.onSurfaceVariant,

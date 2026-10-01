@@ -3,6 +3,7 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:google_fonts/google_fonts.dart';
 
 import '../theme/app_colors.dart';
+import '../theme/app_spacing.dart';
 import '../theme/app_theme.dart';
 
 /// Visual tone
@@ -54,7 +55,7 @@ class AppInfoBanner extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Icon(icon ?? _defaultIcon, size: 20.w, color: accent),
-          SizedBox(width: 10.w),
+          10.horizontalSpace,
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -67,7 +68,7 @@ class AppInfoBanner extends StatelessWidget {
                     color: scheme.onSurface,
                   ),
                 ),
-                SizedBox(height: 4.h),
+                Gap.vXs,
                 Text(
                   body,
                   style: GoogleFonts.beVietnamPro(

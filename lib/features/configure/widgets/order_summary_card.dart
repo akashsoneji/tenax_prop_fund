@@ -4,7 +4,9 @@ import 'package:get/get.dart';
 
 import '../../../shared/theme/app_colors.dart';
 import '../../../shared/theme/app_theme.dart';
+import '../../../shared/widgets/app_dashed.dart';
 import '../controllers/configure_controller.dart';
+import '../../../shared/theme/app_spacing.dart';
 
 /// Receipt-style order summary: plan header, choice chips, then a price
 /// breakdown with a highlighted total. Rebuilds from [ConfigureController].
@@ -30,13 +32,9 @@ class OrderSummaryCard extends StatelessWidget {
             _PlanHeader(c: c),
             Padding(
               padding: EdgeInsets.fromLTRB(16.w, 14.h, 16.w, 4.h),
-              child: Wrap(
-                spacing: 8.w,
-                runSpacing: 8.h,
-                children: _chips(),
-              ),
+              child: Wrap(spacing: 8.w, runSpacing: 8.h, children: _chips()),
             ),
-            _DashedDivider(color: scheme.outlineVariant),
+            AppDashedDivider(color: scheme.outlineVariant),
             _PriceBreakdown(c: c),
           ],
         ),
@@ -93,10 +91,13 @@ class _PlanHeader extends StatelessWidget {
               gradient: AppTheme.heroGradient(scheme),
               borderRadius: BorderRadius.circular(12.r),
             ),
-            child: Icon(Icons.workspace_premium_rounded,
-                size: 20.w, color: AppColors.white),
+            child: Icon(
+              Icons.workspace_premium_rounded,
+              size: 20.w,
+              color: AppColors.white,
+            ),
           ),
-          SizedBox(width: 12.w),
+          Gap.hMd,
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -111,7 +112,7 @@ class _PlanHeader extends StatelessWidget {
                     color: scheme.onSurface,
                   ),
                 ),
-                SizedBox(height: 2.h),
+                Gap.vXxs,
                 Text(
                   '${c.accountSize} · ${c.currency}',
                   maxLines: 1,
@@ -166,7 +167,7 @@ class _InfoChip extends StatelessWidget {
         mainAxisSize: MainAxisSize.min,
         children: [
           Icon(icon, size: 14.w, color: scheme.primary),
-          SizedBox(width: 6.w),
+          6.horizontalSpace,
           Flexible(
             child: Text(
               label,
@@ -199,17 +200,14 @@ class _PriceBreakdown extends StatelessWidget {
       padding: EdgeInsets.fromLTRB(16.w, 4.h, 16.w, 16.h),
       child: Column(
         children: [
-          _PriceLine(
-            label: 'configure.subtotal'.tr,
-            value: '\$${c.subtotal}',
-          ),
+          _PriceLine(label: 'configure.subtotal'.tr, value: '\$${c.subtotal}'),
           if (hasDiscount)
             _PriceLine(
               label: '${'configure.discount'.tr} (${c.appliedCoupon.value})',
               value: '-\$${c.discount}',
               valueColor: AppColors.success,
             ),
-          SizedBox(height: 8.h),
+          Gap.vSm,
           Row(
             crossAxisAlignment: CrossAxisAlignment.end,
             children: [
@@ -274,38 +272,6 @@ class _PriceLine extends StatelessWidget {
             ),
           ),
         ],
-      ),
-    );
-  }
-}
-
-/// Receipt-style perforation between the choices and the price breakdown.
-class _DashedDivider extends StatelessWidget {
-  const _DashedDivider({required this.color});
-
-  final Color color;
-
-  @override
-  Widget build(BuildContext context) {
-    return Padding(
-      padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 10.h),
-      child: LayoutBuilder(
-        builder: (context, constraints) {
-          final dashWidth = 6.w;
-          final gap = 4.w;
-          final count = (constraints.maxWidth / (dashWidth + gap)).floor();
-          return Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: List.generate(
-              count,
-              (_) => SizedBox(
-                width: dashWidth,
-                height: 1.h,
-                child: ColoredBox(color: color),
-              ),
-            ),
-          );
-        },
       ),
     );
   }

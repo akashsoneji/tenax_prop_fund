@@ -7,6 +7,7 @@ import '../../../shared/theme/app_text.dart';
 import '../../../shared/theme/app_theme.dart';
 import '../controllers/positions_controller.dart';
 import 'account_switch_sheet.dart';
+import '../../../shared/theme/app_spacing.dart';
 
 /// The live P&L header above the Positions/Trade tabs, mirroring the
 /// white_label vantage trade screen: a big floating P&L figure on the left and
@@ -39,8 +40,8 @@ class PositionsAccountHeader extends StatelessWidget {
         final profitColor = profit > 0
             ? AppColors.successBright
             : profit < 0
-                ? AppColors.dangerBright
-                : Colors.white;
+            ? AppColors.dangerBright
+            : Colors.white;
         final login = controller.tradingAccount.value;
         return Row(
           children: [
@@ -50,7 +51,6 @@ class PositionsAccountHeader extends StatelessWidget {
                 children: [
                   Row(
                     children: [
-                      
                       Flexible(
                         child: Text(
                           'positions.floating_pl'.tr,
@@ -64,30 +64,23 @@ class PositionsAccountHeader extends StatelessWidget {
                       ),
                     ],
                   ),
-                  SizedBox(height: 4.h),
+                  Gap.vXs,
                   Text(
                     '\$${profit.toStringAsFixed(2)}',
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
-                    style: AppText.title(
-                      color: profitColor,
-                      fontSize: 24.sp,
-                    ),
+                    style: AppText.title(color: profitColor, fontSize: 24.sp),
                   ),
                 ],
               ),
             ),
-            SizedBox(width: 10.w),
-            _AccountPill(
-              login: login,
-              onTap: () => _showSwitchSheet(context),
-            ),
+            10.horizontalSpace,
+            _AccountPill(login: login, onTap: () => _showSwitchSheet(context)),
           ],
         );
       }),
     );
   }
-
 
   void _showSwitchSheet(BuildContext context) =>
       AccountSwitchSheet.show(context, controller);
@@ -113,8 +106,7 @@ class _AccountPill extends StatelessWidget {
           decoration: BoxDecoration(
             color: Colors.white.withValues(alpha: 0.15),
             borderRadius: BorderRadius.circular(24.r),
-            border:
-                Border.all(color: Colors.white.withValues(alpha: 0.25)),
+            border: Border.all(color: Colors.white.withValues(alpha: 0.25)),
           ),
           child: Row(
             mainAxisSize: MainAxisSize.min,
@@ -132,18 +124,14 @@ class _AccountPill extends StatelessWidget {
                   color: AppColors.brandPurple,
                 ),
               ),
-              SizedBox(width: 7.w),
+              7.horizontalSpace,
               Text(
                 login.isEmpty ? '—' : login,
-                style: AppText.title(
-                  color: Colors.white,
-                  fontSize: 14.sp,
-                ),
+                style: AppText.title(color: Colors.white, fontSize: 14.sp),
               ),
-              SizedBox(width: 7.w),
+              7.horizontalSpace,
               Container(
-                padding:
-                    EdgeInsets.symmetric(horizontal: 7.w, vertical: 3.h),
+                padding: EdgeInsets.symmetric(horizontal: 7.w, vertical: 3.h),
                 decoration: BoxDecoration(
                   color: AppColors.accent.withValues(alpha: 0.22),
                   borderRadius: BorderRadius.circular(10.r),
@@ -156,7 +144,7 @@ class _AccountPill extends StatelessWidget {
                   ),
                 ),
               ),
-              SizedBox(width: 2.w),
+              Gap.hXxs,
               Icon(
                 Icons.keyboard_arrow_down_rounded,
                 size: 18.w,
@@ -167,6 +155,5 @@ class _AccountPill extends StatelessWidget {
         ),
       ),
     );
-
   }
 }

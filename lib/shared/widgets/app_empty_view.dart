@@ -3,6 +3,7 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
 
 import '../theme/app_colors.dart';
+import '../theme/app_spacing.dart';
 import '../theme/app_text.dart';
 
 /// The shared empty / no-data state — the reusable form of the `_EmptyState`,
@@ -57,7 +58,7 @@ class AppEmptyView extends StatelessWidget {
       mainAxisSize: MainAxisSize.min,
       children: [
         Icon(icon, size: 44.w, color: muted),
-        SizedBox(height: 12.h),
+        Gap.vMd,
         if (titleKey != null) ...[
           Text(
             titleKey!.tr,
@@ -66,7 +67,7 @@ class AppEmptyView extends StatelessWidget {
             overflow: TextOverflow.ellipsis,
             style: AppText.title(color: scheme.onSurface),
           ),
-          SizedBox(height: 6.h),
+          6.verticalSpace,
         ],
         Text(
           messageKey.tr,
@@ -76,7 +77,7 @@ class AppEmptyView extends StatelessWidget {
           style: AppText.subtitle(color: muted),
         ),
         if (onRetry != null) ...[
-          SizedBox(height: 12.h),
+          Gap.vMd,
           TextButton(
             onPressed: onRetry,
             child: Text(

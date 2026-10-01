@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:google_fonts/google_fonts.dart';
 
+import '../theme/app_spacing.dart';
+
 /// A small metric tile: optional leading icon, a muted label and a bold value.
 ///
 /// This is the single reusable form of the `_MetricCell` / `_StatCell` /
@@ -141,14 +143,14 @@ class AppStatTile extends StatelessWidget {
             children: [
               Icon(icon,
                   size: (iconSize ?? 14).w, color: resolvedIconTint),
-              SizedBox(width: 4.w),
+              Gap.hXs,
               Flexible(child: labelText),
             ],
           )
         else ...[
           if (icon != null) ...[
             Icon(icon, size: (iconSize ?? 18).w, color: resolvedIconTint),
-            SizedBox(height: 6.h),
+            6.verticalSpace,
           ],
           labelText,
         ],

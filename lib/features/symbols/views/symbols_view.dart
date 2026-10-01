@@ -12,6 +12,7 @@ import '../services/favorites_service.dart';
 import '../services/market_watch_v2_service.dart';
 import '../widgets/favorite_symbol_tile.dart';
 import '../widgets/instrument_search_sheet.dart';
+import '../../../shared/theme/app_spacing.dart';
 
 /// The "Symbols & specs" screen — a single compact watchlist of the user's
 /// favorited instruments with live Sell/Buy. Rows can be reordered by dragging
@@ -69,7 +70,6 @@ class SymbolsView extends StatelessWidget {
         ),
       ),
     );
-
   }
 }
 
@@ -102,12 +102,14 @@ class _FavoritesSection extends StatelessWidget {
           physics: const NeverScrollableScrollPhysics(),
           padding: EdgeInsets.zero,
           itemCount: items.length,
-          onReorder: favorites.reorder,
+          onReorderItem: favorites.reorder,
           itemBuilder: (context, i) {
             final item = items[i];
             return Padding(
               key: ValueKey(item.code),
-              padding: EdgeInsets.only(bottom: i == items.length - 1 ? 0 : 10.h),
+              padding: EdgeInsets.only(
+                bottom: i == items.length - 1 ? 0 : 10.h,
+              ),
               child: Dismissible(
                 key: ValueKey('dismiss_${item.code}'),
                 direction: DismissDirection.endToStart,
@@ -153,21 +155,27 @@ class _EmptyWatchlist extends StatelessWidget {
       padding: EdgeInsets.fromLTRB(32.w, 80.h, 32.w, 32.h),
       child: Column(
         children: [
-          Icon(Icons.star_border_rounded,
-              size: 56.w, color: scheme.onSurfaceVariant),
-          SizedBox(height: 16.h),
+          Icon(
+            Icons.star_border_rounded,
+            size: 56.w,
+            color: scheme.onSurfaceVariant,
+          ),
+          Gap.vLg,
           Text(
             'symbols.watchlist_empty_title'.tr,
             textAlign: TextAlign.center,
             style: AppText.title(color: scheme.onSurface, fontSize: 16.sp),
           ),
-          SizedBox(height: 8.h),
+          Gap.vSm,
           Text(
             'symbols.watchlist_empty_hint'.tr,
             textAlign: TextAlign.center,
-            style: AppText.base(fontSize: 13.sp, color: scheme.onSurfaceVariant),
+            style: AppText.base(
+              fontSize: 13.sp,
+              color: scheme.onSurfaceVariant,
+            ),
           ),
-          SizedBox(height: 20.h),
+          20.verticalSpace,
           FilledButton.icon(
             onPressed: InstrumentSearchSheet.open,
             icon: Icon(Icons.add_rounded, size: 20.w),

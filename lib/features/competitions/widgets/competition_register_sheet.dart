@@ -6,6 +6,7 @@ import '../../../shared/theme/app_colors.dart';
 import '../../../shared/theme/app_text.dart';
 import '../controllers/competitions_controller.dart';
 import '../models/competition_models.dart';
+import '../../../shared/theme/app_spacing.dart';
 
 /// Bottom sheet that asks which trading account to enter a competition with,
 /// then hands the choice to [CompetitionsController.register].
@@ -65,12 +66,12 @@ class CompetitionRegisterSheet extends StatelessWidget {
                 ),
               ),
             ),
-            SizedBox(height: 16.h),
+            Gap.vLg,
             Text(
               'competitions.select_account'.tr,
               style: AppText.title(fontSize: 16.sp, color: scheme.onSurface),
             ),
-            SizedBox(height: 4.h),
+            Gap.vXs,
             Text(
               competition.name,
               maxLines: 2,
@@ -80,7 +81,7 @@ class CompetitionRegisterSheet extends StatelessWidget {
                 color: scheme.onSurfaceVariant,
               ),
             ),
-            SizedBox(height: 16.h),
+            Gap.vLg,
             Flexible(
               child: accounts.isEmpty
                   ? Padding(
@@ -98,11 +99,12 @@ class CompetitionRegisterSheet extends StatelessWidget {
                       shrinkWrap: true,
                       physics: const BouncingScrollPhysics(),
                       itemCount: accounts.length,
-                      separatorBuilder: (_, _) => SizedBox(height: 10.h),
+                      separatorBuilder: (_, _) => 10.verticalSpace,
                       itemBuilder: (context, index) => Obx(
                         () => _AccountTile(
                           account: accounts[index],
-                          selected: controller.selectedAccount.value?.id ==
+                          selected:
+                              controller.selectedAccount.value?.id ==
                               accounts[index].id,
                           onTap: () =>
                               controller.selectAccount(accounts[index]),
@@ -110,10 +112,11 @@ class CompetitionRegisterSheet extends StatelessWidget {
                       ),
                     ),
             ),
-            SizedBox(height: 16.h),
+            Gap.vLg,
             Obx(
               () => _ConfirmButton(
-                enabled: controller.selectedAccount.value != null &&
+                enabled:
+                    controller.selectedAccount.value != null &&
                     !controller.isRegistering(competition),
                 busy: controller.isRegistering(competition),
                 onTap: () async {
@@ -164,7 +167,7 @@ class _AccountTile extends StatelessWidget {
                 size: 18.w,
                 color: selected ? scheme.primary : scheme.onSurfaceVariant,
               ),
-              SizedBox(width: 12.w),
+              Gap.hMd,
               Expanded(
                 child: Text(
                   account.label,
@@ -217,7 +220,9 @@ class _ConfirmButton extends StatelessWidget {
                     height: 20.w,
                     child: CircularProgressIndicator(
                       strokeWidth: 2.w,
-                      valueColor: AlwaysStoppedAnimation(scheme.onSurfaceVariant),
+                      valueColor: AlwaysStoppedAnimation(
+                        scheme.onSurfaceVariant,
+                      ),
                     ),
                   )
                 : Text(
@@ -226,8 +231,9 @@ class _ConfirmButton extends StatelessWidget {
                     overflow: TextOverflow.ellipsis,
                     style: AppText.title(
                       fontSize: 15.sp,
-                      color:
-                          enabled ? AppColors.white : scheme.onSurfaceVariant,
+                      color: enabled
+                          ? AppColors.white
+                          : scheme.onSurfaceVariant,
                     ),
                   ),
           ),

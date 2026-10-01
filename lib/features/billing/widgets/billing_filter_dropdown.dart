@@ -1,8 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
-import 'package:google_fonts/google_fonts.dart';
 
 import '../../../shared/theme/app_colors.dart';
+import '../../../shared/theme/app_spacing.dart';
+import '../../../shared/theme/app_text.dart';
 
 /// A polished, reusable filter chip that opens a themed popup menu. Used for
 /// both the transaction `type` and `status` filters that map to the query
@@ -46,9 +47,7 @@ class BillingFilterDropdown<T> extends StatelessWidget {
       color: scheme.surface,
       elevation: 3,
       offset: Offset(0, 46.h),
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(14.r),
-      ),
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14.r)),
       itemBuilder: (context) => [
         for (final v in values)
           PopupMenuItem<T>(
@@ -61,10 +60,11 @@ class BillingFilterDropdown<T> extends StatelessWidget {
                     labelOf(v),
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
-                    style: GoogleFonts.beVietnamPro(
+                    style: AppText.base(
                       fontSize: 13.sp,
-                      fontWeight:
-                          v == selected ? FontWeight.w700 : FontWeight.w500,
+                      fontWeight: v == selected
+                          ? FontWeight.w700
+                          : FontWeight.w500,
                       color: v == selected ? scheme.primary : scheme.onSurface,
                     ),
                   ),
@@ -88,20 +88,20 @@ class BillingFilterDropdown<T> extends StatelessWidget {
           mainAxisSize: MainAxisSize.min,
           children: [
             Icon(icon, size: 16.w, color: fg),
-            SizedBox(width: 8.w),
+            Gap.hSm,
             Flexible(
               child: Text(
                 labelOf(selected),
                 maxLines: 1,
                 overflow: TextOverflow.ellipsis,
-                style: GoogleFonts.beVietnamPro(
+                style: AppText.base(
                   fontSize: 13.sp,
                   fontWeight: FontWeight.w600,
                   color: fg,
                 ),
               ),
             ),
-            SizedBox(width: 4.w),
+            Gap.hXs,
             Icon(Icons.keyboard_arrow_down_rounded, size: 18.w, color: fg),
           ],
         ),

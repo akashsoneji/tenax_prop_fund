@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 
 import '../../../shared/theme/app_colors.dart';
+import '../../../shared/theme/app_spacing.dart';
+import '../../../shared/theme/app_text.dart';
 
 /// A tinted callout
 /// and the KYC-name-mismatch reminder. Variants drive background tint and
@@ -29,7 +31,8 @@ class InfoBanner extends StatelessWidget {
       padding: EdgeInsets.fromLTRB(14.w, 12.h, 14.w, 14.h),
       decoration: BoxDecoration(
         color: palette.accent.withValues(
-            alpha: scheme.brightness == Brightness.dark ? 0.16 : 0.12),
+          alpha: scheme.brightness == Brightness.dark ? 0.16 : 0.12,
+        ),
         borderRadius: BorderRadius.circular(12.r),
       ),
       child: Column(
@@ -38,11 +41,11 @@ class InfoBanner extends StatelessWidget {
           Row(
             children: [
               Icon(iconData, size: 18.w, color: palette.accent),
-              SizedBox(width: 8.w),
+              Gap.hSm,
               Expanded(
                 child: Text(
                   title,
-                  style: TextStyle(
+                  style: AppText.base(
                     color: palette.accent,
                     fontWeight: FontWeight.w700,
                     fontSize: 13.5.sp,
@@ -51,10 +54,10 @@ class InfoBanner extends StatelessWidget {
               ),
             ],
           ),
-          SizedBox(height: 8.h),
+          Gap.vSm,
           Text(
             body,
-            style: TextStyle(
+            style: AppText.base(
               color: scheme.onSurface.withValues(alpha: 0.7),
               fontSize: 13.sp,
               height: 1.4,
@@ -85,10 +88,7 @@ class InfoBanner extends StatelessWidget {
 enum InfoBannerVariant { warning, info }
 
 class _InfoBannerPalette {
-  const _InfoBannerPalette({
-    required this.accent,
-    required this.icon,
-  });
+  const _InfoBannerPalette({required this.accent, required this.icon});
   final Color accent;
   final IconData icon;
 }

@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 
 import '../../../shared/theme/app_colors.dart';
+import '../../../shared/theme/app_spacing.dart';
+import '../../../shared/theme/app_text.dart';
 
 /// Amber tinted callout matching
 /// Local to the referral feature so features stay self-contained.
@@ -36,11 +38,11 @@ class ReferralWarningBanner extends StatelessWidget {
                 size: 18.w,
                 color: AppColors.warningInk,
               ),
-              SizedBox(width: 8.w),
+              Gap.hSm,
               Expanded(
                 child: Text(
                   title,
-                  style: TextStyle(
+                  style: AppText.base(
                     color: AppColors.warningInk,
                     fontWeight: FontWeight.w700,
                     fontSize: 13.5.sp,
@@ -49,10 +51,10 @@ class ReferralWarningBanner extends StatelessWidget {
               ),
             ],
           ),
-          SizedBox(height: 8.h),
+          Gap.vSm,
           Text(
             body,
-            style: TextStyle(
+            style: AppText.base(
               color: scheme.onSurface.withValues(alpha: 0.7),
               fontSize: 13.sp,
               height: 1.4,

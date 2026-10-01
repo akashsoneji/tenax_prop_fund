@@ -11,6 +11,8 @@ import '../widgets/rule_line_card.dart';
 import '../widgets/rules_hero_header.dart';
 import '../widgets/rules_info_banner.dart';
 import '../widgets/rules_segmented_tabs.dart';
+import '../../../shared/theme/app_spacing.dart';
+import '../../../shared/widgets/app_card.dart';
 
 /// Trading Rules screen — every tab and every rule line comes from
 /// `GET /support/rules`, so the screen matches whatever the backend publishes.
@@ -79,10 +81,7 @@ class _RulesBody extends StatelessWidget {
         },
         child: KeyedSubtree(
           key: ValueKey(tabValue),
-          child: _RulesTabBody(
-            tab: tab,
-            section: data.sectionFor(tabValue),
-          ),
+          child: _RulesTabBody(tab: tab, section: data.sectionFor(tabValue)),
         ),
       );
     });
@@ -111,9 +110,9 @@ class _RulesTabBody extends StatelessWidget {
           child: Text(
             'trading_rules.no_rules'.tr,
             textAlign: TextAlign.center,
-            style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-              color: scheme.onSurfaceVariant,
-            ),
+            style: Theme.of(
+              context,
+            ).textTheme.bodyMedium?.copyWith(color: scheme.onSurfaceVariant),
           ),
         ),
       );
@@ -132,9 +131,9 @@ class _RulesTabBody extends StatelessWidget {
           //     title: title,
           //     body: section?.body ?? 'trading_rules.section_body'.tr,
           //   ),
-          Container(
+          AppCard(
+            radius: 16.r,
             margin: EdgeInsets.symmetric(horizontal: 16.w),
-            decoration: AppTheme.surfaceCard(scheme, radius: 16.r),
             child: Column(
               children: [
                 for (var i = 0; i < items.length; i++)
@@ -146,7 +145,7 @@ class _RulesTabBody extends StatelessWidget {
               ],
             ),
           ),
-          SizedBox(height: 8.h),
+          Gap.vSm,
         ],
       ),
     );
@@ -168,11 +167,11 @@ class _RulesSkeleton extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
           HeroSkeleton(height: 96.h),
-          SizedBox(height: 16.h),
+          Gap.vLg,
           CardSkeleton(lines: 3, height: 130.h),
-          SizedBox(height: 12.h),
+          Gap.vMd,
           CardSkeleton(lines: 3, height: 130.h),
-          SizedBox(height: 12.h),
+          Gap.vMd,
           CardSkeleton(lines: 2, height: 100.h),
         ],
       ),

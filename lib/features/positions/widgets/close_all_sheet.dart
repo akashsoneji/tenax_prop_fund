@@ -5,6 +5,8 @@ import 'package:get/get.dart';
 import '../../../shared/theme/app_colors.dart';
 import '../../../shared/theme/app_theme.dart';
 import '../models/positions_models.dart';
+import '../../../shared/theme/app_spacing.dart';
+import '../../../shared/theme/app_text.dart';
 
 enum CloseGroup { all, profitable, losing, long, short }
 
@@ -50,18 +52,16 @@ class _CloseAllSheet extends StatefulWidget {
 class _CloseAllSheetState extends State<_CloseAllSheet> {
   CloseGroup _selected = CloseGroup.all;
 
-  double _totalFor(List<TradePosition> positions) => positions.fold(
-        0,
-        (total, position) => total + position.profitLoss,
-      );
+  double _totalFor(List<TradePosition> positions) =>
+      positions.fold(0, (total, position) => total + position.profitLoss);
 
   String _labelFor(CloseGroup group) => switch (group) {
-        CloseGroup.all => 'positions.all_currently_open'.tr,
-        CloseGroup.profitable => 'positions.all_profitable'.tr,
-        CloseGroup.losing => 'positions.all_losing'.tr,
-        CloseGroup.long => 'positions.all_long'.tr,
-        CloseGroup.short => 'positions.all_short'.tr,
-      };
+    CloseGroup.all => 'positions.all_currently_open'.tr,
+    CloseGroup.profitable => 'positions.all_profitable'.tr,
+    CloseGroup.losing => 'positions.all_losing'.tr,
+    CloseGroup.long => 'positions.all_long'.tr,
+    CloseGroup.short => 'positions.all_short'.tr,
+  };
 
   @override
   Widget build(BuildContext context) {
@@ -86,7 +86,7 @@ class _CloseAllSheetState extends State<_CloseAllSheet> {
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            SizedBox(height: 10.h),
+            10.verticalSpace,
             Container(
               width: 40.w,
               height: 4.h,
@@ -102,10 +102,10 @@ class _CloseAllSheetState extends State<_CloseAllSheet> {
                 child: Text(
                   'positions.choose_close_group'.tr,
                   style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                        color: scheme.onSurface,
-                        fontSize: 17.sp,
-                        fontWeight: FontWeight.w500,
-                      ),
+                    color: scheme.onSurface,
+                    fontSize: 17.sp,
+                    fontWeight: FontWeight.w500,
+                  ),
                 ),
               ),
             ),
@@ -114,19 +114,16 @@ class _CloseAllSheetState extends State<_CloseAllSheet> {
                 physics: const BouncingScrollPhysics(),
                 padding: EdgeInsets.symmetric(horizontal: 16.w),
                 child: Column(
-                  children: CloseGroup.values
-                      .map((group) {
-                        final groupPositions =
-                            positionsForGroup(group, positions);
-                        return _CloseOption(
-                          label: _labelFor(group),
-                          total: _totalFor(groupPositions),
-                          count: groupPositions.length,
-                          selected: _selected == group,
-                          onTap: () => setState(() => _selected = group),
-                        );
-                      })
-                      .toList(),
+                  children: CloseGroup.values.map((group) {
+                    final groupPositions = positionsForGroup(group, positions);
+                    return _CloseOption(
+                      label: _labelFor(group),
+                      total: _totalFor(groupPositions),
+                      count: groupPositions.length,
+                      selected: _selected == group,
+                      onTap: () => setState(() => _selected = group),
+                    );
+                  }).toList(),
                 ),
               ),
             ),
@@ -150,7 +147,7 @@ class _CloseAllSheetState extends State<_CloseAllSheet> {
                       ),
                       child: Text(
                         'positions.cancel'.tr,
-                        style: TextStyle(
+                        style: AppText.base(
                           color: scheme.onSurfaceVariant,
                           fontSize: 14.sp,
                           fontWeight: FontWeight.w500,
@@ -158,7 +155,7 @@ class _CloseAllSheetState extends State<_CloseAllSheet> {
                       ),
                     ),
                   ),
-                  SizedBox(width: 12.w),
+                  Gap.hMd,
                   Expanded(
                     child: OutlinedButton(
                       onPressed: selectedPositions.isEmpty
@@ -176,7 +173,7 @@ class _CloseAllSheetState extends State<_CloseAllSheet> {
                         '${'positions.confirm'.tr} (${_money(selectedTotal)})',
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
-                        style: TextStyle(
+                        style: AppText.base(
                           fontSize: 14.sp,
                           fontWeight: FontWeight.w500,
                         ),
@@ -237,26 +234,26 @@ class _CloseOption extends StatelessWidget {
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
                   style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                        color: count == 0
-                            ? scheme.onSurfaceVariant.withValues(alpha: 0.45)
-                            : scheme.onSurface,
-                        fontSize: 15.sp,
-                        fontWeight: FontWeight.w400,
-                      ),
+                    color: count == 0
+                        ? scheme.onSurfaceVariant.withValues(alpha: 0.45)
+                        : scheme.onSurface,
+                    fontSize: 15.sp,
+                    fontWeight: FontWeight.w400,
+                  ),
                 ),
               ),
-              SizedBox(width: 8.w),
+              Gap.hSm,
               Text(
                 _money(total),
                 style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                      color: count == 0
-                          ? scheme.onSurfaceVariant.withValues(alpha: 0.45)
-                          : profitColor,
-                      fontSize: 15.sp,
-                      fontWeight: FontWeight.w500,
-                    ),
+                  color: count == 0
+                      ? scheme.onSurfaceVariant.withValues(alpha: 0.45)
+                      : profitColor,
+                  fontSize: 15.sp,
+                  fontWeight: FontWeight.w500,
+                ),
               ),
-              SizedBox(width: 12.w),
+              Gap.hMd,
               Container(
                 width: 24.w,
                 height: 24.w,
@@ -264,9 +261,7 @@ class _CloseOption extends StatelessWidget {
                 decoration: BoxDecoration(
                   shape: BoxShape.circle,
                   border: Border.all(
-                    color: selected
-                        ? AppColors.danger
-                        : scheme.outlineVariant,
+                    color: selected ? AppColors.danger : scheme.outlineVariant,
                     width: 2.w,
                   ),
                 ),

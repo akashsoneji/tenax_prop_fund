@@ -1,18 +1,16 @@
 import 'dart:async';
 import 'dart:convert';
-import 'dart:math';
 import 'dart:typed_data';
 
-import 'package:flutter/widgets.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:get/get.dart';
-
-import 'package:web_socket_channel/web_socket_channel.dart';
 
 import '../../../app/flavor/flavor_config.dart';
 import '../../../core/logger/app_logger.dart';
 import '../../../core/network/api_interceptor.dart';
 import '../../../core/websocket/message_pack_decoder.dart';
+import '../../../core/websocket/websocket_manager.dart';
+import '../../../core/websocket/ws_connection.dart';
 
 /// A single live quote for one symbol, patched in place from `marketwatchv2`
 /// ticks. Only the fields the feed sends are updated; the rest are preserved.
@@ -45,17 +43,16 @@ class MarketPrice {
     double? dayHigh,
     double? dayLow,
     String? category,
-  }) =>
-      MarketPrice(
-        symbol: symbol,
-        bid: bid ?? this.bid,
-        ask: ask ?? this.ask,
-        spread: spread ?? this.spread,
-        digits: digits ?? this.digits,
-        dayHigh: dayHigh ?? this.dayHigh,
-        dayLow: dayLow ?? this.dayLow,
-        category: category ?? this.category,
-      );
+  }) => MarketPrice(
+    symbol: symbol,
+    bid: bid ?? this.bid,
+    ask: ask ?? this.ask,
+    spread: spread ?? this.spread,
+    digits: digits ?? this.digits,
+    dayHigh: dayHigh ?? this.dayHigh,
+    dayLow: dayLow ?? this.dayLow,
+    category: category ?? this.category,
+  );
 }
 
 /// Owns the ONE `marketwatchv2` WebSocket for the whole app (mirrors the pattern
@@ -72,49 +69,36 @@ class MarketPrice {
 /// `[symbol, bid, ask, spread, digits, day_high, day_low, category]`, arrays of
 /// those, or `{symbol, bid, ask, ...}` maps. All shapes are normalised into the
 /// per-symbol [prices] map so a granular `Obx` only rebuilds the affected row.
-class MarketWatchV2Service extends GetxService with WidgetsBindingObserver {
-  MarketWatchV2Service(this._config, this._storage);
+class MarketWatchV2Service extends GetxService {
+  MarketWatchV2Service(this._config, this._storage, this._sockets);
 
   final FlavorConfig _config;
   final FlutterSecureStorage _storage;
+  final WebSocketManager _sockets;
 
   /// Seeded so the listing shows live data immediately on app open, before the
   /// symbols screen (and its own subscribe call) is ever visited.
   static const List<String> _seedSymbols = ['XAUUSD', 'EURUSD', 'GBPUSD'];
 
-  WebSocketChannel? _channel;
-  StreamSubscription<dynamic>? _sub;
-  Timer? _reconnectTimer;
-  Timer? _heartbeatTimer;
-  int _reconnectAttempts = 0;
-  bool _manuallyClosed = false;
-
-  /// Bumped by [resetForNewSession]. A connect that was already in flight when
-  /// the session changed reads the OLD token, so it checks this before adopting
-  /// its channel and aborts when it is stale.
-  int _session = 0;
-  bool _connecting = false;
+  late final WsConnection _socket = _sockets.open(
+    name: 'marketwatchv2',
+    url: () => _config.marketWatchV2Url,
+    connectGate: _hasToken,
+    onOpen: _authenticate,
+    onMessage: _onMessage,
+    // Application-level keep-alive so idle NATs / proxies don't silently drop
+    // the socket while the user sits on one screen.
+    heartbeat: () => const {'action': 'ping'},
+  );
 
   @override
   void onInit() {
     super.onInit();
-    WidgetsBinding.instance.addObserver(this);
     _desired.addAll(_seedSymbols);
     for (final s in _seedSymbols) {
       priceOf(s);
     }
-    _connect();
-  }
-
-  /// Reconnect the moment the app returns to the foreground: iOS and Android
-  /// both suspend/kill open sockets while backgrounded, so on resume we force a
-  /// fresh connect (which replays [_desired]) if the socket is gone.
-  @override
-  void didChangeAppLifecycleState(AppLifecycleState state) {
-    if (state == AppLifecycleState.resumed && _channel == null) {
-      _reconnectTimer?.cancel();
-      _connect();
-    }
+    _socket.connect();
   }
 
   /// Symbols the caller wants ticks for. Resent verbatim after every reconnect
@@ -130,7 +114,7 @@ class MarketWatchV2Service extends GetxService with WidgetsBindingObserver {
       StreamController<dynamic>.broadcast();
   Stream<dynamic> get decodedFrames => _decodedBroadcast.stream;
 
-  final RxBool isConnected = false.obs;
+  RxBool get isConnected => _socket.isConnected;
 
   /// The symbol the user last tapped in the Trade list. The Markets tab watches
   /// this to load that symbol's chart + trade ticket. Seeded to the first seed
@@ -166,98 +150,33 @@ class MarketWatchV2Service extends GetxService with WidgetsBindingObserver {
     );
   }
 
-  Future<String?> _authToken() =>
-      _storage.read(key: ApiInterceptor.tokenKey);
+  Future<String?> _authToken() => _storage.read(key: ApiInterceptor.tokenKey);
 
   /// Restarts the socket so it re-auths with whatever token is currently stored.
   /// Called on logout (no token → connect is skipped and the socket stays down)
   /// and again after login, so ticks are never served on the previous user's
   /// authenticated connection. Desired subscriptions are kept: they are the
   /// device's watchlist, not per-user session state.
-  void resetForNewSession() {
-    _session++;
-    _reconnectTimer?.cancel();
-    _stopHeartbeat();
-    _sub?.cancel();
-    _sub = null;
-    try {
-      _channel?.sink.close();
-    } catch (_) {}
-    _channel = null;
-    _connecting = false;
-    isConnected.value = false;
-    _reconnectAttempts = 0;
-    _connect();
+  void resetForNewSession() => _socket.restart();
+
+  Future<bool> _hasToken() async {
+    final token = await _authToken();
+    if (token != null && token.isNotEmpty) return true;
+    log.w('marketwatchv2: no auth token, skipping connect');
+    return false;
   }
 
-  Future<void> _connect() async {
-    // Re-entrancy guard MUST flip synchronously, before the first await:
-    // onInit, lifecycle-resume and subscribeSymbols can all call _connect in
-    // the same microtask, and if the flag were set after `await _authToken()`
-    // every caller would pass the guard and open a duplicate socket.
-    if (_connecting || _channel != null) return;
-    final session = _session;
-    _connecting = true;
-    _manuallyClosed = false;
-
-    try {
-      final token = await _authToken();
-      if (token == null || token.isEmpty) {
-        log.w('marketwatchv2: no auth token, skipping connect');
-        return;
-      }
-      if (session != _session) return;
-
-      final channel = WebSocketChannel.connect(Uri.parse(_config.marketWatchV2Url));
-      await channel.ready;
-      // The session changed while the handshake was in flight — this socket
-      // would auth with the previous user's token, so drop it.
-      if (session != _session) {
-        await channel.sink.close();
-        return;
-      }
-      _channel = channel;
-      _reconnectAttempts = 0;
-      isConnected.value = true;
-
-      _sub = channel.stream.listen(
-        _onMessage,
-        onError: (Object e) => _onDisconnected(e),
-        onDone: () => _onDisconnected('closed'),
-        cancelOnError: true,
-      );
-
-      // 1. Auth frame first. trading_account is '0' until account wiring lands.
-      _send({'authID': token, 'trading_account': '0'});
-      // 2. Restore any symbols requested before the socket was ready.
-      _resubscribeAll();
-      _startHeartbeat();
-    } catch (e) {
-      _onDisconnected(e);
-    } finally {
-      _connecting = false;
-    }
+  Future<bool> _authenticate(WsConnection socket) async {
+    final token = await _authToken();
+    if (token == null || token.isEmpty) return false;
+    // 1. Auth frame first. trading_account is '0' until account wiring lands.
+    socket.send({'authID': token, 'trading_account': '0'});
+    // 2. Restore any symbols requested before the socket was ready.
+    _resubscribeAll();
+    return true;
   }
 
-  void _send(Map<String, dynamic> payload) {
-    final channel = _channel;
-    if (channel == null) return;
-    channel.sink.add(jsonEncode(payload));
-  }
-
-  /// Application-level keep-alive: a periodic ping stops idle NATs / proxies
-  /// from silently dropping the socket while the user sits on one screen.
-  void _startHeartbeat() {
-    _heartbeatTimer?.cancel();
-    _heartbeatTimer = Timer.periodic(const Duration(seconds: 20), (_) {
-      if (_channel != null) _send({'action': 'ping'});
-    });
-  }
-
-  void _stopHeartbeat() {
-    _heartbeatTimer?.cancel();
-    _heartbeatTimer = null;
-  }
+  void _send(Map<String, dynamic> payload) => _socket.send(payload);
 
   void _resubscribeAll() {
     if (_desired.isEmpty) return;
@@ -266,16 +185,18 @@ class MarketWatchV2Service extends GetxService with WidgetsBindingObserver {
 
   /// Opens the socket (if needed) and starts ticks for [symbols].
   Future<void> subscribeSymbols(List<String> symbols) async {
-    final clean =
-        symbols.map(normalizeSymbol).where((s) => s.isNotEmpty).toSet();
+    final clean = symbols
+        .map(normalizeSymbol)
+        .where((s) => s.isNotEmpty)
+        .toSet();
     if (clean.isEmpty) return;
     _desired.addAll(clean);
     for (final s in clean) {
       priceOf(s);
     }
 
-    if (_channel == null) {
-      await _connect();
+    if (!_socket.hasChannel) {
+      await _socket.connect();
       return;
     }
     _send({'action': 'subscribe', 'symbols': clean.toList()});
@@ -283,8 +204,10 @@ class MarketWatchV2Service extends GetxService with WidgetsBindingObserver {
 
   /// Stops ticks for [symbols] (keeps the socket open for the rest).
   void unsubscribeSymbols(List<String> symbols) {
-    final clean =
-        symbols.map(normalizeSymbol).where((s) => s.isNotEmpty).toSet();
+    final clean = symbols
+        .map(normalizeSymbol)
+        .where((s) => s.isNotEmpty)
+        .toSet();
     if (clean.isEmpty) return;
     _desired.removeAll(clean);
     _send({'action': 'unsubscribe', 'symbols': clean.toList()});
@@ -380,54 +303,18 @@ class MarketWatchV2Service extends GetxService with WidgetsBindingObserver {
     );
   }
 
-  static double? _d(dynamic v) =>
-      v == null ? null : (v is num ? v.toDouble() : double.tryParse(v.toString()));
+  static double? _d(dynamic v) => v == null
+      ? null
+      : (v is num ? v.toDouble() : double.tryParse(v.toString()));
 
   static int? _i(dynamic v) =>
       v == null ? null : (v is num ? v.toInt() : int.tryParse(v.toString()));
 
-  void _onDisconnected(Object reason) {
-    _sub?.cancel();
-    _sub = null;
-    _channel = null;
-    isConnected.value = false;
-    _stopHeartbeat();
-    if (_manuallyClosed) return;
-    log.w('marketwatchv2 disconnected: $reason — scheduling reconnect');
-    _scheduleReconnect();
-  }
-
-  void _scheduleReconnect() {
-    _reconnectAttempts++;
-    // Exponential backoff capped at 30s with jitter so many clients don't
-    // reconnect in lockstep after a server blip.
-    final exponent = _reconnectAttempts.clamp(1, 5);
-    final base = (1 << exponent).clamp(1, 30);
-    final jitterMs = Random().nextInt(1000);
-    _reconnectTimer?.cancel();
-    _reconnectTimer = Timer(
-      Duration(seconds: base, milliseconds: jitterMs),
-      _connect,
-    );
-  }
-
-  Future<void> disconnect() async {
-    _manuallyClosed = true;
-    _reconnectTimer?.cancel();
-    _stopHeartbeat();
-    await _sub?.cancel();
-    _sub = null;
-    try {
-      await _channel?.sink.close();
-    } catch (_) {}
-    _channel = null;
-    isConnected.value = false;
-  }
+  Future<void> disconnect() => _socket.close();
 
   @override
   void onClose() {
-    WidgetsBinding.instance.removeObserver(this);
-    disconnect();
+    _sockets.release('marketwatchv2');
     if (!_decodedBroadcast.isClosed) _decodedBroadcast.close();
     super.onClose();
   }

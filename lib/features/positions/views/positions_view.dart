@@ -14,6 +14,7 @@ import '../widgets/history_filter_sheet.dart';
 import '../widgets/history_row.dart';
 import '../widgets/position_card.dart';
 import '../widgets/positions_account_header.dart';
+import '../../../shared/theme/app_spacing.dart';
 
 /// The Positions/Trade screen: a live account summary grid, a Market / Pending /
 /// History segmented switch, and the matching list (open positions with close,
@@ -46,12 +47,18 @@ class PositionsView extends GetView<PositionsController> {
           child: CustomScrollView(
             physics: const BouncingScrollPhysics(),
             slivers: [
-              SliverToBoxAdapter(child: _PositionsHeader(controller: controller)),
+              SliverToBoxAdapter(
+                child: _PositionsHeader(controller: controller),
+              ),
               Obx(
                 () => switch (controller.selectedTab.value) {
                   PositionsTab.market => _MarketSliver(controller: controller),
-                  PositionsTab.pending => _PendingSliver(controller: controller),
-                  PositionsTab.history => _HistorySliver(controller: controller),
+                  PositionsTab.pending => _PendingSliver(
+                    controller: controller,
+                  ),
+                  PositionsTab.history => _HistorySliver(
+                    controller: controller,
+                  ),
                 },
               ),
             ],
@@ -163,7 +170,9 @@ class _CloseAllBar extends StatelessWidget {
         children: [
           Obx(
             () => TextButton(
-              onPressed: controller.busy.value ? null : () => _closeAll(context),
+              onPressed: controller.busy.value
+                  ? null
+                  : () => _closeAll(context),
               child: Text(
                 'positions.close_all'.tr,
                 style: AppText.subtitle(
@@ -302,7 +311,11 @@ class _HistoryFilterBar extends StatelessWidget {
       profitFilter: controller.historyProfitFilter.value,
     );
     if (result == null) return;
-    controller.applyHistoryFilter(result.range, from: result.from, to: result.to);
+    controller.applyHistoryFilter(
+      result.range,
+      from: result.from,
+      to: result.to,
+    );
     controller.applyHistoryFilters(
       symbol: result.symbol,
       direction: result.direction,
@@ -337,7 +350,7 @@ class _HistoryFilterBar extends StatelessWidget {
                   mainAxisSize: MainAxisSize.min,
                   children: [
                     Icon(Icons.tune_rounded, size: 15.w, color: scheme.primary),
-                    SizedBox(width: 6.w),
+                    6.horizontalSpace,
                     Text(
                       controller.historyRange.value.labelKey.tr,
                       maxLines: 1,
@@ -347,7 +360,7 @@ class _HistoryFilterBar extends StatelessWidget {
                         fontSize: 12.sp,
                       ),
                     ),
-                    SizedBox(width: 4.w),
+                    Gap.hXs,
                     Icon(
                       Icons.keyboard_arrow_down_rounded,
                       size: 16.w,
@@ -368,9 +381,9 @@ class _HistoryFilterBar extends StatelessWidget {
                     overflow: TextOverflow.ellipsis,
                     style: AppText.subtitle(color: muted, fontSize: 12.sp),
                   ),
-                  SizedBox(width: 8.w),
+                  Gap.hSm,
                   Container(width: 1.w, height: 12.h, color: muted),
-                  SizedBox(width: 8.w),
+                  Gap.hSm,
                   Flexible(
                     child: Text(
                       profit.toStringAsFixed(2),
@@ -388,4 +401,3 @@ class _HistoryFilterBar extends StatelessWidget {
     );
   }
 }
-

@@ -23,11 +23,21 @@ class FavoritesService extends GetxService {
   /// once (guarded by [_seededKey]); after that the user's edits win, including
   /// an intentionally empty list.
   static const _seed = <Instrument>[
-    Instrument(code: 'XAUUSD', name: 'Gold', category: InstrumentCategory.metals),
     Instrument(
-        code: 'EURUSD', name: 'Euro / Dollar', category: InstrumentCategory.currency),
+      code: 'XAUUSD',
+      name: 'Gold',
+      category: InstrumentCategory.metals,
+    ),
     Instrument(
-        code: 'GBPUSD', name: 'Pound / Dollar', category: InstrumentCategory.currency),
+      code: 'EURUSD',
+      name: 'Euro / Dollar',
+      category: InstrumentCategory.currency,
+    ),
+    Instrument(
+      code: 'GBPUSD',
+      name: 'Pound / Dollar',
+      category: InstrumentCategory.currency,
+    ),
   ];
 
   /// Favorited instruments, newest first (codes normalised). Bind with `Obx`.
@@ -64,7 +74,11 @@ class FavoritesService extends GetxService {
     if (sym.isEmpty || isFavorite(sym)) return;
     favorites.insert(
       0,
-      Instrument(code: sym, name: instrument.name, category: instrument.category),
+      Instrument(
+        code: sym,
+        name: instrument.name,
+        category: instrument.category,
+      ),
     );
     _persist();
     _market.subscribeSymbols([sym]);
@@ -75,11 +89,13 @@ class FavoritesService extends GetxService {
   void addByCode(String code) {
     final sym = MarketWatchV2Service.normalizeSymbol(code);
     if (sym.isEmpty) return;
-    add(Instrument(
-      code: sym,
-      name: sym,
-      category: InstrumentCategory.classify(sym),
-    ));
+    add(
+      Instrument(
+        code: sym,
+        name: sym,
+        category: InstrumentCategory.classify(sym),
+      ),
+    );
   }
 
   /// Removes the favorite matching [code] and unsubscribes it from the socket.
@@ -93,13 +109,11 @@ class FavoritesService extends GetxService {
   }
 
   /// Moves the favorite at [oldIndex] to [newIndex] and persists the new order.
-  /// Mirrors `ReorderableListView`'s index convention (target shifts down by one
-  /// when dragging downward).
+  /// [newIndex] is the final position after removal (the
+  /// `ReorderableListView.onReorderItem` convention).
   void reorder(int oldIndex, int newIndex) {
     if (oldIndex < 0 || oldIndex >= favorites.length) return;
-    var target = newIndex;
-    if (oldIndex < target) target -= 1;
-    target = target.clamp(0, favorites.length - 1);
+    final target = newIndex.clamp(0, favorites.length - 1);
     if (target == oldIndex) return;
     final item = favorites.removeAt(oldIndex);
     favorites.insert(target, item);
@@ -123,11 +137,13 @@ class FavoritesService extends GetxService {
           (json['code'] ?? '').toString(),
         );
         if (sym.isEmpty) continue;
-        out.add(Instrument(
-          code: sym,
-          name: (json['name'] ?? '').toString(),
-          category: (json['category'] ?? '').toString(),
-        ));
+        out.add(
+          Instrument(
+            code: sym,
+            name: (json['name'] ?? '').toString(),
+            category: (json['category'] ?? '').toString(),
+          ),
+        );
       } else {
         final sym = MarketWatchV2Service.normalizeSymbol(e.toString());
         if (sym.isEmpty) continue;

@@ -4,6 +4,7 @@ import 'package:get/get.dart';
 
 import '../../../shared/theme/app_colors.dart';
 import '../../../shared/theme/app_text.dart';
+import '../../../shared/theme/app_spacing.dart';
 
 /// One tab on the competitions status filter.
 class CompetitionStatusTab {
@@ -42,7 +43,7 @@ class CompetitionStatusTabs extends StatelessWidget {
         scrollDirection: Axis.horizontal,
         physics: const BouncingScrollPhysics(),
         itemCount: tabs.length,
-        separatorBuilder: (_, _) => SizedBox(width: 8.w),
+        separatorBuilder: (_, _) => Gap.hSm,
         itemBuilder: (context, index) {
           final tab = tabs[index];
           final active = tab.key == selected;

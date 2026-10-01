@@ -6,6 +6,7 @@ import '../../../shared/theme/app_colors.dart';
 import '../../../shared/theme/app_text.dart';
 import '../../../shared/theme/app_theme.dart';
 import '../models/certificate_model.dart';
+import '../../../shared/theme/app_spacing.dart';
 
 /// One certificate as an achievement tile: a medal seal on the left, the name
 /// and blurb beside it, and the unlock criteria as a checklist underneath.
@@ -73,7 +74,7 @@ class CertificateCard extends StatelessWidget {
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
                               _MedalSeal(earned: earned),
-                              SizedBox(width: 12.w),
+                              Gap.hMd,
                               Expanded(
                                 child: _Heading(
                                   certificate: certificate,
@@ -83,11 +84,11 @@ class CertificateCard extends StatelessWidget {
                             ],
                           ),
                           if (criteria.isNotEmpty) ...[
-                            SizedBox(height: 12.h),
+                            Gap.vMd,
                             for (final item in criteria)
                               _CriterionRow(text: item, earned: earned),
                           ],
-                          SizedBox(height: 12.h),
+                          Gap.vMd,
                           _Footer(earned: earned),
                         ],
                       ),
@@ -125,7 +126,7 @@ class _Heading extends StatelessWidget {
             fontSize: 17.sp,
           ),
         ),
-        SizedBox(height: 4.h),
+        Gap.vXs,
         Text(
           certificate.blurb,
           maxLines: 2,
@@ -211,7 +212,7 @@ class _CriterionRow extends StatelessWidget {
                   : scheme.onSurface.withValues(alpha: 0.3),
             ),
           ),
-          SizedBox(width: 8.w),
+          Gap.hSm,
           Expanded(
             child: Text(
               text,
@@ -259,11 +260,9 @@ class _Footer extends StatelessWidget {
                   color: tone.withValues(alpha: earned ? 1 : 0.35),
                 ),
               ),
-              SizedBox(width: 6.w),
+              6.horizontalSpace,
               Text(
-                earned
-                    ? 'certificates.earned'.tr
-                    : 'certificates.locked'.tr,
+                earned ? 'certificates.earned'.tr : 'certificates.locked'.tr,
                 maxLines: 1,
                 overflow: TextOverflow.ellipsis,
                 style: AppText.label(
@@ -283,12 +282,9 @@ class _Footer extends StatelessWidget {
                 'certificates.view'.tr,
                 maxLines: 1,
                 overflow: TextOverflow.ellipsis,
-                style: AppText.subtitle(
-                  color: scheme.primary,
-                  fontSize: 13.sp,
-                ),
+                style: AppText.subtitle(color: scheme.primary, fontSize: 13.sp),
               ),
-              SizedBox(width: 3.w),
+              3.horizontalSpace,
               Icon(
                 Icons.arrow_forward_rounded,
                 size: 15.w,

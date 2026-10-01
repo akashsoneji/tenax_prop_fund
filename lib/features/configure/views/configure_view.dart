@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
-import 'package:google_fonts/google_fonts.dart';
 
 import '../../../shared/theme/app_colors.dart';
 import '../../../shared/theme/app_theme.dart';
@@ -15,6 +14,9 @@ import '../controllers/configure_controller.dart';
 import '../widgets/addon_tile.dart';
 import '../widgets/order_summary_card.dart';
 import '../widgets/payment_method_tile.dart';
+import '../../../shared/theme/app_spacing.dart';
+import '../../../shared/theme/app_text.dart';
+import '../../../shared/widgets/app_card.dart';
 
 /// Configure — platform + swap selection, add-ons, quantity stepper, the
 /// create-account form and a live Summary. Every input flows through
@@ -41,28 +43,31 @@ class ConfigureView extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
                   _SelectedPlanHeader(c: c),
-                  SizedBox(height: 14.h),
+                  14.verticalSpace,
                   if (c.availablePlatforms.isNotEmpty) ...[
                     SectionHeader('configure.platform'.tr),
-                    Obx(() => AppSegmentedControl(
-                          labels: c.availablePlatforms,
-                          selected: c.platform.value.clamp(
-                              0, c.availablePlatforms.length - 1),
-                          onChanged: c.setPlatform,
-                        )),
-                    SizedBox(height: 14.h),
+                    Obx(
+                      () => AppSegmentedControl(
+                        labels: c.availablePlatforms,
+                        selected: c.platform.value.clamp(
+                          0,
+                          c.availablePlatforms.length - 1,
+                        ),
+                        onChanged: c.setPlatform,
+                      ),
+                    ),
+                    14.verticalSpace,
                   ],
                   SectionHeader('configure.swap'.tr),
-                  Obx(() => AppSegmentedControl(
-                        labels: [
-                          'configure.swap'.tr,
-                          'configure.swap_free'.tr
-                        ],
-                        selected: c.swap.value,
-                        onChanged: c.setSwap,
-                      )),
+                  Obx(
+                    () => AppSegmentedControl(
+                      labels: ['configure.swap'.tr, 'configure.swap_free'.tr],
+                      selected: c.swap.value,
+                      onChanged: c.setSwap,
+                    ),
+                  ),
                   if (c.availableAddons.isNotEmpty) ...[
-                    SizedBox(height: 14.h),
+                    14.verticalSpace,
                     SectionHeader('configure.addons'.tr),
                     Obx(() {
                       // Touch the RxSet so Obx rebuilds on toggle.
@@ -72,8 +77,9 @@ class ConfigureView extends StatelessWidget {
                           for (var i = 0; i < c.availableAddons.length; i++)
                             AddonTile(
                               addon: c.availableAddons[i],
-                              selected:
-                                  c.isAddonSelected(c.availableAddons[i].id),
+                              selected: c.isAddonSelected(
+                                c.availableAddons[i].id,
+                              ),
                               onTap: () =>
                                   c.toggleAddon(c.availableAddons[i].id),
                               showDivider: i != c.availableAddons.length - 1,
@@ -83,17 +89,17 @@ class ConfigureView extends StatelessWidget {
                     }),
                   ],
                   if (c.availablePaymentMethods.isNotEmpty) ...[
-                    SizedBox(height: 14.h),
+                    14.verticalSpace,
                     SectionHeader('configure.payment_method'.tr),
                     PaymentMethodTile(c: c),
                   ],
-                  SizedBox(height: 14.h),
+                  14.verticalSpace,
                   SectionHeader('configure.quantity'.tr),
                   _QuantityRow(c: c),
-                  SizedBox(height: 14.h),
+                  14.verticalSpace,
                   SectionHeader('configure.coupon_code'.tr),
                   _CouponField(c: c),
-                  SizedBox(height: 14.h),
+                  14.verticalSpace,
                   SectionHeader('configure.summary'.tr),
                   OrderSummaryCard(c: c),
                 ],
@@ -102,16 +108,18 @@ class ConfigureView extends StatelessWidget {
           ),
         ],
       ),
-      bottomNavigationBar: Obx(() => ChallengeBottomBar(
-            planName: '${c.planName} · ${c.accountSize}',
-            price: '${c.currency} ${c.total}',
-            strikePrice: c.subtotal > c.total
-                ? '${c.currency} ${c.subtotal}'
-                : null,
-            actionLabel: 'configure.continue'.tr,
-            loading: c.purchasing.value,
-            onAction: c.purchasing.value ? null : c.continuePressed,
-          )),
+      bottomNavigationBar: Obx(
+        () => ChallengeBottomBar(
+          planName: '${c.planName} · ${c.accountSize}',
+          price: '${c.currency} ${c.total}',
+          strikePrice: c.subtotal > c.total
+              ? '${c.currency} ${c.subtotal}'
+              : null,
+          actionLabel: 'configure.continue'.tr,
+          loading: c.purchasing.value,
+          onAction: c.purchasing.value ? null : c.continuePressed,
+        ),
+      ),
     );
   }
 }
@@ -150,16 +158,16 @@ class _SelectedPlanHeader extends StatelessWidget {
                   c.planName,
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
-                  style: GoogleFonts.beVietnamPro(
+                  style: AppText.base(
                     color: Colors.white,
                     fontSize: 18.sp,
                     fontWeight: FontWeight.w800,
                   ),
                 ),
-                SizedBox(height: 5.h),
+                5.verticalSpace,
                 Text(
                   'Account size: ${c.accountSize}',
-                  style: GoogleFonts.beVietnamPro(
+                  style: AppText.base(
                     color: Colors.white.withValues(alpha: 0.82),
                     fontSize: 13.sp,
                   ),
@@ -167,10 +175,10 @@ class _SelectedPlanHeader extends StatelessWidget {
               ],
             ),
           ),
-          SizedBox(width: 12.w),
+          Gap.hMd,
           Text(
             '\$${c.basePrice}',
-            style: GoogleFonts.beVietnamPro(
+            style: AppText.base(
               color: Theme.of(context).colorScheme.secondary,
               fontSize: 24.sp,
               fontWeight: FontWeight.w800,
@@ -193,31 +201,33 @@ class _QuantityRow extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final scheme = Theme.of(context).colorScheme;
-    return Container(
+    return AppCard(
+      radius: 14.r,
       padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 12.h),
-      decoration: AppTheme.surfaceCard(scheme, radius: 14.r),
       child: Row(
         children: [
           Expanded(
             child: Text(
               'configure.number_of_accounts'.tr,
-              style: GoogleFonts.beVietnamPro(
+              style: AppText.base(
                 fontSize: 14.sp,
                 color: scheme.onSurface.withValues(alpha: 0.75),
               ),
             ),
           ),
           _StepButton(icon: Icons.remove_rounded, onTap: c.decrement),
-          SizedBox(width: 14.w),
-          Obx(() => Text(
-                '${c.quantity.value}',
-                style: GoogleFonts.beVietnamPro(
-                  fontSize: 16.sp,
-                  fontWeight: FontWeight.w800,
-                  color: scheme.onSurface,
-                ),
-              )),
-          SizedBox(width: 14.w),
+          14.horizontalSpace,
+          Obx(
+            () => Text(
+              '${c.quantity.value}',
+              style: AppText.base(
+                fontSize: 16.sp,
+                fontWeight: FontWeight.w800,
+                color: scheme.onSurface,
+              ),
+            ),
+          ),
+          14.horizontalSpace,
           _StepButton(icon: Icons.add_rounded, onTap: c.increment),
         ],
       ),
@@ -278,7 +288,7 @@ class _CouponField extends StatelessWidget {
             inputFormatters: const [_UpperCaseFormatter()],
             textInputAction: TextInputAction.done,
             onSubmitted: (_) => c.applyCoupon(),
-            style: GoogleFonts.beVietnamPro(
+            style: AppText.base(
               fontSize: 14.sp,
               fontWeight: FontWeight.w600,
               color: scheme.onSurface,
@@ -287,36 +297,36 @@ class _CouponField extends StatelessWidget {
               isCollapsed: true,
               border: InputBorder.none,
               hintText: 'configure.enter_coupon_code'.tr,
-              hintStyle: GoogleFonts.beVietnamPro(
+              hintStyle: AppText.base(
                 fontSize: 14.sp,
                 color: scheme.onSurface.withValues(alpha: 0.5),
               ),
-              suffix:  SizedBox(
+              suffix: SizedBox(
                 height: 20.h,
                 child: _CouponAction(
-                                  applied: applied,
-                                  loading: loading,
-                                  onApply: c.applyCoupon,
-                                  onRemove: c.removeCoupon,
-                                ),
+                  applied: applied,
+                  loading: loading,
+                  onApply: c.applyCoupon,
+                  onRemove: c.removeCoupon,
+                ),
               ),
             ),
           ),
           if (applied) ...[
-            SizedBox(height: 8.h),
+            Gap.vSm,
             Text(
               '${c.appliedCoupon.value} applied — you save \$${c.discount}',
-              style: GoogleFonts.beVietnamPro(
+              style: AppText.base(
                 fontSize: 12.5.sp,
                 fontWeight: FontWeight.w600,
                 color: AppColors.success,
               ),
             ),
           ] else if (error != null) ...[
-            SizedBox(height: 8.h),
+            Gap.vSm,
             Text(
               error,
-              style: GoogleFonts.beVietnamPro(
+              style: AppText.base(
                 fontSize: 12.5.sp,
                 fontWeight: FontWeight.w600,
                 color: scheme.error,
@@ -369,7 +379,7 @@ class _CouponAction extends StatelessWidget {
       ),
       child: Text(
         'configure.apply'.tr,
-        style: GoogleFonts.beVietnamPro(
+        style: AppText.base(
           fontSize: 14.sp,
           fontWeight: FontWeight.w700,
           color: scheme.primary,

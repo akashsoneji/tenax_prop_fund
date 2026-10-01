@@ -3,6 +3,8 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
 
 import '../../../shared/theme/app_colors.dart';
+import '../../../shared/theme/app_spacing.dart';
+import '../../../shared/theme/app_text.dart';
 
 /// Live password strength
 /// gradient as the password gets stronger, plus a checklist of requirements
@@ -70,7 +72,7 @@ class PasswordStrengthMeter extends StatelessWidget {
             );
           }),
         ),
-        SizedBox(height: 6.h),
+        6.verticalSpace,
         Row(
           children: [
             Expanded(
@@ -81,7 +83,7 @@ class PasswordStrengthMeter extends StatelessWidget {
                   opacity: password.isEmpty ? 0 : 1,
                   child: Text(
                     _labelKey.tr,
-                    style: TextStyle(
+                    style: AppText.base(
                       color: color,
                       fontSize: 12.sp,
                       fontWeight: FontWeight.w600,
@@ -92,7 +94,7 @@ class PasswordStrengthMeter extends StatelessWidget {
             ),
           ],
         ),
-        SizedBox(height: 12.h),
+        Gap.vMd,
         _Requirement(
           met: password.length >= _minLength,
           label: 'register.req_length'.tr,
@@ -136,17 +138,19 @@ class _Requirement extends StatelessWidget {
                   : scheme.onSurface.withValues(alpha: 0.4),
             ),
           ),
-          SizedBox(width: 8.w),
+          Gap.hSm,
           Text(
             label,
-            style: TextStyle(
-              fontSize: 12.sp,
-              color: met
-                  ? scheme.onSurface
-                  : scheme.onSurface.withValues(alpha: 0.6),
-              decoration: met ? TextDecoration.lineThrough : null,
-              decorationColor: scheme.onSurface.withValues(alpha: 0.4),
-            ),
+            style:
+                AppText.base(
+                  fontSize: 12.sp,
+                  color: met
+                      ? scheme.onSurface
+                      : scheme.onSurface.withValues(alpha: 0.6),
+                ).copyWith(
+                  decoration: met ? TextDecoration.lineThrough : null,
+                  decorationColor: scheme.onSurface.withValues(alpha: 0.4),
+                ),
           ),
         ],
       ),

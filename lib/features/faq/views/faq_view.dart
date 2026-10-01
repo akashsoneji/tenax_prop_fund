@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
-import 'package:google_fonts/google_fonts.dart';
 
 import '../../../shared/theme/app_colors.dart';
 import '../../../shared/theme/app_theme.dart';
@@ -14,6 +13,8 @@ import '../../../shared/widgets/section_header.dart';
 import '../../../shared/widgets/skeletons/skeletons.dart';
 import '../controllers/faq_controller.dart';
 import '../models/faq_models.dart';
+import '../../../shared/theme/app_spacing.dart';
+import '../../../shared/theme/app_text.dart';
 
 /// FAQ — grouped accordion. Each section is a surface card of expandable Q&A
 /// rows; opening one collapses the others. Loading/error/empty are handled by
@@ -65,11 +66,8 @@ class _FaqBody extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
         for (var s = 0; s < sections.length; s++) ...[
-          if (s > 0) SizedBox(height: 24.h),
-          FadeSlideIn(
-            order: s * 2,
-            child: SectionHeader(sections[s].title),
-          ),
+          if (s > 0) Gap.vXl,
+          FadeSlideIn(order: s * 2, child: SectionHeader(sections[s].title)),
           FadeSlideIn(
             order: s * 2 + 1,
             child: RulesCard(
@@ -86,7 +84,7 @@ class _FaqBody extends StatelessWidget {
             ),
           ),
         ],
-        SizedBox(height: 22.h),
+        22.verticalSpace,
         FadeSlideIn(
           order: 8,
           child: AppInfoBanner(
@@ -135,14 +133,14 @@ class _FaqTile extends StatelessWidget {
                       Expanded(
                         child: Text(
                           entry.question,
-                          style: GoogleFonts.beVietnamPro(
+                          style: AppText.base(
                             fontSize: 15.sp,
                             fontWeight: FontWeight.w700,
                             color: scheme.onSurface,
                           ),
                         ),
                       ),
-                      SizedBox(width: 10.w),
+                      10.horizontalSpace,
                       Obx(() {
                         final open = controller.isExpanded(section, item);
                         return AnimatedRotation(
@@ -166,7 +164,7 @@ class _FaqTile extends StatelessWidget {
                           alignment: Alignment.centerLeft,
                           child: Text(
                             entry.answer,
-                            style: GoogleFonts.beVietnamPro(
+                            style: AppText.base(
                               fontSize: 13.5.sp,
                               height: 1.45,
                               color: scheme.onSurface.withValues(alpha: 0.62),

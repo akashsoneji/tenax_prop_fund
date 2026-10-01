@@ -2,9 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
-import 'package:google_fonts/google_fonts.dart';
 
 import '../../../../shared/widgets/app_gradient_button.dart';
+import '../../../shared/theme/app_text.dart';
 
 /// "Verify Mobile Number" dialog from the KYC design: a white card with four
 /// OTP cells and a gradient Verify button. Returns the entered code via
@@ -71,7 +71,7 @@ class _VerifyMobileDialogState extends State<VerifyMobileDialog> {
                 Expanded(
                   child: Text(
                     'verification.verify_mobile'.tr,
-                    style: GoogleFonts.beVietnamPro(
+                    style: AppText.base(
                       fontSize: 19.sp,
                       fontWeight: FontWeight.w700,
                       color: scheme.onSurface,
@@ -81,22 +81,25 @@ class _VerifyMobileDialogState extends State<VerifyMobileDialog> {
                 InkWell(
                   onTap: () => Get.back(),
                   borderRadius: BorderRadius.circular(20.r),
-                  child: Icon(Icons.cancel_outlined,
-                      color: scheme.error, size: 24.w),
+                  child: Icon(
+                    Icons.cancel_outlined,
+                    color: scheme.error,
+                    size: 24.w,
+                  ),
                 ),
               ],
             ),
-            SizedBox(height: 14.h),
+            14.verticalSpace,
             Text(
               'verification.otp_body'.trParams({'phone': widget.phone}),
               textAlign: TextAlign.center,
-              style: GoogleFonts.beVietnamPro(
+              style: AppText.base(
                 fontSize: 14.sp,
                 height: 1.4,
                 color: scheme.onSurface.withValues(alpha: 0.6),
               ),
             ),
-            SizedBox(height: 22.h),
+            22.verticalSpace,
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
@@ -108,12 +111,13 @@ class _VerifyMobileDialogState extends State<VerifyMobileDialog> {
                   ),
               ],
             ),
-            SizedBox(height: 22.h),
+            22.verticalSpace,
             widget.verifying == null
                 ? AppGradientButton(
                     label: 'common.verify'.tr,
-                    onPressed:
-                        _code.length == _length ? () => Get.back(result: _code) : null,
+                    onPressed: _code.length == _length
+                        ? () => Get.back(result: _code)
+                        : null,
                   )
                 : Obx(
                     () => AppGradientButton(
@@ -155,7 +159,7 @@ class _OtpCell extends StatelessWidget {
         keyboardType: TextInputType.number,
         textAlign: TextAlign.center,
         maxLength: 1,
-        style: GoogleFonts.beVietnamPro(
+        style: AppText.base(
           fontSize: 24.sp,
           fontWeight: FontWeight.w700,
           color: scheme.onSurface,
@@ -170,8 +174,9 @@ class _OtpCell extends StatelessWidget {
           contentPadding: EdgeInsets.zero,
           enabledBorder: OutlineInputBorder(
             borderRadius: BorderRadius.circular(12.r),
-            borderSide:
-                BorderSide(color: scheme.onSurface.withValues(alpha: 0.2)),
+            borderSide: BorderSide(
+              color: scheme.onSurface.withValues(alpha: 0.2),
+            ),
           ),
           focusedBorder: OutlineInputBorder(
             borderRadius: BorderRadius.circular(12.r),

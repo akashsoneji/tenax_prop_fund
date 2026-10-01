@@ -2,11 +2,11 @@ import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
-import 'package:get/get.dart';
 
 import '../../../shared/theme/app_colors.dart';
-import '../../../shared/theme/app_theme.dart';
-import '../../../shared/widgets/app_pill.dart';
+
+import '../../../shared/theme/app_spacing.dart';
+import '../../../shared/theme/app_text.dart';
 
 /// Shared animated backdrop for the auth module. Provides:
 ///
@@ -122,7 +122,8 @@ class _AuthScaffoldState extends State<AuthScaffold>
                 Expanded(
                   child: SingleChildScrollView(
                     physics: const BouncingScrollPhysics(),
-                    padding: widget.padding ??
+                    padding:
+                        widget.padding ??
                         EdgeInsets.fromLTRB(24.w, 60.h, 24.w, 24.h),
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -131,9 +132,7 @@ class _AuthScaffoldState extends State<AuthScaffold>
                           Text(
                             widget.heroTitle!,
                             textAlign: TextAlign.center,
-                            style: Theme.of(context)
-                                .textTheme
-                                .displaySmall
+                            style: Theme.of(context).textTheme.displaySmall
                                 ?.copyWith(
                                   fontWeight: FontWeight.w700,
                                   height: 2.05,
@@ -141,7 +140,7 @@ class _AuthScaffoldState extends State<AuthScaffold>
                                 ),
                           ),
                           // if (widget.heroSubtitle != null) ...[
-                          //   SizedBox(height: 8.h),
+                          //   Gap.vSm,
                           //   Text(
                           //     widget.heroSubtitle!,
                           //     textAlign: TextAlign.center,
@@ -237,15 +236,18 @@ class _MeshPainter extends CustomPainter {
     final pulseScale = 1.0 + 0.04 * pulse;
     for (final blob in blobs) {
       final paint = Paint()
-        ..shader = RadialGradient(
-          colors: [
-            blob.color.withValues(alpha: dark ? 0.28 : 0.18),
-            blob.color.withValues(alpha: 0.0),
-          ],
-        ).createShader(Rect.fromCircle(
-          center: blob.offset,
-          radius: blob.radius * pulseScale,
-        ));
+        ..shader =
+            RadialGradient(
+              colors: [
+                blob.color.withValues(alpha: dark ? 0.28 : 0.18),
+                blob.color.withValues(alpha: 0.0),
+              ],
+            ).createShader(
+              Rect.fromCircle(
+                center: blob.offset,
+                radius: blob.radius * pulseScale,
+              ),
+            );
       canvas.drawCircle(blob.offset, blob.radius * pulseScale, paint);
     }
   }
@@ -325,16 +327,18 @@ class _TickerTapeState extends State<_TickerTape>
                             for (final row in _rows) ...[
                               Text(
                                 row,
-                                style: TextStyle(
-                                  color: widget.color,
-                                  fontSize: 12.sp,
-                                  fontFeatures: const [
-                                    FontFeature.tabularFigures(),
-                                  ],
-                                  letterSpacing: 0.4,
-                                ),
+                                style:
+                                    AppText.base(
+                                      color: widget.color,
+                                      fontSize: 12.sp,
+                                      letterSpacing: 0.4,
+                                    ).copyWith(
+                                      fontFeatures: const [
+                                        FontFeature.tabularFigures(),
+                                      ],
+                                    ),
                               ),
-                              SizedBox(width: 24.w),
+                              Gap.hXl,
                             ],
                           ],
                         ),
@@ -346,149 +350,6 @@ class _TickerTapeState extends State<_TickerTape>
           );
         },
       ),
-    );
-  }
-}
-
-/// Side-by-side marketing scaffold for LoginViewB: tall illustrated panel on
-/// the left with the brand promise, glass card with the form on the right.
-/// On narrow screens it collapses to a vertical stack.
-class MarketingScaffold extends StatelessWidget {
-  const MarketingScaffold({
-    super.key,
-    required this.child,
-    required this.heroTitle,
-    required this.heroSubtitle,
-  });
-
-  final Widget child;
-  final String heroTitle;
-  final String heroSubtitle;
-
-  @override
-  Widget build(BuildContext context) {
-    final scheme = Theme.of(context).colorScheme;
-    return Scaffold(
-      body: LayoutBuilder(
-        builder: (context, constraints) {
-          final narrow = constraints.maxWidth < 720;
-          if (narrow) {
-            return Column(
-              children: [
-                _MarketingPanel(
-                  heroTitle: heroTitle,
-                  heroSubtitle: heroSubtitle,
-                  scheme: scheme,
-                ),
-                Expanded(
-                  child: SingleChildScrollView(
-                    padding: EdgeInsets.all(24.w),
-                    child: child,
-                  ),
-                ),
-              ],
-            );
-          }
-          return Row(
-            children: [
-              Expanded(
-                flex: 5,
-                child: _MarketingPanel(
-                  heroTitle: heroTitle,
-                  heroSubtitle: heroSubtitle,
-                  scheme: scheme,
-                ),
-              ),
-              Expanded(
-                flex: 4,
-                child: SingleChildScrollView(
-                  padding: EdgeInsets.all(32.w),
-                  child: Center(child: child),
-                ),
-              ),
-            ],
-          );
-        },
-      ),
-    );
-  }
-}
-
-class _MarketingPanel extends StatelessWidget {
-  const _MarketingPanel({
-    required this.heroTitle,
-    required this.heroSubtitle,
-    required this.scheme,
-  });
-
-  final String heroTitle;
-  final String heroSubtitle;
-  final ColorScheme scheme;
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      decoration: BoxDecoration(
-        gradient: AppTheme.brandGradient(scheme),
-      ),
-      child: SafeArea(
-        child: Padding(
-          padding: EdgeInsets.all(32.w),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Icon(Icons.candlestick_chart_rounded,
-                  size: 56.w, color: AppColors.white),
-              SizedBox(height: 24.h),
-              Text(
-                heroTitle,
-                style: TextStyle(
-                  color: AppColors.white,
-                  fontSize: 36.sp,
-                  fontWeight: FontWeight.w700,
-                  height: 1.1,
-                ),
-              ),
-              SizedBox(height: 12.h),
-              Text(
-                heroSubtitle,
-                style: TextStyle(
-                  color: AppColors.white.withValues(alpha: 0.85),
-                  fontSize: 16.sp,
-                  height: 1.4,
-                ),
-              ),
-              SizedBox(height: 32.h),
-              Wrap(
-                spacing: 12.w,
-                runSpacing: 8.h,
-                children: [
-                  _Pill(label: 'auth.pill_challenges'.tr),
-                  _Pill(label: 'auth.pill_payouts'.tr),
-                  _Pill(label: 'auth.pill_charts'.tr),
-                ],
-              ),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
-}
-
-class _Pill extends StatelessWidget {
-  const _Pill({required this.label});
-  final String label;
-
-  @override
-  Widget build(BuildContext context) {
-    return AppPill(
-      label: label,
-      color: AppColors.white,
-      bgAlpha: 0.18,
-      fontWeight: FontWeight.w600,
-      padding: EdgeInsets.symmetric(horizontal: 14.w, vertical: 8.h),
     );
   }
 }

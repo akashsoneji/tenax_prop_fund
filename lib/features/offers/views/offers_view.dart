@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
-import 'package:google_fonts/google_fonts.dart';
 
 import '../../../shared/theme/app_theme.dart';
 import '../../../shared/widgets/app_empty_view.dart';
@@ -11,6 +10,8 @@ import '../../../shared/widgets/skeletons/skeletons.dart';
 import '../controllers/offers_controller.dart';
 import '../models/offer_models.dart';
 import '../widgets/offer_card.dart';
+import '../../../shared/theme/app_spacing.dart';
+import '../../../shared/theme/app_text.dart';
 
 /// "My offers" screen. Two labelled sections — offers the user can apply now
 /// and ones already redeemed — each a stack of [OfferCard]s driven by
@@ -59,7 +60,7 @@ class OffersView extends StatelessWidget {
                             OfferCard(offer: o, onApply: c.copyCode),
                         ],
                         if (used.isNotEmpty) ...[
-                          SizedBox(height: 14.h),
+                          14.verticalSpace,
                           _SectionLabel(
                             'offers.used_offers'.tr,
                             count: used.length,
@@ -79,7 +80,6 @@ class OffersView extends StatelessWidget {
     );
   }
 }
-
 
 /// Small section header used between the two offer blocks, with the same
 /// subtle rise-in entrance as the rewards screen.
@@ -113,7 +113,7 @@ class _SectionLabel extends StatelessWidget {
                 text,
                 maxLines: 1,
                 overflow: TextOverflow.ellipsis,
-                style: GoogleFonts.beVietnamPro(
+                style: AppText.base(
                   fontSize: 15.sp,
                   fontWeight: FontWeight.w800,
                   letterSpacing: -0.2,
@@ -121,7 +121,7 @@ class _SectionLabel extends StatelessWidget {
                 ),
               ),
             ),
-            SizedBox(width: 8.w),
+            Gap.hSm,
             Container(
               padding: EdgeInsets.symmetric(horizontal: 8.w, vertical: 2.h),
               decoration: BoxDecoration(
@@ -130,7 +130,7 @@ class _SectionLabel extends StatelessWidget {
               ),
               child: Text(
                 '$count',
-                style: GoogleFonts.beVietnamPro(
+                style: AppText.base(
                   fontSize: 11.sp,
                   fontWeight: FontWeight.w700,
                   color: scheme.onSurfaceVariant,

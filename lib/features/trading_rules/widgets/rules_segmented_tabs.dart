@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
-import 'package:google_fonts/google_fonts.dart';
 
 import '../../../shared/theme/app_colors.dart';
 import '../../../shared/theme/app_theme.dart';
 import '../controllers/trading_rules_controller.dart';
+import '../../../shared/theme/app_text.dart';
 
 /// Top-of-screen segmented tab bar, built from the tabs the rules API returns.
 ///
@@ -77,7 +77,7 @@ class _SegmentChip extends StatelessWidget {
         ),
         child: Text(
           label,
-          style: GoogleFonts.beVietnamPro(
+          style: AppText.base(
             fontSize: 13.5.sp,
             fontWeight: FontWeight.w700,
             color: isSelected ? Colors.white : scheme.onSurface,

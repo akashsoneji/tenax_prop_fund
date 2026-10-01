@@ -6,6 +6,7 @@ import '../../../app/routes/app_routes.dart';
 import '../../../shared/widgets/app_gradient_button.dart';
 import '../controllers/referral_controller.dart';
 import '../models/referral_models.dart';
+import '../../../shared/theme/app_spacing.dart';
 
 /// Opens the "Withdraw referral earnings" sheet and loads the payout methods.
 Future<void> showReferralWithdrawSheet(ReferralData data) {
@@ -84,7 +85,7 @@ class _ReferralWithdrawSheetState extends State<ReferralWithdrawSheet> {
                 ],
               ),
               _BalanceStrip(data: widget.data),
-              SizedBox(height: 14.h),
+              14.verticalSpace,
               _Label('referral.amount_usd'.tr),
               TextField(
                 controller: _amount,
@@ -94,10 +95,10 @@ class _ReferralWithdrawSheetState extends State<ReferralWithdrawSheet> {
                 style: text.bodyMedium?.copyWith(fontSize: 14.sp),
                 decoration: _decoration(context, hint: '0.00'),
               ),
-              SizedBox(height: 12.h),
+              Gap.vMd,
               _Label('referral.payout_method'.tr),
               const _MethodPicker(),
-              SizedBox(height: 18.h),
+              18.verticalSpace,
               Obx(
                 () => AppGradientButton(
                   label: 'referral.withdraw_submit'.tr,

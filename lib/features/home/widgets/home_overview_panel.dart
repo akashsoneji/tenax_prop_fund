@@ -8,6 +8,7 @@ import '../../../shared/theme/app_theme.dart';
 import '../../../shared/widgets/app_pill.dart';
 import '../models/dashboard_models.dart';
 import 'home_bento.dart';
+import '../../../shared/theme/app_spacing.dart';
 
 /// One grouped surface holding the focused account's balance, the account
 /// count and every KPI tile as a two-column grid split by hairline dividers.
@@ -44,20 +45,22 @@ class HomeOverviewPanel extends StatelessWidget {
     final rows = <Widget>[];
     for (var i = 0; i < cells.length; i += 2) {
       if (i > 0) rows.add(Divider(height: 1, thickness: 1, color: divider));
-      rows.add(IntrinsicHeight(
-        child: Row(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            Expanded(child: cells[i]),
-            VerticalDivider(width: 1, thickness: 1, color: divider),
-            Expanded(
-              child: i + 1 < cells.length
-                  ? cells[i + 1]
-                  : const SizedBox.shrink(),
-            ),
-          ],
+      rows.add(
+        IntrinsicHeight(
+          child: Row(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              Expanded(child: cells[i]),
+              VerticalDivider(width: 1, thickness: 1, color: divider),
+              Expanded(
+                child: i + 1 < cells.length
+                    ? cells[i + 1]
+                    : const SizedBox.shrink(),
+              ),
+            ],
+          ),
         ),
-      ));
+      );
     }
 
     return Container(
@@ -80,20 +83,26 @@ class _StatCell extends StatelessWidget {
     this.valueColor,
   });
 
-  factory _StatCell.kpi({required DashboardKpi kpi, required ColorScheme scheme}) {
+  factory _StatCell.kpi({
+    required DashboardKpi kpi,
+    required ColorScheme scheme,
+  }) {
     final tone = kpi.isGold
         ? AppColors.amber
         : kpi.isDown
-            ? AppColors.dangerBright
-            : kpi.isUp
-                ? AppColors.success
-                : scheme.primary;
+        ? AppColors.dangerBright
+        : kpi.isUp
+        ? AppColors.success
+        : scheme.primary;
     final hint = kpi.hint.trim();
-    final isDelta = hint.isNotEmpty &&
+    final isDelta =
+        hint.isNotEmpty &&
         (hint.startsWith('+') || hint.startsWith('-') || hint.startsWith('−'));
     return _StatCell(
       icon: _iconFor(kpi),
-      label: hint.isNotEmpty && !isDelta ? '${kpi.label} · ${kpi.hint}' : kpi.label,
+      label: hint.isNotEmpty && !isDelta
+          ? '${kpi.label} · ${kpi.hint}'
+          : kpi.label,
       value: kpi.value,
       tone: tone,
       delta: isDelta ? kpi.hint : null,
@@ -134,7 +143,7 @@ class _StatCell extends StatelessWidget {
             ),
             child: Icon(icon, size: 15.w, color: tone),
           ),
-          SizedBox(width: 8.w),
+          Gap.hSm,
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -152,7 +161,7 @@ class _StatCell extends StatelessWidget {
                     ).copyWith(letterSpacing: -0.4),
                   ),
                 ),
-                SizedBox(height: 1.h),
+                1.verticalSpace,
                 Row(
                   children: [
                     Flexible(
@@ -167,13 +176,15 @@ class _StatCell extends StatelessWidget {
                       ),
                     ),
                     if (delta != null) ...[
-                      SizedBox(width: 4.w),
+                      Gap.hXs,
                       AppPill(
                         label: delta!,
                         color: tone,
                         fontSize: 9,
-                        padding:
-                            EdgeInsets.symmetric(horizontal: 5.w, vertical: 1.h),
+                        padding: EdgeInsets.symmetric(
+                          horizontal: 5.w,
+                          vertical: 1.h,
+                        ),
                       ),
                     ],
                   ],

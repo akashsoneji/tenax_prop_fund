@@ -6,7 +6,9 @@ import '../../../app/routes/app_routes.dart';
 import '../../../shared/theme/app_colors.dart';
 import '../../../shared/theme/app_text.dart';
 import '../../../shared/theme/app_theme.dart';
+import '../../../shared/widgets/app_status_pill.dart';
 import '../models/billing_models.dart';
+import '../../../shared/theme/app_spacing.dart';
 
 /// Billing history as a stack of cards. Every field is rendered in full (no
 /// ellipsis): a status-coloured accent rail, icon + wrapping title with the
@@ -90,10 +92,10 @@ class _TransactionCard extends StatelessWidget {
                             tint: tint,
                             statusColor: statusColor,
                           ),
-                          SizedBox(height: 12.h),
+                          Gap.vMd,
                           _DetailPanel(transaction: transaction),
                           if (transaction.hasInvoice) ...[
-                            SizedBox(height: 10.h),
+                            10.verticalSpace,
                             _ViewInvoiceLink(color: tint),
                           ],
                         ],
@@ -137,7 +139,7 @@ class _Header extends StatelessWidget {
           ),
           child: Icon(transaction.icon, size: 20.w, color: tint),
         ),
-        SizedBox(width: 12.w),
+        Gap.hMd,
         Expanded(
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
@@ -150,12 +152,12 @@ class _Header extends StatelessWidget {
                   color: scheme.onSurface,
                 ).copyWith(fontWeight: FontWeight.w700, height: 1.35),
               ),
-              SizedBox(height: 6.h),
+              6.verticalSpace,
               _StatusPill(status: transaction.status, color: statusColor),
             ],
           ),
         ),
-        SizedBox(width: 10.w),
+        10.horizontalSpace,
         Text(
           transaction.amount,
           style: AppText.value(
@@ -212,7 +214,7 @@ class _DetailPanel extends StatelessWidget {
       child: Column(
         children: [
           for (var i = 0; i < rows.length; i++) ...[
-            if (i > 0) SizedBox(height: 8.h),
+            if (i > 0) Gap.vSm,
             _DetailRow(icon: rows[i].$1, label: rows[i].$2, value: rows[i].$3),
           ],
         ],
@@ -240,9 +242,12 @@ class _DetailRow extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Icon(icon, size: 15.w, color: muted),
-        SizedBox(width: 8.w),
-        Text(label, style: AppText.label(fontSize: 12.sp, color: muted)),
-        SizedBox(width: 12.w),
+        Gap.hSm,
+        Text(
+          label,
+          style: AppText.label(fontSize: 12.sp, color: muted),
+        ),
+        Gap.hMd,
         Expanded(
           child: Text(
             value,
@@ -271,29 +276,7 @@ class _StatusPill extends StatelessWidget {
       BillingStatus.awaitingPayment => 'billing.status_awaiting',
       BillingStatus.refunded => 'billing.status_refunded',
     };
-    return Container(
-      padding: EdgeInsets.symmetric(horizontal: 8.w, vertical: 3.h),
-      decoration: BoxDecoration(
-        color: color.withValues(alpha: 0.12),
-        borderRadius: BorderRadius.circular(20.r),
-      ),
-      child: Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Container(
-            width: 6.w,
-            height: 6.w,
-            decoration: BoxDecoration(color: color, shape: BoxShape.circle),
-          ),
-          SizedBox(width: 5.w),
-          Text(
-            labelKey.tr,
-            style: AppText.label(fontSize: 10.5.sp, color: color)
-                .copyWith(fontWeight: FontWeight.w700),
-          ),
-        ],
-      ),
-    );
+    return AppStatusPill(label: labelKey.tr, color: color);
   }
 }
 
@@ -307,12 +290,14 @@ class _ViewInvoiceLink extends StatelessWidget {
       mainAxisAlignment: MainAxisAlignment.end,
       children: [
         Icon(Icons.description_outlined, size: 15.w, color: color),
-        SizedBox(width: 4.w),
+        Gap.hXs,
         Flexible(
           child: Text(
             'billing.view_invoice'.tr,
-            style: AppText.label(fontSize: 12.sp, color: color)
-                .copyWith(fontWeight: FontWeight.w700),
+            style: AppText.label(
+              fontSize: 12.sp,
+              color: color,
+            ).copyWith(fontWeight: FontWeight.w700),
           ),
         ),
         Icon(Icons.chevron_right_rounded, size: 18.w, color: color),

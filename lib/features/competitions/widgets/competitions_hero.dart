@@ -6,6 +6,7 @@ import '../../../shared/theme/app_colors.dart';
 import '../../../shared/theme/app_text.dart';
 import '../../../shared/theme/app_theme.dart';
 import '../models/competition_models.dart';
+import '../../../shared/theme/app_spacing.dart';
 
 /// Gradient hero at the top of the Competitions screen. Leads with the
 /// combined cash pool from `stats.cash_pool` and summarises how many
@@ -46,7 +47,7 @@ class CompetitionsHero extends StatelessWidget {
             color: AppColors.white.withValues(alpha: 0.85),
             size: 20.w,
           ),
-          SizedBox(width: 10.w),
+          10.horizontalSpace,
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -61,7 +62,7 @@ class CompetitionsHero extends StatelessWidget {
                     fontSize: 11.sp,
                   ),
                 ),
-                SizedBox(height: 2.h),
+                Gap.vXxs,
                 Text(
                   stats.cashPool.isEmpty ? '—' : stats.cashPool,
                   maxLines: 1,
@@ -71,9 +72,9 @@ class CompetitionsHero extends StatelessWidget {
               ],
             ),
           ),
-          SizedBox(width: 10.w),
+          10.horizontalSpace,
           _HeroStat(label: 'competitions.total'.tr, value: '$total'),
-          SizedBox(width: 8.w),
+          Gap.hSm,
           _HeroStat(label: 'competitions.status.live'.tr, value: '$liveCount'),
         ],
       ),
@@ -106,7 +107,7 @@ class _HeroStat extends StatelessWidget {
             overflow: TextOverflow.ellipsis,
             style: AppText.value(color: AppColors.white, fontSize: 15.sp),
           ),
-          SizedBox(height: 1.h),
+          1.verticalSpace,
           Text(
             label,
             maxLines: 1,

@@ -3,6 +3,7 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
 
 import '../../../shared/widgets/app_checkbox.dart';
+import '../../../shared/theme/app_spacing.dart';
 
 /// Long-form T&C content. Stateless presentation — no business logic. Receives
 /// [agreed] + [onAgreed] from the caller so RegisterView can persist the
@@ -45,7 +46,7 @@ class _TermsViewState extends State<TermsView> {
                   label: 'terms.agree'.tr,
                 ),
               ),
-            SizedBox(height: 12.h),
+            Gap.vMd,
           ],
         ),
       ),

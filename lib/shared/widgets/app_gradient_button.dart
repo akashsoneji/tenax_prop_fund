@@ -151,7 +151,7 @@ class _AppGradientButtonState extends State<AppGradientButton>
                               if (widget.icon != null) ...[
                                 Icon(widget.icon,
                                     color: fgColor, size: 18.w),
-                                SizedBox(width: 10.w),
+                                10.horizontalSpace,
                               ],
                               Text(
                                 widget.label,

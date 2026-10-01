@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 
+import '../theme/app_spacing.dart';
+
 /// Themed checkbox with a label.
 class AppCheckbox extends StatelessWidget {
   const AppCheckbox({
@@ -28,7 +30,7 @@ class AppCheckbox extends StatelessWidget {
               onChanged: onChanged,
               materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
             ),
-            SizedBox(width: 4.w),
+            Gap.hXs,
             Expanded(child: Text(label)),
           ],
         ),

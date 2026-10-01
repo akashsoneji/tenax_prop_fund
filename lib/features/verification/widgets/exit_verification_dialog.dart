@@ -1,9 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
-import 'package:google_fonts/google_fonts.dart';
 
-import '../../../../shared/widgets/app_gradient_button.dart';
+import '../../../shared/theme/app_spacing.dart';
+import '../../../shared/theme/app_text.dart';
+import '../../../shared/widgets/app_button.dart';
 
 /// The "Exit Verification" confirmation dialog. Returns `true` from the route
 /// when the user chooses to exit, `false`/null when they continue.
@@ -27,34 +28,34 @@ class ExitVerificationDialog extends StatelessWidget {
           children: [
             Text(
               'verification.exit_title'.tr,
-              style: GoogleFonts.beVietnamPro(
+              style: AppText.base(
                 fontSize: 22.sp,
                 fontWeight: FontWeight.w700,
                 color: scheme.onSurface,
               ),
             ),
-            SizedBox(height: 16.h),
+            Gap.vLg,
             Text(
               'verification.exit_body'.tr,
               textAlign: TextAlign.center,
-              style: GoogleFonts.beVietnamPro(
+              style: AppText.base(
                 fontSize: 14.5.sp,
                 height: 1.4,
                 color: scheme.onSurface.withValues(alpha: 0.6),
               ),
             ),
-            SizedBox(height: 28.h),
+            28.verticalSpace,
             Row(
               children: [
                 Expanded(
-                  child: OutlinedButton(
+                  child: AppButton.outlined(
+                    label: 'verification.exit'.tr,
                     onPressed: () => Get.back(result: true),
-                    child: Text('verification.exit'.tr),
                   ),
                 ),
-                SizedBox(width: 14.w),
+                14.horizontalSpace,
                 Expanded(
-                  child: AppGradientButton(
+                  child: AppButton(
                     label: 'common.continue_action'.tr,
                     onPressed: () => Get.back(result: false),
                   ),

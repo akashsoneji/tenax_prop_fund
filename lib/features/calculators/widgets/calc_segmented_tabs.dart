@@ -1,12 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
-import 'package:google_fonts/google_fonts.dart';
 
 import '../../../shared/theme/app_colors.dart';
 import '../../../shared/theme/app_theme.dart';
+import '../../../shared/theme/app_spacing.dart';
+import '../../../shared/theme/app_text.dart';
 
 TextStyle _segmentTextStyle(ColorScheme scheme, {required bool selected}) =>
-    GoogleFonts.beVietnamPro(
+    AppText.base(
       fontSize: 13.5.sp,
       fontWeight: FontWeight.w700,
       color: selected
@@ -50,7 +51,7 @@ class CalcSegmentedTabs extends StatelessWidget {
       child: Row(
         children: [
           for (var i = 0; i < labels.length; i++) ...[
-            if (i > 0) SizedBox(width: 4.w),
+            if (i > 0) Gap.hXs,
             Expanded(
               flex: (widths[i] * 100).round().clamp(1, 1 << 20),
               child: _Segment(

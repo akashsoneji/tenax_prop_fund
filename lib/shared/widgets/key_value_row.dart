@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:google_fonts/google_fonts.dart';
 
+import '../theme/app_spacing.dart';
 import '../theme/app_theme.dart';
 
 /// A key/value row used inside grouped "rules" cards across the app
@@ -58,7 +59,7 @@ class KeyValueRow extends StatelessWidget {
                   ),
                 ),
               ),
-              SizedBox(width: 12.w),
+              Gap.hMd,
               // Both sides are Expanded (tight): a loose label would leave its
               // unused share after the value, so the value's right edge would
               // drift with label length.
@@ -75,7 +76,7 @@ class KeyValueRow extends StatelessWidget {
                 ),
               ),
               if (showInfo) ...[
-                SizedBox(width: 8.w),
+                Gap.hSm,
                 GestureDetector(
                   onTap: onInfo,
                   child: Icon(

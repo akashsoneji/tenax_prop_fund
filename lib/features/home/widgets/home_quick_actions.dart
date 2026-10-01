@@ -5,6 +5,7 @@ import 'package:get/get.dart';
 import '../../../app/routes/app_routes.dart';
 import '../../../shared/theme/app_text.dart';
 import '../../../shared/widgets/app_glass.dart';
+import '../../../shared/theme/app_spacing.dart';
 
 class _QuickAction {
   const _QuickAction(this.route, this.labelKey, this.icon);
@@ -15,13 +16,25 @@ class _QuickAction {
 
 const _quickActions = <_QuickAction>[
   _QuickAction(
-      AppRoutes.challenge, 'home.qa.challenge', Icons.emoji_events_outlined),
+    AppRoutes.challenge,
+    'home.qa.challenge',
+    Icons.emoji_events_outlined,
+  ),
   _QuickAction(
-      AppRoutes.profileKyc, 'home.qa.kyc', Icons.verified_user_outlined),
+    AppRoutes.profileKyc,
+    'home.qa.kyc',
+    Icons.verified_user_outlined,
+  ),
   _QuickAction(
-      AppRoutes.rewards, 'home.qa.reward', Icons.card_giftcard_rounded),
+    AppRoutes.rewards,
+    'home.qa.reward',
+    Icons.card_giftcard_rounded,
+  ),
   _QuickAction(
-      AppRoutes.tradingRules, 'home.qa.rules', Icons.menu_book_rounded),
+    AppRoutes.tradingRules,
+    'home.qa.rules',
+    Icons.menu_book_rounded,
+  ),
 ];
 
 /// App-style shortcut row: four round tinted icon buttons with a caption
@@ -82,7 +95,7 @@ class _QuickActionButton extends StatelessWidget {
                 ),
                 child: Icon(action.icon, color: scheme.primary, size: 22.w),
               ),
-            SizedBox(height: 8.h),
+            Gap.vSm,
             Text(
               action.labelKey.tr,
               maxLines: 1,

@@ -8,6 +8,9 @@ import '../../../shared/widgets/app_gradient_button.dart';
 import '../controllers/auth_controller.dart';
 import '../widgets/animated_field.dart';
 import '../widgets/biometric_button.dart';
+import '../../../shared/theme/app_spacing.dart';
+import '../../../shared/theme/app_text.dart';
+import '../../../shared/widgets/app_button.dart';
 
 /// Reusable login form. Both flavor layouts embed this same widget — the
 /// business inputs and the controller call are identical; only the surrounding
@@ -50,9 +53,9 @@ class LoginFormState extends State<LoginForm> {
   }) {
     final scheme = Theme.of(context).colorScheme;
     OutlineInputBorder border(Color color, double width) => OutlineInputBorder(
-          borderRadius: BorderRadius.circular(16.r),
-          borderSide: BorderSide(color: color, width: width),
-        );
+      borderRadius: BorderRadius.circular(16.r),
+      borderSide: BorderSide(color: color, width: width),
+    );
     return InputDecoration(
       labelText: label,
       hintText: hint,
@@ -87,7 +90,7 @@ class LoginFormState extends State<LoginForm> {
             ),
           ),
         ),
-        SizedBox(height: 14.h),
+        14.verticalSpace,
         AnimatedField(
           index: 1,
           child: TextField(
@@ -99,29 +102,31 @@ class LoginFormState extends State<LoginForm> {
               label: 'login.password'.tr,
               icon: Icons.lock_outline_rounded,
               suffix: IconButton(
-                icon: Icon(_obscure
-                    ? Icons.visibility_outlined
-                    : Icons.visibility_off_outlined),
+                icon: Icon(
+                  _obscure
+                      ? Icons.visibility_outlined
+                      : Icons.visibility_off_outlined,
+                ),
                 onPressed: () => setState(() => _obscure = !_obscure),
               ),
             ),
           ),
         ),
-        SizedBox(height: 8.h),
+        Gap.vSm,
         AnimatedField(
           index: 2,
           child: Align(
             alignment: AlignmentDirectional.centerEnd,
-            child: TextButton(
+            child: AppButton.text(
+              label: 'login.forgot_password'.tr,
               onPressed: () => Get.toNamed(
                 AppRoutes.forgotPassword,
                 arguments: _email.text.trim(),
               ),
-              child: Text('login.forgot_password'.tr),
             ),
           ),
         ),
-        SizedBox(height: 8.h),
+        Gap.vSm,
         Obx(() {
           final msg = controller.errorMessage.value;
           if (msg != null) {
@@ -140,7 +145,7 @@ class LoginFormState extends State<LoginForm> {
                       padding: EdgeInsets.only(bottom: 8.h),
                       child: Text(
                         msg,
-                        style: TextStyle(
+                        style: AppText.base(
                           color: Theme.of(context).colorScheme.error,
                           fontWeight: FontWeight.w600,
                         ),
@@ -149,7 +154,7 @@ class LoginFormState extends State<LoginForm> {
             ),
           );
         }),
-        SizedBox(height: 8.h),
+        Gap.vSm,
         Obx(
           () => AppGradientButton(
             label: 'login.login_button'.tr,
@@ -157,9 +162,9 @@ class LoginFormState extends State<LoginForm> {
             onPressed: submit,
           ),
         ),
-        SizedBox(height: 16.h),
+        Gap.vLg,
         _OrContinue(),
-        SizedBox(height: 14.h),
+        14.verticalSpace,
         Center(
           child: BiometricButton(
             savedEmail: _email.text.trim().isEmpty ? null : _email.text.trim(),
@@ -168,12 +173,12 @@ class LoginFormState extends State<LoginForm> {
             },
           ),
         ),
-        SizedBox(height: 12.h),
+        Gap.vMd,
         TextButton(
           onPressed: () => Get.toNamed(AppRoutes.register),
           child: Text(
             '${'login.no_account'.tr} ${'login.register_link'.tr}',
-            style: const TextStyle(fontWeight: FontWeight.w600),
+            style: AppText.base(fontWeight: FontWeight.w600),
           ),
         ),
       ],
@@ -184,8 +189,9 @@ class LoginFormState extends State<LoginForm> {
 class _OrContinue extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    final color =
-        Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.35);
+    final color = Theme.of(
+      context,
+    ).colorScheme.onSurface.withValues(alpha: 0.35);
     return Row(
       children: [
         Expanded(child: Divider(color: color, thickness: 0.6)),
@@ -193,11 +199,10 @@ class _OrContinue extends StatelessWidget {
           padding: EdgeInsets.symmetric(horizontal: 12.w),
           child: Text(
             'login.or_continue'.tr,
-            style: TextStyle(
-              color: Theme.of(context)
-                  .colorScheme
-                  .onSurface
-                  .withValues(alpha: 0.6),
+            style: AppText.base(
+              color: Theme.of(
+                context,
+              ).colorScheme.onSurface.withValues(alpha: 0.6),
               fontSize: 12.sp,
             ),
           ),

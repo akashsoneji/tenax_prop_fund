@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
-import 'package:google_fonts/google_fonts.dart';
 
 import '../../../app/routes/app_routes.dart';
 import '../../../shared/theme/app_colors.dart';
@@ -11,6 +10,9 @@ import '../../../shared/widgets/pinned_gradient_app_bar.dart';
 import '../../../shared/widgets/skeletons/skeletons.dart';
 import '../controllers/kyc_controller.dart';
 import '../models/kyc_profile.dart';
+import '../../../shared/theme/app_spacing.dart';
+import '../../../shared/theme/app_text.dart';
+import '../../../shared/widgets/app_card.dart';
 
 /// Profile & KYC screen. Purple gradient header over a scrolling body:
 /// profile chip, "blocks your reward" warning banner, verification checklist,
@@ -68,13 +70,13 @@ class _KycBody extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
           _ProfileChip(profile: profile),
-          // SizedBox(height: 14.h),
+          // 14.verticalSpace,
           // const _WarningBanner(),
-          SizedBox(height: 22.h),
+          22.verticalSpace,
           _VerificationSection(profile: profile),
-          SizedBox(height: 22.h),
+          22.verticalSpace,
           _PersonalDetailsSection(profile: profile),
-          SizedBox(height: 14.h),
+          14.verticalSpace,
           const _PayoutNote(),
         ],
       ),
@@ -97,25 +99,32 @@ class _ProfileChip extends StatelessWidget {
       decoration: BoxDecoration(
         color: scheme.brightness == Brightness.dark
             ? AppColors.white.withValues(alpha: 0.05)
-        : AppColors.track,
+            : AppColors.track,
         borderRadius: BorderRadius.circular(18.r),
       ),
       child: Row(
         children: [
           _ProfileAvatar(url: profile.avatarUrl, name: profile.name),
-          SizedBox(width: 14.w),
+          14.horizontalSpace,
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(profile.name,
-                    style: GoogleFonts.beVietnamPro(
-                        fontSize: 17.sp, fontWeight: FontWeight.w700)),
-                SizedBox(height: 3.h),
-                Text(profile.since,
-                    style: GoogleFonts.beVietnamPro(
-                        fontSize: 13.sp,
-                        color: scheme.onSurface.withValues(alpha: 0.6))),
+                Text(
+                  profile.name,
+                  style: AppText.base(
+                    fontSize: 17.sp,
+                    fontWeight: FontWeight.w700,
+                  ),
+                ),
+                3.verticalSpace,
+                Text(
+                  profile.since,
+                  style: AppText.base(
+                    fontSize: 13.sp,
+                    color: scheme.onSurface.withValues(alpha: 0.6),
+                  ),
+                ),
               ],
             ),
           ),
@@ -147,7 +156,7 @@ class _ProfileAvatar extends StatelessWidget {
           ? null
           : Text(
               initial,
-              style: GoogleFonts.beVietnamPro(
+              style: AppText.base(
                 fontSize: 20.sp,
                 fontWeight: FontWeight.w700,
                 color: scheme.primary,
@@ -170,7 +179,8 @@ class _WarningBanner extends StatelessWidget {
       padding: EdgeInsets.all(14.w),
       decoration: BoxDecoration(
         color: AppTheme.accent.withValues(
-            alpha: scheme.brightness == Brightness.dark ? 0.16 : 0.12),
+          alpha: scheme.brightness == Brightness.dark ? 0.16 : 0.12,
+        ),
         borderRadius: BorderRadius.circular(14.r),
         border: Border.all(color: AppTheme.accent.withValues(alpha: 0.30)),
       ),
@@ -179,24 +189,33 @@ class _WarningBanner extends StatelessWidget {
         children: [
           Row(
             children: [
-              Icon(Icons.warning_amber_rounded,
-                  size: 18.w, color: AppTheme.accent),
-              SizedBox(width: 8.w),
+              Icon(
+                Icons.warning_amber_rounded,
+                size: 18.w,
+                color: AppTheme.accent,
+              ),
+              Gap.hSm,
               Expanded(
-                child: Text('kyc.blocks_reward'.tr,
-                    style: GoogleFonts.beVietnamPro(
-                        fontSize: 13.sp,
-                        fontWeight: FontWeight.w700,
-                        color: scheme.onSurface)),
+                child: Text(
+                  'kyc.blocks_reward'.tr,
+                  style: AppText.base(
+                    fontSize: 13.sp,
+                    fontWeight: FontWeight.w700,
+                    color: scheme.onSurface,
+                  ),
+                ),
               ),
             ],
           ),
-          SizedBox(height: 6.h),
-          Text('kyc.blocks_reward_body'.tr,
-              style: GoogleFonts.beVietnamPro(
-                  fontSize: 13.sp,
-                  height: 1.35,
-                  color: scheme.onSurface.withValues(alpha: 0.7))),
+          6.verticalSpace,
+          Text(
+            'kyc.blocks_reward_body'.tr,
+            style: AppText.base(
+              fontSize: 13.sp,
+              height: 1.35,
+              color: scheme.onSurface.withValues(alpha: 0.7),
+            ),
+          ),
         ],
       ),
     );
@@ -221,19 +240,26 @@ class _VerificationSection extends StatelessWidget {
           child: Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              Text('kyc.verification'.tr,
-                  style: GoogleFonts.beVietnamPro(
-                      fontSize: 17.sp, fontWeight: FontWeight.w700)),
-              Text('${profile.doneCount}/${profile.totalCount} ${'kyc.done'.tr}',
-                  style: GoogleFonts.beVietnamPro(
-                      fontSize: 13.sp,
-                      fontWeight: FontWeight.w700,
-                      color: AppTheme.accent.withValues(alpha: 1))),
+              Text(
+                'kyc.verification'.tr,
+                style: AppText.base(
+                  fontSize: 17.sp,
+                  fontWeight: FontWeight.w700,
+                ),
+              ),
+              Text(
+                '${profile.doneCount}/${profile.totalCount} ${'kyc.done'.tr}',
+                style: AppText.base(
+                  fontSize: 13.sp,
+                  fontWeight: FontWeight.w700,
+                  color: AppTheme.accent.withValues(alpha: 1),
+                ),
+              ),
             ],
           ),
         ),
-        Container(
-          decoration: AppTheme.surfaceCard(scheme, radius: 18),
+        AppCard(
+          radius: 18,
           child: Column(
             children: [
               for (var i = 0; i < profile.steps.length; i++) ...[
@@ -265,13 +291,13 @@ class _VerificationRow extends StatelessWidget {
     final actionColor = step.isDone
         ? AppColors.success
         : step.isInReview
-            ? AppTheme.accent
-            : scheme.error;
+        ? AppTheme.accent
+        : scheme.error;
     final actionLabel = step.isDone
         ? 'kyc.status_done'.tr
         : step.isInReview
-            ? 'kyc.status_in_review'.tr
-            : 'kyc.status_upload'.tr;
+        ? 'kyc.status_in_review'.tr
+        : 'kyc.status_upload'.tr;
     final locked = step.isDone || step.isInReview;
     return Material(
       color: AppColors.transparent,
@@ -286,25 +312,38 @@ class _VerificationRow extends StatelessWidget {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text(step.title.tr,
-                        style: GoogleFonts.beVietnamPro(
-                            fontSize: 15.sp, fontWeight: FontWeight.w700)),
-                    SizedBox(height: 3.h),
-                    Text(step.subtitle.tr,
-                        style: GoogleFonts.beVietnamPro(
-                            fontSize: 12.5.sp,
-                            color: scheme.onSurface.withValues(alpha: 0.55))),
+                    Text(
+                      step.title.tr,
+                      style: AppText.base(
+                        fontSize: 15.sp,
+                        fontWeight: FontWeight.w700,
+                      ),
+                    ),
+                    3.verticalSpace,
+                    Text(
+                      step.subtitle.tr,
+                      style: AppText.base(
+                        fontSize: 12.5.sp,
+                        color: scheme.onSurface.withValues(alpha: 0.55),
+                      ),
+                    ),
                   ],
                 ),
               ),
-              Text(actionLabel,
-                  style: GoogleFonts.beVietnamPro(
-                      fontSize: 13.sp,
-                      fontWeight: FontWeight.w700,
-                      color: actionColor)),
+              Text(
+                actionLabel,
+                style: AppText.base(
+                  fontSize: 13.sp,
+                  fontWeight: FontWeight.w700,
+                  color: actionColor,
+                ),
+              ),
               if (!locked)
-                Icon(Icons.chevron_right_rounded,
-                    size: 20.w, color: actionColor),
+                Icon(
+                  Icons.chevron_right_rounded,
+                  size: 20.w,
+                  color: actionColor,
+                ),
             ],
           ),
         ),
@@ -331,14 +370,21 @@ class _PersonalDetailsSection extends StatelessWidget {
           child: Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              Text('kyc.personal_details'.tr,
-                  style: GoogleFonts.beVietnamPro(
-                      fontSize: 17.sp, fontWeight: FontWeight.w700)),
-              Text('kyc.edit'.tr,
-                  style: GoogleFonts.beVietnamPro(
-                      fontSize: 14.sp,
-                      fontWeight: FontWeight.w700,
-                      color: scheme.primary)),
+              Text(
+                'kyc.personal_details'.tr,
+                style: AppText.base(
+                  fontSize: 17.sp,
+                  fontWeight: FontWeight.w700,
+                ),
+              ),
+              Text(
+                'kyc.edit'.tr,
+                style: AppText.base(
+                  fontSize: 14.sp,
+                  fontWeight: FontWeight.w700,
+                  color: scheme.primary,
+                ),
+              ),
             ],
           ),
         ),
@@ -386,23 +432,31 @@ class _DetailRow extends StatelessWidget {
       child: Row(
         // mainAxisAlignment: MainAxisAlignment.end,
         children: [
-          Icon(row.icon, size: 18.w, color: AppColors.white.withValues(alpha: 0.85)),
-          SizedBox(width: 12.w),
-          Text(row.label.tr,
-              style: GoogleFonts.beVietnamPro(
-                  fontSize: 14.sp,
-                  color: AppColors.white.withValues(alpha: 0.9))),
-          SizedBox(width: 8.w),
+          Icon(
+            row.icon,
+            size: 18.w,
+            color: AppColors.white.withValues(alpha: 0.85),
+          ),
+          Gap.hMd,
+          Text(
+            row.label.tr,
+            style: AppText.base(
+              fontSize: 14.sp,
+              color: AppColors.white.withValues(alpha: 0.9),
+            ),
+          ),
+          Gap.hSm,
           Expanded(
             child: Text(
               row.value,
               textAlign: TextAlign.end,
               maxLines: 1,
               overflow: TextOverflow.ellipsis,
-              style: GoogleFonts.beVietnamPro(
-                  fontSize: 14.sp,
-                  fontWeight: FontWeight.w700,
-                  color: AppColors.white),
+              style: AppText.base(
+                fontSize: 14.sp,
+                fontWeight: FontWeight.w700,
+                color: AppColors.white,
+              ),
             ),
           ),
         ],
@@ -431,23 +485,33 @@ class _PayoutNote extends StatelessWidget {
         children: [
           Row(
             children: [
-              Icon(Icons.info_outline_rounded, size: 18.w, color: scheme.primary),
-              SizedBox(width: 8.w),
+              Icon(
+                Icons.info_outline_rounded,
+                size: 18.w,
+                color: scheme.primary,
+              ),
+              Gap.hSm,
               Expanded(
-                child: Text('kyc.payout_note_title'.tr,
-                    style: GoogleFonts.beVietnamPro(
-                        fontSize: 13.5.sp,
-                        fontWeight: FontWeight.w700,
-                        color: scheme.primary)),
+                child: Text(
+                  'kyc.payout_note_title'.tr,
+                  style: AppText.base(
+                    fontSize: 13.5.sp,
+                    fontWeight: FontWeight.w700,
+                    color: scheme.primary,
+                  ),
+                ),
               ),
             ],
           ),
-          SizedBox(height: 6.h),
-          Text('kyc.payout_note_body'.tr,
-              style: GoogleFonts.beVietnamPro(
-                  fontSize: 13.sp,
-                  height: 1.35,
-                  color: scheme.onSurface.withValues(alpha: 0.7))),
+          6.verticalSpace,
+          Text(
+            'kyc.payout_note_body'.tr,
+            style: AppText.base(
+              fontSize: 13.sp,
+              height: 1.35,
+              color: scheme.onSurface.withValues(alpha: 0.7),
+            ),
+          ),
         ],
       ),
     );
@@ -468,19 +532,19 @@ class _KycSkeleton extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
           ShimmerBox(height: 76.h, radius: 18.r),
-          SizedBox(height: 14.h),
+          14.verticalSpace,
           ShimmerBox(height: 88.h, radius: 14.r),
-          SizedBox(height: 22.h),
+          22.verticalSpace,
           ShimmerBox(width: 140.w, height: 18.h),
-          SizedBox(height: 12.h),
+          Gap.vMd,
           ShimmerBox(height: 190.h, radius: 18.r),
-          SizedBox(height: 22.h),
+          22.verticalSpace,
           ShimmerBox(width: 160.w, height: 18.h),
-          SizedBox(height: 12.h),
+          Gap.vMd,
           ShimmerBox(height: 260.h, radius: 18.r),
-          SizedBox(height: 22.h),
+          22.verticalSpace,
           ShimmerBox(width: 120.w, height: 18.h),
-          SizedBox(height: 12.h),
+          Gap.vMd,
           ShimmerBox(height: 240.h, radius: 18.r),
         ],
       ),

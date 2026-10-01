@@ -14,6 +14,8 @@ import '../../../shared/widgets/app_pill.dart';
 import '../controllers/home_controller.dart';
 import '../models/dashboard_models.dart';
 import 'home_overview_panel.dart';
+import '../../../shared/theme/app_spacing.dart';
+import '../../../shared/theme/app_text.dart';
 
 /// Formats a minor-currency amount (e.g. cents) as a grouped major string with
 /// a leading currency symbol.
@@ -45,12 +47,10 @@ class HomeBento extends StatelessWidget {
       children: [
         // Account card — same Floating P/L + account pill used on Positions.
         if (Get.isRegistered<PositionsController>())
-          PositionsAccountHeader(
-            controller: Get.find<PositionsController>(),
-          )
+          PositionsAccountHeader(controller: Get.find<PositionsController>())
         else
           EquityBentoTile(data: data),
-        SizedBox(height: 16.h),
+        Gap.vLg,
         HomeOverviewPanel(data: data),
       ],
     );
@@ -91,18 +91,23 @@ class EquityBentoTile extends GetView<HomeController> {
         children: [
           Row(
             children: [
-              Expanded(child: _Switcher(data: data, color: onMuted)),
-              SizedBox(width: 8.w),
+              Expanded(
+                child: _Switcher(data: data, color: onMuted),
+              ),
+              Gap.hSm,
               _LivePill(),
             ],
           ),
-          SizedBox(height: 18.h),
-          Text('home.equity'.tr,
-              style: TextStyle(
-                  fontSize: 12.5.sp,
-                  fontWeight: FontWeight.w500,
-                  color: onMuted)),
-          SizedBox(height: 4.h),
+          18.verticalSpace,
+          Text(
+            'home.equity'.tr,
+            style: AppText.base(
+              fontSize: 12.5.sp,
+              fontWeight: FontWeight.w500,
+              color: onMuted,
+            ),
+          ),
+          Gap.vXs,
           FittedBox(
             fit: BoxFit.scaleDown,
             alignment: Alignment.centerLeft,
@@ -112,17 +117,23 @@ class EquityBentoTile extends GetView<HomeController> {
                     formatter: (v) => formatMinorMoney(v.round(), currency),
                     style: _equityStyle,
                   )
-                : Text(equityText.isEmpty ? '—' : equityText,
-                    maxLines: 1, style: _equityStyle),
+                : Text(
+                    equityText.isEmpty ? '—' : equityText,
+                    maxLines: 1,
+                    style: _equityStyle,
+                  ),
           ),
           if (focus?.note.isNotEmpty ?? false) ...[
-            SizedBox(height: 8.h),
+            Gap.vSm,
             Text(
               focus!.note,
               maxLines: 1,
               overflow: TextOverflow.ellipsis,
-              style: TextStyle(
-                  fontSize: 13.sp, fontWeight: FontWeight.w600, color: onMuted),
+              style: AppText.base(
+                fontSize: 13.sp,
+                fontWeight: FontWeight.w600,
+                color: onMuted,
+              ),
             ),
           ],
         ],
@@ -130,15 +141,19 @@ class EquityBentoTile extends GetView<HomeController> {
     );
   }
 
-  TextStyle get _equityStyle => TextStyle(
+  TextStyle get _equityStyle =>
+      AppText.base(
         fontSize: 36.sp,
         fontWeight: FontWeight.w900,
         letterSpacing: -1.4,
         height: 1.0,
         color: AppColors.white,
+      ).copyWith(
         shadows: [
           Shadow(
-              color: AppColors.white.withValues(alpha: 0.3), blurRadius: 20.r),
+            color: AppColors.white.withValues(alpha: 0.3),
+            blurRadius: 20.r,
+          ),
         ],
       );
 }
@@ -164,12 +179,15 @@ class _Switcher extends StatelessWidget {
             title,
             maxLines: 1,
             overflow: TextOverflow.ellipsis,
-            style: TextStyle(
-                fontSize: 13.sp, fontWeight: FontWeight.w600, color: color),
+            style: AppText.base(
+              fontSize: 13.sp,
+              fontWeight: FontWeight.w600,
+              color: color,
+            ),
           ),
         ),
         if (canSwitch) ...[
-          SizedBox(width: 4.w),
+          Gap.hXs,
           Icon(Icons.keyboard_arrow_down_rounded, size: 18.w, color: color),
         ],
       ],
@@ -240,11 +258,14 @@ class _PickerSheet extends StatelessWidget {
             children: [
               Padding(
                 padding: EdgeInsets.fromLTRB(20.w, 12.h, 20.w, 8.h),
-                child: Text('home.switch_account'.tr,
-                    style: TextStyle(
-                        fontSize: 15.sp,
-                        fontWeight: FontWeight.w700,
-                        color: scheme.onSurface)),
+                child: Text(
+                  'home.switch_account'.tr,
+                  style: AppText.base(
+                    fontSize: 15.sp,
+                    fontWeight: FontWeight.w700,
+                    color: scheme.onSurface,
+                  ),
+                ),
               ),
               Flexible(
                 child: ListView.builder(
@@ -261,22 +282,27 @@ class _PickerSheet extends StatelessWidget {
                             : Icons.radio_button_unchecked_rounded,
                         color: selected ? scheme.primary : scheme.outline,
                       ),
-                      title: Text('${'home.account_hash'.tr}${a.id}',
-                          style: TextStyle(
-                              fontSize: 15.sp,
-                              fontWeight: FontWeight.w600,
-                              color: scheme.onSurface)),
-                      trailing: Text(a.currency,
-                          style: TextStyle(
-                              fontSize: 12.5.sp,
-                              fontWeight: FontWeight.w600,
-                              color:
-                                  scheme.onSurface.withValues(alpha: 0.6))),
+                      title: Text(
+                        '${'home.account_hash'.tr}${a.id}',
+                        style: AppText.base(
+                          fontSize: 15.sp,
+                          fontWeight: FontWeight.w600,
+                          color: scheme.onSurface,
+                        ),
+                      ),
+                      trailing: Text(
+                        a.currency,
+                        style: AppText.base(
+                          fontSize: 12.5.sp,
+                          fontWeight: FontWeight.w600,
+                          color: scheme.onSurface.withValues(alpha: 0.6),
+                        ),
+                      ),
                     );
                   },
                 ),
               ),
-              SizedBox(height: 4.h),
+              Gap.vXs,
             ],
           ),
         ),
@@ -354,8 +380,9 @@ class _HomePulseDotState extends State<HomePulseDot>
         width: 7.w,
         height: 7.w,
         decoration: BoxDecoration(
-            color: color.withValues(alpha: widget.active ? 1 : 0.6),
-            shape: BoxShape.circle),
+          color: color.withValues(alpha: widget.active ? 1 : 0.6),
+          shape: BoxShape.circle,
+        ),
       );
     }
     return FadeTransition(

@@ -3,6 +3,7 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 
 import '../../../shared/theme/app_text.dart';
 import '../models/competition_models.dart';
+import '../../../shared/theme/app_spacing.dart';
 
 /// Prize-tier card on the competition detail screen. `amount` is null until
 /// the organiser funds a tier, so unfunded tiers still show their structure.
@@ -24,10 +25,7 @@ class CompetitionPrizesCard extends StatelessWidget {
       child: Column(
         children: [
           for (var i = 0; i < prizes.length; i++)
-            _PrizeRow(
-              prize: prizes[i],
-              showDivider: i != prizes.length - 1,
-            ),
+            _PrizeRow(prize: prizes[i], showDivider: i != prizes.length - 1),
         ],
       ),
     );
@@ -69,7 +67,7 @@ class _PrizeRow extends StatelessWidget {
                   style: AppText.title(fontSize: 12.sp, color: medal),
                 ),
               ),
-              SizedBox(width: 12.w),
+              Gap.hMd,
               Expanded(
                 child: Text(
                   prize.label,
@@ -81,7 +79,7 @@ class _PrizeRow extends StatelessWidget {
                   ),
                 ),
               ),
-              SizedBox(width: 10.w),
+              10.horizontalSpace,
               Flexible(
                 child: Text(
                   prize.amount ?? '—',

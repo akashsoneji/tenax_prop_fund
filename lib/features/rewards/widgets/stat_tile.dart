@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
-import 'package:google_fonts/google_fonts.dart';
 
 import '../../../shared/theme/app_colors.dart';
+import '../../../shared/theme/app_text.dart';
 
 /// One of the four
 /// screen (Withdrawable / Pending / Paid out / Your share).
@@ -61,7 +61,7 @@ class StatTile extends StatelessWidget {
                 Expanded(
                   child: Text(
                     label,
-                    style: GoogleFonts.beVietnamPro(
+                    style: AppText.base(
                       fontSize: 13.sp,
                       fontWeight: FontWeight.w600,
                       color: scheme.onSurface.withValues(alpha: 0.7),
@@ -81,10 +81,10 @@ class StatTile extends StatelessWidget {
                   ),
               ],
             ),
-            SizedBox(height: 14.h),
+            14.verticalSpace,
             Text(
               value,
-              style: GoogleFonts.beVietnamPro(
+              style: AppText.base(
                 fontSize: 26.sp,
                 fontWeight: FontWeight.w800,
                 color: tintAccent,
@@ -100,8 +100,10 @@ class StatTile extends StatelessWidget {
   // Tint matrix — matches the design without leaking yellow onto CTA surfaces.
   // Brightness-aware so the tile stays readable on a dark scaffold.
   Color _toneBackground(StatTileTone t, ColorScheme scheme) {
-    return _toneAccent(t, scheme).withValues(
-        alpha: scheme.brightness == Brightness.dark ? 0.16 : 0.12);
+    return _toneAccent(
+      t,
+      scheme,
+    ).withValues(alpha: scheme.brightness == Brightness.dark ? 0.16 : 0.12);
   }
 
   Color _toneAccent(StatTileTone t, ColorScheme scheme) {

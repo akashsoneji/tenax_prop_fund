@@ -4,8 +4,9 @@ import 'package:get/get.dart';
 
 import '../../../shared/theme/app_colors.dart';
 import '../../../shared/theme/app_text.dart';
-import '../../../shared/theme/app_theme.dart';
 import '../models/positions_models.dart';
+import '../../../shared/theme/app_spacing.dart';
+import '../../../shared/widgets/app_card.dart';
 
 /// One closed-trade row
 /// price, and net profit coloured green/red.
@@ -22,10 +23,10 @@ class HistoryRow extends StatelessWidget {
     final sideColor = isBuy ? AppColors.success : AppColors.danger;
     final pnlColor = entry.profit >= 0 ? AppColors.success : AppColors.danger;
 
-    return Container(
+    return AppCard(
+      radius: 16.r,
       margin: EdgeInsets.only(bottom: 10.h),
       padding: EdgeInsets.all(14.w),
-      decoration: AppTheme.surfaceCard(scheme, radius: 16.r),
       child: Row(
         children: [
           Expanded(
@@ -39,17 +40,20 @@ class HistoryRow extends StatelessWidget {
                         entry.symbol,
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
-                        style: AppText.title(color: scheme.onSurface, fontSize: 15.sp),
+                        style: AppText.title(
+                          color: scheme.onSurface,
+                          fontSize: 15.sp,
+                        ),
                       ),
                     ),
-                    SizedBox(width: 8.w),
+                    Gap.hSm,
                     Text(
                       (isBuy ? 'trade.buy' : 'trade.sell').tr.toUpperCase(),
                       style: AppText.label(color: sideColor, fontSize: 11.sp),
                     ),
                   ],
                 ),
-                SizedBox(height: 4.h),
+                Gap.vXs,
                 Text(
                   '${'positions.volume'.tr}: ${entry.volume.toStringAsFixed(2)}'
                   '   ${entry.priceOpen} → ${entry.priceClose}',
@@ -58,7 +62,7 @@ class HistoryRow extends StatelessWidget {
                   style: AppText.label(color: muted),
                 ),
                 if (entry.closeTime.isNotEmpty) ...[
-                  SizedBox(height: 3.h),
+                  3.verticalSpace,
                   Text(
                     entry.closeTime,
                     maxLines: 1,
@@ -69,7 +73,7 @@ class HistoryRow extends StatelessWidget {
               ],
             ),
           ),
-          SizedBox(width: 8.w),
+          Gap.hSm,
           Text(
             entry.profit.toStringAsFixed(2),
             style: AppText.subtitle(color: pnlColor, fontSize: 14.sp),

@@ -19,6 +19,7 @@ import '../controllers/challenge_controller.dart';
 import '../models/challenge_models.dart';
 import '../widgets/challenge_bottom_bar.dart';
 import '../widgets/challenge_plan_card.dart';
+import '../../../shared/theme/app_spacing.dart';
 
 /// Choose a challenge — a mode toggle (Paid / Free trial), and for Paid a
 /// step segmented control, a price-card grid and rule cards; for Free trial a
@@ -131,23 +132,21 @@ class _ChallengeBody extends StatelessWidget {
             AppSegmentedControl(
               labels: [
                 'challenge.paid_challenges'.tr,
-                'challenge.free_trial'.tr
+                'challenge.free_trial'.tr,
               ],
               selected: c.mode.value == ChallengeMode.paid ? 0 : 1,
               onChanged: (i) => c.setMode(
-                  i == 0 ? ChallengeMode.paid : ChallengeMode.freeTrial),
+                i == 0 ? ChallengeMode.paid : ChallengeMode.freeTrial,
+              ),
             ),
-            SizedBox(height: 12.h),
+            Gap.vMd,
           ],
           AnimatedSwitcher(
             duration: AppMotion.base,
             switchInCurve: AppMotion.enter,
             transitionBuilder: (child, anim) => FadeTransition(
               opacity: anim,
-              child: SizeTransition(
-                sizeFactor: anim,
-                child: child,
-              ),
+              child: SizeTransition(sizeFactor: anim, child: child),
             ),
             child: c.mode.value == ChallengeMode.paid
                 ? _PaidBody(c: c, data: data, key: const ValueKey('paid'))
@@ -172,13 +171,13 @@ class _ChallengeSkeleton extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
         ShimmerBox(height: 40.h, radius: 12.r),
-        SizedBox(height: 12.h),
+        Gap.vMd,
         ShimmerBox(height: 40.h, radius: 12.r),
-        SizedBox(height: 12.h),
+        Gap.vMd,
         const StatGridSkeleton(tiles: 6),
-        SizedBox(height: 18.h),
+        18.verticalSpace,
         const CardSkeleton(lines: 5),
-        SizedBox(height: 18.h),
+        18.verticalSpace,
         const CardSkeleton(lines: 4),
       ],
     );
@@ -189,8 +188,7 @@ class _ChallengeSkeleton extends StatelessWidget {
 // Paid mode body
 // ---------------------------------------------------------------------------
 
-EdgeInsets get _sectionHeaderPadding =>
-    EdgeInsets.only(left: 2.w, bottom: 8.h);
+EdgeInsets get _sectionHeaderPadding => EdgeInsets.only(left: 2.w, bottom: 8.h);
 
 class _PaidBody extends StatelessWidget {
   const _PaidBody({required this.c, required this.data, super.key});
@@ -211,7 +209,7 @@ class _PaidBody extends StatelessWidget {
                   .clamp(0, tabKeys.length - 1),
               onChanged: (i) => c.setStep(tabKeys[i]),
             ),
-            SizedBox(height: 12.h),
+            Gap.vMd,
           ]
         : const <Widget>[];
     if (plans.isEmpty) {
@@ -220,7 +218,7 @@ class _PaidBody extends StatelessWidget {
         children: [
           ...stepTabs,
           const _CompareLink(),
-          SizedBox(height: 12.h),
+          Gap.vMd,
           const AppEmptyView(
             titleKey: 'challenge.no_plans_title',
             messageKey: 'challenge.no_plans_hint',
@@ -230,28 +228,27 @@ class _PaidBody extends StatelessWidget {
         ],
       );
     }
-    final selectedPlan =
-        plans[c.selectedPlan.value.clamp(0, plans.length - 1)];
+    final selectedPlan = plans[c.selectedPlan.value.clamp(0, plans.length - 1)];
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
         ...stepTabs,
         _PlanGrid(c: c, plans: plans),
-        SizedBox(height: 10.h),
+        10.verticalSpace,
         const _CompareLink(),
-        SizedBox(height: 18.h),
+        18.verticalSpace,
         _RulesSection(
           title: 'challenge.challenge_rules'.tr,
           rules: selectedPlan.challengeRules,
         ),
-        SizedBox(height: 18.h),
+        18.verticalSpace,
         _RulesSection(
           title: 'challenge.funded_reward_rules'.tr,
           rules: selectedPlan.fundedRules,
         ),
         if (data.plans.isNotEmpty)
           for (final box in selectedPlan.ruleBoxes) ...[
-            SizedBox(height: 18.h),
+            18.verticalSpace,
             SectionHeader(box.title, padding: _sectionHeaderPadding),
             RulesCard(
               children: [
@@ -319,9 +316,12 @@ class _CompareLink extends StatelessWidget {
           child: Row(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              Icon(Icons.compare_arrows_rounded,
-                  size: 18.w, color: scheme.primary),
-              SizedBox(width: 6.w),
+              Icon(
+                Icons.compare_arrows_rounded,
+                size: 18.w,
+                color: scheme.primary,
+              ),
+              6.horizontalSpace,
               Flexible(
                 child: Text(
                   'challenge.compare_plans'.tr,
@@ -351,13 +351,13 @@ class _PlanGrid extends StatelessWidget {
     return Column(
       children: [
         for (var row = 0; row < rowCount; row++) ...[
-          if (row > 0) SizedBox(height: 10.h),
+          if (row > 0) 10.verticalSpace,
           IntrinsicHeight(
             child: Row(
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
                 Expanded(child: _cell(row * 2)),
-                SizedBox(width: 10.w),
+                10.horizontalSpace,
                 Expanded(
                   child: row * 2 + 1 < plans.length
                       ? _cell(row * 2 + 1)
@@ -372,10 +372,10 @@ class _PlanGrid extends StatelessWidget {
   }
 
   Widget _cell(int i) => ChallengePlanCard(
-        plan: plans[i],
-        selected: c.selectedPlan.value == i,
-        onTap: () => c.selectPlan(i),
-      );
+    plan: plans[i],
+    selected: c.selectedPlan.value == i,
+    onTap: () => c.selectPlan(i),
+  );
 }
 
 // ---------------------------------------------------------------------------
@@ -401,9 +401,9 @@ class _TrialBody extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
           _TrialHeader(data: data),
-          SizedBox(height: 12.h),
+          Gap.vMd,
           _TrialStatGrid(data: data),
-          SizedBox(height: 14.h),
+          14.verticalSpace,
           Obx(
             () => AppGradientButton(
               label: 'challenge.start_free_trial'.tr,
@@ -414,7 +414,7 @@ class _TrialBody extends StatelessWidget {
               },
             ),
           ),
-          SizedBox(height: 8.h),
+          Gap.vSm,
           Text(
             'challenge.trial_note'.tr,
             textAlign: TextAlign.center,
@@ -444,13 +444,17 @@ class _TrialHeader extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text(
-                'challenge.free_trial_plan'
-                    .trParams({'app': FlavorResolver.appName}),
+                'challenge.free_trial_plan'.trParams({
+                  'app': FlavorResolver.appName,
+                }),
                 maxLines: 2,
                 overflow: TextOverflow.ellipsis,
-                style: AppText.heading(color: scheme.onSurface, fontSize: 16.sp),
+                style: AppText.heading(
+                  color: scheme.onSurface,
+                  fontSize: 16.sp,
+                ),
               ),
-              SizedBox(height: 2.h),
+              Gap.vXxs,
               Text(
                 _trialDescription(data),
                 maxLines: 2,
@@ -463,7 +467,7 @@ class _TrialHeader extends StatelessWidget {
             ],
           ),
         ),
-        SizedBox(width: 10.w),
+        10.horizontalSpace,
         Column(
           crossAxisAlignment: CrossAxisAlignment.end,
           children: [
@@ -514,16 +518,26 @@ class _TrialStatGrid extends StatelessWidget {
     final rules = data.trialRules.isNotEmpty
         ? data.trialRules
         : [
-            ChallengeRule('challenge.rule_account_size'.tr,
-                '\$${(trial?.accountSizeMinor ?? 0) ~/ 100}'),
-            ChallengeRule('challenge.rule_profit_target'.tr,
-                '${trial?.profitTargetPercent ?? 0}%'),
-            ChallengeRule('challenge.rule_daily_loss'.tr,
-                '${trial?.dailyLossPercent ?? 0}%'),
-            ChallengeRule('challenge.rule_max_loss'.tr,
-                '${trial?.maxLossPercent ?? 0}%'),
-            ChallengeRule('challenge.rule_min_days'.tr,
-                '${trial?.minTradingDays ?? 0}'),
+            ChallengeRule(
+              'challenge.rule_account_size'.tr,
+              '\$${(trial?.accountSizeMinor ?? 0) ~/ 100}',
+            ),
+            ChallengeRule(
+              'challenge.rule_profit_target'.tr,
+              '${trial?.profitTargetPercent ?? 0}%',
+            ),
+            ChallengeRule(
+              'challenge.rule_daily_loss'.tr,
+              '${trial?.dailyLossPercent ?? 0}%',
+            ),
+            ChallengeRule(
+              'challenge.rule_max_loss'.tr,
+              '${trial?.maxLossPercent ?? 0}%',
+            ),
+            ChallengeRule(
+              'challenge.rule_min_days'.tr,
+              '${trial?.minTradingDays ?? 0}',
+            ),
             ChallengeRule(
               'challenge.rule_expires_after'.tr,
               'challenge.days_count'.trParams({'days': '${trial?.days ?? 0}'}),
@@ -574,7 +588,7 @@ class _TrialStatTile extends StatelessWidget {
               fontSize: 11.5.sp,
             ),
           ),
-          SizedBox(height: 2.h),
+          Gap.vXxs,
           Text(
             rule.value,
             maxLines: 1,

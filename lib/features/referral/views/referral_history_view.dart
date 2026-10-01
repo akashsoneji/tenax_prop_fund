@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
-import 'package:google_fonts/google_fonts.dart';
 
 import '../../../shared/theme/app_theme.dart';
 import '../../../shared/widgets/data_state_builder.dart';
@@ -10,6 +9,7 @@ import '../../../shared/widgets/skeletons/skeletons.dart';
 import '../controllers/referral_history_controller.dart';
 import '../models/referral_models.dart';
 import '../widgets/referral_commission_row.dart';
+import '../../../shared/theme/app_text.dart';
 
 /// Referral commission history with infinite scroll: the next page is fetched
 /// when a row within the last [ReferralHistoryController.prefetchThreshold]
@@ -92,13 +92,13 @@ class _SummaryHeader extends StatelessWidget {
       child: Row(
         children: [
           Icon(Icons.receipt_long_rounded, size: 16.w, color: scheme.primary),
-          SizedBox(width: 6.w),
+          6.horizontalSpace,
           Expanded(
             child: Text(
               'referral.history_count'.trParams({'count': '$total'}),
               maxLines: 1,
               overflow: TextOverflow.ellipsis,
-              style: GoogleFonts.beVietnamPro(
+              style: AppText.base(
                 fontSize: 13.sp,
                 fontWeight: FontWeight.w700,
                 color: scheme.onSurfaceVariant,
@@ -154,7 +154,7 @@ class _ListFooter extends StatelessWidget {
       } else if (hasRows && !controller.hasMore) {
         child = Text(
           'referral.history_end'.tr,
-          style: GoogleFonts.beVietnamPro(
+          style: AppText.base(
             fontSize: 12.sp,
             fontWeight: FontWeight.w500,
             color: scheme.onSurfaceVariant,

@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
-import 'package:google_fonts/google_fonts.dart';
 
 import '../../../shared/theme/app_colors.dart';
 import '../../../shared/theme/app_theme.dart';
@@ -9,6 +8,8 @@ import '../../../shared/widgets/app_gradient_button.dart';
 import '../../../shared/widgets/app_labeled_field.dart';
 import '../../../shared/widgets/pinned_gradient_app_bar.dart';
 import '../controllers/edit_profile_controller.dart';
+import '../../../shared/theme/app_spacing.dart';
+import '../../../shared/theme/app_text.dart';
 
 /// Edit Profile screen: a gradient avatar hero (with the app's asymmetric
 /// half-circle pill radius) over a card of editable personal-detail fields and
@@ -31,33 +32,33 @@ class EditProfileView extends GetView<EditProfileController> {
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
                   // const _AvatarHero(),
-                  // SizedBox(height: 22.h),
+                  // 22.verticalSpace,
                   AppLabeledField(
                     controller: controller.fullName,
                     label: 'edit_profile.full_name'.tr,
                     textInputAction: TextInputAction.next,
                   ),
-                  SizedBox(height: 12.h),
+                  Gap.vMd,
                   AppLabeledField(
                     controller: controller.email,
                     label: 'edit_profile.email'.tr,
                     keyboardType: TextInputType.emailAddress,
                     textInputAction: TextInputAction.next,
                   ),
-                  SizedBox(height: 12.h),
+                  Gap.vMd,
                   AppLabeledField(
                     controller: controller.mobile,
                     label: 'edit_profile.mobile'.tr,
                     keyboardType: TextInputType.phone,
                     textInputAction: TextInputAction.next,
                   ),
-                  SizedBox(height: 12.h),
+                  Gap.vMd,
                   AppLabeledField(
                     controller: controller.country,
                     label: 'edit_profile.country'.tr,
                     textInputAction: TextInputAction.done,
                   ),
-                  SizedBox(height: 24.h),
+                  Gap.vXl,
                   Obx(
                     () => AppGradientButton(
                       label: 'edit_profile.save'.tr,
@@ -104,9 +105,12 @@ class _AvatarHero extends StatelessWidget {
             children: [
               CircleAvatar(
                 radius: 34.r,
-        backgroundColor: AppColors.white.withValues(alpha: 0.16),
-                child: Icon(Icons.person_rounded,
-                    size: 34.w, color: AppColors.white),
+                backgroundColor: AppColors.white.withValues(alpha: 0.16),
+                child: Icon(
+                  Icons.person_rounded,
+                  size: 34.w,
+                  color: AppColors.white,
+                ),
               ),
               Positioned(
                 right: 0,
@@ -118,29 +122,32 @@ class _AvatarHero extends StatelessWidget {
                     shape: BoxShape.circle,
                     border: Border.all(color: scheme.primary, width: 1.5.w),
                   ),
-                  child: Icon(Icons.camera_alt_rounded,
-                      size: 13.w, color: scheme.primary),
+                  child: Icon(
+                    Icons.camera_alt_rounded,
+                    size: 13.w,
+                    color: scheme.primary,
+                  ),
                 ),
               ),
             ],
           ),
-          SizedBox(width: 16.w),
+          Gap.hLg,
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
                   'edit_profile.hero_title'.tr,
-                  style: GoogleFonts.beVietnamPro(
+                  style: AppText.base(
                     color: Colors.white,
                     fontSize: 17.sp,
                     fontWeight: FontWeight.w700,
                   ),
                 ),
-                SizedBox(height: 4.h),
+                Gap.vXs,
                 Text(
                   'edit_profile.hero_subtitle'.tr,
-                  style: GoogleFonts.beVietnamPro(
+                  style: AppText.base(
                     color: Colors.white.withValues(alpha: 0.85),
                     fontSize: 13.sp,
                     height: 1.3,

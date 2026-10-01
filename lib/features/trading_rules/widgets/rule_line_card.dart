@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
-import 'package:google_fonts/google_fonts.dart';
+import '../../../shared/theme/app_spacing.dart';
+import '../../../shared/theme/app_text.dart';
 
 /// A single rule line
 /// inside the section card. Text is free-form from the API, so it wraps rather
@@ -38,18 +39,18 @@ class RuleLineTile extends StatelessWidget {
                 alignment: Alignment.center,
                 child: Text(
                   '$number',
-                  style: GoogleFonts.beVietnamPro(
+                  style: AppText.base(
                     fontSize: 12.sp,
                     fontWeight: FontWeight.w800,
                     color: scheme.primary,
                   ),
                 ),
               ),
-              SizedBox(width: 12.w),
+              Gap.hMd,
               Expanded(
                 child: Text(
                   text,
-                  style: GoogleFonts.beVietnamPro(
+                  style: AppText.base(
                     fontSize: 13.5.sp,
                     height: 1.45,
                     fontWeight: FontWeight.w600,

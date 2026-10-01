@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 
 import '../../../shared/theme/app_text.dart';
+import '../../../shared/theme/app_spacing.dart';
 
 /// Card that stacks security rows with hairline dividers between them. Mirrors
 /// the theme/language option cards on the same screen.
@@ -81,7 +82,7 @@ class _RowBody extends StatelessWidget {
                   : scheme.onSurface.withValues(alpha: 0.6),
             ),
           ),
-          SizedBox(width: 12.w),
+          Gap.hMd,
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -95,7 +96,7 @@ class _RowBody extends StatelessWidget {
                     color: scheme.onSurface,
                   ),
                 ),
-                SizedBox(height: 2.h),
+                Gap.vXxs,
                 Text(
                   description,
                   maxLines: 2,
@@ -108,7 +109,7 @@ class _RowBody extends StatelessWidget {
               ],
             ),
           ),
-          SizedBox(width: 10.w),
+          10.horizontalSpace,
           trailing,
         ],
       ),
@@ -198,7 +199,7 @@ class SecurityActionRow extends StatelessWidget {
                   ),
                 ),
               ),
-            SizedBox(width: 6.w),
+            6.horizontalSpace,
             Icon(
               Icons.chevron_right_rounded,
               size: 20.sp,

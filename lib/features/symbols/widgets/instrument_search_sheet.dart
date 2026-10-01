@@ -11,6 +11,7 @@ import '../controllers/search_instruments_controller.dart';
 import '../models/symbol_models.dart';
 import '../repositories/symbols_repository.dart';
 import '../services/favorites_service.dart';
+import '../../../shared/theme/app_spacing.dart';
 
 /// Bottom-sheet instrument search with category filter pills and add/remove
 /// favorite toggles. Opened via [InstrumentSearchSheet.open]; reads the
@@ -60,9 +61,9 @@ class InstrumentSearchSheet extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               _SearchHeader(controller: c),
-              SizedBox(height: 10.h),
+              10.verticalSpace,
               _CategoryPills(controller: c),
-              SizedBox(height: 8.h),
+              Gap.vSm,
               Expanded(child: _ResultsList(controller: c)),
             ],
           ),
@@ -96,11 +97,14 @@ class _SearchHeader extends StatelessWidget {
                 isDense: true,
                 hintText: 'symbols.search.hint'.tr,
                 hintStyle: AppText.body(color: scheme.onSurfaceVariant),
-                prefixIcon:
-                    Icon(Icons.search_rounded, color: scheme.onSurfaceVariant),
+                prefixIcon: Icon(
+                  Icons.search_rounded,
+                  color: scheme.onSurfaceVariant,
+                ),
                 filled: true,
-                fillColor: scheme.surfaceContainerHighest
-                    .withValues(alpha: AppColors.alphaMuted),
+                fillColor: scheme.surfaceContainerHighest.withValues(
+                  alpha: AppColors.alphaMuted,
+                ),
                 border: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(14.r),
                   borderSide: BorderSide.none,
@@ -139,7 +143,7 @@ class _CategoryPills extends StatelessWidget {
           physics: const BouncingScrollPhysics(),
           padding: EdgeInsets.symmetric(horizontal: 16.w),
           itemCount: controller.categories.length,
-          separatorBuilder: (_, _) => SizedBox(width: 8.w),
+          separatorBuilder: (_, _) => Gap.hSm,
           itemBuilder: (context, i) {
             final cat = controller.categories[i];
             final key = _labelKey[cat];
@@ -204,10 +208,8 @@ class _ResultsList extends StatelessWidget {
         physics: const BouncingScrollPhysics(),
         padding: EdgeInsets.fromLTRB(16.w, 4.h, 16.w, 16.h),
         itemCount: items.length,
-        itemBuilder: (context, i) => _InstrumentRow(
-          instrument: items[i],
-          controller: controller,
-        ),
+        itemBuilder: (context, i) =>
+            _InstrumentRow(instrument: items[i], controller: controller),
       );
     });
   }
@@ -226,7 +228,7 @@ class _InstrumentRow extends StatelessWidget {
       child: Row(
         children: [
           SymbolIcon(code: instrument.code, size: 40.w),
-          SizedBox(width: 12.w),
+          Gap.hMd,
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -235,9 +237,12 @@ class _InstrumentRow extends StatelessWidget {
                   instrument.code,
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
-                  style: AppText.title(color: scheme.onSurface, fontSize: 15.sp),
+                  style: AppText.title(
+                    color: scheme.onSurface,
+                    fontSize: 15.sp,
+                  ),
                 ),
-                SizedBox(height: 2.h),
+                Gap.vXxs,
                 Text(
                   instrument.category,
                   maxLines: 1,
@@ -247,15 +252,17 @@ class _InstrumentRow extends StatelessWidget {
               ],
             ),
           ),
-          SizedBox(width: 10.w),
+          10.horizontalSpace,
           Obx(() {
             final fav = controller.favorites.isFavorite(instrument.code);
             return IconButton(
               onPressed: () => controller.toggleFavorite(instrument.code),
               icon: fav
                   ? Icon(Icons.flag_rounded, color: scheme.primary)
-                  : Icon(Icons.add_circle_outline_rounded,
-                      color: scheme.onSurfaceVariant),
+                  : Icon(
+                      Icons.add_circle_outline_rounded,
+                      color: scheme.onSurfaceVariant,
+                    ),
             );
           }),
         ],

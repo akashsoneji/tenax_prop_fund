@@ -11,6 +11,7 @@ import '../../../../shared/theme/app_theme.dart';
 import '../../../../shared/widgets/app_confirm_dialog.dart';
 import '../../../../shared/widgets/pinned_gradient_app_bar.dart';
 import '../../widgets/delete_account_dialog.dart';
+import '../../../../shared/theme/app_spacing.dart';
 
 /// The "More" tab: a grouped directory of every secondary destination in the
 /// app. Each section is a single card that carries its own tinted title strip,
@@ -45,9 +46,9 @@ class MoreTabView extends StatelessWidget {
                 children: [
                   for (var i = 0; i < _sections.length; i++) ...[
                     _MoreSection(section: _sections[i], order: i),
-                    if (i < _sections.length - 1) SizedBox(height: 16.h),
+                    if (i < _sections.length - 1) Gap.vLg,
                   ],
-                  SizedBox(height: 18.h),
+                  18.verticalSpace,
                   const _DangerZone(),
                 ],
               ),
@@ -60,40 +61,63 @@ class MoreTabView extends StatelessWidget {
 
   static const _sections = <_Section>[
     _Section(Icons.person_rounded, 'more.account', [
-      _Item(Icons.account_circle_outlined, 'more.item.profile',
-          AppRoutes.profileKyc),
+      _Item(
+        Icons.account_circle_outlined,
+        'more.item.profile',
+        AppRoutes.profileKyc,
+      ),
       // _Item(Icons.verified_user_outlined, 'more.item.verify_identity',
       //     AppRoutes.verification),
       _Item(Icons.shield_outlined, 'more.item.security', AppRoutes.settings),
     ]),
     _Section(Icons.account_balance_wallet_rounded, 'more.money', [
       _Item(Icons.description_outlined, 'more.item.billing', AppRoutes.billing),
-      _Item(Icons.account_balance_wallet_outlined, 'more.item.payout_methods',
-          AppRoutes.payoutMethods),
-      _Item(Icons.card_giftcard_rounded, 'more.item.rewards',
-          AppRoutes.rewards),
+      _Item(
+        Icons.account_balance_wallet_outlined,
+        'more.item.payout_methods',
+        AppRoutes.payoutMethods,
+      ),
+      _Item(
+        Icons.card_giftcard_rounded,
+        'more.item.rewards',
+        AppRoutes.rewards,
+      ),
     ]),
     _Section(Icons.auto_awesome_rounded, 'more.rewards_hub', [
       _Item(Icons.share_rounded, 'more.item.refer', AppRoutes.referral),
       _Item(Icons.local_offer_outlined, 'more.item.offers', AppRoutes.offers),
-      _Item(Icons.leaderboard_rounded, 'more.item.competitions',
-          AppRoutes.competitions),
-      _Item(Icons.workspace_premium_outlined, 'more.item.certificates',
-          AppRoutes.certificates),
+      _Item(
+        Icons.leaderboard_rounded,
+        'more.item.competitions',
+        AppRoutes.competitions,
+      ),
+      _Item(
+        Icons.workspace_premium_outlined,
+        'more.item.certificates',
+        AppRoutes.certificates,
+      ),
     ]),
     _Section(Icons.handyman_rounded, 'more.tools', [
-      _Item(Icons.calculate_outlined, 'more.item.calculators',
-          AppRoutes.calculators),
+      _Item(
+        Icons.calculate_outlined,
+        'more.item.calculators',
+        AppRoutes.calculators,
+      ),
     ]),
     _Section(Icons.support_agent_rounded, 'more.help', [
-      _Item(Icons.menu_book_rounded, 'more.item.trading_rules',
-          AppRoutes.tradingRules),
+      _Item(
+        Icons.menu_book_rounded,
+        'more.item.trading_rules',
+        AppRoutes.tradingRules,
+      ),
       _Item(Icons.help_outline_rounded, 'more.item.faq', AppRoutes.faq),
       _Item(Icons.headset_mic_outlined, 'more.item.support', AppRoutes.support),
-      _Item(Icons.notifications_none_rounded, 'more.item.notifications',
-          AppRoutes.notifications),
+      _Item(
+        Icons.notifications_none_rounded,
+        'more.item.notifications',
+        AppRoutes.notifications,
+      ),
     ]),
-    
   ];
 }
 
@@ -132,19 +156,20 @@ class _MoreSection extends StatelessWidget {
               child: Row(
                 children: [
                   Icon(section.icon, size: 15.w, color: scheme.primary),
-                  SizedBox(width: 8.w),
+                  Gap.hSm,
                   Expanded(
                     child: Text(
                       section.titleKey.tr.toUpperCase(),
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
-                      style: AppText.label(
-                        fontSize: 11.sp,
-                        color: scheme.primary,
-                      ).copyWith(
-                        fontWeight: FontWeight.w800,
-                        letterSpacing: 0.8,
-                      ),
+                      style:
+                          AppText.label(
+                            fontSize: 11.sp,
+                            color: scheme.primary,
+                          ).copyWith(
+                            fontWeight: FontWeight.w800,
+                            letterSpacing: 0.8,
+                          ),
                     ),
                   ),
                 ],
@@ -201,7 +226,7 @@ class _MoreRow extends StatelessWidget {
           child: Row(
             children: [
               Icon(item.icon, size: 20.w, color: scheme.primary),
-              SizedBox(width: 14.w),
+              14.horizontalSpace,
               Expanded(
                 child: Text(
                   item.titleKey.tr,
@@ -316,14 +341,16 @@ class _DangerRow extends StatelessWidget {
           child: Row(
             children: [
               Icon(icon, size: 20.w, color: AppColors.danger),
-              SizedBox(width: 14.w),
+              14.horizontalSpace,
               Expanded(
                 child: Text(
                   label,
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
                   style: AppText.subtitle(
-                      fontSize: 14.sp, color: AppColors.danger),
+                    fontSize: 14.sp,
+                    color: AppColors.danger,
+                  ),
                 ),
               ),
             ],

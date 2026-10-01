@@ -4,6 +4,7 @@ import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
 
 import '../../core/state/data_state.dart';
+import '../theme/app_spacing.dart';
 import 'app_shimmer.dart';
 import 'app_gradient_button.dart';
 
@@ -87,13 +88,13 @@ class _ErrorState extends StatelessWidget {
           children: [
             Icon(Icons.cloud_off_rounded,
                 size: 48.w, color: scheme.onSurface.withValues(alpha: 0.4)),
-            SizedBox(height: 16.h),
+            Gap.vLg,
             Text(
               'state.error_title'.tr,
               style: GoogleFonts.beVietnamPro(
                   fontSize: 16.sp, fontWeight: FontWeight.w700),
             ),
-            SizedBox(height: 6.h),
+            6.verticalSpace,
             Text(
               message,
               textAlign: TextAlign.center,
@@ -103,7 +104,7 @@ class _ErrorState extends StatelessWidget {
               ),
             ),
             if (onRetry != null) ...[
-              SizedBox(height: 16.h),
+              Gap.vLg,
               SizedBox(
                 width: 160.w,
                 child: AppGradientButton(
@@ -145,13 +146,13 @@ class _EmptyState extends StatelessWidget {
           mainAxisSize: MainAxisSize.min,
           children: [
             Icon(icon, size: 48.w, color: scheme.onSurface.withValues(alpha: 0.35)),
-            SizedBox(height: 16.h),
+            Gap.vLg,
             Text(
               title,
               style: GoogleFonts.beVietnamPro(
                   fontSize: 16.sp, fontWeight: FontWeight.w700),
             ),
-            SizedBox(height: 6.h),
+            6.verticalSpace,
             Text(
               message,
               textAlign: TextAlign.center,
@@ -161,7 +162,7 @@ class _EmptyState extends StatelessWidget {
               ),
             ),
             if (actionLabel != null && onAction != null) ...[
-              SizedBox(height: 16.h),
+              Gap.vLg,
               SizedBox(
                 width: 180.w,
                 child: AppGradientButton(

@@ -1,9 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
-import 'package:google_fonts/google_fonts.dart';
 
-import '../../../app/flavor/flavor_resolver.dart';
 import '../../../features/accounts/views/accounts_view.dart';
 import '../../../shared/theme/app_colors.dart';
 import '../../../shared/theme/app_theme.dart';
@@ -11,28 +9,20 @@ import '../../../shared/theme/app_theme.dart';
 import '../controllers/home_controller.dart';
 import 'tabs/home_tab_view.dart';
 import 'tabs/markets_tab_view.dart';
-import 'tabs/more_tab_view.dart';
 import '../../positions/views/positions_view.dart';
 import 'tabs/trade_tab_view.dart';
+import '../../../shared/theme/app_spacing.dart';
+import '../../../shared/theme/app_text.dart';
 
 /// 5-tab shell shown after successful login. Preserves each tab's state with
 /// [IndexedStack]; bottom nav highlights the active tab in the brand yellow.
 ///
-/// The tenax flavor renames the "Market" tab to "Charts" and swaps the "More"
-/// tab for a dedicated "Accounts" tab — its More directory is reached from the
-/// settings icon in the Home header instead.
+/// Every flavor uses the same tabs. The More directory is reached from the
+/// settings icon in the Home header.
 class HomeShellView extends StatelessWidget {
   const HomeShellView({super.key});
 
-  static const _defaultTabs = <_HomeTab>[
-    _HomeTab(Icons.home_rounded, 'home.tabs.home'),
-    _HomeTab(Icons.swap_horiz_rounded, 'home.tabs.trade'),
-    _HomeTab(Icons.show_chart_rounded, 'home.tabs.markets'),
-    _HomeTab(Icons.list_alt_rounded, 'home.tabs.positions'),
-    _HomeTab(Icons.more_horiz_rounded, 'home.tabs.more'),
-  ];
-
-  static const _tenaxTabs = <_HomeTab>[
+  static const _tabs = <_HomeTab>[
     _HomeTab(Icons.home_rounded, 'home.tabs.home'),
     _HomeTab(Icons.swap_horiz_rounded, 'home.tabs.trade'),
     _HomeTab(Icons.show_chart_rounded, 'home.tabs.charts'),
@@ -42,25 +32,13 @@ class HomeShellView extends StatelessWidget {
 
   /// Built once — the IndexedStack children never change, only the active
   /// index does, so this list must not be rebuilt on every tab switch.
-  static const List<Widget> _defaultTabViews = [
-    HomeTabView(),
-    TradeTabView(),
-    MarketsTabView(),
-    PositionsView(),
-    MoreTabView(),
-  ];
-
-  static const List<Widget> _tenaxTabViews = [
+  static const List<Widget> _tabViews = [
     HomeTabView(),
     TradeTabView(),
     MarketsTabView(),
     PositionsView(),
     AccountsView(),
   ];
-
-  bool get _isTenax => FlavorResolver.usesTenaxDesign;
-  List<_HomeTab> get _tabs => _isTenax ? _tenaxTabs : _defaultTabs;
-  List<Widget> get _tabViews => _isTenax ? _tenaxTabViews : _defaultTabViews;
 
   @override
   Widget build(BuildContext context) {
@@ -70,10 +48,7 @@ class HomeShellView extends StatelessWidget {
     return Scaffold(
       backgroundColor: scheme.surface,
       body: Obx(
-        () => IndexedStack(
-          index: c.selectedTab.value,
-          children: _tabViews,
-        ),
+        () => IndexedStack(index: c.selectedTab.value, children: _tabViews),
       ),
 
       bottomNavigationBar: SafeArea(
@@ -161,10 +136,10 @@ class _NavItem extends StatelessWidget {
           mainAxisSize: MainAxisSize.min,
           children: [
             Icon(icon, size: 22.w, color: fg),
-            SizedBox(height: 4.h),
+            Gap.vXs,
             Text(
               label,
-              style: GoogleFonts.beVietnamPro(
+              style: AppText.base(
                 fontSize: 11.sp,
                 fontWeight: active ? FontWeight.w600 : FontWeight.w500,
                 color: fg,

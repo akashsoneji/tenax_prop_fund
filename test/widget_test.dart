@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:get/get.dart';
@@ -8,14 +10,20 @@ import 'package:tenax_prop_flutter/app/flavor/flavor_config.dart';
 import 'package:tenax_prop_flutter/features/settings/controllers/settings_controller.dart';
 import 'package:tenax_prop_flutter/main.dart';
 
+import 'helpers/offline_fonts.dart';
+
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
 
   setUp(() async {
-    // GetStorage needs path_provider; stub the channel to a temp dir for tests.
+    useOfflineGoogleFonts();
+    // GetStorage and google_fonts write through path_provider; give them a temp
+    // dir so tests never leave files in the repo root.
+    final tmp = Directory.systemTemp.createTempSync('tenax_test');
+    addTearDown(() => tmp.deleteSync(recursive: true));
     const channel = MethodChannel('plugins.flutter.io/path_provider');
     TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
-        .setMockMethodCallHandler(channel, (call) async => '.');
+        .setMockMethodCallHandler(channel, (call) async => tmp.path);
 
     await GetStorage.init();
     Get.reset();
@@ -24,7 +32,7 @@ void main() {
 
   testWidgets('App builds with a flavor config', (WidgetTester tester) async {
     const config = FlavorConfig(
-      flavor: Flavor.clientA,
+      flavor: Flavor.tenax,
       env: AppEnv.development,
       appName: 'Test App',
       apiBaseUrl: 'https://api.test/api/v1',

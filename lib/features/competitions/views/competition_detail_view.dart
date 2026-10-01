@@ -14,6 +14,7 @@ import '../widgets/competition_leaderboard_card.dart';
 import '../widgets/competition_prizes_card.dart';
 import '../widgets/competition_register_sheet.dart';
 import '../widgets/competition_rules_card.dart';
+import '../../../shared/theme/app_spacing.dart';
 
 /// Detail screen for one competition: summary header, prizes, rules and the
 /// leaderboard. Reads the already-loaded [CompetitionsData] from the shared
@@ -88,7 +89,7 @@ class _DetailBody extends GetView<CompetitionsController> {
                       showDot: true,
                     ),
                     if (dateRange.isNotEmpty) ...[
-                      SizedBox(width: 10.w),
+                      10.horizontalSpace,
                       Expanded(
                         child: Text(
                           dateRange,
@@ -105,7 +106,7 @@ class _DetailBody extends GetView<CompetitionsController> {
                   ],
                 ),
                 if (description != null && description.isNotEmpty) ...[
-                  SizedBox(height: 12.h),
+                  Gap.vMd,
                   Text(
                     description,
                     style: AppText.body(
@@ -115,7 +116,7 @@ class _DetailBody extends GetView<CompetitionsController> {
                     ),
                   ),
                 ],
-                SizedBox(height: 16.h),
+                Gap.vLg,
                 Row(
                   children: [
                     Expanded(
@@ -145,21 +146,21 @@ class _DetailBody extends GetView<CompetitionsController> {
             ),
           ),
         ),
-        SizedBox(height: 24.h),
+        Gap.vXl,
         FadeSlideIn(order: 1, child: SectionHeader('competitions.prizes'.tr)),
         FadeSlideIn(
           order: 2,
           child: CompetitionPrizesCard(prizes: competition.prizes),
         ),
         if (competition.rules.isNotEmpty) ...[
-          SizedBox(height: 24.h),
+          Gap.vXl,
           FadeSlideIn(order: 3, child: SectionHeader('competitions.rules'.tr)),
           FadeSlideIn(
             order: 4,
             child: CompetitionRulesCard(rules: competition.rules),
           ),
         ],
-        SizedBox(height: 24.h),
+        Gap.vXl,
         FadeSlideIn(
           order: 5,
           child: SectionHeader('competitions.leaderboard'.tr),
@@ -169,7 +170,7 @@ class _DetailBody extends GetView<CompetitionsController> {
           child: CompetitionLeaderboardCard(rows: competition.leaderboard),
         ),
         if (competition.canRegister) ...[
-          SizedBox(height: 24.h),
+          Gap.vXl,
           FadeSlideIn(
             order: 7,
             child: Obx(
@@ -244,10 +245,7 @@ class _Missing extends StatelessWidget {
         child: Text(
           'competitions.empty'.tr,
           textAlign: TextAlign.center,
-          style: AppText.body(
-            fontSize: 13.sp,
-            color: scheme.onSurfaceVariant,
-          ),
+          style: AppText.body(fontSize: 13.sp, color: scheme.onSurfaceVariant),
         ),
       ),
     );

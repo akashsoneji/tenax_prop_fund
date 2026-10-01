@@ -7,6 +7,7 @@ import '../../../shared/widgets/fade_slide_in.dart';
 import '../../../shared/widgets/pinned_gradient_app_bar.dart';
 import '../controllers/settings_controller.dart';
 import '../widgets/security_section.dart';
+import '../../../shared/theme/app_spacing.dart';
 
 /// Settings presented as a preference list: a summary hero at the top showing
 /// the active choices, then grouped cards where every option is a full-width
@@ -43,7 +44,7 @@ class SettingsView extends StatelessWidget {
                       ),
                     ),
                   ),
-                  SizedBox(height: 20.h),
+                  20.verticalSpace,
                   FadeSlideIn(
                     order: 1,
                     child: _SectionHeader(
@@ -52,7 +53,7 @@ class SettingsView extends StatelessWidget {
                       caption: 'settings.theme_caption'.tr,
                     ),
                   ),
-                  SizedBox(height: 10.h),
+                  10.verticalSpace,
                   FadeSlideIn(
                     order: 2,
                     child: Obx(
@@ -83,7 +84,7 @@ class SettingsView extends StatelessWidget {
                       ),
                     ),
                   ),
-                  SizedBox(height: 22.h),
+                  22.verticalSpace,
                   FadeSlideIn(
                     order: 3,
                     child: _SectionHeader(
@@ -92,7 +93,7 @@ class SettingsView extends StatelessWidget {
                       caption: 'settings.language_caption'.tr,
                     ),
                   ),
-                  SizedBox(height: 10.h),
+                  10.verticalSpace,
                   FadeSlideIn(
                     order: 4,
                     child: Obx(
@@ -116,7 +117,7 @@ class SettingsView extends StatelessWidget {
                       ),
                     ),
                   ),
-                  SizedBox(height: 22.h),
+                  22.verticalSpace,
                   FadeSlideIn(
                     order: 5,
                     child: _SectionHeader(
@@ -125,9 +126,9 @@ class SettingsView extends StatelessWidget {
                       caption: 'settings.security.caption'.tr,
                     ),
                   ),
-                  SizedBox(height: 10.h),
+                  10.verticalSpace,
                   const FadeSlideIn(order: 6, child: SecuritySection()),
-                  SizedBox(height: 18.h),
+                  18.verticalSpace,
                   FadeSlideIn(
                     order: 7,
                     child: Text(
@@ -196,7 +197,7 @@ class _SummaryHero extends StatelessWidget {
               color: scheme.onSurface.withValues(alpha: 0.75),
             ),
           ),
-          SizedBox(height: 14.h),
+          14.verticalSpace,
           Row(
             children: [
               _SummaryStat(
@@ -204,13 +205,13 @@ class _SummaryHero extends StatelessWidget {
                 label: 'settings.theme'.tr,
                 value: themeValue,
               ),
-              SizedBox(width: 12.w),
+              Gap.hMd,
               Container(
                 width: 1,
                 height: 34.h,
                 color: scheme.onSurface.withValues(alpha: 0.12),
               ),
-              SizedBox(width: 12.w),
+              Gap.hMd,
               _SummaryStat(
                 icon: Icons.language_rounded,
                 label: 'settings.language'.tr,
@@ -245,7 +246,7 @@ class _SummaryStat extends StatelessWidget {
           Row(
             children: [
               Icon(icon, size: 14.sp, color: scheme.primary),
-              SizedBox(width: 6.w),
+              6.horizontalSpace,
               Expanded(
                 child: Text(
                   label,
@@ -259,7 +260,7 @@ class _SummaryStat extends StatelessWidget {
               ),
             ],
           ),
-          SizedBox(height: 4.h),
+          Gap.vXs,
           Text(
             value,
             maxLines: 1,
@@ -290,7 +291,7 @@ class _SectionHeader extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Icon(icon, size: 16.sp, color: scheme.primary),
-        SizedBox(width: 8.w),
+        Gap.hSm,
         Expanded(
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
@@ -304,7 +305,7 @@ class _SectionHeader extends StatelessWidget {
                   color: scheme.onSurface.withValues(alpha: 0.9),
                 ),
               ),
-              SizedBox(height: 2.h),
+              Gap.vXxs,
               Text(
                 caption,
                 maxLines: 2,
@@ -406,7 +407,7 @@ class _OptionRow extends StatelessWidget {
                     : scheme.onSurface.withValues(alpha: 0.6),
               ),
             ),
-            SizedBox(width: 12.w),
+            Gap.hMd,
             Expanded(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -420,7 +421,7 @@ class _OptionRow extends StatelessWidget {
                       color: selected ? scheme.primary : scheme.onSurface,
                     ),
                   ),
-                  SizedBox(height: 2.h),
+                  Gap.vXxs,
                   Text(
                     description,
                     maxLines: 2,
@@ -433,7 +434,7 @@ class _OptionRow extends StatelessWidget {
                 ],
               ),
             ),
-            SizedBox(width: 10.w),
+            10.horizontalSpace,
             _SelectionDot(selected: selected),
           ],
         ),

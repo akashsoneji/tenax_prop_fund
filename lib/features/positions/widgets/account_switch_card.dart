@@ -6,6 +6,7 @@ import '../../../shared/theme/app_colors.dart';
 import '../../../shared/theme/app_text.dart';
 import '../../../shared/theme/app_theme.dart';
 import '../../accounts/models/accounts_models.dart';
+import '../../../shared/theme/app_spacing.dart';
 
 /// Profit green, loss red, exact zero neutral.
 Color _signColor(String value, ColorScheme scheme) {
@@ -52,7 +53,9 @@ class AccountSwitchCard extends StatelessWidget {
       child: Material(
         color: selected
             ? Color.alphaBlend(
-                scheme.primary.withValues(alpha: 0.05), scheme.surface)
+                scheme.primary.withValues(alpha: 0.05),
+                scheme.surface,
+              )
             : scheme.surface,
         borderRadius: BorderRadius.circular(15.r),
         clipBehavior: Clip.antiAlias,
@@ -70,20 +73,20 @@ class AccountSwitchCard extends StatelessWidget {
                           ? AppColors.danger
                           : AppColors.success,
                     ),
-                    SizedBox(width: 10.w),
+                    10.horizontalSpace,
                     Expanded(
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           _titleLine(scheme),
-                          SizedBox(height: 3.h),
+                          3.verticalSpace,
                           _metaLine(scheme),
                         ],
                       ),
                     ),
                   ],
                 ),
-                SizedBox(height: 8.h),
+                Gap.vSm,
                 _MoneyStrip(row: row),
               ],
             ),
@@ -105,12 +108,14 @@ class AccountSwitchCard extends StatelessWidget {
                   row.login,
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
-                  style:
-                      AppText.title(color: scheme.onSurface, fontSize: 14.sp),
+                  style: AppText.title(
+                    color: scheme.onSurface,
+                    fontSize: 14.sp,
+                  ),
                 ),
               ),
               if (primary) ...[
-                SizedBox(width: 6.w),
+                6.horizontalSpace,
                 _Chip(
                   label: 'positions.primary'.tr,
                   color: scheme.primary,
@@ -120,7 +125,7 @@ class AccountSwitchCard extends StatelessWidget {
             ],
           ),
         ),
-        SizedBox(width: 8.w),
+        Gap.hSm,
         Container(
           padding: EdgeInsets.symmetric(horizontal: 8.w, vertical: 3.h),
           decoration: BoxDecoration(
@@ -147,7 +152,7 @@ class AccountSwitchCard extends StatelessWidget {
       children: [
         if (row.phaseLabel.isNotEmpty) ...[
           _Chip(label: row.phaseLabel, color: scheme.primary),
-          SizedBox(width: 6.w),
+          6.horizontalSpace,
         ],
         Expanded(
           child: Text(
@@ -233,11 +238,11 @@ class _Chip extends StatelessWidget {
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
-          if (icon != null) ...[
-            Icon(icon, size: 10.w, color: color),
-            SizedBox(width: 2.w),
-          ],
-          Text(label, style: AppText.subtitle(color: color, fontSize: 9.5.sp)),
+          if (icon != null) ...[Icon(icon, size: 10.w, color: color), Gap.hXxs],
+          Text(
+            label,
+            style: AppText.subtitle(color: color, fontSize: 9.5.sp),
+          ),
         ],
       ),
     );
@@ -271,8 +276,12 @@ class _MoneyStrip extends StatelessWidget {
           divider,
           _cell(scheme, 'accounts.equity'.tr, row.equity, scheme.onSurface),
           divider,
-          _cell(scheme, 'positions.floating_pl'.tr, row.floating,
-              _signColor(row.floating, scheme)),
+          _cell(
+            scheme,
+            'positions.floating_pl'.tr,
+            row.floating,
+            _signColor(row.floating, scheme),
+          ),
         ],
       ),
     );
@@ -293,7 +302,7 @@ class _MoneyStrip extends StatelessWidget {
               fontSize: 9.5.sp,
             ),
           ),
-          SizedBox(height: 1.h),
+          1.verticalSpace,
           FittedBox(
             fit: BoxFit.scaleDown,
             alignment: Alignment.centerLeft,

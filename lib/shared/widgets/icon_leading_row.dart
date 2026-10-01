@@ -3,6 +3,7 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:google_fonts/google_fonts.dart';
 
 import '../theme/app_colors.dart';
+import '../theme/app_spacing.dart';
 
 /// A reusable list row:
 /// optional subtitle in the middle, and an optional trailing widget (meta text,
@@ -58,7 +59,7 @@ class IconLeadingRow extends StatelessWidget {
                     alignment: Alignment.center,
                     child: Icon(icon, size: 20.w, color: tint),
                   ),
-                  SizedBox(width: 12.w),
+                  Gap.hMd,
                   Expanded(
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
@@ -72,7 +73,7 @@ class IconLeadingRow extends StatelessWidget {
                           ),
                         ),
                         if (hasSubtitle) ...[
-                          SizedBox(height: 2.h),
+                          Gap.vXxs,
                           Text(
                             subtitle!,
                             style: GoogleFonts.beVietnamPro(
@@ -85,11 +86,11 @@ class IconLeadingRow extends StatelessWidget {
                     ),
                   ),
                   if (trailing != null) ...[
-                    SizedBox(width: 8.w),
+                    Gap.hSm,
                     trailing!,
                   ],
                   if (showChevron) ...[
-                    SizedBox(width: 4.w),
+                    Gap.hXs,
                     Icon(
                       Icons.chevron_right_rounded,
                       color: scheme.onSurface.withValues(alpha: 0.35),

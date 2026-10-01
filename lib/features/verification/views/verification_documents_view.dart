@@ -3,17 +3,19 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
-import 'package:google_fonts/google_fonts.dart';
 
 import '../../../app/routes/app_routes.dart';
 import '../../../shared/theme/app_colors.dart';
 import '../../../shared/theme/app_theme.dart';
+import '../../../shared/widgets/app_dashed.dart';
 import '../../../shared/widgets/app_gradient_button.dart';
 import '../../../shared/widgets/bottom_action_bar.dart';
 import '../../../shared/widgets/pinned_gradient_app_bar.dart';
 import '../controllers/verification_controller.dart';
 import '../models/verification_models.dart';
 import '../widgets/exit_verification_dialog.dart';
+import '../../../shared/theme/app_spacing.dart';
+import '../../../shared/theme/app_text.dart';
 
 /// Full-screen ID/address document upload, mirroring white_label's KYC docs
 /// screen: two sections (ID Proof, Address Proof) each with a front + back
@@ -51,13 +53,13 @@ class VerificationDocumentsView extends GetView<VerificationController> {
                 children: [
                   Text(
                     'verification.docs_subtitle'.tr,
-                    style: GoogleFonts.beVietnamPro(
+                    style: AppText.base(
                       fontSize: 13.5.sp,
                       height: 1.35,
                       color: scheme.onSurface.withValues(alpha: 0.65),
                     ),
                   ),
-                  SizedBox(height: 22.h),
+                  22.verticalSpace,
                   _ProofSection(
                     title: 'verification.id_proof'.tr,
                     front: controller.idFront,
@@ -65,7 +67,7 @@ class VerificationDocumentsView extends GetView<VerificationController> {
                     onFront: () => _pickSheet(context, ProofKind.idFront),
                     onBack: () => _pickSheet(context, ProofKind.idBack),
                   ),
-                  SizedBox(height: 26.h),
+                  26.verticalSpace,
                   _ProofSection(
                     title: 'verification.address_proof'.tr,
                     front: controller.addressFront,
@@ -115,7 +117,7 @@ class VerificationDocumentsView extends GetView<VerificationController> {
                   borderRadius: BorderRadius.circular(2.r),
                 ),
               ),
-              SizedBox(height: 22.h),
+              22.verticalSpace,
               Row(
                 children: [
                   Expanded(
@@ -128,7 +130,7 @@ class VerificationDocumentsView extends GetView<VerificationController> {
                       },
                     ),
                   ),
-                  SizedBox(width: 14.w),
+                  14.horizontalSpace,
                   Expanded(
                     child: _SheetAction(
                       icon: Icons.photo_library_rounded,
@@ -153,8 +155,9 @@ class VerificationDocumentsView extends GetView<VerificationController> {
   Future<void> _save() async {
     final ok = await controller.uploadDocuments();
     if (!ok) return;
-    controller.steps[1] =
-        controller.steps[1].copyWith(status: VerificationStatus.completed);
+    controller.steps[1] = controller.steps[1].copyWith(
+      status: VerificationStatus.completed,
+    );
     controller.steps.refresh();
     Get.offNamed(AppRoutes.addBank);
   }
@@ -183,12 +186,9 @@ class _ProofSection extends StatelessWidget {
       children: [
         Text(
           title,
-          style: GoogleFonts.beVietnamPro(
-            fontSize: 16.sp,
-            fontWeight: FontWeight.w700,
-          ),
+          style: AppText.base(fontSize: 16.sp, fontWeight: FontWeight.w700),
         ),
-        SizedBox(height: 12.h),
+        Gap.vMd,
         Row(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
@@ -202,7 +202,7 @@ class _ProofSection extends StatelessWidget {
                 ),
               ),
             ),
-            SizedBox(width: 14.w),
+            14.horizontalSpace,
             Expanded(
               child: Obx(
                 () => _UploadTile(
@@ -262,7 +262,13 @@ class _UploadTile extends StatelessWidget {
             if (!selected)
               CustomPaint(
                 size: Size.infinite,
-                painter: _DashedBorderPainter(color: accent, radius: 12.r),
+                painter: AppDashedBorderPainter(
+                  color: accent,
+                  radius: 12.r,
+                  strokeWidth: 1,
+                  dash: 6,
+                  gap: 4,
+                ),
               ),
             if (selected)
               ClipRRect(
@@ -309,7 +315,7 @@ class _Placeholder extends StatelessWidget {
             ),
             child: Icon(Icons.add_rounded, color: AppColors.white, size: 22.w),
           ),
-          SizedBox(height: 8.h),
+          Gap.vSm,
           Padding(
             padding: EdgeInsets.symmetric(horizontal: 8.w),
             child: Text(
@@ -317,7 +323,7 @@ class _Placeholder extends StatelessWidget {
               maxLines: 1,
               overflow: TextOverflow.ellipsis,
               textAlign: TextAlign.center,
-              style: GoogleFonts.beVietnamPro(
+              style: AppText.base(
                 fontSize: 12.sp,
                 fontWeight: FontWeight.w500,
                 color: accent,
@@ -373,10 +379,7 @@ class _OptionalChip extends StatelessWidget {
           textAlign: TextAlign.center,
           maxLines: 1,
           overflow: TextOverflow.ellipsis,
-          style: GoogleFonts.beVietnamPro(
-            fontSize: 12.sp,
-            color: AppColors.white,
-          ),
+          style: AppText.base(fontSize: 12.sp, color: AppColors.white),
         ),
       ),
     );
@@ -415,13 +418,13 @@ class _SheetAction extends StatelessWidget {
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
                 Icon(icon, color: AppColors.white, size: 18.w),
-                SizedBox(width: 8.w),
+                Gap.hSm,
                 Flexible(
                   child: Text(
                     label,
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
-                    style: GoogleFonts.beVietnamPro(
+                    style: AppText.base(
                       fontSize: 14.sp,
                       fontWeight: FontWeight.w600,
                       color: AppColors.white,
@@ -435,44 +438,4 @@ class _SheetAction extends StatelessWidget {
       ),
     );
   }
-}
-
-/// Paints a rounded-rectangle dashed border matching the KYC upload tiles.
-class _DashedBorderPainter extends CustomPainter {
-  _DashedBorderPainter({required this.color, required this.radius});
-
-  final Color color;
-  final double radius;
-
-  @override
-  void paint(Canvas canvas, Size size) {
-    final paint = Paint()
-      ..color = color
-      ..strokeWidth = 1
-      ..style = PaintingStyle.stroke;
-    final path = Path()
-      ..addRRect(
-        RRect.fromRectAndRadius(
-          Rect.fromLTWH(0, 0, size.width, size.height),
-          Radius.circular(radius),
-        ),
-      );
-    const dashWidth = 6.0;
-    const dashSpace = 4.0;
-    for (final metric in path.computeMetrics()) {
-      var distance = 0.0;
-      while (distance < metric.length) {
-        final next = distance + dashWidth;
-        canvas.drawPath(
-          metric.extractPath(distance, next.clamp(0.0, metric.length)),
-          paint,
-        );
-        distance = next + dashSpace;
-      }
-    }
-  }
-
-  @override
-  bool shouldRepaint(covariant _DashedBorderPainter old) =>
-      old.color != color || old.radius != radius;
 }

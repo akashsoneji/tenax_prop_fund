@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
-import 'package:google_fonts/google_fonts.dart';
 
 import '../../../app/flavor/flavor_config.dart';
 import '../../../app/routes/app_routes.dart';
@@ -9,6 +8,8 @@ import '../../../features/authentication/repositories/auth_repository.dart';
 import '../../../shared/theme/app_colors.dart';
 
 import '../../../shared/widgets/flavor_logo.dart';
+import '../../../shared/theme/app_spacing.dart';
+import '../../../shared/theme/app_text.dart';
 
 /// Brief branded splash. Checks for a persisted session token: if present the
 /// user skips straight to home, otherwise they land on get-started.
@@ -44,9 +45,13 @@ class _SplashViewState extends State<SplashView> {
       begin: Alignment.topLeft,
       end: Alignment.bottomRight,
       colors: [
-        primaryHsl.withLightness((primaryHsl.lightness * 0.7).clamp(0.0, 1.0)).toColor(),
+        primaryHsl
+            .withLightness((primaryHsl.lightness * 0.7).clamp(0.0, 1.0))
+            .toColor(),
         primary,
-        primaryHsl.withLightness((primaryHsl.lightness * 0.5).clamp(0.0, 1.0)).toColor(),
+        primaryHsl
+            .withLightness((primaryHsl.lightness * 0.5).clamp(0.0, 1.0))
+            .toColor(),
       ],
     );
     return Scaffold(
@@ -74,29 +79,28 @@ class _SplashViewState extends State<SplashView> {
                   size: 120.w,
                   fallback: Text(
                     'tp',
-                    style: GoogleFonts.beVietnamPro(
+                    style: AppText.base(
                       fontSize: 48.sp,
                       fontWeight: FontWeight.w800,
-                      fontStyle: FontStyle.italic,
                       color: config.secondaryColor,
-                    ),
+                    ).copyWith(fontStyle: FontStyle.italic),
                   ),
                 ),
               ),
-              SizedBox(height: 20.h),
+              20.verticalSpace,
               Text(
                 config.appName,
-                style: GoogleFonts.beVietnamPro(
+                style: AppText.base(
                   fontSize: 24.sp,
                   fontWeight: FontWeight.w700,
                   color: AppColors.white,
                   letterSpacing: 0.4,
                 ),
               ),
-              SizedBox(height: 8.h),
+              Gap.vSm,
               Text(
                 'splash.loading'.tr,
-                style: GoogleFonts.beVietnamPro(
+                style: AppText.base(
                   color: AppColors.white.withValues(alpha: 0.8),
                   fontSize: 13.sp,
                 ),

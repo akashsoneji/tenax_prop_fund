@@ -1,9 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
-import 'package:google_fonts/google_fonts.dart';
 
 import '../../../shared/theme/app_colors.dart';
 import '../../../shared/theme/app_theme.dart';
+import '../../../shared/theme/app_spacing.dart';
+import '../../../shared/theme/app_text.dart';
 
 /// Purple gradient hero header
 /// button. Mirrors the Rewards hero so the two screens feel like a family.
@@ -30,7 +31,7 @@ class RulesHeroHeader extends StatelessWidget {
                   height: 36.w,
                   decoration: BoxDecoration(
                     shape: BoxShape.circle,
-      color: AppColors.white.withValues(alpha: 0.14),
+                    color: AppColors.white.withValues(alpha: 0.14),
                   ),
                   alignment: Alignment.center,
                   child: Icon(
@@ -40,10 +41,10 @@ class RulesHeroHeader extends StatelessWidget {
                   ),
                 ),
               ),
-              SizedBox(width: 4.w),
+              Gap.hXs,
               Text(
                 title,
-                style: GoogleFonts.beVietnamPro(
+                style: AppText.base(
                   color: Colors.white,
                   fontSize: 20.sp,
                   fontWeight: FontWeight.w800,

@@ -7,6 +7,7 @@ import '../../../shared/theme/app_text.dart';
 import '../../../shared/widgets/symbol_icon.dart';
 import '../models/symbol_models.dart';
 import '../services/market_watch_v2_service.dart';
+import '../../../shared/theme/app_spacing.dart';
 
 /// iQuote-style market row: a drag handle, a circular flag avatar, the slashed
 /// symbol (`XAUUSD` → `XAU/USD`) with a descriptive name below, and a joined
@@ -54,15 +55,17 @@ class FavoriteSymbolTile extends StatelessWidget {
                 index: index,
                 child: Padding(
                   padding: EdgeInsets.fromLTRB(0, 8.h, 6.w, 8.h),
-                  child: Icon(Icons.drag_handle_rounded,
-                      size: 20.w,
-                      color: scheme.onSurfaceVariant.withValues(alpha: 0.5)),
+                  child: Icon(
+                    Icons.drag_handle_rounded,
+                    size: 20.w,
+                    color: scheme.onSurfaceVariant.withValues(alpha: 0.5),
+                  ),
                 ),
               ),
               SymbolIcon(code: instrument.code),
-              SizedBox(width: 10.w),
+              10.horizontalSpace,
               Expanded(child: _identity(scheme)),
-              SizedBox(width: 8.w),
+              Gap.hSm,
               Obx(() => _pill(scheme, rx.value)),
             ],
           ),
@@ -72,7 +75,9 @@ class FavoriteSymbolTile extends StatelessWidget {
   }
 
   Widget _identity(ColorScheme scheme) {
-    final name = instrument.name.isEmpty ? instrument.category : instrument.name;
+    final name = instrument.name.isEmpty
+        ? instrument.category
+        : instrument.name;
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       mainAxisSize: MainAxisSize.min,
@@ -82,17 +87,21 @@ class FavoriteSymbolTile extends StatelessWidget {
           maxLines: 1,
           overflow: TextOverflow.ellipsis,
           style: AppText.base(
-              fontSize: 15.sp,
-              fontWeight: FontWeight.w600,
-              color: scheme.onSurface),
+            fontSize: 15.sp,
+            fontWeight: FontWeight.w600,
+            color: scheme.onSurface,
+          ),
         ),
         if (name.isNotEmpty) ...[
-          SizedBox(height: 2.h),
+          Gap.vXxs,
           Text(
             name,
             maxLines: 1,
             overflow: TextOverflow.ellipsis,
-            style: AppText.base(fontSize: 11.sp, color: scheme.onSurfaceVariant),
+            style: AppText.base(
+              fontSize: 11.sp,
+              color: scheme.onSurfaceVariant,
+            ),
           ),
         ],
       ],
@@ -105,8 +114,9 @@ class FavoriteSymbolTile extends StatelessWidget {
     final has = p.bid > 0 || p.ask > 0;
     final buy = has && p.ask > 0 ? p.ask.toStringAsFixed(digits) : '--';
     final sell = has && p.bid > 0 ? p.bid.toStringAsFixed(digits) : '--';
-    final spread =
-        p.spread > 0 ? p.spread.toStringAsFixed(0) : (has ? '0' : '--');
+    final spread = p.spread > 0
+        ? p.spread.toStringAsFixed(0)
+        : (has ? '0' : '--');
 
     return Stack(
       alignment: Alignment.center,
@@ -115,11 +125,19 @@ class FavoriteSymbolTile extends StatelessWidget {
         Row(
           mainAxisSize: MainAxisSize.min,
           children: [
-            _side('trade.buy'.tr, buy, _buyColor,
-                BorderRadius.horizontal(left: Radius.circular(6.r))),
-            SizedBox(width: 1.w),
-            _side('trade.sell'.tr, sell, _sellColor,
-                BorderRadius.horizontal(right: Radius.circular(6.r))),
+            _side(
+              'trade.buy'.tr,
+              buy,
+              _buyColor,
+              BorderRadius.horizontal(left: Radius.circular(6.r)),
+            ),
+            1.horizontalSpace,
+            _side(
+              'trade.sell'.tr,
+              sell,
+              _sellColor,
+              BorderRadius.horizontal(right: Radius.circular(6.r)),
+            ),
           ],
         ),
         Positioned(
@@ -131,9 +149,14 @@ class FavoriteSymbolTile extends StatelessWidget {
               borderRadius: BorderRadius.circular(10.r),
               border: Border.all(color: Colors.white24, width: 0.5),
             ),
-            child: Text(spread,
-                style: AppText.base(
-                    fontSize: 10.sp, fontWeight: FontWeight.w500, color: Colors.white)),
+            child: Text(
+              spread,
+              style: AppText.base(
+                fontSize: 10.sp,
+                fontWeight: FontWeight.w500,
+                color: Colors.white,
+              ),
+            ),
           ),
         ),
       ],
@@ -150,19 +173,26 @@ class FavoriteSymbolTile extends StatelessWidget {
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          Text(label,
-              style: AppText.base(
-                  fontSize: 10.sp, color: Colors.white.withValues(alpha: 0.85))),
-          SizedBox(height: 1.h),
+          Text(
+            label,
+            style: AppText.base(
+              fontSize: 10.sp,
+              color: Colors.white.withValues(alpha: 0.85),
+            ),
+          ),
+          1.verticalSpace,
           FittedBox(
             fit: BoxFit.scaleDown,
-            child: Text(value,
-                maxLines: 1,
-                style: AppText.base(
-                    fontSize: 13.sp,
-                    fontWeight: FontWeight.w700,
-                    color: Colors.white,
-                    height: 1.1)),
+            child: Text(
+              value,
+              maxLines: 1,
+              style: AppText.base(
+                fontSize: 13.sp,
+                fontWeight: FontWeight.w700,
+                color: Colors.white,
+                height: 1.1,
+              ),
+            ),
           ),
         ],
       ),

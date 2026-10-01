@@ -2,8 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
 
-import '../../../shared/theme/app_theme.dart';
 import '../controllers/configure_controller.dart';
+import '../../../shared/theme/app_spacing.dart';
+import '../../../shared/widgets/app_card.dart';
 
 /// Shows the selected payment method; tapping opens a scrollable bottom sheet
 /// (30% of screen height) listing every method. Index 0 is the default.
@@ -21,28 +22,36 @@ class PaymentMethodTile extends StatelessWidget {
       child: InkWell(
         onTap: () => _openSheet(context),
         borderRadius: BorderRadius.circular(14.r),
-        child: Container(
+        child: AppCard(
+          radius: 14.r,
           padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 14.h),
-          decoration: AppTheme.surfaceCard(scheme, radius: 14.r),
           child: Row(
             children: [
-              Icon(Icons.account_balance_wallet_outlined,
-                  size: 20.w, color: scheme.primary),
-              SizedBox(width: 12.w),
-              Expanded(
-                child: Obx(() => Text(
-                      c.selectedPaymentMethod?.name ?? '',
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                      style: text.titleSmall?.copyWith(
-                        fontSize: 14.sp,
-                        fontWeight: FontWeight.w700,
-                        color: scheme.onSurface,
-                      ),
-                    )),
+              Icon(
+                Icons.account_balance_wallet_outlined,
+                size: 20.w,
+                color: scheme.primary,
               ),
-              Icon(Icons.keyboard_arrow_down_rounded,
-                  size: 22.w, color: scheme.onSurfaceVariant),
+              Gap.hMd,
+              Expanded(
+                child: Obx(
+                  () => Text(
+                    c.selectedPaymentMethod?.name ?? '',
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: text.titleSmall?.copyWith(
+                      fontSize: 14.sp,
+                      fontWeight: FontWeight.w700,
+                      color: scheme.onSurface,
+                    ),
+                  ),
+                ),
+              ),
+              Icon(
+                Icons.keyboard_arrow_down_rounded,
+                size: 22.w,
+                color: scheme.onSurfaceVariant,
+              ),
             ],
           ),
         ),
@@ -81,7 +90,7 @@ class _PaymentMethodSheet extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            SizedBox(height: 10.h),
+            10.verticalSpace,
             Center(
               child: Container(
                 width: 40.w,

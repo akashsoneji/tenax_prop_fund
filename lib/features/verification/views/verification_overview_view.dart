@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
-import 'package:google_fonts/google_fonts.dart';
 
 import '../../../app/routes/app_routes.dart';
 import '../../../shared/theme/app_colors.dart';
@@ -13,6 +12,8 @@ import '../controllers/verification_controller.dart';
 import '../models/verification_models.dart';
 import '../widgets/exit_verification_dialog.dart';
 import '../widgets/verification_step_card.dart';
+import '../../../shared/theme/app_spacing.dart';
+import '../../../shared/theme/app_text.dart';
 
 /// Entry screen of the verification journey: a shield header, a vertical
 /// timeline of the three steps (dot + connector rail beside each card), and a
@@ -64,7 +65,7 @@ class VerificationOverviewView extends GetView<VerificationController> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   const _VerifyHeader(),
-                  SizedBox(height: 28.h),
+                  28.verticalSpace,
                   for (var i = 0; i < controller.steps.length; i++)
                     _TimelineStep(
                       step: controller.steps[i],
@@ -85,7 +86,7 @@ class VerificationOverviewView extends GetView<VerificationController> {
               label: 'verification.start'.tr,
               onPressed: _start,
             ),
-            SizedBox(height: 12.h),
+            Gap.vMd,
             const _SecureNote(),
           ],
         ),
@@ -138,24 +139,24 @@ class _VerifyHeader extends StatelessWidget {
             ),
           ),
         ),
-        SizedBox(width: 16.w),
+        Gap.hLg,
         Expanded(
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text(
                 'verification.header_title'.tr,
-                style: GoogleFonts.beVietnamPro(
+                style: AppText.base(
                   fontSize: 22.sp,
                   fontWeight: FontWeight.w700,
                   color: scheme.onSurface,
                   height: 1.15,
                 ),
               ),
-              SizedBox(height: 6.h),
+              6.verticalSpace,
               Text(
                 'verification.header_subtitle'.tr,
-                style: GoogleFonts.beVietnamPro(
+                style: AppText.base(
                   fontSize: 13.sp,
                   fontWeight: FontWeight.w400,
                   color: scheme.onSurface.withValues(alpha: 0.6),
@@ -193,7 +194,7 @@ class _TimelineStep extends StatelessWidget {
             width: 20.w,
             child: Column(
               children: [
-                SizedBox(height: 22.h),
+                22.verticalSpace,
                 _StatusDot(status: step.status),
                 if (!isLast)
                   Expanded(
@@ -206,7 +207,7 @@ class _TimelineStep extends StatelessWidget {
               ],
             ),
           ),
-          SizedBox(width: 10.w),
+          10.horizontalSpace,
           Expanded(
             child: Padding(
               padding: EdgeInsets.only(bottom: isLast ? 0 : 20.h),
@@ -268,13 +269,13 @@ class _SecureNote extends StatelessWidget {
       mainAxisAlignment: MainAxisAlignment.center,
       children: [
         Icon(Icons.lock_outline_rounded, size: 14.w, color: grey),
-        SizedBox(width: 6.w),
+        6.horizontalSpace,
         Flexible(
           child: Text(
             'verification.secure_note'.tr,
             maxLines: 1,
             overflow: TextOverflow.ellipsis,
-            style: GoogleFonts.beVietnamPro(
+            style: AppText.base(
               fontSize: 12.sp,
               fontWeight: FontWeight.w400,
               color: grey,

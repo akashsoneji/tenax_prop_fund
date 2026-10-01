@@ -1,12 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
-import 'package:google_fonts/google_fonts.dart';
 
 import '../../../shared/widgets/app_gradient_button.dart';
 import '../controllers/support_controller.dart';
 import '../models/support_models.dart';
 import '../repositories/support_repository.dart';
+import '../../../shared/theme/app_spacing.dart';
+import '../../../shared/theme/app_text.dart';
 
 /// Bottom sheet showing one ticket's message thread with a reply composer.
 /// Loads the full ticket (with its messages) on open, then lets the user post
@@ -104,16 +105,16 @@ class _TicketDetailSheetState extends State<TicketDetailSheet> {
                       _ticket.subject,
                       maxLines: 2,
                       overflow: TextOverflow.ellipsis,
-                      style: GoogleFonts.beVietnamPro(
+                      style: AppText.base(
                         fontSize: 16.sp,
                         fontWeight: FontWeight.w800,
                         color: scheme.onSurface,
                       ),
                     ),
-                    SizedBox(height: 2.h),
+                    Gap.vXxs,
                     Text(
                       _ticket.subtitle,
-                      style: GoogleFonts.beVietnamPro(
+                      style: AppText.base(
                         fontSize: 12.5.sp,
                         color: scheme.onSurfaceVariant,
                       ),
@@ -129,14 +130,13 @@ class _TicketDetailSheetState extends State<TicketDetailSheet> {
                 child: _loading
                     ? Padding(
                         padding: EdgeInsets.symmetric(vertical: 40.h),
-                        child:
-                            const Center(child: CircularProgressIndicator()),
+                        child: const Center(child: CircularProgressIndicator()),
                       )
                     : ListView.separated(
                         physics: const BouncingScrollPhysics(),
                         padding: EdgeInsets.fromLTRB(20.w, 14.h, 20.w, 14.h),
                         itemCount: _ticket.messages.length,
-                        separatorBuilder: (_, _) => SizedBox(height: 12.h),
+                        separatorBuilder: (_, _) => Gap.vMd,
                         itemBuilder: (_, i) =>
                             _MessageBubble(message: _ticket.messages[i]),
                       ),
@@ -152,15 +152,13 @@ class _TicketDetailSheetState extends State<TicketDetailSheet> {
                           controller: _replyCtrl,
                           minLines: 1,
                           maxLines: 4,
-                          style: GoogleFonts.beVietnamPro(
-                            color: scheme.onSurface,
-                          ),
+                          style: AppText.base(color: scheme.onSurface),
                           decoration: InputDecoration(
                             hintText: 'support.reply_hint'.tr,
                           ),
                         ),
                       ),
-                      SizedBox(width: 10.w),
+                      10.horizontalSpace,
                       SizedBox(
                         width: 120.w,
                         child: AppGradientButton(
@@ -207,16 +205,16 @@ class _MessageBubble extends StatelessWidget {
           children: [
             Text(
               message.author,
-              style: GoogleFonts.beVietnamPro(
+              style: AppText.base(
                 fontSize: 11.5.sp,
                 fontWeight: FontWeight.w700,
                 color: isStaff ? scheme.primary : scheme.onSurface,
               ),
             ),
-            SizedBox(height: 3.h),
+            3.verticalSpace,
             Text(
               message.body,
-              style: GoogleFonts.beVietnamPro(
+              style: AppText.base(
                 fontSize: 13.5.sp,
                 height: 1.35,
                 color: scheme.onSurface,

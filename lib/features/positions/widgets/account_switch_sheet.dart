@@ -7,6 +7,7 @@ import '../../../shared/theme/app_text.dart';
 import '../../../shared/widgets/skeletons/skeletons.dart';
 import '../controllers/positions_controller.dart';
 import 'account_switch_card.dart';
+import '../../../shared/theme/app_spacing.dart';
 
 /// Bottom sheet listing every trading account (primary first) with live
 /// balance / equity / P&L. Re-fetches the list each time it opens.
@@ -51,9 +52,9 @@ class AccountSwitchSheet extends StatelessWidget {
                 ),
               ),
             ),
-            SizedBox(height: 12.h),
+            Gap.vMd,
             _SheetHeader(controller: controller),
-            SizedBox(height: 12.h),
+            Gap.vMd,
             Flexible(child: Obx(() => _list(context, scheme))),
           ],
         ),
@@ -88,7 +89,7 @@ class AccountSwitchSheet extends StatelessWidget {
       shrinkWrap: true,
       physics: const BouncingScrollPhysics(),
       itemCount: rows.length,
-      separatorBuilder: (_, _) => SizedBox(height: 8.h),
+      separatorBuilder: (_, _) => Gap.vSm,
       itemBuilder: (_, i) {
         final row = rows[i];
         return AccountSwitchCard(
@@ -124,21 +125,22 @@ class _SheetHeader extends StatelessWidget {
                 'positions.switch_account'.tr,
                 style: AppText.title(color: scheme.onSurface, fontSize: 17.sp),
               ),
-              SizedBox(height: 2.h),
+              Gap.vXxs,
               Text(
                 'positions.switch_account_hint'.tr,
                 maxLines: 1,
                 overflow: TextOverflow.ellipsis,
                 style: AppText.subtitle(
-                  color:
-                      scheme.onSurface.withValues(alpha: AppColors.alphaMuted),
+                  color: scheme.onSurface.withValues(
+                    alpha: AppColors.alphaMuted,
+                  ),
                   fontSize: 11.sp,
                 ),
               ),
             ],
           ),
         ),
-        SizedBox(width: 8.w),
+        Gap.hSm,
         Obx(() {
           if (controller.isRefreshingAccounts.value) {
             return SizedBox(
@@ -178,7 +180,7 @@ class _SheetSkeleton extends StatelessWidget {
         children: [
           for (var i = 0; i < 3; i++) ...[
             ShimmerBox(height: 96.h, radius: 16.r),
-            if (i < 2) SizedBox(height: 8.h),
+            if (i < 2) Gap.vSm,
           ],
         ],
       ),

@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
-import 'package:google_fonts/google_fonts.dart';
 
 import '../../../shared/theme/app_colors.dart';
 import '../../../shared/widgets/app_gradient_button.dart';
@@ -9,6 +8,7 @@ import '../../../shared/widgets/app_labeled_field.dart';
 import '../controllers/payout_methods_controller.dart';
 import '../models/method_type.dart';
 import '../models/payout_method.dart';
+import '../../../shared/theme/app_text.dart';
 
 /// Bottom sheet to add or edit a payout method. Loads the admin-configured
 /// rails (`GET /finance/method-types`), then renders the dynamic field form for
@@ -55,7 +55,7 @@ class _AddPayoutMethodSheetState extends State<AddPayoutMethodSheet> {
         if (types.isEmpty) return;
         _selected = _isEdit
             ? types.firstWhereOrNull((t) => t.value == widget.existing!.type) ??
-                types.first
+                  types.first
             : types.first;
         _syncFieldControllers();
       });
@@ -119,13 +119,13 @@ class _AddPayoutMethodSheetState extends State<AddPayoutMethodSheet> {
                   _isEdit
                       ? 'payout_methods.edit_method'.tr
                       : 'rewards.add_payout_method'.tr,
-                  style: GoogleFonts.beVietnamPro(
+                  style: AppText.base(
                     fontSize: 18.sp,
                     fontWeight: FontWeight.w800,
                     color: scheme.onSurface,
                   ),
                 ),
-                SizedBox(height: 18.h),
+                18.verticalSpace,
                 Obx(() {
                   if (_controller.isLoadingMethodTypes.value &&
                       _controller.methodTypes.isEmpty) {
@@ -148,7 +148,7 @@ class _AddPayoutMethodSheetState extends State<AddPayoutMethodSheet> {
                     fieldControllers: _fieldControllers,
                   );
                 }),
-                SizedBox(height: 22.h),
+                22.verticalSpace,
                 Obx(
                   () => AppGradientButton(
                     label: 'rewards.save_method'.tr,
@@ -169,7 +169,9 @@ class _AddPayoutMethodSheetState extends State<AddPayoutMethodSheet> {
       _selected != null &&
       _selected!.fields
           .where((f) => f.required)
-          .every((f) => _fieldControllers[f.key]?.text.trim().isNotEmpty == true);
+          .every(
+            (f) => _fieldControllers[f.key]?.text.trim().isNotEmpty == true,
+          );
 
   Future<void> _submit() async {
     final type = _selected;
@@ -243,23 +245,25 @@ class _Form extends StatelessWidget {
           onChanged: onTypeChanged,
           scheme: scheme,
         ),
-        SizedBox(height: 14.h),
+        14.verticalSpace,
         AppLabeledField(
           controller: labelText,
           label: 'payout_methods.label'.tr,
           hint: 'payout_methods.label_hint'.tr,
         ),
         for (final f in selected?.fields ?? const <MethodTypeField>[]) ...[
-          SizedBox(height: 14.h),
+          14.verticalSpace,
           AppLabeledField(
             controller: fieldControllers[f.key]!,
-            label: f.required ? '${f.label} *' : '${f.label} (${'common.optional'.tr})',
+            label: f.required
+                ? '${f.label} *'
+                : '${f.label} (${'common.optional'.tr})',
             hint: f.placeholder,
             keyboardType: f.type == 'number'
                 ? const TextInputType.numberWithOptions(decimal: true)
                 : f.type == 'email'
-                    ? TextInputType.emailAddress
-                    : TextInputType.text,
+                ? TextInputType.emailAddress
+                : TextInputType.text,
           ),
         ],
       ],
@@ -294,7 +298,7 @@ class _TypeDropdown extends StatelessWidget {
         children: [
           Text(
             'rewards.method_type'.tr,
-            style: GoogleFonts.beVietnamPro(
+            style: AppText.base(
               fontSize: 12.5.sp,
               color: scheme.onSurface.withValues(alpha: 0.55),
             ),
@@ -310,7 +314,7 @@ class _TypeDropdown extends StatelessWidget {
                     value: t,
                     child: Text(
                       t.label,
-                      style: GoogleFonts.beVietnamPro(
+                      style: AppText.base(
                         fontSize: 14.sp,
                         fontWeight: FontWeight.w600,
                         color: scheme.onSurface,
@@ -340,7 +344,7 @@ class _EmptyTypes extends StatelessWidget {
       child: Text(
         'payout_methods.no_types'.tr,
         textAlign: TextAlign.center,
-        style: GoogleFonts.beVietnamPro(
+        style: AppText.base(
           fontSize: 13.sp,
           color: scheme.onSurface.withValues(alpha: 0.6),
         ),
@@ -348,4 +352,3 @@ class _EmptyTypes extends StatelessWidget {
     );
   }
 }
-

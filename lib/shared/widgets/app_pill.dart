@@ -174,7 +174,7 @@ class AppPill extends StatelessWidget {
             ),
           ),
           if (value != null && value!.isNotEmpty) ...[
-            SizedBox(width: 5.w),
+            5.horizontalSpace,
             Text(
               value!,
               style: GoogleFonts.beVietnamPro(

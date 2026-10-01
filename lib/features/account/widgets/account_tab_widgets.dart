@@ -3,8 +3,10 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
 
 import '../../../shared/theme/app_colors.dart';
-import '../../../shared/theme/app_theme.dart';
 import '../models/account_models.dart';
+import '../../../shared/theme/app_spacing.dart';
+import '../../../shared/theme/app_text.dart';
+import '../../../shared/widgets/app_card.dart';
 
 // ---------------------------------------------------------------------------
 // Trading overview
@@ -28,9 +30,9 @@ class AccountInsightsGrid extends StatelessWidget {
       rows.add(metrics.sublist(i, (i + 2).clamp(0, metrics.length)));
     }
 
-    return Container(
+    return AppCard(
+      radius: 16,
       padding: EdgeInsets.symmetric(horizontal: 4.w, vertical: 4.h),
-      decoration: AppTheme.surfaceCard(scheme, radius: 16),
       child: Column(
         children: [
           for (var r = 0; r < rows.length; r++) ...[
@@ -83,16 +85,16 @@ class _MetricCell extends StatelessWidget {
               metric.label,
               maxLines: 1,
               overflow: TextOverflow.ellipsis,
-              style: TextStyle(
+              style: AppText.base(
                 fontSize: 12.5.sp,
                 color: scheme.onSurfaceVariant,
               ),
             ),
           ),
-          SizedBox(width: 8.w),
+          Gap.hSm,
           Text(
             metric.value,
-            style: TextStyle(
+            style: AppText.base(
               fontSize: 13.5.sp,
               fontWeight: FontWeight.w800,
               color: valueColor,
@@ -113,10 +115,10 @@ class AccountTradeRow extends StatelessWidget {
   Widget build(BuildContext context) {
     final scheme = Theme.of(context).colorScheme;
     final sideColor = trade.isBuy ? AppColors.success : AppColors.danger;
-    return Container(
+    return AppCard(
+      radius: 14,
       padding: EdgeInsets.all(12.w),
       margin: EdgeInsets.only(bottom: 10.h),
-      decoration: AppTheme.surfaceCard(scheme, radius: 14),
       child: Row(
         children: [
           Container(
@@ -128,46 +130,56 @@ class AccountTradeRow extends StatelessWidget {
               borderRadius: BorderRadius.circular(12.r),
             ),
             child: Icon(
-              trade.isBuy
-                  ? Icons.north_east_rounded
-                  : Icons.south_east_rounded,
+              trade.isBuy ? Icons.north_east_rounded : Icons.south_east_rounded,
               size: 18.w,
               color: sideColor,
             ),
           ),
-          SizedBox(width: 12.w),
+          Gap.hMd,
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Row(
                   children: [
-                    Text(trade.symbol,
-                        style: TextStyle(
-                            fontSize: 14.5.sp,
-                            fontWeight: FontWeight.w700,
-                            color: scheme.onSurface)),
-                    SizedBox(width: 8.w),
-                    Text('${trade.side.toUpperCase()} · ${trade.volume}',
-                        style: TextStyle(
-                            fontSize: 11.5.sp,
-                            fontWeight: FontWeight.w600,
-                            color: scheme.onSurfaceVariant)),
+                    Text(
+                      trade.symbol,
+                      style: AppText.base(
+                        fontSize: 14.5.sp,
+                        fontWeight: FontWeight.w700,
+                        color: scheme.onSurface,
+                      ),
+                    ),
+                    Gap.hSm,
+                    Text(
+                      '${trade.side.toUpperCase()} · ${trade.volume}',
+                      style: AppText.base(
+                        fontSize: 11.5.sp,
+                        fontWeight: FontWeight.w600,
+                        color: scheme.onSurfaceVariant,
+                      ),
+                    ),
                   ],
                 ),
-                SizedBox(height: 3.h),
-                Text('${trade.openPrice} → ${trade.closePrice} · ${trade.closedAt}',
-                    style: TextStyle(
-                        fontSize: 11.5.sp, color: scheme.onSurfaceVariant)),
+                3.verticalSpace,
+                Text(
+                  '${trade.openPrice} → ${trade.closePrice} · ${trade.closedAt}',
+                  style: AppText.base(
+                    fontSize: 11.5.sp,
+                    color: scheme.onSurfaceVariant,
+                  ),
+                ),
               ],
             ),
           ),
           Text(
             trade.profit,
-            style: TextStyle(
+            style: AppText.base(
               fontSize: 14.sp,
               fontWeight: FontWeight.w800,
-              color: trade.profitNegative ? AppColors.danger : AppColors.success,
+              color: trade.profitNegative
+                  ? AppColors.danger
+                  : AppColors.success,
             ),
           ),
         ],
@@ -194,29 +206,36 @@ class PlatformDownloadCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final scheme = Theme.of(context).colorScheme;
-    return Container(
+    return AppCard(
+      radius: 16,
       padding: EdgeInsets.all(14.w),
-      decoration: AppTheme.surfaceCard(scheme, radius: 16),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Row(
             children: [
               Expanded(
-                child: Text(download.label,
-                    style: TextStyle(
-                        fontSize: 14.5.sp,
-                        fontWeight: FontWeight.w700,
-                        color: scheme.onSurface)),
+                child: Text(
+                  download.label,
+                  style: AppText.base(
+                    fontSize: 14.5.sp,
+                    fontWeight: FontWeight.w700,
+                    color: scheme.onSurface,
+                  ),
+                ),
               ),
               Icon(Icons.download_rounded, size: 18.w, color: scheme.primary),
             ],
           ),
-          SizedBox(height: 6.h),
-          Text(download.note,
-              style: TextStyle(
-                  fontSize: 12.sp, color: scheme.onSurfaceVariant)),
-          SizedBox(height: 12.h),
+          6.verticalSpace,
+          Text(
+            download.note,
+            style: AppText.base(
+              fontSize: 12.sp,
+              color: scheme.onSurfaceVariant,
+            ),
+          ),
+          Gap.vMd,
           Material(
             color: scheme.primary,
             borderRadius: BorderRadius.circular(12.r),
@@ -226,11 +245,14 @@ class PlatformDownloadCard extends StatelessWidget {
               child: Container(
                 height: 42.h,
                 alignment: Alignment.center,
-                child: Text('account.download'.tr,
-                    style: TextStyle(
-                        fontSize: 13.5.sp,
-                        fontWeight: FontWeight.w700,
-                        color: AppColors.white)),
+                child: Text(
+                  'account.download'.tr,
+                  style: AppText.base(
+                    fontSize: 13.5.sp,
+                    fontWeight: FontWeight.w700,
+                    color: AppColors.white,
+                  ),
+                ),
               ),
             ),
           ),
@@ -257,18 +279,21 @@ class ResetCarryList extends StatelessWidget {
       (false, 'account.reset_clear_balance'.tr),
       (false, 'account.reset_clear_counter'.tr),
     ];
-    return Container(
+    return AppCard(
+      radius: 16,
       padding: EdgeInsets.all(16.w),
-      decoration: AppTheme.surfaceCard(scheme, radius: 16),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text('account.reset_carries'.tr,
-              style: TextStyle(
-                  fontSize: 15.sp,
-                  fontWeight: FontWeight.w800,
-                  color: scheme.onSurface)),
-          SizedBox(height: 12.h),
+          Text(
+            'account.reset_carries'.tr,
+            style: AppText.base(
+              fontSize: 15.sp,
+              fontWeight: FontWeight.w800,
+              color: scheme.onSurface,
+            ),
+          ),
+          Gap.vMd,
           for (final (kept, label) in items)
             Padding(
               padding: EdgeInsets.only(bottom: 10.h),
@@ -277,7 +302,9 @@ class ResetCarryList extends StatelessWidget {
                 children: [
                   Container(
                     padding: EdgeInsets.symmetric(
-                        horizontal: 8.w, vertical: 2.h),
+                      horizontal: 8.w,
+                      vertical: 2.h,
+                    ),
                     decoration: BoxDecoration(
                       color: (kept ? AppColors.success : AppColors.amber)
                           .withValues(alpha: 0.14),
@@ -285,17 +312,22 @@ class ResetCarryList extends StatelessWidget {
                     ),
                     child: Text(
                       kept ? 'account.reset_kept'.tr : 'account.reset_reset'.tr,
-                      style: TextStyle(
-                          fontSize: 11.sp,
-                          fontWeight: FontWeight.w700,
-                          color: kept ? AppColors.success : AppColors.amber),
+                      style: AppText.base(
+                        fontSize: 11.sp,
+                        fontWeight: FontWeight.w700,
+                        color: kept ? AppColors.success : AppColors.amber,
+                      ),
                     ),
                   ),
-                  SizedBox(width: 10.w),
+                  10.horizontalSpace,
                   Expanded(
-                    child: Text(label,
-                        style: TextStyle(
-                            fontSize: 13.sp, color: scheme.onSurface)),
+                    child: Text(
+                      label,
+                      style: AppText.base(
+                        fontSize: 13.sp,
+                        color: scheme.onSurface,
+                      ),
+                    ),
                   ),
                 ],
               ),

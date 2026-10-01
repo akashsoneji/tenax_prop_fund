@@ -4,7 +4,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
 import 'package:file_picker/file_picker.dart';
-import 'package:google_fonts/google_fonts.dart';
 
 import '../../../shared/theme/app_colors.dart';
 import '../../../shared/theme/app_theme.dart';
@@ -15,6 +14,9 @@ import '../../../shared/widgets/data_state_builder.dart';
 import '../../../shared/widgets/pinned_gradient_app_bar.dart';
 import '../controllers/complete_payment_controller.dart';
 import '../models/order_models.dart';
+import '../../../shared/theme/app_spacing.dart';
+import '../../../shared/theme/app_text.dart';
+import '../../../shared/widgets/app_card.dart';
 
 /// Manual "Complete payment" screen. Mirrors the web checkout: an amount-due
 /// hero, the selected method's crypto/bank details and a proof-upload card.
@@ -65,13 +67,13 @@ class _PaymentBody extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
           _CheckoutHero(order: order),
-          SizedBox(height: 16.h),
+          Gap.vLg,
           if (review)
             const _UnderReviewCard()
           else ...[
             if (data.instructions != null) ...[
               _MethodCard(instructions: data.instructions!),
-              SizedBox(height: 16.h),
+              Gap.vLg,
             ],
             _UploadProofCard(controller: c),
           ],
@@ -114,7 +116,7 @@ class _CheckoutHero extends StatelessWidget {
               Expanded(
                 child: Text(
                   'payment.amount_due'.tr.toUpperCase(),
-                  style: GoogleFonts.beVietnamPro(
+                  style: AppText.base(
                     color: AppColors.white.withValues(alpha: 0.72),
                     fontSize: 11.sp,
                     fontWeight: FontWeight.w700,
@@ -125,7 +127,7 @@ class _CheckoutHero extends StatelessWidget {
               _StatusPill(status: order.status),
             ],
           ),
-          SizedBox(height: 8.h),
+          Gap.vSm,
           Row(
             crossAxisAlignment: CrossAxisAlignment.end,
             children: [
@@ -136,7 +138,7 @@ class _CheckoutHero extends StatelessWidget {
                   child: Text(
                     order.total,
                     maxLines: 1,
-                    style: GoogleFonts.beVietnamPro(
+                    style: AppText.base(
                       color: AppColors.white,
                       fontSize: 30.sp,
                       fontWeight: FontWeight.w800,
@@ -144,14 +146,14 @@ class _CheckoutHero extends StatelessWidget {
                   ),
                 ),
               ),
-              SizedBox(width: 12.w),
+              Gap.hMd,
               Flexible(
                 child: Text(
                   order.title,
                   textAlign: TextAlign.right,
                   maxLines: 2,
                   overflow: TextOverflow.ellipsis,
-                  style: GoogleFonts.beVietnamPro(
+                  style: AppText.base(
                     color: AppColors.white.withValues(alpha: 0.85),
                     fontSize: 13.sp,
                     fontWeight: FontWeight.w600,
@@ -161,10 +163,10 @@ class _CheckoutHero extends StatelessWidget {
             ],
           ),
           if (order.number.isNotEmpty) ...[
-            SizedBox(height: 10.h),
+            10.verticalSpace,
             Text(
               'payment.order'.trParams({'number': order.number}),
-              style: GoogleFonts.beVietnamPro(
+              style: AppText.base(
                 color: AppColors.white.withValues(alpha: 0.7),
                 fontSize: 12.sp,
               ),
@@ -202,9 +204,9 @@ class _MethodCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final scheme = Theme.of(context).colorScheme;
-    return Container(
+    return AppCard(
+      radius: 18.r,
       padding: EdgeInsets.all(18.w),
-      decoration: AppTheme.surfaceCard(scheme, radius: 18.r),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -213,20 +215,21 @@ class _MethodCard extends StatelessWidget {
               Expanded(
                 child: Text(
                   instructions.name,
-                  style: GoogleFonts.beVietnamPro(
+                  style: AppText.base(
                     fontSize: 16.sp,
                     fontWeight: FontWeight.w800,
                     color: scheme.onSurface,
                   ),
                 ),
               ),
-              if (instructions.type.isNotEmpty) _TypeBadge(type: instructions.type),
+              if (instructions.type.isNotEmpty)
+                _TypeBadge(type: instructions.type),
             ],
           ),
-          SizedBox(height: 14.h),
+          14.verticalSpace,
           for (final entry in instructions.fields.entries) ...[
             _DetailRow(label: entry.key, value: entry.value),
-            SizedBox(height: 12.h),
+            Gap.vMd,
           ],
           if (instructions.instructionsText.isNotEmpty)
             _InstructionsNote(text: instructions.instructionsText),
@@ -267,16 +270,16 @@ class _DetailRow extends StatelessWidget {
       children: [
         Text(
           _humanize(label),
-          style: GoogleFonts.beVietnamPro(
+          style: AppText.base(
             fontSize: 12.sp,
             fontWeight: FontWeight.w600,
             color: scheme.onSurface.withValues(alpha: 0.5),
           ),
         ),
-        SizedBox(height: 3.h),
+        3.verticalSpace,
         SelectableText(
           value,
-          style: GoogleFonts.beVietnamPro(
+          style: AppText.base(
             fontSize: 14.sp,
             fontWeight: FontWeight.w700,
             color: scheme.onSurface,
@@ -310,11 +313,11 @@ class _InstructionsNote extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Icon(Icons.info_outline_rounded, size: 16.w, color: scheme.primary),
-          SizedBox(width: 8.w),
+          Gap.hSm,
           Expanded(
             child: Text(
               text,
-              style: GoogleFonts.beVietnamPro(
+              style: AppText.base(
                 fontSize: 12.5.sp,
                 color: scheme.onSurface.withValues(alpha: 0.75),
                 height: 1.4,
@@ -338,86 +341,93 @@ class _UploadProofCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final scheme = Theme.of(context).colorScheme;
-    return Container(
+    return AppCard(
+      radius: 18.r,
       padding: EdgeInsets.all(18.w),
-      decoration: AppTheme.surfaceCard(scheme, radius: 18.r),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
           Text(
             'payment.upload_title'.tr,
-            style: GoogleFonts.beVietnamPro(
+            style: AppText.base(
               fontSize: 16.sp,
               fontWeight: FontWeight.w800,
               color: scheme.onSurface,
             ),
           ),
-          SizedBox(height: 14.h),
+          14.verticalSpace,
           Text(
             'payment.reference_label'.tr,
-            style: GoogleFonts.beVietnamPro(
+            style: AppText.base(
               fontSize: 13.sp,
               fontWeight: FontWeight.w600,
               color: scheme.onSurface.withValues(alpha: 0.7),
             ),
           ),
-          SizedBox(height: 8.h),
+          Gap.vSm,
           TextField(
             onChanged: (v) => controller.reference.value = v,
             textInputAction: TextInputAction.done,
-            style: GoogleFonts.beVietnamPro(fontSize: 14.sp),
+            style: AppText.base(fontSize: 14.sp),
             decoration: InputDecoration(
               hintText: 'payment.reference_hint'.tr,
               filled: true,
               fillColor: scheme.surface,
-              contentPadding:
-                  EdgeInsets.symmetric(horizontal: 14.w, vertical: 12.h),
+              contentPadding: EdgeInsets.symmetric(
+                horizontal: 14.w,
+                vertical: 12.h,
+              ),
               border: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(12.r),
                 borderSide: BorderSide(
-                    color: scheme.outline.withValues(alpha: 0.4)),
+                  color: scheme.outline.withValues(alpha: 0.4),
+                ),
               ),
               enabledBorder: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(12.r),
                 borderSide: BorderSide(
-                    color: scheme.outline.withValues(alpha: 0.4)),
+                  color: scheme.outline.withValues(alpha: 0.4),
+                ),
               ),
             ),
           ),
-          SizedBox(height: 16.h),
+          Gap.vLg,
           Text(
             'payment.proof_label'.tr,
-            style: GoogleFonts.beVietnamPro(
+            style: AppText.base(
               fontSize: 13.sp,
               fontWeight: FontWeight.w600,
               color: scheme.onSurface.withValues(alpha: 0.7),
             ),
           ),
-          SizedBox(height: 8.h),
-          Obx(() => _ProofPicker(
-                file: controller.proofFile.value,
-                onPick: () => _pickProof(controller),
-              )),
-          SizedBox(height: 8.h),
+          Gap.vSm,
+          Obx(
+            () => _ProofPicker(
+              file: controller.proofFile.value,
+              onPick: () => _pickProof(controller),
+            ),
+          ),
+          Gap.vSm,
           Text(
             'payment.proof_hint'.tr,
-            style: GoogleFonts.beVietnamPro(
+            style: AppText.base(
               fontSize: 11.5.sp,
               color: scheme.onSurface.withValues(alpha: 0.5),
             ),
           ),
-          SizedBox(height: 18.h),
-          Obx(() => AppGradientButton(
-                label: 'payment.submit'.tr,
-                loading: controller.submitting.value,
-                onPressed:
-                    controller.canSubmit ? controller.submitProof : null,
-              )),
-          SizedBox(height: 12.h),
+          18.verticalSpace,
+          Obx(
+            () => AppGradientButton(
+              label: 'payment.submit'.tr,
+              loading: controller.submitting.value,
+              onPressed: controller.canSubmit ? controller.submitProof : null,
+            ),
+          ),
+          Gap.vMd,
           Text(
             'payment.footer_note'.tr,
             textAlign: TextAlign.center,
-            style: GoogleFonts.beVietnamPro(
+            style: AppText.base(
               fontSize: 11.5.sp,
               color: scheme.onSurface.withValues(alpha: 0.5),
               height: 1.4,
@@ -475,8 +485,11 @@ class _ProofPicker extends StatelessWidget {
                         color: AppColors.black.withValues(alpha: 0.45),
                         shape: BoxShape.circle,
                       ),
-                      child: Icon(Icons.edit_rounded,
-                          size: 16.w, color: AppColors.white),
+                      child: Icon(
+                        Icons.edit_rounded,
+                        size: 16.w,
+                        color: AppColors.white,
+                      ),
                     ),
                   ),
                 ],
@@ -484,12 +497,15 @@ class _ProofPicker extends StatelessWidget {
             : Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  Icon(Icons.cloud_upload_outlined,
-                      size: 28.w, color: scheme.primary),
-                  SizedBox(height: 6.h),
+                  Icon(
+                    Icons.cloud_upload_outlined,
+                    size: 28.w,
+                    color: scheme.primary,
+                  ),
+                  6.verticalSpace,
                   Text(
                     'payment.choose_file'.tr,
-                    style: GoogleFonts.beVietnamPro(
+                    style: AppText.base(
                       fontSize: 13.sp,
                       fontWeight: FontWeight.w700,
                       color: scheme.primary,
@@ -512,9 +528,9 @@ class _UnderReviewCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final scheme = Theme.of(context).colorScheme;
-    return Container(
+    return AppCard(
+      radius: 18.r,
       padding: EdgeInsets.all(22.w),
-      decoration: AppTheme.surfaceCard(scheme, radius: 18.r),
       child: Column(
         children: [
           Container(
@@ -523,30 +539,33 @@ class _UnderReviewCard extends StatelessWidget {
               color: AppColors.success.withValues(alpha: 0.12),
               shape: BoxShape.circle,
             ),
-            child: Icon(Icons.check_rounded,
-                size: 34.w, color: AppColors.success),
+            child: Icon(
+              Icons.check_rounded,
+              size: 34.w,
+              color: AppColors.success,
+            ),
           ),
-          SizedBox(height: 16.h),
+          Gap.vLg,
           Text(
             'payment.review_title'.tr,
             textAlign: TextAlign.center,
-            style: GoogleFonts.beVietnamPro(
+            style: AppText.base(
               fontSize: 17.sp,
               fontWeight: FontWeight.w800,
               color: scheme.onSurface,
             ),
           ),
-          SizedBox(height: 8.h),
+          Gap.vSm,
           Text(
             'payment.review_message'.tr,
             textAlign: TextAlign.center,
-            style: GoogleFonts.beVietnamPro(
+            style: AppText.base(
               fontSize: 13.sp,
               color: scheme.onSurface.withValues(alpha: 0.65),
               height: 1.4,
             ),
           ),
-          SizedBox(height: 20.h),
+          20.verticalSpace,
           AppGradientButton(
             label: 'payment.done'.tr,
             onPressed: () => Get.back(),
@@ -567,19 +586,17 @@ class _PaymentSkeleton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     Widget box(double h) => Container(
-          height: h,
-          margin: EdgeInsets.only(bottom: 16.h),
-          decoration: BoxDecoration(
-            color: AppColors.white,
-            borderRadius: BorderRadius.circular(18.r),
-          ),
-        );
+      height: h,
+      margin: EdgeInsets.only(bottom: 16.h),
+      decoration: BoxDecoration(
+        color: AppColors.white,
+        borderRadius: BorderRadius.circular(18.r),
+      ),
+    );
     return Padding(
       padding: EdgeInsets.fromLTRB(16.w, 16.h, 16.w, 28.h),
       child: AppShimmer(
-        child: Column(
-          children: [box(120.h), box(180.h), box(260.h)],
-        ),
+        child: Column(children: [box(120.h), box(180.h), box(260.h)]),
       ),
     );
   }

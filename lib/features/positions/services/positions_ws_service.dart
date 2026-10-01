@@ -1,23 +1,20 @@
-import 'dart:async';
 import 'dart:convert';
-import 'dart:math';
 import 'dart:typed_data';
 
-import 'package:flutter/widgets.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:get/get.dart';
-import 'package:web_socket_channel/web_socket_channel.dart';
 
 import '../../../app/flavor/flavor_config.dart';
 import '../../../core/logger/app_logger.dart';
 import '../../../core/network/api_interceptor.dart';
 import '../../../core/websocket/message_pack_decoder.dart';
+import '../../../core/websocket/websocket_manager.dart';
+import '../../../core/websocket/ws_connection.dart';
 import '../models/positions_models.dart';
 
-/// Owns the TWO trade sockets for the whole app: `/op` (open positions) and
-/// `/po` (pending orders). Styled exactly like [MarketWatchV2Service] — a
-/// self-connecting [GetxService] with reconnect/backoff/heartbeat and
-/// MessagePack/JSON decode — but driving TWO channels.
+/// Speaks the TWO trade sockets: `/op` (open positions) and `/po` (pending
+/// orders). The sockets themselves are owned by [WebSocketManager]; this
+/// service only authenticates and decodes frames.
 ///
 /// Protocol is ported VERBATIM from the white_label app
 /// (`trading_websocket_service.dart`):
@@ -30,11 +27,12 @@ import '../models/positions_models.dart';
 ///
 /// Widgets never open a socket — the controller reads [openPositions] /
 /// [pendingOrders] (granular `Obx`) and [isConnected].
-class PositionsWsService extends GetxService with WidgetsBindingObserver {
-  PositionsWsService(this._config, this._storage);
+class PositionsWsService extends GetxService {
+  PositionsWsService(this._config, this._storage, this._sockets);
 
   final FlavorConfig _config;
   final FlutterSecureStorage _storage;
+  final WebSocketManager _sockets;
 
   /// Live open positions (patched whole on every `/op` frame).
   final RxList<TradingPosition> openPositions = <TradingPosition>[].obs;
@@ -42,33 +40,55 @@ class PositionsWsService extends GetxService with WidgetsBindingObserver {
   /// Live pending orders (patched whole on every `/po` frame).
   final RxList<PendingOrder> pendingOrders = <PendingOrder>[].obs;
 
+  /// True while at least one of the two sockets is live.
   final RxBool isConnected = false.obs;
 
   /// The trading account number currently authed on both sockets. `'0'` until
   /// the controller resolves the focused account and calls [switchAccount].
   String _account = '0';
 
-  final _Channel _op = _Channel('op');
-  final _Channel _po = _Channel('po');
+  late final WsConnection _op = _open(
+    'positions/op',
+    () => _config.openPositionsUrl,
+    _onOpFrame,
+  );
+  late final WsConnection _po = _open(
+    'positions/po',
+    () => _config.pendingOrdersUrl,
+    _onPoFrame,
+  );
 
-  /// Bumped by [resetForNewSession]. A connect that was already in flight when
-  /// the session changed reads the OLD token, so it checks this before adopting
-  /// its channel and aborts when it is stale.
-  int _session = 0;
+  late final Worker _opWorker = ever(
+    _op.isConnected,
+    (_) => _updateConnected(),
+  );
+  late final Worker _poWorker = ever(
+    _po.isConnected,
+    (_) => _updateConnected(),
+  );
+
+  WsConnection _open(
+    String name,
+    String Function() url,
+    void Function(dynamic decoded) onFrame,
+  ) {
+    return _sockets.open(
+      name: name,
+      url: url,
+      connectGate: () => _hasToken(name),
+      onOpen: _authenticate,
+      onMessage: (message) => _onMessage(message, onFrame),
+      heartbeat: () => const <String, dynamic>{},
+    );
+  }
 
   @override
   void onInit() {
     super.onInit();
-    WidgetsBinding.instance.addObserver(this);
-    _connectAll();
-  }
-
-  @override
-  void didChangeAppLifecycleState(AppLifecycleState state) {
-    if (state == AppLifecycleState.resumed) {
-      if (_op.channel == null) _connect(_op, _config.openPositionsUrl, _onOpFrame);
-      if (_po.channel == null) _connect(_po, _config.pendingOrdersUrl, _onPoFrame);
-    }
+    _opWorker;
+    _poWorker;
+    _op.connect();
+    _po.connect();
   }
 
   /// Re-auth both sockets for [account] (called on account switch / first
@@ -81,8 +101,8 @@ class PositionsWsService extends GetxService with WidgetsBindingObserver {
     // Full restart for the new account (mirrors the dashboard set-primary
     // flow): tear both sockets down and open fresh connections, rather than
     // re-authing on the stale ones.
-    _restart(_op, _config.openPositionsUrl, _onOpFrame);
-    _restart(_po, _config.pendingOrdersUrl, _onPoFrame);
+    _op.restart();
+    _po.restart();
   }
 
   /// Forgets the bound trading account and both live lists, then restarts the
@@ -90,82 +110,28 @@ class PositionsWsService extends GetxService with WidgetsBindingObserver {
   /// → connect is skipped and the sockets stay down) and again after login, so
   /// the next user never inherits the previous user's trades.
   void resetForNewSession() {
-    _session++;
     _account = '0';
     openPositions.clear();
     pendingOrders.clear();
-    _restart(_op, _config.openPositionsUrl, _onOpFrame);
-    _restart(_po, _config.pendingOrdersUrl, _onPoFrame);
+    _op.restart();
+    _po.restart();
   }
-
-  /// Disconnects [ch] and immediately reconnects it with a reset backoff.
-  void _restart(
-    _Channel ch,
-    String url,
-    void Function(dynamic decoded) onFrame,
-  ) {
-    ch.disconnect();
-    ch.connecting = false;
-    ch.reconnectAttempts = 0;
-    _updateConnected();
-    _connect(ch, url, onFrame);
-  }
-
 
   Future<String?> _authToken() => _storage.read(key: ApiInterceptor.tokenKey);
 
-  void _connectAll() {
-    _connect(_op, _config.openPositionsUrl, _onOpFrame);
-    _connect(_po, _config.pendingOrdersUrl, _onPoFrame);
+  Future<bool> _hasToken(String name) async {
+    final token = await _authToken();
+    if (token != null && token.isNotEmpty) return true;
+    log.w('$name: no auth token, skipping connect');
+    return false;
   }
 
-  Future<void> _connect(
-    _Channel ch,
-    String url,
-    void Function(dynamic decoded) onFrame,
-  ) async {
-    if (ch.connecting || ch.channel != null) return;
-    final session = _session;
-    final attempt = ++ch.attempt;
-    // A restart / session change while this attempt awaited makes it stale: it
-    // must not touch the channel state now owned by the newer attempt.
-    bool isStale() => attempt != ch.attempt || session != _session;
-    ch.connecting = true;
-    ch.manuallyClosed = false;
-    try {
-      final token = await _authToken();
-      if (token == null || token.isEmpty) {
-        log.w('positions/${ch.name}: no auth token, skipping connect');
-        return;
-      }
-      if (isStale()) return;
-      final channel = WebSocketChannel.connect(Uri.parse(url));
-      await channel.ready;
-      // The session changed (or the channel was restarted) while the handshake
-      // was in flight — this socket is stale, so drop it.
-      if (isStale()) {
-        await channel.sink.close();
-        return;
-      }
-      ch.channel = channel;
-      ch.reconnectAttempts = 0;
-      _updateConnected();
-
-      ch.sub = channel.stream.listen(
-        (message) => _onMessage(message, onFrame),
-        onError: (Object e) => _onDisconnected(ch, url, onFrame, e),
-        onDone: () => _onDisconnected(ch, url, onFrame, 'closed'),
-        cancelOnError: true,
-      );
-
-      // Auth frame first — same shape as white_label (self-hosted form).
-      ch.send({'authID': token, 'trading_account': _account});
-      ch.startHeartbeat();
-    } catch (e) {
-      if (attempt == ch.attempt) _onDisconnected(ch, url, onFrame, e);
-    } finally {
-      if (attempt == ch.attempt) ch.connecting = false;
-    }
+  /// Auth frame first — same shape as white_label (self-hosted form).
+  Future<bool> _authenticate(WsConnection socket) async {
+    final token = await _authToken();
+    if (token == null || token.isEmpty) return false;
+    socket.send({'authID': token, 'trading_account': _account});
+    return true;
   }
 
   void _onMessage(dynamic message, void Function(dynamic decoded) onFrame) {
@@ -248,8 +214,9 @@ class PositionsWsService extends GetxService with WidgetsBindingObserver {
     }
     final position = _positionFromOpArray(row);
     if (position == null) return;
-    final idx =
-        openPositions.indexWhere((p) => p.position == position.position);
+    final idx = openPositions.indexWhere(
+      (p) => p.position == position.position,
+    );
     if (idx >= 0) {
       openPositions[idx] = position;
     } else {
@@ -292,8 +259,10 @@ class PositionsWsService extends GetxService with WidgetsBindingObserver {
       priceCurrent: f.length > 6 ? f[6].toString() : '0',
       closeTime: '',
       timeCreate: timeCreate > 0
-          ? DateTime.fromMillisecondsSinceEpoch(timeCreate * 1000, isUtc: true)
-              .toIso8601String()
+          ? DateTime.fromMillisecondsSinceEpoch(
+              timeCreate * 1000,
+              isUtc: true,
+            ).toIso8601String()
           : '',
       symbol: f.length > 2 ? f[2].toString() : '',
       logo: '',
@@ -385,8 +354,10 @@ class PositionsWsService extends GetxService with WidgetsBindingObserver {
       priceSL: toD(7),
       priceTP: toD(8),
       timeCreate: timeCreate > 0
-          ? DateTime.fromMillisecondsSinceEpoch(timeCreate * 1000, isUtc: true)
-              .toIso8601String()
+          ? DateTime.fromMillisecondsSinceEpoch(
+              timeCreate * 1000,
+              isUtc: true,
+            ).toIso8601String()
           : '',
       state: f.length > 11 ? f[11].toString() : '',
       logo: '',
@@ -419,90 +390,16 @@ class PositionsWsService extends GetxService with WidgetsBindingObserver {
     pendingOrders.removeWhere((o) => o.order.toString() == orderId);
   }
 
-  void _onDisconnected(
-    _Channel ch,
-    String url,
-    void Function(dynamic decoded) onFrame,
-    Object reason,
-  ) {
-    ch.sub?.cancel();
-    ch.sub = null;
-    ch.channel = null;
-    ch.stopHeartbeat();
-    _updateConnected();
-    if (ch.manuallyClosed) return;
-    log.w('positions/${ch.name} disconnected: $reason — reconnecting');
-    ch.reconnectAttempts++;
-    final exponent = ch.reconnectAttempts.clamp(1, 5);
-    final base = (1 << exponent).clamp(1, 30);
-    final jitterMs = Random().nextInt(1000);
-    ch.reconnectTimer?.cancel();
-    ch.reconnectTimer = Timer(
-      Duration(seconds: base, milliseconds: jitterMs),
-      () => _connect(ch, url, onFrame),
-    );
-  }
-
   void _updateConnected() {
-    isConnected.value = _op.channel != null || _po.channel != null;
+    isConnected.value = _op.isConnected.value || _po.isConnected.value;
   }
 
   @override
   void onClose() {
-    WidgetsBinding.instance.removeObserver(this);
-    _op.disconnect();
-    _po.disconnect();
+    _opWorker.dispose();
+    _poWorker.dispose();
+    _sockets.release(_op.name);
+    _sockets.release(_po.name);
     super.onClose();
-  }
-}
-
-/// Per-socket connection state so [PositionsWsService] can drive `/op` and `/po`
-/// independently with identical reconnect/heartbeat logic.
-class _Channel {
-  _Channel(this.name);
-
-  final String name;
-  WebSocketChannel? channel;
-  StreamSubscription<dynamic>? sub;
-  Timer? reconnectTimer;
-  Timer? heartbeatTimer;
-  int reconnectAttempts = 0;
-  bool connecting = false;
-  bool manuallyClosed = false;
-
-  /// Bumped on every connect and disconnect; an in-flight connect whose value
-  /// no longer matches is stale and must leave the channel state alone.
-  int attempt = 0;
-
-  void send(Map<String, dynamic> payload) {
-    channel?.sink.add(jsonEncode(payload));
-  }
-
-  void startHeartbeat() {
-    heartbeatTimer?.cancel();
-    heartbeatTimer = Timer.periodic(const Duration(seconds: 20), (_) {
-      if (channel != null) send(const {});
-    });
-  }
-
-  void stopHeartbeat() {
-    heartbeatTimer?.cancel();
-    heartbeatTimer = null;
-  }
-
-  void disconnect() {
-    manuallyClosed = true;
-    attempt++;
-    connecting = false;
-    reconnectTimer?.cancel();
-    stopHeartbeat();
-    sub?.cancel();
-    sub = null;
-    try {
-      channel?.sink.close();
-    } catch (e) {
-      log.w('positions/$name sink close failed: $e');
-    }
-    channel = null;
   }
 }

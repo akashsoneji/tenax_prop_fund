@@ -48,21 +48,6 @@ android {
             // Base flavor keeps the root application id.
             resValue("string", "app_name", "Tenax Prop")
         }
-        create("client_a") {
-            dimension = "client"
-            applicationIdSuffix = ".clienta"
-            resValue("string", "app_name", "Client A")
-        }
-        create("client_b") {
-            dimension = "client"
-            applicationIdSuffix = ".clientb"
-            resValue("string", "app_name", "Client B")
-        }
-        create("client_c") {
-            dimension = "client"
-            applicationIdSuffix = ".clientc"
-            resValue("string", "app_name", "Client C")
-        }
         create("pipze_funded") {
             dimension = "client"
             applicationIdSuffix = ".pipzefunded"

@@ -1,13 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
-import 'package:google_fonts/google_fonts.dart';
 
 import '../../../shared/widgets/data_state_builder.dart';
 import '../../../shared/widgets/skeletons/skeletons.dart';
 import '../controllers/payout_history_controller.dart';
 import '../models/reward_models.dart';
 import 'payout_history_card.dart';
+import '../../../shared/theme/app_spacing.dart';
+import '../../../shared/theme/app_text.dart';
 
 /// Rewards → "Payout history" tab body: status filter chips, a total count,
 /// one card per payout request and a footer that shows a loader while the
@@ -24,7 +25,7 @@ class PayoutHistoryTab extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
           _FilterChips(controller: c),
-          SizedBox(height: 14.h),
+          14.verticalSpace,
           Obx(
             () => DataStateBuilder<List<PayoutHistoryItem>>(
               state: c.state,
@@ -75,7 +76,7 @@ class PayoutHistoryTab extends StatelessWidget {
             onPressed: () => Navigator.of(dialogContext).pop(true),
             child: Text(
               'rewards.history_cancel'.tr,
-              style: TextStyle(
+              style: AppText.base(
                 color: scheme.error,
                 fontWeight: FontWeight.w700,
               ),
@@ -104,7 +105,7 @@ class _FilterChips extends StatelessWidget {
           scrollDirection: Axis.horizontal,
           physics: const BouncingScrollPhysics(),
           itemCount: payoutHistoryFilters.length,
-          separatorBuilder: (_, _) => SizedBox(width: 8.w),
+          separatorBuilder: (_, _) => Gap.hSm,
           itemBuilder: (context, i) {
             final value = payoutHistoryFilters[i];
             final isSelected = value == selected;
@@ -128,7 +129,7 @@ class _FilterChips extends StatelessWidget {
                 ),
                 child: Text(
                   'rewards.payout_filter_$value'.tr,
-                  style: GoogleFonts.beVietnamPro(
+                  style: AppText.base(
                     fontSize: 12.5.sp,
                     fontWeight: FontWeight.w700,
                     color: isSelected
@@ -156,7 +157,7 @@ class _CountLabel extends StatelessWidget {
       padding: EdgeInsets.only(left: 2.w, bottom: 10.h),
       child: Text(
         'rewards.payout_history_count'.trParams({'count': '$total'}),
-        style: GoogleFonts.beVietnamPro(
+        style: AppText.base(
           fontSize: 13.sp,
           fontWeight: FontWeight.w700,
           color: scheme.onSurfaceVariant,
@@ -185,7 +186,7 @@ class _Footer extends StatelessWidget {
       } else if (!controller.hasMore) {
         child = Text(
           'referral.history_end'.tr,
-          style: GoogleFonts.beVietnamPro(
+          style: AppText.base(
             fontSize: 12.sp,
             fontWeight: FontWeight.w500,
             color: scheme.onSurfaceVariant,

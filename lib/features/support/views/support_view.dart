@@ -15,6 +15,7 @@ import '../widgets/open_ticket_sheet.dart';
 import '../widgets/support_empty_state.dart';
 import '../widgets/support_ticket_row.dart';
 import '../widgets/ticket_detail_sheet.dart';
+import '../../../shared/widgets/app_card.dart';
 
 /// Full Support screen: the user's ticket list, with a "+" app-bar action that
 /// launches the "Open a ticket" bottom sheet. Shows an empty state when the
@@ -39,8 +40,11 @@ class SupportView extends StatelessWidget {
               IconButton(
                 onPressed: () => _openSheet(context),
                 tooltip: 'support.open_ticket'.tr,
-                icon: Icon(Icons.add_rounded,
-                    color: AppColors.white, size: 26.w),
+                icon: Icon(
+                  Icons.add_rounded,
+                  color: AppColors.white,
+                  size: 26.w,
+                ),
               ),
             ],
           ),
@@ -56,7 +60,7 @@ class SupportView extends StatelessWidget {
                     crossAxisAlignment: CrossAxisAlignment.stretch,
                     children: [
                       _SectionTitle('support.your_tickets'.tr),
-                      SizedBox(height: 10.h),
+                      10.verticalSpace,
                       _Enter(
                         child: data.tickets.isEmpty
                             ? SupportEmptyState(
@@ -91,10 +95,9 @@ class _TicketsCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final scheme = Theme.of(context).colorScheme;
-    return Container(
+    return AppCard(
+      radius: 18.r,
       padding: EdgeInsets.symmetric(horizontal: 16.w),
-      decoration: AppTheme.surfaceCard(scheme, radius: 18.r),
       child: Column(
         children: [
           for (var i = 0; i < tickets.length; i++)
@@ -124,7 +127,7 @@ class _SupportSkeleton extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
         ShimmerBox(width: 140.w, height: 16.h),
-        SizedBox(height: 10.h),
+        10.verticalSpace,
         CardSkeleton(lines: 3, height: 140.h),
       ],
     );

@@ -7,6 +7,9 @@ import '../../../shared/theme/app_theme.dart';
 import '../../../shared/widgets/app_pill.dart';
 import '../../../shared/widgets/app_stat_tile.dart';
 import '../models/account_models.dart';
+import '../../../shared/theme/app_spacing.dart';
+import '../../../shared/theme/app_text.dart';
+import '../../../shared/widgets/app_card.dart';
 
 /// Modern gradient summary hero for the Account overview tab. Leads with the
 /// login + status pill, the plan label, a large Balance figure, and an Equity /
@@ -61,7 +64,7 @@ class AccountSummaryHero extends StatelessWidget {
                   '${'account.login'.tr} ${header.login}',
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
-                  style: TextStyle(
+                  style: AppText.base(
                     fontSize: 12.sp,
                     fontWeight: FontWeight.w700,
                     letterSpacing: 0.3,
@@ -72,24 +75,24 @@ class AccountSummaryHero extends StatelessWidget {
               _HeroStatusPill(label: header.statusLabel, tone: header.tone),
             ],
           ),
-          SizedBox(height: 12.h),
+          Gap.vMd,
           Text(
             'account.balance'.tr,
-            style: TextStyle(
+            style: AppText.base(
               fontSize: 10.5.sp,
               fontWeight: FontWeight.w700,
               letterSpacing: 0.8,
               color: AppColors.white.withValues(alpha: 0.72),
             ),
           ),
-          SizedBox(height: 4.h),
+          Gap.vXs,
           FittedBox(
             fit: BoxFit.scaleDown,
             alignment: Alignment.centerLeft,
             child: Text(
               balance?.value.isNotEmpty == true ? balance!.value : '—',
               maxLines: 1,
-              style: TextStyle(
+              style: AppText.base(
                 fontSize: 23.sp,
                 fontWeight: FontWeight.w800,
                 color: AppColors.white,
@@ -98,19 +101,19 @@ class AccountSummaryHero extends StatelessWidget {
             ),
           ),
           if (header.planLabel.isNotEmpty) ...[
-            SizedBox(height: 6.h),
+            6.verticalSpace,
             Text(
               header.planLabel,
               maxLines: 1,
               overflow: TextOverflow.ellipsis,
-              style: TextStyle(
+              style: AppText.base(
                 fontSize: 12.5.sp,
                 fontWeight: FontWeight.w600,
                 color: AppColors.white.withValues(alpha: 0.80),
               ),
             ),
           ],
-          SizedBox(height: 14.h),
+          14.verticalSpace,
           Row(
             children: [
               Expanded(
@@ -120,7 +123,7 @@ class AccountSummaryHero extends StatelessWidget {
                   tone: pnl?.tone ?? AccountTone.neutral,
                 ),
               ),
-              SizedBox(width: 10.w),
+              10.horizontalSpace,
               Expanded(
                 child: _HeroMiniStat(
                   label: 'account.floating_pl'.tr,
@@ -247,16 +250,20 @@ class AccountHeaderCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final scheme = Theme.of(context).colorScheme;
-    return Container(
+    return AppCard(
+      radius: 18,
       padding: EdgeInsets.all(16.w),
-      decoration: AppTheme.surfaceCard(scheme, radius: 18),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          _SectionHead(icon: Icons.person_outline_rounded, text: 'account.plan_facts'.tr),
-          SizedBox(height: 12.h),
-          _Fact(text: '${'account.initial_balance'.tr}: ${header.initialBalance}'),
+          _SectionHead(
+            icon: Icons.person_outline_rounded,
+            text: 'account.plan_facts'.tr,
+          ),
+          Gap.vMd,
+          _Fact(
+            text: '${'account.initial_balance'.tr}: ${header.initialBalance}',
+          ),
           _Fact(text: '${'account.leverage'.tr}: ${header.leverageLabel}'),
           _Fact(text: '${'account.plan'.tr}: ${header.planLabel}'),
           if (header.drawdownType.isNotEmpty)
@@ -264,33 +271,39 @@ class AccountHeaderCard extends StatelessWidget {
           if (header.accountType.isNotEmpty)
             _Fact(text: '${'account.account_type'.tr}: ${header.accountType}'),
           Divider(height: 28.h),
-          _SectionHead(icon: Icons.shield_outlined, text: 'account.account_details'.tr),
-          SizedBox(height: 12.h),
+          _SectionHead(
+            icon: Icons.shield_outlined,
+            text: 'account.account_details'.tr,
+          ),
+          Gap.vMd,
           _CredRow(
             label: 'account.login'.tr,
             value: credentials.login,
             trailingLabel: 'account.copy'.tr,
             onTrailing: onCopyLogin,
           ),
-          SizedBox(height: 10.h),
+          10.verticalSpace,
           _CredRow(
             label: 'account.master_password'.tr,
             value: revealed ? credentials.password : '••••••••••',
             trailingLabel: revealed ? 'account.hide'.tr : 'account.reveal'.tr,
             onTrailing: onReveal,
           ),
-          SizedBox(height: 10.h),
+          10.verticalSpace,
           _CredRow(
             label: 'account.investor_password'.tr,
             value: revealed ? credentials.investorPassword : '••••••••••',
             trailingLabel: revealed ? 'account.hide'.tr : 'account.reveal'.tr,
             onTrailing: onReveal,
           ),
-          SizedBox(height: 10.h),
+          10.verticalSpace,
           _CredRow(label: 'account.server'.tr, value: credentials.server),
           Divider(height: 28.h),
-          _SectionHead(icon: Icons.schedule_rounded, text: 'account.cycle_details'.tr),
-          SizedBox(height: 12.h),
+          _SectionHead(
+            icon: Icons.schedule_rounded,
+            text: 'account.cycle_details'.tr,
+          ),
+          Gap.vMd,
           _Kv(k: 'account.phase_started'.tr, v: cycle.phaseStarted),
           _Kv(k: 'account.days_elapsed'.tr, v: '${cycle.daysElapsed}'),
           _Kv(k: 'account.time_limit'.tr, v: cycle.timeLimit),
@@ -312,13 +325,14 @@ class _SectionHead extends StatelessWidget {
     return Row(
       children: [
         Icon(icon, size: 18.w, color: scheme.primary),
-        SizedBox(width: 8.w),
+        Gap.hSm,
         Text(
           text,
-          style: TextStyle(
-              fontSize: 15.sp,
-              fontWeight: FontWeight.w800,
-              color: scheme.onSurface),
+          style: AppText.base(
+            fontSize: 15.sp,
+            fontWeight: FontWeight.w800,
+            color: scheme.onSurface,
+          ),
         ),
       ],
     );
@@ -337,16 +351,20 @@ class _Fact extends StatelessWidget {
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Icon(Icons.check_circle_rounded,
-              size: 17.w, color: AppColors.success),
-          SizedBox(width: 8.w),
+          Icon(
+            Icons.check_circle_rounded,
+            size: 17.w,
+            color: AppColors.success,
+          ),
+          Gap.hSm,
           Expanded(
             child: Text(
               text,
-              style: TextStyle(
-                  fontSize: 13.5.sp,
-                  fontWeight: FontWeight.w600,
-                  color: scheme.onSurface),
+              style: AppText.base(
+                fontSize: 13.5.sp,
+                fontWeight: FontWeight.w600,
+                color: scheme.onSurface,
+              ),
             ),
           ),
         ],
@@ -384,17 +402,23 @@ class _CredRow extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(label,
-                    style: TextStyle(
-                        fontSize: 11.5.sp,
-                        fontWeight: FontWeight.w600,
-                        color: scheme.onSurfaceVariant)),
-                SizedBox(height: 3.h),
-                Text(value,
-                    style: TextStyle(
-                        fontSize: 14.5.sp,
-                        fontWeight: FontWeight.w700,
-                        color: scheme.onSurface)),
+                Text(
+                  label,
+                  style: AppText.base(
+                    fontSize: 11.5.sp,
+                    fontWeight: FontWeight.w600,
+                    color: scheme.onSurfaceVariant,
+                  ),
+                ),
+                3.verticalSpace,
+                Text(
+                  value,
+                  style: AppText.base(
+                    fontSize: 14.5.sp,
+                    fontWeight: FontWeight.w700,
+                    color: scheme.onSurface,
+                  ),
+                ),
               ],
             ),
           ),
@@ -404,10 +428,11 @@ class _CredRow extends StatelessWidget {
               behavior: HitTestBehavior.opaque,
               child: Text(
                 trailingLabel!,
-                style: TextStyle(
-                    fontSize: 12.5.sp,
-                    fontWeight: FontWeight.w700,
-                    color: scheme.primary),
+                style: AppText.base(
+                  fontSize: 12.5.sp,
+                  fontWeight: FontWeight.w700,
+                  color: scheme.primary,
+                ),
               ),
             ),
         ],
@@ -429,21 +454,27 @@ class _Kv extends StatelessWidget {
       child: Row(
         children: [
           Expanded(
-            child: Text(k,
-                style: TextStyle(
-                    fontSize: 13.sp, color: scheme.onSurfaceVariant)),
+            child: Text(
+              k,
+              style: AppText.base(
+                fontSize: 13.sp,
+                color: scheme.onSurfaceVariant,
+              ),
+            ),
           ),
-          Text(v,
-              style: TextStyle(
-                  fontSize: 13.5.sp,
-                  fontWeight: FontWeight.w700,
-                  color: scheme.onSurface)),
+          Text(
+            v,
+            style: AppText.base(
+              fontSize: 13.5.sp,
+              fontWeight: FontWeight.w700,
+              color: scheme.onSurface,
+            ),
+          ),
         ],
       ),
     );
   }
 }
-
 
 /// One objective card
 class AccountObjectiveCard extends StatelessWidget {
@@ -474,41 +505,44 @@ class AccountObjectiveCard extends StatelessWidget {
                 size: 18.w,
                 color: passed ? AppColors.success : scheme.primary,
               ),
-              SizedBox(width: 8.w),
+              Gap.hSm,
               Expanded(
                 child: Text(
                   objective.label,
-                  style: TextStyle(
-                      fontSize: 13.5.sp,
-                      fontWeight: FontWeight.w700,
-                      color: scheme.onSurface),
+                  style: AppText.base(
+                    fontSize: 13.5.sp,
+                    fontWeight: FontWeight.w700,
+                    color: scheme.onSurface,
+                  ),
                 ),
               ),
               Container(
-                padding:
-                    EdgeInsets.symmetric(horizontal: 8.w, vertical: 3.h),
+                padding: EdgeInsets.symmetric(horizontal: 8.w, vertical: 3.h),
                 decoration: BoxDecoration(
                   color: statusColor.withValues(alpha: 0.14),
                   borderRadius: BorderRadius.circular(20.r),
                 ),
                 child: Text(
                   objective.status,
-                  style: TextStyle(
-                      fontSize: 11.sp,
-                      fontWeight: FontWeight.w700,
-                      color: statusColor),
+                  style: AppText.base(
+                    fontSize: 11.sp,
+                    fontWeight: FontWeight.w700,
+                    color: statusColor,
+                  ),
                 ),
               ),
             ],
           ),
-          SizedBox(height: 10.h),
+          10.verticalSpace,
           for (final line in objective.lines)
             Padding(
               padding: EdgeInsets.only(bottom: 4.h),
               child: Text(
                 line,
-                style: TextStyle(
-                    fontSize: 12.5.sp, color: scheme.onSurfaceVariant),
+                style: AppText.base(
+                  fontSize: 12.5.sp,
+                  color: scheme.onSurfaceVariant,
+                ),
               ),
             ),
         ],
@@ -533,21 +567,24 @@ class AccountHealthCard extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text('account.account_health'.tr,
-              style: TextStyle(
-                  fontSize: 15.sp,
-                  fontWeight: FontWeight.w800,
-                  color: AppColors.white)),
-          SizedBox(height: 4.h),
-          Text('account.account_health_sub'.tr,
-              style: TextStyle(
-                  fontSize: 12.sp,
-                  color: AppColors.white.withValues(alpha: 0.6))),
-          SizedBox(height: 14.h),
-          for (final h in health) ...[
-            _HealthRow(health: h),
-            SizedBox(height: 10.h),
-          ],
+          Text(
+            'account.account_health'.tr,
+            style: AppText.base(
+              fontSize: 15.sp,
+              fontWeight: FontWeight.w800,
+              color: AppColors.white,
+            ),
+          ),
+          Gap.vXs,
+          Text(
+            'account.account_health_sub'.tr,
+            style: AppText.base(
+              fontSize: 12.sp,
+              color: AppColors.white.withValues(alpha: 0.6),
+            ),
+          ),
+          14.verticalSpace,
+          for (final h in health) ...[_HealthRow(health: h), 10.verticalSpace],
         ],
       ),
     );
@@ -574,24 +611,33 @@ class _HealthRow extends StatelessWidget {
           Row(
             children: [
               Expanded(
-                child: Text(health.name,
-                    style: TextStyle(
-                        fontSize: 13.5.sp,
-                        fontWeight: FontWeight.w700,
-                        color: AppColors.white)),
+                child: Text(
+                  health.name,
+                  style: AppText.base(
+                    fontSize: 13.5.sp,
+                    fontWeight: FontWeight.w700,
+                    color: AppColors.white,
+                  ),
+                ),
               ),
-              Text(health.status,
-                  style: TextStyle(
-                      fontSize: 12.sp,
-                      fontWeight: FontWeight.w700,
-                      color: color)),
+              Text(
+                health.status,
+                style: AppText.base(
+                  fontSize: 12.sp,
+                  fontWeight: FontWeight.w700,
+                  color: color,
+                ),
+              ),
             ],
           ),
-          SizedBox(height: 4.h),
-          Text(health.note,
-              style: TextStyle(
-                  fontSize: 12.sp,
-                  color: AppColors.white.withValues(alpha: 0.7))),
+          Gap.vXs,
+          Text(
+            health.note,
+            style: AppText.base(
+              fontSize: 12.sp,
+              color: AppColors.white.withValues(alpha: 0.7),
+            ),
+          ),
         ],
       ),
     );

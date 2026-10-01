@@ -13,6 +13,7 @@ import '../../widgets/home_header.dart';
 import '../../widgets/home_live_accounts.dart';
 import '../../widgets/home_quick_actions.dart';
 import '../../widgets/home_sections.dart';
+import '../../../../shared/theme/app_spacing.dart';
 
 /// The Home (Portfolio) tab, driven entirely by `HomeController` (GetX). Below
 /// the brand header: the account card (Floating P/L), an overview panel,
@@ -50,7 +51,8 @@ class HomeTabView extends GetView<HomeController> {
                     color: scheme.primary,
                     child: ListView(
                       physics: const AlwaysScrollableScrollPhysics(
-                          parent: BouncingScrollPhysics()),
+                        parent: BouncingScrollPhysics(),
+                      ),
                       padding: EdgeInsets.fromLTRB(14.w, 6.h, 14.w, 28.h),
                       children: _sections(data),
                     ),
@@ -65,14 +67,18 @@ class HomeTabView extends GetView<HomeController> {
   }
 
   List<Widget> _sections(DashboardData data) {
-    final sectionGap = SizedBox(height: 22.h);
-    final labelGap = SizedBox(height: 10.h);
+    final sectionGap = 22.verticalSpace;
+    final labelGap = 10.verticalSpace;
     final blocks = <Widget>[HomeBento(data: data)];
 
     blocks
       ..add(sectionGap)
-      ..add(HomeSectionLabel('home.quick_actions'.tr,
-          actionLabel: 'home.recommended'.tr))
+      ..add(
+        HomeSectionLabel(
+          'home.quick_actions'.tr,
+          actionLabel: 'home.recommended'.tr,
+        ),
+      )
       ..add(labelGap)
       ..add(const HomeQuickActions());
 
@@ -87,8 +93,12 @@ class HomeTabView extends GetView<HomeController> {
     if (data.health.isNotEmpty) {
       blocks
         ..add(sectionGap)
-        ..add(HomeSectionLabel('home.account_health'.tr,
-            actionLabel: data.healthBadge.isEmpty ? null : data.healthBadge))
+        ..add(
+          HomeSectionLabel(
+            'home.account_health'.tr,
+            actionLabel: data.healthBadge.isEmpty ? null : data.healthBadge,
+          ),
+        )
         ..add(labelGap)
         ..add(HomeRiskOverview(items: data.health));
     }
@@ -104,9 +114,13 @@ class HomeTabView extends GetView<HomeController> {
     if (data.activity.isNotEmpty) {
       blocks
         ..add(sectionGap)
-        ..add(HomeSectionLabel('home.recent_activity'.tr,
+        ..add(
+          HomeSectionLabel(
+            'home.recent_activity'.tr,
             actionLabel: 'home.view_all'.tr,
-            onAction: () => Get.toNamed(AppRoutes.notifications)))
+            onAction: () => Get.toNamed(AppRoutes.notifications),
+          ),
+        )
         ..add(labelGap)
         ..add(HomeActivityList(items: data.activity));
     }
@@ -134,11 +148,11 @@ class _HomeSkeleton extends StatelessWidget {
       padding: EdgeInsets.fromLTRB(14.w, 8.h, 14.w, 24.h),
       children: [
         HeroSkeleton(height: 84.h),
-        SizedBox(height: 16.h),
+        Gap.vLg,
         const StatGridSkeleton(tiles: 4),
-        SizedBox(height: 22.h),
+        22.verticalSpace,
         ShimmerBox(width: 130.w, height: 16.h),
-        SizedBox(height: 12.h),
+        Gap.vMd,
         Row(
           mainAxisAlignment: MainAxisAlignment.spaceAround,
           children: [
@@ -146,19 +160,23 @@ class _HomeSkeleton extends StatelessWidget {
               ShimmerBox(width: 50.w, height: 50.w, radius: 25.r),
           ],
         ),
-        SizedBox(height: 22.h),
+        22.verticalSpace,
         ShimmerBox(width: 130.w, height: 16.h),
-        SizedBox(height: 10.h),
+        10.verticalSpace,
         Row(
           children: [
-            Expanded(child: ShimmerBox(height: 112.h, radius: 18.r)),
-            SizedBox(width: 10.w),
-            Expanded(child: ShimmerBox(height: 112.h, radius: 18.r)),
+            Expanded(
+              child: ShimmerBox(height: 112.h, radius: 18.r),
+            ),
+            10.horizontalSpace,
+            Expanded(
+              child: ShimmerBox(height: 112.h, radius: 18.r),
+            ),
           ],
         ),
-        SizedBox(height: 22.h),
+        22.verticalSpace,
         CardSkeleton(lines: 3, height: 150.h),
-        SizedBox(height: 16.h),
+        Gap.vLg,
         CardSkeleton(lines: 3, height: 150.h),
       ],
     );

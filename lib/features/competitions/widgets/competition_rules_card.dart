@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 
 import '../../../shared/theme/app_text.dart';
+import '../../../shared/theme/app_spacing.dart';
 
 /// Competition rules card — a simple bulleted list of the API's `rules[]`
 /// strings.
@@ -24,7 +25,7 @@ class CompetitionRulesCard extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           for (var i = 0; i < rules.length; i++) ...[
-            if (i != 0) SizedBox(height: 12.h),
+            if (i != 0) Gap.vMd,
             Row(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
@@ -39,7 +40,7 @@ class CompetitionRulesCard extends StatelessWidget {
                     ),
                   ),
                 ),
-                SizedBox(width: 10.w),
+                10.horizontalSpace,
                 Expanded(
                   child: Text(
                     rules[i],

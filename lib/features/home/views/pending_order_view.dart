@@ -12,6 +12,7 @@ import '../../positions/controllers/positions_controller.dart';
 import '../../positions/models/positions_models.dart';
 import '../../symbols/services/market_watch_v2_service.dart';
 import '../widgets/pending_order_widgets.dart';
+import '../../../shared/theme/app_spacing.dart';
 
 /// Full-screen pending order editor, opened from the floating trade ticket's
 /// pending-order action. Lots / trigger price / TP / SL are assembled here and
@@ -157,7 +158,6 @@ class _PendingOrderViewState extends State<PendingOrderView> {
     });
   }
 
-
   void _setVolume(double value) {
     final clamped = value.clamp(_minLot, _maxLot);
     setState(() {
@@ -262,7 +262,7 @@ class _PendingOrderViewState extends State<PendingOrderView> {
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
               _chartSection(scheme),
-              SizedBox(height: 10.h),
+              10.verticalSpace,
               _ticketPanel(scheme),
             ],
           ),
@@ -287,7 +287,7 @@ class _PendingOrderViewState extends State<PendingOrderView> {
           overflow: TextOverflow.ellipsis,
           style: textTheme.titleLarge?.copyWith(fontWeight: FontWeight.w700),
         ),
-        SizedBox(height: 2.h),
+        Gap.vXxs,
         Text(
           '$_orderTypeLabel ${widget.symbol}',
           maxLines: 1,
@@ -371,76 +371,70 @@ class _PendingOrderViewState extends State<PendingOrderView> {
       child: Padding(
         padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 12.h),
         child: LayoutBuilder(
-        builder: (context, constraints) {
-          final presetsWidth = (constraints.maxWidth * 0.58).clamp(
-            150.0,
-            constraints.maxWidth - 110.w,
-          );
-          return Column(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              PendingOrderTypeSelector(
-                label: 'pending_order.order_type'.tr,
-                selectedLabel: _orderTypeLabel,
-                options: _pendingTypes.map(_labelOf).toList(),
-                selectedIndex: _pendingTypes.indexOf(_orderType),
-                onSelected: (i) => _setOrderType(_pendingTypes[i]),
-              ),
-              divider,
-              PendingOrderSectionHeader(
-                icon: Icons.tune_rounded,
-                title: 'pending_order.quantity'.tr,
-                trailing: PendingOrderLotPresets(
-                  presets: _lotPresets,
-                  volume: _volume,
-                  maxWidth: presetsWidth,
-                  onSelected: _setVolume,
+          builder: (context, constraints) {
+            final presetsWidth = (constraints.maxWidth * 0.58).clamp(
+              150.0,
+              constraints.maxWidth - 110.w,
+            );
+            return Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                PendingOrderTypeSelector(
+                  label: 'pending_order.order_type'.tr,
+                  selectedLabel: _orderTypeLabel,
+                  options: _pendingTypes.map(_labelOf).toList(),
+                  selectedIndex: _pendingTypes.indexOf(_orderType),
+                  onSelected: (i) => _setOrderType(_pendingTypes[i]),
                 ),
-              ),
-              SizedBox(height: 8.h),
-              _volumeField(),
-              divider,
-              PendingOrderSectionHeader(
-                icon: Icons.show_chart_rounded,
-                title: 'pending_order.trigger_price'.tr,
-                trailing: PendingOrderSwitch(
-                  value: _triggerPriceEnabled,
-                  onChanged: (value) =>
-                      setState(() => _triggerPriceEnabled = value),
-                ),
-              ),
-              if (_triggerPriceEnabled) ...[
-                SizedBox(height: 8.h),
-                _priceField(),
-                if (_isStopLimit) ...[
-                  SizedBox(height: 8.h),
-                  _limitPriceField(),
-                ],
-              ],
-              divider,
-              PendingOrderSectionHeader(
-                icon: Icons.shield_outlined,
-                title: 'pending_order.risk_management'.tr,
-                trailing: IconButton(
-                  onPressed: () =>
-                      setState(() => _riskExpanded = !_riskExpanded),
-                  padding: EdgeInsets.zero,
-                  constraints: const BoxConstraints(),
-                  icon: Icon(
-                    _riskExpanded
-                        ? Icons.keyboard_arrow_up_rounded
-                        : Icons.keyboard_arrow_down_rounded,
-                    size: 22.w,
-                    color: scheme.primary,
+                divider,
+                PendingOrderSectionHeader(
+                  icon: Icons.tune_rounded,
+                  title: 'pending_order.quantity'.tr,
+                  trailing: PendingOrderLotPresets(
+                    presets: _lotPresets,
+                    volume: _volume,
+                    maxWidth: presetsWidth,
+                    onSelected: _setVolume,
                   ),
                 ),
-              ),
-              if (_riskExpanded) ...[
-                SizedBox(height: 8.h),
-                _riskSection(scheme),
+                Gap.vSm,
+                _volumeField(),
+                divider,
+                PendingOrderSectionHeader(
+                  icon: Icons.show_chart_rounded,
+                  title: 'pending_order.trigger_price'.tr,
+                  trailing: PendingOrderSwitch(
+                    value: _triggerPriceEnabled,
+                    onChanged: (value) =>
+                        setState(() => _triggerPriceEnabled = value),
+                  ),
+                ),
+                if (_triggerPriceEnabled) ...[
+                  Gap.vSm,
+                  _priceField(),
+                  if (_isStopLimit) ...[Gap.vSm, _limitPriceField()],
+                ],
+                divider,
+                PendingOrderSectionHeader(
+                  icon: Icons.shield_outlined,
+                  title: 'pending_order.risk_management'.tr,
+                  trailing: IconButton(
+                    onPressed: () =>
+                        setState(() => _riskExpanded = !_riskExpanded),
+                    padding: EdgeInsets.zero,
+                    constraints: const BoxConstraints(),
+                    icon: Icon(
+                      _riskExpanded
+                          ? Icons.keyboard_arrow_up_rounded
+                          : Icons.keyboard_arrow_down_rounded,
+                      size: 22.w,
+                      color: scheme.primary,
+                    ),
+                  ),
+                ),
+                if (_riskExpanded) ...[Gap.vSm, _riskSection(scheme)],
               ],
-            ],
-          );
+            );
           },
         ),
       ),
@@ -515,7 +509,7 @@ class _PendingOrderViewState extends State<PendingOrderView> {
               }
             }),
           ),
-          SizedBox(height: 6.h),
+          6.verticalSpace,
           _riskRow(
             label: 'pending_order.stop_loss'.tr,
             accent: AppColors.danger,
@@ -571,7 +565,7 @@ class _PendingOrderViewState extends State<PendingOrderView> {
                   shape: BoxShape.circle,
                 ),
               ),
-              SizedBox(width: 8.w),
+              Gap.hSm,
               Expanded(
                 child: Text(
                   label,
@@ -587,7 +581,7 @@ class _PendingOrderViewState extends State<PendingOrderView> {
             ],
           ),
           if (enabled) ...[
-            SizedBox(height: 8.h),
+            Gap.vSm,
             PendingOrderStepperField(
               controller: controller,
               label: 'pending_order.price'.tr,

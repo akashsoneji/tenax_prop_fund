@@ -3,9 +3,9 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
 
 import '../../../shared/theme/app_colors.dart';
-import '../../../shared/theme/app_theme.dart';
 import '../../../shared/widgets/app_stat_tile.dart';
 import '../models/positions_models.dart';
+import '../../../shared/widgets/app_card.dart';
 
 /// The 6-cell account summary grid
 /// Balance / Credit / Equity / Margin / Free Margin / Margin Level, each an
@@ -17,19 +17,38 @@ class AccountSummaryGrid extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final scheme = Theme.of(context).colorScheme;
     final cells = <_Metric>[
-      _Metric('positions.balance'.tr, account.balance, Icons.account_balance_wallet_outlined),
-      _Metric('positions.credit'.tr, account.credit, Icons.card_giftcard_outlined),
+      _Metric(
+        'positions.balance'.tr,
+        account.balance,
+        Icons.account_balance_wallet_outlined,
+      ),
+      _Metric(
+        'positions.credit'.tr,
+        account.credit,
+        Icons.card_giftcard_outlined,
+      ),
       _Metric('positions.equity'.tr, account.equity, Icons.trending_up_rounded),
-      _Metric('positions.margin'.tr, account.margin, Icons.pie_chart_outline_rounded),
-      _Metric('positions.free_margin'.tr, account.marginFree, Icons.savings_outlined),
-      _Metric('positions.margin_level'.tr, account.marginLevel,
-          Icons.speed_rounded, isPercent: true),
+      _Metric(
+        'positions.margin'.tr,
+        account.margin,
+        Icons.pie_chart_outline_rounded,
+      ),
+      _Metric(
+        'positions.free_margin'.tr,
+        account.marginFree,
+        Icons.savings_outlined,
+      ),
+      _Metric(
+        'positions.margin_level'.tr,
+        account.marginLevel,
+        Icons.speed_rounded,
+        isPercent: true,
+      ),
     ];
-    return Container(
+    return AppCard(
+      radius: 18.r,
       padding: EdgeInsets.fromLTRB(12.w, 10.h, 12.w, 10.h),
-      decoration: AppTheme.surfaceCard(scheme, radius: 18.r),
       child: GridView.count(
         crossAxisCount: 3,
         shrinkWrap: true,

@@ -94,7 +94,7 @@ class _BillingBody extends StatelessWidget {
                   ),
                 ),
               ),
-              SizedBox(width: 10.w),
+              10.horizontalSpace,
               Expanded(
                 child: Obx(
                   () => BillingFilterDropdown<BillingStatusFilter>(
@@ -109,7 +109,7 @@ class _BillingBody extends StatelessWidget {
               ),
             ],
           ),
-          SizedBox(height: 18.h),
+          18.verticalSpace,
           Obx(
             () => BillingTransactionList(
               transactions: controller.filteredTransactions(data),
@@ -135,7 +135,7 @@ class _BillingSkeleton extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
           HeroSkeleton(height: 64.h),
-          SizedBox(height: 20.h),
+          20.verticalSpace,
           const ListSkeleton(),
         ],
       ),
@@ -240,7 +240,7 @@ class _StatCell extends StatelessWidget {
               color: AppColors.white.withValues(alpha: 0.75),
             ),
           ),
-          SizedBox(height: 3.h),
+          3.verticalSpace,
           FittedBox(
             fit: BoxFit.scaleDown,
             child: Text(

@@ -1,14 +1,15 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
-import 'package:google_fonts/google_fonts.dart';
 
 import '../../../shared/theme/app_colors.dart';
-import '../../../shared/theme/app_theme.dart';
 import '../../../shared/widgets/app_gradient_button.dart';
 import '../../../shared/widgets/pinned_gradient_app_bar.dart';
 import '../controllers/challenge_controller.dart';
 import '../models/challenge_models.dart';
+import '../../../shared/theme/app_spacing.dart';
+import '../../../shared/theme/app_text.dart';
+import '../../../shared/widgets/app_card.dart';
 
 /// Compare challenges — a wrap of selectable plan chips, a key-features table
 /// for the selected plan (challenge + funded rules), and a sticky "Get plan"
@@ -61,12 +62,12 @@ class _CompareBody extends StatelessWidget {
         children: [
           Text(
             'challenge.compare_plans'.tr,
-            style: GoogleFonts.beVietnamPro(
+            style: AppText.base(
               fontSize: 14.sp,
               color: scheme.onSurface.withValues(alpha: 0.6),
             ),
           ),
-          SizedBox(height: 14.h),
+          14.verticalSpace,
           Wrap(
             spacing: 10.w,
             runSpacing: 10.h,
@@ -79,11 +80,11 @@ class _CompareBody extends StatelessWidget {
                 ),
             ],
           ),
-          SizedBox(height: 18.h),
+          18.verticalSpace,
           _PlanHeaderCard(plan: plan),
-          SizedBox(height: 14.h),
-          Container(
-            decoration: AppTheme.surfaceCard(scheme, radius: 18),
+          14.verticalSpace,
+          AppCard(
+            radius: 18,
             padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 6.h),
             child: Column(
               children: [
@@ -95,7 +96,7 @@ class _CompareBody extends StatelessWidget {
                         child: Text(
                           '${plan.name} ${'challenge.key_features'.tr}'
                               .toUpperCase(),
-                          style: GoogleFonts.beVietnamPro(
+                          style: AppText.base(
                             fontSize: 11.sp,
                             letterSpacing: 0.8,
                             fontWeight: FontWeight.w700,
@@ -111,7 +112,7 @@ class _CompareBody extends StatelessWidget {
               ],
             ),
           ),
-          SizedBox(height: 18.h),
+          18.verticalSpace,
           AppGradientButton(
             label: 'challenge.get_plan'.tr,
             onPressed: () => c.buyComparePlan(plan),
@@ -154,7 +155,7 @@ class _PlanChip extends StatelessWidget {
         ),
         child: Text(
           label,
-          style: GoogleFonts.beVietnamPro(
+          style: AppText.base(
             fontSize: 13.sp,
             fontWeight: FontWeight.w700,
             color: selected ? scheme.primary : scheme.onSurface,
@@ -187,17 +188,17 @@ class _PlanHeaderCard extends StatelessWidget {
               children: [
                 Text(
                   'challenge.account'.tr.toUpperCase(),
-                  style: GoogleFonts.beVietnamPro(
+                  style: AppText.base(
                     fontSize: 11.sp,
                     letterSpacing: 0.8,
                     fontWeight: FontWeight.w700,
                     color: scheme.onSurface.withValues(alpha: 0.5),
                   ),
                 ),
-                SizedBox(height: 4.h),
+                Gap.vXs,
                 Text(
                   plan.size,
-                  style: GoogleFonts.beVietnamPro(
+                  style: AppText.base(
                     fontSize: 26.sp,
                     fontWeight: FontWeight.w800,
                     color: scheme.onSurface,
@@ -212,7 +213,7 @@ class _PlanHeaderCard extends StatelessWidget {
               if (plan.discountLabel.isNotEmpty)
                 Text(
                   plan.discountLabel,
-                  style: GoogleFonts.beVietnamPro(
+                  style: AppText.base(
                     fontSize: 11.sp,
                     fontWeight: FontWeight.w700,
                     color: scheme.primary,
@@ -220,7 +221,7 @@ class _PlanHeaderCard extends StatelessWidget {
                 ),
               Text(
                 plan.price,
-                style: GoogleFonts.beVietnamPro(
+                style: AppText.base(
                   fontSize: 22.sp,
                   fontWeight: FontWeight.w800,
                   color: scheme.primary,
@@ -256,26 +257,29 @@ class _FeatureRow extends StatelessWidget {
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Icon(Icons.help_outline_rounded,
-              size: 15.w, color: scheme.onSurface.withValues(alpha: 0.35)),
-          SizedBox(width: 8.w),
+          Icon(
+            Icons.help_outline_rounded,
+            size: 15.w,
+            color: scheme.onSurface.withValues(alpha: 0.35),
+          ),
+          Gap.hSm,
           Expanded(
             child: Text(
               row.label,
-              style: GoogleFonts.beVietnamPro(
+              style: AppText.base(
                 fontSize: 13.sp,
                 color: scheme.onSurface.withValues(alpha: 0.7),
               ),
             ),
           ),
-          SizedBox(width: 10.w),
+          10.horizontalSpace,
           Flexible(
             child: Text(
               row.value,
               textAlign: TextAlign.right,
               maxLines: 2,
               overflow: TextOverflow.ellipsis,
-              style: GoogleFonts.beVietnamPro(
+              style: AppText.base(
                 fontSize: 13.sp,
                 fontWeight: FontWeight.w700,
                 color: _toneColor(row.tone, scheme),
@@ -306,10 +310,10 @@ class _CompareSkeleton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => Container(
-        height: 320.h,
-        decoration: BoxDecoration(
-          color: Theme.of(context).colorScheme.surfaceContainerHighest,
-          borderRadius: BorderRadius.circular(18.r),
-        ),
-      );
+    height: 320.h,
+    decoration: BoxDecoration(
+      color: Theme.of(context).colorScheme.surfaceContainerHighest,
+      borderRadius: BorderRadius.circular(18.r),
+    ),
+  );
 }

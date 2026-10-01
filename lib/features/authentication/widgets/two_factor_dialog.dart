@@ -6,6 +6,7 @@ import 'package:get/get.dart';
 import '../../../shared/theme/app_colors.dart';
 import '../../../shared/theme/app_theme.dart';
 import 'animated_field.dart';
+import '../../../shared/theme/app_text.dart';
 
 /// Two-factor authenticator-code entry, shown when `POST /auth/login` answers
 /// `two_factor_required: true` with a `challenge_token`.
@@ -153,7 +154,7 @@ class _TwoFactorDialogState extends State<TwoFactorDialog> {
                     ),
                   ),
                   const _Header(),
-                  SizedBox(height: 20.h),
+                  20.verticalSpace,
                   ShakeWidget(
                     controller: _shake,
                     child: _CodeField(
@@ -165,18 +166,18 @@ class _TwoFactorDialogState extends State<TwoFactorDialog> {
                     ),
                   ),
                   if (_error != null) ...[
-                    SizedBox(height: 10.h),
+                    10.verticalSpace,
                     Text(
                       _error!,
                       textAlign: TextAlign.center,
-                      style: TextStyle(
+                      style: AppText.base(
                         color: scheme.error,
                         fontSize: 12.sp,
                         fontWeight: FontWeight.w600,
                       ),
                     ),
                   ],
-                  SizedBox(height: 18.h),
+                  18.verticalSpace,
                   FilledButton(
                     style: FilledButton.styleFrom(
                       backgroundColor: scheme.primary,
@@ -223,26 +224,21 @@ class _Header extends StatelessWidget {
             color: scheme.primary.withValues(alpha: 0.12),
             shape: BoxShape.circle,
           ),
-          child: Icon(
-            Icons.shield_outlined,
-            size: 26.w,
-            color: scheme.primary,
-          ),
+          child: Icon(Icons.shield_outlined, size: 26.w, color: scheme.primary),
         ),
-        SizedBox(height: 14.h),
+        14.verticalSpace,
         Text(
           'two_factor.title'.tr,
           textAlign: TextAlign.center,
-          style: Theme.of(context)
-              .textTheme
-              .titleLarge
-              ?.copyWith(fontWeight: FontWeight.w700),
+          style: Theme.of(
+            context,
+          ).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.w700),
         ),
-        SizedBox(height: 6.h),
+        6.verticalSpace,
         Text(
           'two_factor.subtitle'.tr,
           textAlign: TextAlign.center,
-          style: TextStyle(
+          style: AppText.base(
             color: scheme.onSurface.withValues(alpha: 0.65),
             fontSize: 13.sp,
           ),
@@ -347,15 +343,15 @@ class _Cells extends StatelessWidget {
                         color: hasError
                             ? scheme.error
                             : (active
-                                ? scheme.primary
-                                : scheme.outline.withValues(alpha: 0.20)),
+                                  ? scheme.primary
+                                  : scheme.outline.withValues(alpha: 0.20)),
                         width: 1.6.w,
                       ),
                     ),
                     child: Center(
                       child: Text(
                         filled ? code[i] : '',
-                        style: TextStyle(
+                        style: AppText.base(
                           fontSize: 22.sp,
                           fontWeight: FontWeight.w700,
                           color: scheme.onSurface,

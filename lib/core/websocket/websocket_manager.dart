@@ -1,175 +1,70 @@
-import 'dart:async';
-import 'dart:convert';
-import 'dart:math';
-
+import 'package:flutter/widgets.dart';
 import 'package:get/get.dart';
-import 'package:web_socket_channel/web_socket_channel.dart';
 
-import '../../app/flavor/flavor_config.dart';
-import '../logger/app_logger.dart';
-import 'websocket_message.dart';
-import 'websocket_subscription_manager.dart';
+import 'ws_connection.dart';
 
-/// The ONLY owner of a WebSocket connection in the app. Widgets and controllers
-/// never open sockets — they subscribe to a topic here and listen to [messages]
-/// (or the per-topic filtered stream). Handles connect / reconnect with
-/// exponential backoff, heartbeat, and automatic resubscription.
-class WebSocketManager extends GetxService {
-  WebSocketManager(this._config);
+/// The ONLY owner of WebSocket connections in the app. Feature services never
+/// open a socket themselves — they call [open] once with their endpoint and
+/// protocol hooks and talk through the returned [WsConnection]. One instance
+/// per [name]; asking again returns the same connection, so a socket can never
+/// be duplicated.
+///
+/// Centralises what every socket needs: reconnect on app resume (iOS/Android
+/// drop sockets while backgrounded) and orderly shutdown.
+class WebSocketManager extends GetxService with WidgetsBindingObserver {
+  final Map<String, WsConnection> _connections = {};
 
-  final FlavorConfig _config;
-  final SubscriptionManager _subs = SubscriptionManager();
+  Iterable<WsConnection> get connections => _connections.values;
 
-  WebSocketChannel? _channel;
-  StreamSubscription? _channelSub;
-  Timer? _heartbeat;
-  Timer? _reconnectTimer;
-  int _reconnectAttempts = 0;
-  bool _manuallyClosed = false;
-
-  final _stateController =
-      StreamController<WsConnectionState>.broadcast();
-  final _messageController = StreamController<WsMessage>.broadcast();
-
-  WsConnectionState _state = WsConnectionState.disconnected;
-
-  Stream<WsConnectionState> get connectionState => _stateController.stream;
-  Stream<WsMessage> get messages => _messageController.stream;
-
-  /// Filtered stream for a single topic — controllers use this so only the
-  /// widgets bound to that topic rebuild.
-  Stream<WsMessage> streamFor(String topic) =>
-      _messageController.stream.where((m) => m.topic == topic);
-
-  void _setState(WsConnectionState s) {
-    _state = s;
-    if (!_stateController.isClosed) _stateController.add(s);
-  }
-
-  Future<void> connect() async {
-    if (_state == WsConnectionState.connected ||
-        _state == WsConnectionState.connecting) {
-      return;
-    }
-    _manuallyClosed = false;
-    _setState(WsConnectionState.connecting);
-
-    try {
-      final channel = WebSocketChannel.connect(Uri.parse(_config.wsUrl));
-      _channel = channel;
-      await channel.ready;
-      // disconnect() ran while the handshake was in flight — drop this socket
-      // instead of marking it connected.
-      if (_manuallyClosed) {
-        await channel.sink.close();
-        if (identical(_channel, channel)) _channel = null;
-        return;
-      }
-      _reconnectAttempts = 0;
-      _setState(WsConnectionState.connected);
-      _startHeartbeat();
-      _resubscribeAll();
-
-      _channelSub = _channel!.stream.listen(
-        _onData,
-        onError: (Object e) => _onDisconnected(e),
-        onDone: () => _onDisconnected('closed'),
-        cancelOnError: true,
-      );
-    } catch (e) {
-      _onDisconnected(e);
-    }
-  }
-
-  void _onData(dynamic raw) {
-    try {
-      final decoded = jsonDecode(raw as String) as Map<String, dynamic>;
-      final topic = decoded['topic'] as String? ?? 'unknown';
-      if (!_messageController.isClosed) {
-        _messageController.add(WsMessage(topic: topic, data: decoded));
-      }
-    } catch (e) {
-      log.w('WS parse failed: $e');
-    }
-  }
-
-  void subscribe(String topic) {
-    if (_subs.add(topic)) {
-      _send({'action': 'subscribe', 'topic': topic});
-    }
-  }
-
-  void unsubscribe(String topic) {
-    if (_subs.remove(topic)) {
-      _send({'action': 'unsubscribe', 'topic': topic});
-    }
-  }
-
-  void _resubscribeAll() {
-    for (final topic in _subs.activeTopics) {
-      _send({'action': 'subscribe', 'topic': topic});
-    }
-  }
-
-  void _send(Map<String, dynamic> payload) {
-    if (_state == WsConnectionState.connected && _channel != null) {
-      _channel!.sink.add(jsonEncode(payload));
-    }
-  }
-
-  void _startHeartbeat() {
-    _heartbeat?.cancel();
-    _heartbeat = Timer.periodic(const Duration(seconds: 20), (_) {
-      _send({'action': 'ping'});
-    });
-  }
-
-  void _onDisconnected(Object reason) {
-    _heartbeat?.cancel();
-    _channelSub?.cancel();
-    _channel = null;
-    if (_manuallyClosed) {
-      _setState(WsConnectionState.disconnected);
-      return;
-    }
-    log.w('WS disconnected: $reason — scheduling reconnect');
-    _scheduleReconnect();
-  }
-
-  void _scheduleReconnect() {
-    _setState(WsConnectionState.reconnecting);
-    _reconnectAttempts++;
-    // Exponential backoff capped at 30s, with jitter so a fleet of clients
-    // doesn't reconnect in lockstep after a server blip. The exponent is
-    // clamped so `1 << n` can never overflow on a long outage.
-    final exponent = _reconnectAttempts.clamp(1, 5);
-    final base = (1 << exponent).clamp(1, 30);
-    final jitterMs = Random().nextInt(1000);
-    _reconnectTimer?.cancel();
-    _reconnectTimer = Timer(
-      Duration(seconds: base, milliseconds: jitterMs),
-      connect,
+  WsConnection open({
+    required String name,
+    required String Function() url,
+    required void Function(dynamic message) onMessage,
+    WsOnOpen? onOpen,
+    void Function()? onClosed,
+    Object? Function()? heartbeat,
+    Duration heartbeatInterval = const Duration(seconds: 20),
+    Future<bool> Function()? connectGate,
+  }) {
+    return _connections.putIfAbsent(
+      name,
+      () => WsConnection(
+        name: name,
+        url: url,
+        onMessage: onMessage,
+        onOpen: onOpen,
+        onClosed: onClosed,
+        heartbeat: heartbeat,
+        heartbeatInterval: heartbeatInterval,
+        connectGate: connectGate,
+      ),
     );
   }
 
-  Future<void> disconnect() async {
-    _manuallyClosed = true;
-    _heartbeat?.cancel();
-    _reconnectTimer?.cancel();
-    await _channelSub?.cancel();
-    await _channel?.sink.close();
-    _channel = null;
-    _setState(WsConnectionState.disconnected);
+  /// Closes and forgets [name] (e.g. a feature-scoped socket being disposed).
+  Future<void> release(String name) async {
+    await _connections.remove(name)?.close();
+  }
+
+  @override
+  void onInit() {
+    super.onInit();
+    WidgetsBinding.instance.addObserver(this);
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    if (state != AppLifecycleState.resumed) return;
+    for (final connection in _connections.values) {
+      connection.resumeIfDropped();
+    }
   }
 
   @override
   Future<void> onClose() async {
-    // Await the socket teardown BEFORE closing the controllers, so no late
-    // `_setState`/message add can fire on an already-closed StreamController.
-    await disconnect();
-    _subs.clear();
-    await _stateController.close();
-    await _messageController.close();
+    WidgetsBinding.instance.removeObserver(this);
+    await Future.wait(_connections.values.map((c) => c.close()));
+    _connections.clear();
     super.onClose();
   }
 }

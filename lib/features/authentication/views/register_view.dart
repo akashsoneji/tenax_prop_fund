@@ -13,6 +13,8 @@ import '../widgets/glass_card.dart';
 import '../../../shared/widgets/app_gradient_button.dart';
 import '../widgets/otp_dialog.dart';
 import '../widgets/password_strength_meter.dart';
+import '../../../shared/theme/app_spacing.dart';
+import '../../../shared/theme/app_text.dart';
 
 /// Single-screen registration organised into two clear sections — Identity and
 /// Security. Uses the shared AuthController; on success prompts the OTP dialog
@@ -144,7 +146,7 @@ class _RegisterViewState extends State<RegisterView> {
                 text: 'register.section_identity'.tr,
                 icon: Icons.badge_outlined,
               ),
-              SizedBox(height: 12.h),
+              Gap.vMd,
               AnimatedField(
                 index: 1,
                 child: _field(
@@ -153,11 +155,12 @@ class _RegisterViewState extends State<RegisterView> {
                   icon: Icons.person_outline_rounded,
                   textCapitalization: TextCapitalization.words,
                   autofill: const [AutofillHints.givenName],
-                  validator: (val) =>
-                      val == null || val.trim().isEmpty ? 'register.required'.tr : null,
+                  validator: (val) => val == null || val.trim().isEmpty
+                      ? 'register.required'.tr
+                      : null,
                 ),
               ),
-              SizedBox(height: 14.h),
+              14.verticalSpace,
               AnimatedField(
                 index: 2,
                 child: _field(
@@ -166,11 +169,12 @@ class _RegisterViewState extends State<RegisterView> {
                   icon: Icons.person_outline_rounded,
                   textCapitalization: TextCapitalization.words,
                   autofill: const [AutofillHints.familyName],
-                  validator: (val) =>
-                      val == null || val.trim().isEmpty ? 'register.required'.tr : null,
+                  validator: (val) => val == null || val.trim().isEmpty
+                      ? 'register.required'.tr
+                      : null,
                 ),
               ),
-              SizedBox(height: 14.h),
+              14.verticalSpace,
               AnimatedField(
                 index: 3,
                 child: _field(
@@ -184,7 +188,7 @@ class _RegisterViewState extends State<RegisterView> {
                       : null,
                 ),
               ),
-              SizedBox(height: 14.h),
+              14.verticalSpace,
               AnimatedField(
                 index: 4,
                 child: _field(
@@ -202,7 +206,7 @@ class _RegisterViewState extends State<RegisterView> {
                         children: [
                           Text(
                             '$_selectedCountryFlag $_selectedCountryCode',
-                            style: TextStyle(
+                            style: AppText.base(
                               fontSize: 16.sp,
                               color: scheme.onSurface,
                             ),
@@ -223,12 +227,12 @@ class _RegisterViewState extends State<RegisterView> {
                   },
                 ),
               ),
-              SizedBox(height: 24.h),
+              Gap.vXl,
               _SectionLabel(
                 text: 'register.section_security'.tr,
                 icon: Icons.shield_outlined,
               ),
-              SizedBox(height: 12.h),
+              Gap.vMd,
               AnimatedField(
                 index: 5,
                 child: _field(
@@ -250,9 +254,9 @@ class _RegisterViewState extends State<RegisterView> {
                   ),
                 ),
               ),
-              SizedBox(height: 12.h),
+              Gap.vMd,
               PasswordStrengthMeter(password: _password.text),
-              SizedBox(height: 8.h),
+              Gap.vSm,
               Material(
                 type: MaterialType.transparency,
                 child: CheckboxListTile(
@@ -263,7 +267,7 @@ class _RegisterViewState extends State<RegisterView> {
                   dense: true,
                   title: Text(
                     '${'register.agree_prefix'.tr} ${'register.terms_link'.tr}',
-                    style: TextStyle(fontSize: 13.sp),
+                    style: AppText.base(fontSize: 13.sp),
                   ),
                 ),
               ),
@@ -277,7 +281,7 @@ class _RegisterViewState extends State<RegisterView> {
                           padding: EdgeInsets.only(bottom: 8.h),
                           child: Text(
                             msg,
-                            style: TextStyle(
+                            style: AppText.base(
                               color: scheme.error,
                               fontWeight: FontWeight.w600,
                             ),
@@ -285,7 +289,7 @@ class _RegisterViewState extends State<RegisterView> {
                         ),
                 );
               }),
-              SizedBox(height: 8.h),
+              Gap.vSm,
               Obx(
                 () => AppGradientButton(
                   label: 'register.register_button'.tr,
@@ -293,12 +297,12 @@ class _RegisterViewState extends State<RegisterView> {
                   onPressed: _submit,
                 ),
               ),
-              SizedBox(height: 8.h),
+              Gap.vSm,
               TextButton(
                 onPressed: () => Get.toNamed(AppRoutes.login),
                 child: Text(
                   '${'register.have_account'.tr} ${'register.login_link'.tr}',
-                  style: const TextStyle(fontWeight: FontWeight.w600),
+                  style: AppText.base(fontWeight: FontWeight.w600),
                 ),
               ),
             ],
@@ -333,7 +337,7 @@ class _RegisterViewState extends State<RegisterView> {
       textCapitalization: textCapitalization,
       autofillHints: autofill,
       validator: validator,
-      style: TextStyle(fontSize: 15.sp, color: scheme.onSurface),
+      style: AppText.base(fontSize: 15.sp, color: scheme.onSurface),
       decoration: InputDecoration(
         labelText: label,
         prefixIcon: prefix ?? Icon(icon, color: scheme.primary),
@@ -366,7 +370,7 @@ class _SectionLabel extends StatelessWidget {
     return Row(
       children: [
         Icon(icon, size: 18.w, color: scheme.primary),
-        SizedBox(width: 8.w),
+        Gap.hSm,
         Text(
           text,
           style: Theme.of(context).textTheme.titleSmall?.copyWith(
@@ -378,5 +382,3 @@ class _SectionLabel extends StatelessWidget {
     );
   }
 }
-
-

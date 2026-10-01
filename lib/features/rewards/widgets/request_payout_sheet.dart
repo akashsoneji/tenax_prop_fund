@@ -6,6 +6,8 @@ import '../../../shared/widgets/app_gradient_button.dart';
 import '../../../shared/widgets/app_toast.dart';
 import '../controllers/rewards_controller.dart';
 import '../models/reward_models.dart';
+import '../../../shared/theme/app_spacing.dart';
+import '../../../shared/theme/app_text.dart';
 
 /// "Request a payout" sheet — mirrors the web form: withdrawable strip,
 /// Amount*, Payout method*, Trading account (optional), Notes (optional) and
@@ -62,7 +64,7 @@ class _RequestPayoutSheetState extends State<RequestPayoutSheet> {
                     crossAxisAlignment: CrossAxisAlignment.stretch,
                     children: [
                       _BalanceStrip(data: data),
-                      SizedBox(height: 12.h),
+                      Gap.vMd,
                       _Field(
                         label: 'rewards.amount_usd'.tr,
                         required: true,
@@ -70,60 +72,67 @@ class _RequestPayoutSheetState extends State<RequestPayoutSheet> {
                           controller: _amount,
                           hint: '0.00',
                           keyboardType: const TextInputType.numberWithOptions(
-                              decimal: true),
+                            decimal: true,
+                          ),
                           onChanged: c.setAmount,
                         ),
                       ),
-                      SizedBox(height: 10.h),
+                      10.verticalSpace,
                       _Field(
                         label: 'rewards.payout_method'.tr,
                         required: true,
-                        child: Obx(() => _Dropdown<String?>(
-                              value: c.selectedMethod.value,
-                              items: <String?, String>{
-                                for (final m in data.payoutMethods) m.id: m.label,
-                              },
-                              onChanged: (v) {
-                                if (v != null) c.selectMethod(v);
-                              },
-                            )),
+                        child: Obx(
+                          () => _Dropdown<String?>(
+                            value: c.selectedMethod.value,
+                            items: <String?, String>{
+                              for (final m in data.payoutMethods) m.id: m.label,
+                            },
+                            onChanged: (v) {
+                              if (v != null) c.selectMethod(v);
+                            },
+                          ),
+                        ),
                       ),
-                      SizedBox(height: 10.h),
+                      10.verticalSpace,
                       _Field(
                         label: 'rewards.trading_account_optional'.tr,
-                        child: Obx(() => _Dropdown<String?>(
-                              value: c.selectedAccountId.value,
-                              items: {
-                                null: 'rewards.none'.tr,
-                                for (final a in data.accounts) a.id: a.label,
-                              },
-                              onChanged: c.selectAccount,
-                            )),
+                        child: Obx(
+                          () => _Dropdown<String?>(
+                            value: c.selectedAccountId.value,
+                            items: {
+                              null: 'rewards.none'.tr,
+                              for (final a in data.accounts) a.id: a.label,
+                            },
+                            onChanged: c.selectAccount,
+                          ),
+                        ),
                       ),
-                      SizedBox(height: 10.h),
+                      10.verticalSpace,
                       _Field(
                         label: 'rewards.notes_optional'.tr,
                         child: _Input(controller: _notes, maxLines: 2),
                       ),
-                      SizedBox(height: 10.h),
+                      10.verticalSpace,
                       _Field(
                         label: 'rewards.password_confirm'.tr,
                         helper: 'rewards.password_helper'.tr,
-                        child: Obx(() => _Input(
-                              controller: _password,
-                              obscure: _obscure.value,
-                              suffix: IconButton(
-                                visualDensity: VisualDensity.compact,
-                                onPressed: () => _obscure.toggle(),
-                                icon: Icon(
-                                  _obscure.value
-                                      ? Icons.visibility_outlined
-                                      : Icons.visibility_off_outlined,
-                                  size: 18.w,
-                                  color: scheme.onSurfaceVariant,
-                                ),
+                        child: Obx(
+                          () => _Input(
+                            controller: _password,
+                            obscure: _obscure.value,
+                            suffix: IconButton(
+                              visualDensity: VisualDensity.compact,
+                              onPressed: () => _obscure.toggle(),
+                              icon: Icon(
+                                _obscure.value
+                                    ? Icons.visibility_outlined
+                                    : Icons.visibility_off_outlined,
+                                size: 18.w,
+                                color: scheme.onSurfaceVariant,
                               ),
-                            )),
+                            ),
+                          ),
+                        ),
                       ),
                     ],
                   ),
@@ -225,9 +234,9 @@ class _BalanceStrip extends StatelessWidget {
   Widget build(BuildContext context) {
     final scheme = Theme.of(context).colorScheme;
     final base = Theme.of(context).textTheme.bodySmall?.copyWith(
-          fontSize: 12.5.sp,
-          color: scheme.onSurfaceVariant,
-        );
+      fontSize: 12.5.sp,
+      color: scheme.onSurfaceVariant,
+    );
     return Container(
       padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 10.h),
       decoration: BoxDecoration(
@@ -279,7 +288,10 @@ class _Field extends StatelessWidget {
             text: label,
             children: [
               if (required)
-                TextSpan(text: ' *', style: TextStyle(color: scheme.error)),
+                TextSpan(
+                  text: ' *',
+                  style: AppText.base(color: scheme.error),
+                ),
             ],
           ),
           style: text.labelLarge?.copyWith(
@@ -288,10 +300,10 @@ class _Field extends StatelessWidget {
             color: scheme.onSurface,
           ),
         ),
-        SizedBox(height: 5.h),
+        5.verticalSpace,
         child,
         if (helper != null) ...[
-          SizedBox(height: 4.h),
+          Gap.vXs,
           Text(
             helper!,
             style: text.bodySmall?.copyWith(
@@ -305,7 +317,11 @@ class _Field extends StatelessWidget {
   }
 }
 
-InputDecoration _decoration(BuildContext context, {String? hint, Widget? suffix}) {
+InputDecoration _decoration(
+  BuildContext context, {
+  String? hint,
+  Widget? suffix,
+}) {
   final scheme = Theme.of(context).colorScheme;
   OutlineInputBorder border(Color color, [double width = 1]) =>
       OutlineInputBorder(
@@ -418,15 +434,17 @@ class _Actions extends StatelessWidget {
               child: Text('rewards.cancel_no'.tr),
             ),
           ),
-          SizedBox(width: 10.w),
+          10.horizontalSpace,
           Expanded(
             flex: 2,
-            child: Obx(() => AppGradientButton(
-                  label: 'rewards.submit_request'.tr,
-                  height: 44.h,
-                  loading: submitting.value,
-                  onPressed: submitting.value ? null : onSubmit,
-                )),
+            child: Obx(
+              () => AppGradientButton(
+                label: 'rewards.submit_request'.tr,
+                height: 44.h,
+                loading: submitting.value,
+                onPressed: submitting.value ? null : onSubmit,
+              ),
+            ),
           ),
         ],
       ),

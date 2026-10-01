@@ -32,7 +32,7 @@ class PayoutMethodsView extends StatelessWidget {
                     title: 'payout_methods.name_match_title'.tr,
                     body: 'payout_methods.name_match_body'.tr,
                   ),
-                  SizedBox(height: 18.h),
+                  18.verticalSpace,
                   const PayoutMethodsManager(showTitle: false),
                 ],
               ),

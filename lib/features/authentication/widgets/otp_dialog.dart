@@ -9,6 +9,8 @@ import '../../../shared/theme/app_colors.dart';
 import '../../../shared/theme/app_theme.dart';
 import 'animated_field.dart';
 import 'glass_card.dart';
+import '../../../shared/theme/app_spacing.dart';
+import '../../../shared/theme/app_text.dart';
 
 /// 6-cell OTP entry. Each cell accepts one digit; auto-advances focus on
 /// input, backspace moves focus back, paste from SMS is auto-split.
@@ -202,20 +204,20 @@ class _OtpDialogState extends State<OtpDialog> {
                 Text(
                   'otp.title'.tr,
                   textAlign: TextAlign.center,
-                  style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                        fontWeight: FontWeight.w700,
-                      ),
+                  style: Theme.of(
+                    context,
+                  ).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.w700),
                 ),
-                SizedBox(height: 6.h),
+                6.verticalSpace,
                 Text(
                   '${'otp.subtitle'.tr}\n${widget.target}',
                   textAlign: TextAlign.center,
-                  style: TextStyle(
+                  style: AppText.base(
                     color: scheme.onSurface.withValues(alpha: 0.65),
                     fontSize: 13.sp,
                   ),
                 ),
-                SizedBox(height: 20.h),
+                20.verticalSpace,
                 ShakeWidget(
                   controller: _shake,
                   child: Row(
@@ -237,11 +239,11 @@ class _OtpDialogState extends State<OtpDialog> {
                   ),
                 ),
                 if (_error != null) ...[
-                  SizedBox(height: 10.h),
+                  10.verticalSpace,
                   Text(
                     _error!,
                     textAlign: TextAlign.center,
-                    style: TextStyle(
+                    style: AppText.base(
                       color: scheme.error,
                       fontSize: 12.sp,
                       fontWeight: FontWeight.w600,
@@ -249,7 +251,7 @@ class _OtpDialogState extends State<OtpDialog> {
                   ),
                 ],
                 if (widget.onResend != null) ...[
-                  SizedBox(height: 14.h),
+                  14.verticalSpace,
                   Center(
                     child: TextButton(
                       onPressed: (_busy || _resendIn > 0) ? null : _resend,
@@ -257,7 +259,7 @@ class _OtpDialogState extends State<OtpDialog> {
                         _resendIn > 0
                             ? '${'common.resend'.tr} ${'otp.resend_in'.tr} ${_resendIn}s'
                             : 'common.resend'.tr,
-                        style: TextStyle(
+                        style: AppText.base(
                           color: (_busy || _resendIn > 0)
                               ? scheme.onSurface.withValues(alpha: 0.5)
                               : scheme.primary,
@@ -267,7 +269,7 @@ class _OtpDialogState extends State<OtpDialog> {
                     ),
                   ),
                 ],
-                SizedBox(height: 18.h),
+                18.verticalSpace,
                 Row(
                   mainAxisAlignment: MainAxisAlignment.end,
                   children: [
@@ -275,15 +277,18 @@ class _OtpDialogState extends State<OtpDialog> {
                       onPressed: _busy ? null : () => Get.back(),
                       child: Text('common.cancel'.tr),
                     ),
-                    SizedBox(width: 8.w),
+                    Gap.hSm,
                     FilledButton(
                       style: FilledButton.styleFrom(
                         backgroundColor: scheme.primary,
                         foregroundColor: scheme.onPrimary,
                         padding: EdgeInsets.symmetric(
-                            horizontal: 22.w, vertical: 12.h),
+                          horizontal: 22.w,
+                          vertical: 12.h,
+                        ),
                         shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(10.r)),
+                          borderRadius: BorderRadius.circular(10.r),
+                        ),
                       ),
                       onPressed: _busy ? null : _verify,
                       child: _busy
@@ -339,8 +344,8 @@ class _PinCell extends StatelessWidget {
             color: hasError
                 ? scheme.error
                 : (focusNode.hasFocus
-                    ? scheme.primary
-                    : scheme.outline.withValues(alpha: 0.20)),
+                      ? scheme.primary
+                      : scheme.outline.withValues(alpha: 0.20)),
             width: 1.6.w,
           ),
         ),
@@ -358,7 +363,7 @@ class _PinCell extends StatelessWidget {
             maxLength: 1,
             autofocus: true,
             autofillHints: const [AutofillHints.oneTimeCode],
-            style: TextStyle(
+            style: AppText.base(
               fontSize: 22.sp,
               fontWeight: FontWeight.w700,
               color: scheme.onSurface,

@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
-import 'package:google_fonts/google_fonts.dart';
 
 import '../../../shared/widgets/data_state_builder.dart';
 import '../../../shared/widgets/fade_slide_in.dart';
@@ -12,6 +11,7 @@ import '../../../shared/widgets/section_header.dart';
 import '../../../shared/widgets/skeletons/skeletons.dart';
 import '../controllers/downloads_controller.dart';
 import '../models/download_models.dart';
+import '../../../shared/theme/app_text.dart';
 
 /// Downloads & guides — three grouped card sections (Trading platform, Read
 /// first, Video) of tappable rows. Fully theme-driven and reactive via
@@ -42,7 +42,7 @@ class DownloadsView extends StatelessWidget {
                     crossAxisAlignment: CrossAxisAlignment.stretch,
                     children: [
                       for (var s = 0; s < sections.length; s++) ...[
-                        if (s > 0) SizedBox(height: 26.h),
+                        if (s > 0) 26.verticalSpace,
                         FadeSlideIn(
                           order: s * 2,
                           child: SectionHeader(sections[s].title.tr),
@@ -97,7 +97,7 @@ class _Meta extends StatelessWidget {
     final scheme = Theme.of(context).colorScheme;
     return Text(
       text,
-      style: GoogleFonts.beVietnamPro(
+      style: AppText.base(
         fontSize: 13.sp,
         fontWeight: FontWeight.w600,
         color: scheme.onSurface.withValues(alpha: 0.55),

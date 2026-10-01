@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:google_fonts/google_fonts.dart';
 
+import '../theme/app_spacing.dart';
+
 /// One labelled value shown inside an [AppStatGrid].
 class AppStat {
   const AppStat({required this.label, required this.value});
@@ -105,7 +107,7 @@ class _Cell extends StatelessWidget {
             color: labelColor,
           ),
         ),
-        SizedBox(height: 4.h),
+        Gap.vXs,
         Text(
           stat.value,
           maxLines: 1,

@@ -4,7 +4,7 @@
 # flavor in VS Code and hit Run, the correct app icon + launch-screen color
 # are copied into the Runner target.
 #
-# Usage: scripts/prepare_ios_flavor.sh <client_a|client_b|client_c>
+# Usage: scripts/prepare_ios_flavor.sh <tenax|pipze_funded|alibabafx_prop>
 #
 # Per-flavor source assets live in:
 #   ios/flavors/<flavor>/AppIcon.appiconset/   (optional; full iOS icon set)
@@ -15,16 +15,13 @@ set -eo pipefail
 
 FLAVOR="${1:-}"
 if [[ -z "$FLAVOR" ]]; then
-  echo "Usage: $0 <client_a|client_b|client_c>" >&2
+  echo "Usage: $0 <tenax|pipze_funded|alibabafx_prop>" >&2
   exit 1
 fi
 
 case "$FLAVOR" in
-  tenax)    DEFAULT_COLOR="5F259E" ;;
-  client_a) DEFAULT_COLOR="1E88E5" ;;
-  client_b) DEFAULT_COLOR="2E7D32" ;;
-  client_c) DEFAULT_COLOR="6A1B9A" ;;
-  pipze_funded) DEFAULT_COLOR="5F259E" ;;
+  tenax)          DEFAULT_COLOR="5F259E" ;;
+  pipze_funded)   DEFAULT_COLOR="5F259E" ;;
   alibabafx_prop) DEFAULT_COLOR="182430" ;;
   *) echo "Unknown flavor: $FLAVOR" >&2; exit 1 ;;
 esac

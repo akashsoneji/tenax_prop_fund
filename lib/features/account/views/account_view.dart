@@ -3,7 +3,6 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
 
 import '../../../shared/theme/app_colors.dart';
-import '../../../shared/theme/app_theme.dart';
 import '../../../shared/widgets/app_choice_chip.dart';
 import '../../../shared/widgets/app_empty_view.dart';
 import '../../../shared/widgets/app_gradient_button.dart';
@@ -17,6 +16,9 @@ import '../widgets/account_analytics_widgets.dart';
 import '../widgets/account_overview_widgets.dart';
 import '../widgets/account_tab_widgets.dart';
 import '../widgets/reset_confirm_dialog.dart';
+import '../../../shared/theme/app_spacing.dart';
+import '../../../shared/theme/app_text.dart';
+import '../../../shared/widgets/app_card.dart';
 
 /// Account detail screen — a mobile-native version of the web
 /// `My accounts › Account overview` page, with four tabs (Account overview,
@@ -41,11 +43,13 @@ class AccountView extends StatelessWidget {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
-                  Obx(() => _Tabs(
-                        selected: c.selectedTab.value,
-                        onChanged: c.selectTab,
-                      )),
-                  SizedBox(height: 12.h),
+                  Obx(
+                    () => _Tabs(
+                      selected: c.selectedTab.value,
+                      onChanged: c.selectTab,
+                    ),
+                  ),
+                  Gap.vMd,
                   _TabBody(controller: c),
                 ],
               ),
@@ -80,7 +84,7 @@ class _Tabs extends StatelessWidget {
         scrollDirection: Axis.horizontal,
         physics: const BouncingScrollPhysics(),
         itemCount: AccountDetailTab.values.length,
-        separatorBuilder: (_, _) => SizedBox(width: 10.w),
+        separatorBuilder: (_, _) => 10.horizontalSpace,
         itemBuilder: (context, i) {
           final tab = AccountDetailTab.values[i];
           return _TabChip(
@@ -186,28 +190,30 @@ class _OverviewTab extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
         AccountSummaryHero(header: data.header, stats: data.stats),
-        SizedBox(height: 16.h),
-        Obx(() => AccountHeaderCard(
-              header: data.header,
-              credentials: data.credentials,
-              cycle: data.cycle,
-              revealed: controller.revealPassword.value,
-              onReveal: controller.toggleReveal,
-              onCopyLogin: () =>
-                  controller.copy(data.credentials.login, 'account.copied'),
-            )),
-        SizedBox(height: 22.h),
+        Gap.vLg,
+        Obx(
+          () => AccountHeaderCard(
+            header: data.header,
+            credentials: data.credentials,
+            cycle: data.cycle,
+            revealed: controller.revealPassword.value,
+            onReveal: controller.toggleReveal,
+            onCopyLogin: () =>
+                controller.copy(data.credentials.login, 'account.copied'),
+          ),
+        ),
+        22.verticalSpace,
         _SectionLabel('account.trading_objectives'.tr),
-        SizedBox(height: 12.h),
+        Gap.vMd,
         for (final o in data.objectives) ...[
           AccountObjectiveCard(objective: o),
-          SizedBox(height: 12.h),
+          Gap.vMd,
         ],
         if (data.health.isNotEmpty) ...[
-          SizedBox(height: 6.h),
+          6.verticalSpace,
           AccountHealthCard(health: data.health),
         ],
-        SizedBox(height: 18.h),
+        18.verticalSpace,
         // AppGradientButton(
         //   label: 'account.trade_now'.tr,
         //   icon: Icons.trending_up_rounded,
@@ -232,19 +238,20 @@ class _TradingTab extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        Obx(() => AccountSegmentedTabs(
-              labels: [
-                'account.detailed_stats'.tr,
-                'account.analytics'.tr,
-              ],
-              selectedIndex: controller.tradingSub.value.index,
-              onChanged: (i) =>
-                  controller.selectTradingSub(TradingSubTab.values[i]),
-            )),
-        SizedBox(height: 18.h),
-        Obx(() => controller.tradingSub.value == TradingSubTab.detailed
-            ? _DetailedStats(data: data)
-            : _Analytics(controller: controller, data: data)),
+        Obx(
+          () => AccountSegmentedTabs(
+            labels: ['account.detailed_stats'.tr, 'account.analytics'.tr],
+            selectedIndex: controller.tradingSub.value.index,
+            onChanged: (i) =>
+                controller.selectTradingSub(TradingSubTab.values[i]),
+          ),
+        ),
+        18.verticalSpace,
+        Obx(
+          () => controller.tradingSub.value == TradingSubTab.detailed
+              ? _DetailedStats(data: data)
+              : _Analytics(controller: controller, data: data),
+        ),
       ],
     );
   }
@@ -261,11 +268,11 @@ class _DetailedStats extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
         _SectionLabel('account.insights'.tr),
-        SizedBox(height: 12.h),
+        Gap.vMd,
         AccountInsightsGrid(metrics: data.insights.metrics),
-        SizedBox(height: 22.h),
+        22.verticalSpace,
         _SectionLabel('account.recent_trades'.tr),
-        SizedBox(height: 12.h),
+        Gap.vMd,
         if (data.trades.isEmpty)
           const AppEmptyView(
             messageKey: 'account.no_trades',
@@ -291,19 +298,21 @@ class _Analytics extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
         EquityGrowthCard(points: data.equity),
-        SizedBox(height: 18.h),
-        Obx(() => AccountPillSelector(
-              labels: [
-                'account.symbol_performance'.tr,
-                'account.pl_weekday'.tr,
-                'account.pl_hour'.tr,
-                'account.win_loss'.tr,
-              ],
-              selectedIndex: controller.perfBreakdown.value.index,
-              onChanged: (i) => controller
-                  .selectPerfBreakdown(PerformanceBreakdown.values[i]),
-            )),
-        SizedBox(height: 14.h),
+        18.verticalSpace,
+        Obx(
+          () => AccountPillSelector(
+            labels: [
+              'account.symbol_performance'.tr,
+              'account.pl_weekday'.tr,
+              'account.pl_hour'.tr,
+              'account.win_loss'.tr,
+            ],
+            selectedIndex: controller.perfBreakdown.value.index,
+            onChanged: (i) =>
+                controller.selectPerfBreakdown(PerformanceBreakdown.values[i]),
+          ),
+        ),
+        14.verticalSpace,
         Obx(() {
           switch (controller.perfBreakdown.value) {
             case PerformanceBreakdown.symbol:
@@ -339,39 +348,43 @@ class _PlatformTab extends StatelessWidget {
             Expanded(
               child: Text(
                 'account.connection_details'.tr,
-                style: TextStyle(
-                    fontSize: 16.sp,
-                    fontWeight: FontWeight.w800,
-                    color: Theme.of(context).colorScheme.onSurface),
+                style: AppText.base(
+                  fontSize: 16.sp,
+                  fontWeight: FontWeight.w800,
+                  color: Theme.of(context).colorScheme.onSurface,
+                ),
               ),
             ),
             AccountStatusPill(label: data.statusLabel, tone: data.tone),
           ],
         ),
-        SizedBox(height: 14.h),
-        Obx(() => AccountHeaderCard(
-              header: AccountHeader(
-                login: data.credentials.login,
-                statusLabel: '',
-                tone: AccountTone.neutral,
-                planLabel: data.credentials.platform,
-                phaseLabel: '',
-                initialBalance: '—',
-                leverage: 0,
-                drawdownType: '',
-                accountType: data.credentials.accountType,
-              ),
-              credentials: data.credentials,
-              cycle: const AccountCycle(
-                  phaseStarted: '—',
-                  daysElapsed: 0,
-                  timeLimit: '—',
-                  nextReward: '—'),
-              revealed: controller.revealPassword.value,
-              onReveal: controller.toggleReveal,
-              onCopyLogin: () =>
-                  controller.copy(data.credentials.login, 'account.copied'),
-            )),
+        14.verticalSpace,
+        Obx(
+          () => AccountHeaderCard(
+            header: AccountHeader(
+              login: data.credentials.login,
+              statusLabel: '',
+              tone: AccountTone.neutral,
+              planLabel: data.credentials.platform,
+              phaseLabel: '',
+              initialBalance: '—',
+              leverage: 0,
+              drawdownType: '',
+              accountType: data.credentials.accountType,
+            ),
+            credentials: data.credentials,
+            cycle: const AccountCycle(
+              phaseStarted: '—',
+              daysElapsed: 0,
+              timeLimit: '—',
+              nextReward: '—',
+            ),
+            revealed: controller.revealPassword.value,
+            onReveal: controller.toggleReveal,
+            onCopyLogin: () =>
+                controller.copy(data.credentials.login, 'account.copied'),
+          ),
+        ),
         // const SizedBox(height: 22),
         // _SectionLabel('account.downloads'.tr),
         // const SizedBox(height: 12),
@@ -409,9 +422,9 @@ class _ResetTab extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        Container(
+        AppCard(
+          radius: 16,
           padding: EdgeInsets.all(16.w),
-          decoration: AppTheme.surfaceCard(scheme, radius: 16),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
@@ -420,45 +433,54 @@ class _ResetTab extends StatelessWidget {
                   Expanded(
                     child: Text(
                       '${'account.reset'.tr} ${data.login}',
-                      style: TextStyle(
-                          fontSize: 16.sp,
-                          fontWeight: FontWeight.w800,
-                          color: scheme.onSurface),
+                      style: AppText.base(
+                        fontSize: 16.sp,
+                        fontWeight: FontWeight.w800,
+                        color: scheme.onSurface,
+                      ),
                     ),
                   ),
                   if (data.percentLabel.isNotEmpty)
                     Container(
                       padding: EdgeInsets.symmetric(
-                          horizontal: 10.w, vertical: 4.h),
+                        horizontal: 10.w,
+                        vertical: 4.h,
+                      ),
                       decoration: BoxDecoration(
                         color: AppColors.amber.withValues(alpha: 0.16),
                         borderRadius: BorderRadius.circular(20.r),
                       ),
-                      child: Text(data.percentLabel,
-                          style: TextStyle(
-                              fontSize: 11.5.sp,
-                              fontWeight: FontWeight.w700,
-                              color: AppColors.warningInk)),
+                      child: Text(
+                        data.percentLabel,
+                        style: AppText.base(
+                          fontSize: 11.5.sp,
+                          fontWeight: FontWeight.w700,
+                          color: AppColors.warningInk,
+                        ),
+                      ),
                     ),
                 ],
               ),
-              SizedBox(height: 12.h),
-              Text('account.reset_blurb'.tr,
-                  style: TextStyle(
-                      fontSize: 13.sp,
-                      height: 1.4,
-                      color: scheme.onSurfaceVariant)),
-              SizedBox(height: 14.h),
+              Gap.vMd,
+              Text(
+                'account.reset_blurb'.tr,
+                style: AppText.base(
+                  fontSize: 13.sp,
+                  height: 1.4,
+                  color: scheme.onSurfaceVariant,
+                ),
+              ),
+              14.verticalSpace,
               _KvLine(k: 'account.reset_original_fee'.tr, v: data.originalFee),
               _KvLine(k: 'account.reset_price'.tr, v: data.resetPrice),
               _KvLine(k: 'account.reset_valid_until'.tr, v: data.validUntil),
             ],
           ),
         ),
-        SizedBox(height: 16.h),
+        Gap.vLg,
         const ResetCarryList(),
         if (data.message.isNotEmpty) ...[
-          SizedBox(height: 16.h),
+          Gap.vLg,
           Container(
             padding: EdgeInsets.all(14.w),
             decoration: BoxDecoration(
@@ -466,19 +488,21 @@ class _ResetTab extends StatelessWidget {
               borderRadius: BorderRadius.circular(14.r),
               border: Border.all(color: AppColors.amber.withValues(alpha: 0.3)),
             ),
-            child: Text(data.message,
-                style: TextStyle(
-                    fontSize: 12.5.sp,
-                    height: 1.4,
-                    color: scheme.onSurface.withValues(alpha: 0.85))),
+            child: Text(
+              data.message,
+              style: AppText.base(
+                fontSize: 12.5.sp,
+                height: 1.4,
+                color: scheme.onSurface.withValues(alpha: 0.85),
+              ),
+            ),
           ),
         ],
-        SizedBox(height: 18.h),
+        18.verticalSpace,
         AppGradientButton(
           label: 'account.reset_this'.tr,
-          onPressed: data.eligible &&
-                  data.quotable &&
-                  data.paymentMethods.isNotEmpty
+          onPressed:
+              data.eligible && data.quotable && data.paymentMethods.isNotEmpty
               ? () => ResetConfirmDialog.show(controller, data)
               : null,
         ),
@@ -500,15 +524,22 @@ class _KvLine extends StatelessWidget {
       child: Row(
         children: [
           Expanded(
-            child: Text(k,
-                style: TextStyle(
-                    fontSize: 13.sp, color: scheme.onSurfaceVariant)),
+            child: Text(
+              k,
+              style: AppText.base(
+                fontSize: 13.sp,
+                color: scheme.onSurfaceVariant,
+              ),
+            ),
           ),
-          Text(v,
-              style: TextStyle(
-                  fontSize: 13.5.sp,
-                  fontWeight: FontWeight.w700,
-                  color: scheme.onSurface)),
+          Text(
+            v,
+            style: AppText.base(
+              fontSize: 13.5.sp,
+              fontWeight: FontWeight.w700,
+              color: scheme.onSurface,
+            ),
+          ),
         ],
       ),
     );
@@ -527,12 +558,14 @@ class _SectionLabel extends StatelessWidget {
     final scheme = Theme.of(context).colorScheme;
     return Text(
       text,
-      style: TextStyle(
-          fontSize: 16.sp, fontWeight: FontWeight.w800, color: scheme.onSurface),
+      style: AppText.base(
+        fontSize: 16.sp,
+        fontWeight: FontWeight.w800,
+        color: scheme.onSurface,
+      ),
     );
   }
 }
-
 
 class _OverviewSkeleton extends StatelessWidget {
   const _OverviewSkeleton();
@@ -543,11 +576,11 @@ class _OverviewSkeleton extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
         CardSkeleton(lines: 5, height: 240.h),
-        SizedBox(height: 16.h),
+        Gap.vLg,
         ShimmerBox(height: 90.h, radius: 16.r),
-        SizedBox(height: 22.h),
+        22.verticalSpace,
         CardSkeleton(lines: 3, height: 120.h),
-        SizedBox(height: 12.h),
+        Gap.vMd,
         CardSkeleton(lines: 3, height: 120.h),
       ],
     );

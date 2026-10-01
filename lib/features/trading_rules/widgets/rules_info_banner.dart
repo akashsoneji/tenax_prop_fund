@@ -1,10 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
-import 'package:google_fonts/google_fonts.dart';
 
 import '../../../shared/theme/app_colors.dart';
 import '../../../shared/theme/app_theme.dart';
 import '../models/rules_models.dart';
+import '../../../shared/theme/app_spacing.dart';
+import '../../../shared/theme/app_text.dart';
 
 /// Generic intro banner used at the top of each tab (pale-tinted card with
 /// an icon + title + body). Different variants pick the icon and the tint.
@@ -57,23 +58,23 @@ class RulesInfoBanner extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             _BadgeOrIcon(index: index, icon: icon, accent: accent, tone: tone),
-            SizedBox(width: 12.w),
+            Gap.hMd,
             Expanded(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
                     title,
-                    style: GoogleFonts.beVietnamPro(
+                    style: AppText.base(
                       fontSize: 15.sp,
                       fontWeight: FontWeight.w800,
                       color: scheme.onSurface,
                     ),
                   ),
-                  SizedBox(height: 6.h),
+                  6.verticalSpace,
                   Text(
                     body,
-                    style: GoogleFonts.beVietnamPro(
+                    style: AppText.base(
                       fontSize: 13.5.sp,
                       height: 1.45,
                       color: scheme.onSurface.withValues(alpha: 0.78),
@@ -117,8 +118,8 @@ class _BadgeOrIcon extends StatelessWidget {
         alignment: Alignment.center,
         child: Text(
           '$index',
-          style: TextStyle(
-              color: AppColors.white,
+          style: AppText.base(
+            color: AppColors.white,
             fontWeight: FontWeight.w800,
             fontSize: 16.sp,
           ),

@@ -4,7 +4,6 @@ import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
-import 'package:google_fonts/google_fonts.dart';
 
 import '../../billing/controllers/billing_controller.dart';
 import '../../billing/models/billing_models.dart';
@@ -27,6 +26,9 @@ import '../widgets/request_payout_sheet.dart';
 import '../widgets/section_title.dart';
 import '../widgets/staggered_grid.dart';
 import '../widgets/stat_tile.dart';
+import '../../../shared/theme/app_spacing.dart';
+import '../../../shared/theme/app_text.dart';
+import '../../../shared/widgets/app_card.dart';
 
 /// Full Rewards screen. Composed of:
 ///
@@ -145,13 +147,13 @@ class _BillingTabContent extends StatelessWidget {
                       'billing.history_title'.tr,
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
-                      style: GoogleFonts.beVietnamPro(
+                      style: AppText.base(
                         fontSize: 20.sp,
                         fontWeight: FontWeight.w800,
                       ),
                     ),
                   ),
-                  SizedBox(width: 10.w),
+                  10.horizontalSpace,
                   Obx(
                     () => SizedBox(
                       height: 36.h,
@@ -180,7 +182,7 @@ class _BillingTabContent extends StatelessWidget {
                             : Icon(Icons.download_rounded, size: 16.w),
                         label: Text(
                           'billing.export'.tr,
-                          style: GoogleFonts.beVietnamPro(
+                          style: AppText.base(
                             fontSize: 12.sp,
                             fontWeight: FontWeight.w700,
                           ),
@@ -190,7 +192,7 @@ class _BillingTabContent extends StatelessWidget {
                   ),
                 ],
               ),
-              SizedBox(height: 14.h),
+              14.verticalSpace,
               Row(
                 children: [
                   Expanded(
@@ -205,7 +207,7 @@ class _BillingTabContent extends StatelessWidget {
                       ),
                     ),
                   ),
-                  SizedBox(width: 10.w),
+                  10.horizontalSpace,
                   Expanded(
                     child: Obx(
                       () => BillingFilterDropdown<BillingStatusFilter>(
@@ -220,7 +222,7 @@ class _BillingTabContent extends StatelessWidget {
                   ),
                 ],
               ),
-              SizedBox(height: 16.h),
+              Gap.vLg,
               BillingTransactionList(
                 transactions: controller.filteredTransactions(data),
               ),
@@ -341,14 +343,14 @@ class _FinanceTabs extends StatelessWidget {
                             ? scheme.onPrimary
                             : scheme.onSurface.withValues(alpha: 0.62),
                       ),
-                      SizedBox(height: 4.h),
+                      Gap.vXs,
                       FittedBox(
                         fit: BoxFit.scaleDown,
                         child: Text(
                           tabs[i].label,
                           maxLines: 1,
                           textAlign: TextAlign.center,
-                          style: GoogleFonts.beVietnamPro(
+                          style: AppText.base(
                             fontSize: 10.5.sp,
                             fontWeight: FontWeight.w700,
                             color: i == selectedTab
@@ -379,12 +381,12 @@ class _RewardsBody extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
         _StatGrid(data: data),
-        SizedBox(height: 26.h),
+        26.verticalSpace,
         RewardsSectionTitle('rewards.requests'.tr),
         _RequestsCard(controller: controller, data: data),
-        SizedBox(height: 18.h),
+        18.verticalSpace,
         _RequestPayoutCta(controller: controller, data: data),
-        SizedBox(height: 18.h),
+        18.verticalSpace,
         InfoBanner(
           variant: InfoBannerVariant.warning,
           title: 'rewards.name_match_id'.tr,
@@ -407,9 +409,9 @@ class _RewardsSkeleton extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
         HeroSkeleton(height: 120.h),
-        SizedBox(height: 26.h),
+        26.verticalSpace,
         const StatGridSkeleton(),
-        SizedBox(height: 18.h),
+        18.verticalSpace,
         CardSkeleton(lines: 4, height: 200.h),
       ],
     );
@@ -485,9 +487,9 @@ class _RequestsCard extends StatelessWidget {
           ),
         );
       },
-      child: Container(
+      child: AppCard(
+        radius: 18,
         padding: EdgeInsets.fromLTRB(16.w, 14.h, 16.w, 14.h),
-        decoration: AppTheme.surfaceCard(scheme, radius: 18),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
@@ -495,14 +497,14 @@ class _RequestsCard extends StatelessWidget {
               padding: EdgeInsets.only(bottom: 6.h, top: 2.h),
               child: Text(
                 'rewards.what_stands'.tr,
-                style: GoogleFonts.beVietnamPro(
+                style: AppText.base(
                   fontSize: 15.5.sp,
                   fontWeight: FontWeight.w800,
                   color: scheme.onSurface,
                 ),
               ),
             ),
-            SizedBox(height: 4.h),
+            Gap.vXs,
             Column(
               children: [
                 for (var i = 0; i < data.requirements.length; i++)
@@ -512,7 +514,7 @@ class _RequestsCard extends StatelessWidget {
                   ),
               ],
             ),
-            SizedBox(height: 6.h),
+            6.verticalSpace,
             Builder(
               builder: (context) {
                 final n = controller.blockingCount(data);

@@ -90,11 +90,11 @@ class _CertificatesSkeleton extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
         CardSkeleton(lines: 3, height: 150.h),
-        SizedBox(height: 14.h),
+        14.verticalSpace,
         CardSkeleton(lines: 3, height: 150.h),
-        SizedBox(height: 14.h),
+        14.verticalSpace,
         CardSkeleton(lines: 3, height: 150.h),
-        SizedBox(height: 14.h),
+        14.verticalSpace,
         CardSkeleton(lines: 3, height: 150.h),
       ],
     );

@@ -3,6 +3,8 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 
 import '../../../shared/theme/app_colors.dart';
 import '../models/accounts_models.dart';
+import '../../../shared/theme/app_spacing.dart';
+import '../../../shared/theme/app_text.dart';
 
 /// Horizontally scrollable status tabs with a count badge on each — mirrors the
 /// web "Active / Funded / Completed / Breached / All" row. The selected tab is a
@@ -29,7 +31,7 @@ class AccountsStatusTabs extends StatelessWidget {
         scrollDirection: Axis.horizontal,
         physics: const BouncingScrollPhysics(),
         itemCount: AccountTab.values.length,
-        separatorBuilder: (_, _) => SizedBox(width: 8.w),
+        separatorBuilder: (_, _) => Gap.hSm,
         itemBuilder: (context, i) {
           final tab = AccountTab.values[i];
           return _Tab(
@@ -84,13 +86,13 @@ class _Tab extends StatelessWidget {
           children: [
             Text(
               label,
-              style: TextStyle(
+              style: AppText.base(
                 fontSize: 12.5.sp,
                 fontWeight: FontWeight.w700,
                 color: fg,
               ),
             ),
-            SizedBox(width: 7.w),
+            7.horizontalSpace,
             Container(
               padding: EdgeInsets.symmetric(horizontal: 6.w, vertical: 2.h),
               decoration: BoxDecoration(
@@ -101,7 +103,7 @@ class _Tab extends StatelessWidget {
               ),
               child: Text(
                 '$count',
-                style: TextStyle(
+                style: AppText.base(
                   fontSize: 11.sp,
                   fontWeight: FontWeight.w800,
                   color: selected ? AppColors.white : scheme.primary,

@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
-import 'package:google_fonts/google_fonts.dart';
 
 import '../../../shared/theme/app_colors.dart';
 import '../../../shared/theme/app_theme.dart';
+import '../../../shared/theme/app_text.dart';
 
 /// The big brand-gradient result banner
 /// Yellow headline value + white subtitle, matching the design. Animates its
@@ -51,18 +51,18 @@ class CalcResultCard extends StatelessWidget {
               headline,
               key: ValueKey(headline),
               textAlign: TextAlign.center,
-              style: GoogleFonts.beVietnamPro(
+              style: AppText.base(
                 fontSize: 30.sp,
                 fontWeight: FontWeight.w800,
                 color: scheme.secondary,
               ),
             ),
           ),
-          SizedBox(height: 6.h),
+          6.verticalSpace,
           Text(
             subtitle,
             textAlign: TextAlign.center,
-            style: GoogleFonts.beVietnamPro(
+            style: AppText.base(
               fontSize: 14.sp,
               fontWeight: FontWeight.w500,
               color: AppColors.white.withValues(alpha: 0.92),
@@ -112,11 +112,11 @@ class CalcNoteBanner extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Icon(icon, size: 20.w, color: iconColor),
-          SizedBox(width: 10.w),
+          10.horizontalSpace,
           Expanded(
             child: Text(
               text,
-              style: GoogleFonts.beVietnamPro(
+              style: AppText.base(
                 fontSize: 14.sp,
                 color: scheme.onSurface.withValues(alpha: 0.8),
               ),

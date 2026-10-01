@@ -1,3 +1,0 @@
-#include "Generated.xcconfig"
-FLAVOR_NAME=client_a
-LAUNCH_BG_COLOR=1E88E5

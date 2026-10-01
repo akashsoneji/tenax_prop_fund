@@ -4,6 +4,7 @@ import 'package:get/get.dart';
 
 import '../../../shared/theme/app_text.dart';
 import '../models/competition_models.dart';
+import '../../../shared/theme/app_spacing.dart';
 
 /// Leaderboard card — ranked rows with the signed-in trader's row highlighted
 /// via `is_you`. Shows a placeholder while no scores have been posted.
@@ -79,10 +80,12 @@ class _LeaderboardRow extends StatelessWidget {
                   style: AppText.title(fontSize: 12.sp, color: accent),
                 ),
               ),
-              SizedBox(width: 12.w),
+              Gap.hMd,
               Expanded(
                 child: Text(
-                  row.isYou ? '${row.name} · ${'competitions.you'.tr}' : row.name,
+                  row.isYou
+                      ? '${row.name} · ${'competitions.you'.tr}'
+                      : row.name,
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
                   style: AppText.subtitle(
@@ -91,7 +94,7 @@ class _LeaderboardRow extends StatelessWidget {
                   ),
                 ),
               ),
-              SizedBox(width: 10.w),
+              10.horizontalSpace,
               Flexible(
                 child: Text(
                   row.score,

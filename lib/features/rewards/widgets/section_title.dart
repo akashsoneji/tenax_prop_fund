@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
-import 'package:google_fonts/google_fonts.dart';
+import '../../../shared/theme/app_text.dart';
 
 /// Small section label used between blocks (e.g. "Requests").
 class RewardsSectionTitle extends StatelessWidget {
@@ -14,7 +14,7 @@ class RewardsSectionTitle extends StatelessWidget {
       padding: EdgeInsets.only(left: 2.w, bottom: 10.h),
       child: Text(
         text,
-        style: GoogleFonts.beVietnamPro(
+        style: AppText.base(
           fontSize: 18.sp,
           fontWeight: FontWeight.w800,
           color: scheme.onSurface,

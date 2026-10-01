@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
-import 'package:google_fonts/google_fonts.dart';
 
 import '../../../shared/theme/app_colors.dart';
 import '../../../shared/theme/app_theme.dart';
@@ -12,6 +11,9 @@ import '../../../shared/widgets/skeletons/skeletons.dart';
 import '../controllers/notifications_controller.dart';
 import '../models/notification_models.dart';
 import '../widgets/notification_row.dart';
+import '../../../shared/theme/app_spacing.dart';
+import '../../../shared/theme/app_text.dart';
+import '../../../shared/widgets/app_card.dart';
 
 /// Notifications screen. Rows are grouped under date-section headers, each
 /// group rendered as one surface card with divider-separated rows. A
@@ -35,49 +37,51 @@ class NotificationsView extends StatelessWidget {
           return false;
         },
         child: CustomScrollView(
-        physics: const BouncingScrollPhysics(),
-        slivers: [
-          PinnedGradientAppBar(
-            title: 'notifications.title'.tr,
-            actions: [
-              IconButton(
-                onPressed: () => _openPreferences(context, c),
-                icon: Icon(Icons.tune_rounded, color: AppColors.white, size: 22.w),
-                tooltip: 'notifications.preferences'.tr,
-              ),
-              TextButton(
-                onPressed: c.markAllRead,
-                child: Text(
-                  'common.mark_all_read'.tr,
-                  style: GoogleFonts.beVietnamPro(
+          physics: const BouncingScrollPhysics(),
+          slivers: [
+            PinnedGradientAppBar(
+              title: 'notifications.title'.tr,
+              actions: [
+                IconButton(
+                  onPressed: () => _openPreferences(context, c),
+                  icon: Icon(
+                    Icons.tune_rounded,
                     color: AppColors.white,
-                    fontSize: 13.5.sp,
-                    fontWeight: FontWeight.w600,
+                    size: 22.w,
+                  ),
+                  tooltip: 'notifications.preferences'.tr,
+                ),
+                TextButton(
+                  onPressed: c.markAllRead,
+                  child: Text(
+                    'common.mark_all_read'.tr,
+                    style: AppText.base(
+                      color: AppColors.white,
+                      fontSize: 13.5.sp,
+                      fontWeight: FontWeight.w600,
+                    ),
                   ),
                 ),
-              ),
-            ],
-          ),
-          SliverToBoxAdapter(
-            child: Padding(
-              padding: EdgeInsets.fromLTRB(16.w, 18.h, 16.w, 32.h),
-              child: Obx(
-                () => DataStateBuilder<List<NotificationGroup>>(
-                  state: c.state,
-                  onRetry: c.load,
-                  skeleton: const _NotificationsSkeleton(),
-                  builder: (groups) => Column(
-                    crossAxisAlignment: CrossAxisAlignment.stretch,
-                    children: [
-                      for (final g in groups) _GroupBlock(group: g),
-                    ],
+              ],
+            ),
+            SliverToBoxAdapter(
+              child: Padding(
+                padding: EdgeInsets.fromLTRB(16.w, 18.h, 16.w, 32.h),
+                child: Obx(
+                  () => DataStateBuilder<List<NotificationGroup>>(
+                    state: c.state,
+                    onRetry: c.load,
+                    skeleton: const _NotificationsSkeleton(),
+                    builder: (groups) => Column(
+                      crossAxisAlignment: CrossAxisAlignment.stretch,
+                      children: [for (final g in groups) _GroupBlock(group: g)],
+                    ),
                   ),
                 ),
               ),
             ),
-          ),
-        ],
-      ),
+          ],
+        ),
       ),
     );
   }
@@ -113,7 +117,7 @@ class NotificationsView extends StatelessWidget {
                     Expanded(
                       child: Text(
                         'notifications.preferences'.tr,
-                        style: GoogleFonts.beVietnamPro(
+                        style: AppText.base(
                           fontSize: 17.sp,
                           fontWeight: FontWeight.w800,
                           color: scheme.onSurface,
@@ -133,11 +137,12 @@ class NotificationsView extends StatelessWidget {
                                 width: 16.w,
                                 height: 16.w,
                                 child: const CircularProgressIndicator(
-                                    strokeWidth: 2),
+                                  strokeWidth: 2,
+                                ),
                               )
                             : Text(
                                 'common.save'.tr,
-                                style: GoogleFonts.beVietnamPro(
+                                style: AppText.base(
                                   fontSize: 14.sp,
                                   fontWeight: FontWeight.w700,
                                   color: scheme.primary,
@@ -162,7 +167,7 @@ class NotificationsView extends StatelessWidget {
                       padding: EdgeInsets.symmetric(vertical: 40.h),
                       child: Text(
                         'common.no_data'.tr,
-                        style: GoogleFonts.beVietnamPro(
+                        style: AppText.base(
                           fontSize: 14.sp,
                           color: scheme.onSurfaceVariant,
                         ),
@@ -184,24 +189,24 @@ class NotificationsView extends StatelessWidget {
                         children: [
                           Text(
                             item.label,
-                            style: GoogleFonts.beVietnamPro(
+                            style: AppText.base(
                               fontSize: 14.5.sp,
                               fontWeight: FontWeight.w700,
                               color: scheme.onSurface,
                             ),
                           ),
                           if (item.description.isNotEmpty) ...[
-                            SizedBox(height: 2.h),
+                            Gap.vXxs,
                             Text(
                               item.description,
-                              style: GoogleFonts.beVietnamPro(
+                              style: AppText.base(
                                 fontSize: 12.sp,
                                 height: 1.3,
                                 color: scheme.onSurfaceVariant,
                               ),
                             ),
                           ],
-                          SizedBox(height: 8.h),
+                          Gap.vSm,
                           Wrap(
                             spacing: 8.w,
                             runSpacing: 8.h,
@@ -209,8 +214,8 @@ class NotificationsView extends StatelessWidget {
                               _ChannelChip(
                                 label: 'notifications.channel_push'.tr,
                                 on: item.broadcast,
-                                onChanged: (v) => c.togglePref(item.key,
-                                    broadcast: v),
+                                onChanged: (v) =>
+                                    c.togglePref(item.key, broadcast: v),
                               ),
                               _ChannelChip(
                                 label: 'notifications.channel_inapp'.tr,
@@ -280,11 +285,11 @@ class _NotificationsSkeleton extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
         ShimmerBox(width: 120.w, height: 16.h),
-        SizedBox(height: 12.h),
+        Gap.vMd,
         CardSkeleton(lines: 3, height: 130.h),
-        SizedBox(height: 18.h),
+        18.verticalSpace,
         ShimmerBox(width: 120.w, height: 16.h),
-        SizedBox(height: 12.h),
+        Gap.vMd,
         CardSkeleton(lines: 3, height: 130.h),
       ],
     );
@@ -323,17 +328,17 @@ class _GroupBlock extends StatelessWidget {
             padding: EdgeInsets.only(left: 2.w, bottom: 10.h),
             child: Text(
               group.label.tr,
-              style: GoogleFonts.beVietnamPro(
+              style: AppText.base(
                 fontSize: 18.sp,
                 fontWeight: FontWeight.w800,
                 color: scheme.onSurface,
               ),
             ),
           ),
-          Container(
+          AppCard(
+            radius: 18,
             padding: EdgeInsets.symmetric(horizontal: 14.w, vertical: 2.h),
             margin: EdgeInsets.only(bottom: 18.h),
-            decoration: AppTheme.surfaceCard(scheme, radius: 18),
             child: Column(
               children: [
                 for (var i = 0; i < items.length; i++) ...[

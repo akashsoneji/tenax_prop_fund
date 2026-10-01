@@ -4,6 +4,8 @@ import 'package:get/get.dart';
 
 import '../../../shared/theme/app_colors.dart';
 import '../../../shared/theme/app_theme.dart';
+import '../../../shared/theme/app_spacing.dart';
+import '../../../shared/theme/app_text.dart';
 
 /// The "ACCOUNT CENTER" hero — a compact gradient banner. Eyebrow + title sit
 /// beside the primary CTA; a single-row metric strip (Owned / Active / Funded /
@@ -58,7 +60,7 @@ class AccountCenterHero extends StatelessWidget {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     _Eyebrow(label: 'accounts.center'.tr),
-                    SizedBox(height: 6.h),
+                    6.verticalSpace,
                     Text(
                       'accounts.subtitle'.tr,
                       maxLines: 2,
@@ -72,7 +74,7 @@ class AccountCenterHero extends StatelessWidget {
                   ],
                 ),
               ),
-              SizedBox(width: 10.w),
+              10.horizontalSpace,
               if (trialEnabled)
                 _IconCta(
                   icon: Icons.card_giftcard_rounded,
@@ -81,14 +83,14 @@ class AccountCenterHero extends StatelessWidget {
                 ),
             ],
           ),
-          SizedBox(height: 10.h),
+          10.verticalSpace,
           _MetricStrip(
             owned: ownedTotal,
             active: active,
             funded: funded,
             provisioning: provisioning,
           ),
-          SizedBox(height: 10.h),
+          10.verticalSpace,
           _HeroButton(
             label: 'accounts.start_challenge'.tr,
             icon: Icons.rocket_launch_rounded,
@@ -123,10 +125,10 @@ class _Eyebrow extends StatelessWidget {
               shape: BoxShape.circle,
             ),
           ),
-          SizedBox(width: 7.w),
+          7.horizontalSpace,
           Text(
             label,
-            style: TextStyle(
+            style: AppText.base(
               color: AppColors.white,
               fontSize: 10.sp,
               fontWeight: FontWeight.w700,
@@ -216,7 +218,7 @@ class _Metric extends StatelessWidget {
           child: Text(
             '$value',
             maxLines: 1,
-            style: TextStyle(
+            style: AppText.base(
               color: AppColors.white,
               fontSize: 17.sp,
               fontWeight: FontWeight.w800,
@@ -224,13 +226,13 @@ class _Metric extends StatelessWidget {
             ),
           ),
         ),
-        SizedBox(height: 3.h),
+        3.verticalSpace,
         Text(
           label.toUpperCase(),
           maxLines: 1,
           overflow: TextOverflow.ellipsis,
           textAlign: TextAlign.center,
-          style: TextStyle(
+          style: AppText.base(
             color: AppColors.white.withValues(alpha: 0.72),
             fontSize: 9.sp,
             fontWeight: FontWeight.w700,
@@ -266,8 +268,11 @@ class _IconCta extends StatelessWidget {
           child: SizedBox(
             width: 36.w,
             height: 36.h,
-            child: Icon(Icons.card_giftcard_rounded,
-                size: 19.w, color: AppColors.white),
+            child: Icon(
+              Icons.card_giftcard_rounded,
+              size: 19.w,
+              color: AppColors.white,
+            ),
           ),
         ),
       ),
@@ -300,14 +305,17 @@ class _HeroButton extends StatelessWidget {
           child: Row(
             mainAxisSize: MainAxisSize.min,
             children: [
-              Icon(icon,
-                  size: 16.w, color: Theme.of(context).colorScheme.primary),
-              SizedBox(width: 8.w),
+              Icon(
+                icon,
+                size: 16.w,
+                color: Theme.of(context).colorScheme.primary,
+              ),
+              Gap.hSm,
               Text(
                 label,
                 maxLines: 1,
                 overflow: TextOverflow.ellipsis,
-                style: TextStyle(
+                style: AppText.base(
                   color: Theme.of(context).colorScheme.primary,
                   fontSize: 14.sp,
                   fontWeight: FontWeight.w700,

@@ -54,12 +54,11 @@ class _BiometricButtonState extends State<BiometricButton> {
     setState(() => _busy = true);
     try {
       final ok = await _auth.authenticate(
-        localizedReason: 'login.biometric_reason'
-            .trParams({'app': FlavorResolver.appName}),
-        options: const AuthenticationOptions(
-          biometricOnly: true,
-          stickyAuth: true,
-        ),
+        localizedReason: 'login.biometric_reason'.trParams({
+          'app': FlavorResolver.appName,
+        }),
+        biometricOnly: true,
+        persistAcrossBackgrounding: true,
       );
       if (ok) widget.onAuthenticated(widget.savedEmail!);
     } catch (_) {
@@ -89,8 +88,11 @@ class _BiometricButtonState extends State<BiometricButton> {
                   padding: EdgeInsets.all(16.w),
                   child: const CircularProgressIndicator(strokeWidth: 2),
                 )
-              : Icon(Icons.fingerprint_rounded,
-                  size: 28.w, color: scheme.primary),
+              : Icon(
+                  Icons.fingerprint_rounded,
+                  size: 28.w,
+                  color: scheme.primary,
+                ),
         ),
       ),
     );

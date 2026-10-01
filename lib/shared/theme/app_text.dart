@@ -13,6 +13,14 @@ import 'package:google_fonts/google_fonts.dart';
 class AppText {
   const AppText._();
 
+  /// Font-only style per weight, built once. `GoogleFonts.beVietnamPro(...)`
+  /// looks the variant up and allocates on every call; widgets rebuild often
+  /// (live ticks), so roles derive from this cache with a cheap `copyWith`.
+  static final Map<FontWeight?, TextStyle> _byWeight = {};
+
+  static TextStyle _font(FontWeight? weight) =>
+      _byWeight[weight] ??= GoogleFonts.beVietnamPro(fontWeight: weight);
+
   /// Swap this one call to change the entire app's font family.
   static TextStyle base({
     double? fontSize,
@@ -21,9 +29,8 @@ class AppText {
     double? height,
     double? letterSpacing,
   }) =>
-      GoogleFonts.beVietnamPro(
+      _font(fontWeight).copyWith(
         fontSize: fontSize,
-        fontWeight: fontWeight,
         color: color,
         height: height,
         letterSpacing: letterSpacing,
@@ -34,23 +41,37 @@ class AppText {
       GoogleFonts.beVietnamProTextTheme(base);
 
   // ---------------------------------------------------------------------------
-  // Named roles (size + weight only). Pass color per call site.
+  // Named roles = weight + default size. Pass color per call site (so the same
+  // style works in light/dark) and override size/height/letterSpacing only
+  // where the design asks for it. Sizes are ScreenUtil values (`13.sp`).
   // ---------------------------------------------------------------------------
-  static TextStyle heading({Color? color, double fontSize = 20}) =>
-      base(fontSize: fontSize, fontWeight: FontWeight.w800, color: color);
 
-  static TextStyle title({Color? color, double fontSize = 16}) =>
-      base(fontSize: fontSize, fontWeight: FontWeight.w700, color: color);
+  /// w800 — screen and card headings.
+  static TextStyle heading({Color? color, double fontSize = 20, double? height, double? letterSpacing}) =>
+      base(fontSize: fontSize, fontWeight: FontWeight.w800, color: color, height: height, letterSpacing: letterSpacing);
 
-  static TextStyle subtitle({Color? color, double fontSize = 14}) =>
-      base(fontSize: fontSize, fontWeight: FontWeight.w600, color: color);
+  /// w700 — titles, emphasised labels, links.
+  static TextStyle title({Color? color, double fontSize = 16, double? height, double? letterSpacing}) =>
+      base(fontSize: fontSize, fontWeight: FontWeight.w700, color: color, height: height, letterSpacing: letterSpacing);
 
-  static TextStyle body({Color? color, double fontSize = 14, double? height}) =>
-      base(fontSize: fontSize, fontWeight: FontWeight.w500, color: color, height: height);
+  /// w600 — subtitles, row labels, chip text.
+  static TextStyle subtitle({Color? color, double fontSize = 14, double? height, double? letterSpacing}) =>
+      base(fontSize: fontSize, fontWeight: FontWeight.w600, color: color, height: height, letterSpacing: letterSpacing);
 
-  static TextStyle label({Color? color, double fontSize = 12}) =>
-      base(fontSize: fontSize, fontWeight: FontWeight.w500, color: color);
+  /// w500 — body copy.
+  static TextStyle body({Color? color, double fontSize = 14, double? height, double? letterSpacing}) =>
+      base(fontSize: fontSize, fontWeight: FontWeight.w500, color: color, height: height, letterSpacing: letterSpacing);
 
-  static TextStyle value({Color? color, double fontSize = 22}) =>
-      base(fontSize: fontSize, fontWeight: FontWeight.w800, color: color);
+  /// w400 — plain/secondary copy, captions, helper text.
+  static TextStyle regular({Color? color, double fontSize = 14, double? height, double? letterSpacing}) =>
+      base(fontSize: fontSize, fontWeight: FontWeight.w400, color: color, height: height, letterSpacing: letterSpacing);
+
+  /// w500, small — field labels and meta text.
+  static TextStyle label({Color? color, double fontSize = 12, double? height, double? letterSpacing}) =>
+      base(fontSize: fontSize, fontWeight: FontWeight.w500, color: color, height: height, letterSpacing: letterSpacing);
+
+  /// w800, large — numbers and amounts.
+  static TextStyle value({Color? color, double fontSize = 22, double? height, double? letterSpacing}) =>
+      base(fontSize: fontSize, fontWeight: FontWeight.w800, color: color, height: height, letterSpacing: letterSpacing);
+
 }

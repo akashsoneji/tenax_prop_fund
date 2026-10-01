@@ -11,6 +11,7 @@ import '../../shared/theme/app_theme.dart';
 import 'app_status_controller.dart';
 import 'in_app_update_service.dart';
 import 'update_web_view_screen.dart';
+import '../../shared/theme/app_spacing.dart';
 
 enum _State { idle, downloading, installing, error, installBlocked }
 
@@ -271,7 +272,7 @@ class _ForceUpdateDialogState extends State<ForceUpdateDialog> {
                                   color: Colors.white,
                                 ),
                               ),
-                              SizedBox(height: 14.h),
+                              14.verticalSpace,
                               _VersionPill(latest: latest),
                             ],
                           ),
@@ -292,7 +293,7 @@ class _ForceUpdateDialogState extends State<ForceUpdateDialog> {
                                   height: 1.2,
                                 ),
                               ),
-                              SizedBox(height: 8.h),
+                              Gap.vSm,
                               Text(
                                 _subtitleFor(latest),
                                 textAlign: TextAlign.center,
@@ -303,7 +304,7 @@ class _ForceUpdateDialogState extends State<ForceUpdateDialog> {
                                 ),
                               ),
                               if (_state == _State.downloading) ...[
-                                SizedBox(height: 18.h),
+                                18.verticalSpace,
                                 Row(
                                   mainAxisAlignment:
                                       MainAxisAlignment.spaceBetween,
@@ -326,7 +327,7 @@ class _ForceUpdateDialogState extends State<ForceUpdateDialog> {
                                     ),
                                   ],
                                 ),
-                                SizedBox(height: 8.h),
+                                Gap.vSm,
                                 ClipRRect(
                                   borderRadius: BorderRadius.circular(8.r),
                                   child: LinearProgressIndicator(
@@ -343,7 +344,7 @@ class _ForceUpdateDialogState extends State<ForceUpdateDialog> {
                                 ),
                               ],
                               if (releaseNotes.isNotEmpty) ...[
-                                SizedBox(height: 20.h),
+                                20.verticalSpace,
                                 Container(
                                   width: double.infinity,
                                   padding: EdgeInsets.all(14.w),
@@ -364,7 +365,7 @@ class _ForceUpdateDialogState extends State<ForceUpdateDialog> {
                                             size: 14.w,
                                             color: AppColors.brandPurple,
                                           ),
-                                          SizedBox(width: 6.w),
+                                          6.horizontalSpace,
                                           Text(
                                             'app_status.whats_new'.tr,
                                             style: textTheme.labelMedium
@@ -377,7 +378,7 @@ class _ForceUpdateDialogState extends State<ForceUpdateDialog> {
                                           ),
                                         ],
                                       ),
-                                      SizedBox(height: 8.h),
+                                      Gap.vSm,
                                       Text(
                                         releaseNotes,
                                         style: textTheme.bodySmall?.copyWith(
@@ -389,7 +390,7 @@ class _ForceUpdateDialogState extends State<ForceUpdateDialog> {
                                   ),
                                 ),
                               ],
-                              SizedBox(height: 22.h),
+                              22.verticalSpace,
                               _CtaButton(
                                 label: _ctaLabel(hasApk),
                                 icon: _ctaIcon(hasApk),
@@ -409,7 +410,7 @@ class _ForceUpdateDialogState extends State<ForceUpdateDialog> {
                               ),
                               if (!widget.isForceUpdate &&
                                   _state == _State.idle) ...[
-                                SizedBox(height: 6.h),
+                                6.verticalSpace,
                                 TextButton(
                                   onPressed: () async {
                                     await controller.skipUpdateFor6Hours();
@@ -552,7 +553,7 @@ class _VersionPill extends StatelessWidget {
             size: 14.w,
             color: AppColors.brandPurple,
           ),
-          SizedBox(width: 6.w),
+          6.horizontalSpace,
           Text(
             'v$latest',
             style: textTheme.labelMedium?.copyWith(
@@ -634,7 +635,7 @@ class _CtaButton extends StatelessWidget {
                         children: [
                           if (icon != null) ...[
                             Icon(icon, size: 18.w, color: Colors.white),
-                            SizedBox(width: 8.w),
+                            Gap.hSm,
                           ],
                           Text(
                             label,

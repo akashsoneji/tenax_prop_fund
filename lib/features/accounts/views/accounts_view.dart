@@ -13,6 +13,7 @@ import '../widgets/account_center_hero.dart';
 import '../widgets/account_list_card.dart';
 import '../widgets/accounts_search_bar.dart';
 import '../widgets/accounts_status_tabs.dart';
+import '../../../shared/theme/app_spacing.dart';
 
 /// "Account Center" screen — a mobile-native take on the web `/app/accounts`
 /// page: gradient hero with stat cards + CTAs, status tabs with count badges,
@@ -88,9 +89,7 @@ class _AccountsBody extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final labels = {
-      for (final tab in AccountTab.values) tab: tab.labelKey.tr,
-    };
+    final labels = {for (final tab in AccountTab.values) tab: tab.labelKey.tr};
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -104,7 +103,7 @@ class _AccountsBody extends StatelessWidget {
           onFreeTrial: () => Get.toNamed(AppRoutes.challenge),
           onStartChallenge: () => Get.toNamed(AppRoutes.challenge),
         ),
-        SizedBox(height: 14.h),
+        14.verticalSpace,
         Obx(
           () => AccountsStatusTabs(
             labels: labels,
@@ -113,7 +112,7 @@ class _AccountsBody extends StatelessWidget {
             onChanged: controller.selectTab,
           ),
         ),
-        SizedBox(height: 12.h),
+        Gap.vMd,
         AccountsSearchBar(
           hintText: 'accounts.search_hint'.tr,
           allPlansLabel: 'accounts.all_plans'.tr,
@@ -122,7 +121,7 @@ class _AccountsBody extends StatelessWidget {
           onQueryChanged: controller.setQuery,
           onPlanChanged: controller.setPlanFilter,
         ),
-        SizedBox(height: 14.h),
+        14.verticalSpace,
         Obx(() {
           final rows = controller.visibleAccounts(data);
           if (rows.isEmpty) return const _NoMatches();
@@ -165,12 +164,15 @@ class _NoMatches extends StatelessWidget {
       padding: EdgeInsets.symmetric(vertical: 36.h),
       child: Column(
         children: [
-          Icon(Icons.inbox_rounded,
-              size: 44.w, color: scheme.onSurfaceVariant.withValues(alpha: 0.6)),
-          SizedBox(height: 12.h),
+          Icon(
+            Icons.inbox_rounded,
+            size: 44.w,
+            color: scheme.onSurfaceVariant.withValues(alpha: 0.6),
+          ),
+          Gap.vMd,
           Text(
             'accounts.no_matches'.tr,
-            style: TextStyle(
+            style: AppText.base(
               fontSize: 14.sp,
               fontWeight: FontWeight.w600,
               color: scheme.onSurfaceVariant,
@@ -194,15 +196,15 @@ class _AccountsSkeleton extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
         HeroSkeleton(height: 160.h),
-        SizedBox(height: 14.h),
+        14.verticalSpace,
         ShimmerBox(height: 34.h, radius: 18.r),
-        SizedBox(height: 12.h),
+        Gap.vMd,
         ShimmerBox(height: 42.h, radius: 12.r),
-        SizedBox(height: 14.h),
+        14.verticalSpace,
         const AccountCardSkeleton(),
-        SizedBox(height: 10.h),
+        10.verticalSpace,
         const AccountCardSkeleton(),
-        SizedBox(height: 10.h),
+        10.verticalSpace,
         const AccountCardSkeleton(),
       ],
     );

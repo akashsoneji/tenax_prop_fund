@@ -5,6 +5,7 @@ import 'package:get/get.dart';
 import '../../shared/theme/app_colors.dart';
 import '../../shared/theme/app_theme.dart';
 import 'app_status_controller.dart';
+import '../../shared/theme/app_spacing.dart';
 
 /// Full-screen widget shown by [AppStatusOverlay] while the backend reports
 /// `is_under_maintenance = true`. Scroll-safe (landscape + small phones),
@@ -39,9 +40,9 @@ class MaintenanceScreen extends StatelessWidget {
                       mainAxisSize: MainAxisSize.min,
                       children: [
                         _HeroIcon(gradient: AppTheme.heroGradient(scheme)),
-                        SizedBox(height: 28.h),
+                        28.verticalSpace,
                         _StatusPill(),
-                        SizedBox(height: 16.h),
+                        Gap.vLg,
                         Text(
                           'app_status.maintenance_title'.tr,
                           style: textTheme.titleLarge?.copyWith(
@@ -51,7 +52,7 @@ class MaintenanceScreen extends StatelessWidget {
                           ),
                           textAlign: TextAlign.center,
                         ),
-                        SizedBox(height: 10.h),
+                        10.verticalSpace,
                         Text(
                           'app_status.maintenance_message'.tr,
                           style: textTheme.bodyMedium?.copyWith(
@@ -61,7 +62,7 @@ class MaintenanceScreen extends StatelessWidget {
                           ),
                           textAlign: TextAlign.center,
                         ),
-                        SizedBox(height: 32.h),
+                        Gap.vXxl,
                         _RetryButton(
                           controller: controller,
                           gradient: AppTheme.heroGradient(scheme),
@@ -162,7 +163,7 @@ class _StatusPill extends StatelessWidget {
         mainAxisSize: MainAxisSize.min,
         children: [
           _PulseDot(color: AppColors.brandPurple),
-          SizedBox(width: 8.w),
+          Gap.hSm,
           Text(
             'app_status.in_progress'.tr,
             style: textTheme.labelMedium?.copyWith(
@@ -303,7 +304,7 @@ class _RetryButton extends StatelessWidget {
                             size: 20.w,
                             color: Colors.white,
                           ),
-                          SizedBox(width: 8.w),
+                          Gap.hSm,
                           Text(
                             'app_status.retry'.tr,
                             style: textTheme.labelLarge?.copyWith(

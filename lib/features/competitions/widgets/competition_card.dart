@@ -7,6 +7,7 @@ import '../../../shared/theme/app_text.dart';
 import '../../../shared/widgets/app_pill.dart';
 import '../../../shared/widgets/app_stat_tile.dart';
 import '../models/competition_models.dart';
+import '../../../shared/theme/app_spacing.dart';
 
 /// One competition in the list: name + status pill, description, date window,
 /// a prize-pool / entries / rank stat row and the entry CTA. Tapping the card
@@ -59,7 +60,7 @@ class CompetitionCard extends StatelessWidget {
                       ),
                     ),
                   ),
-                  SizedBox(width: 10.w),
+                  10.horizontalSpace,
                   AppPill.status(
                     label: competition.statusLabel.isEmpty
                         ? competition.status.labelKey.tr
@@ -70,7 +71,7 @@ class CompetitionCard extends StatelessWidget {
                 ],
               ),
               if (description != null && description.isNotEmpty) ...[
-                SizedBox(height: 8.h),
+                Gap.vSm,
                 Text(
                   description,
                   maxLines: 2,
@@ -82,7 +83,7 @@ class CompetitionCard extends StatelessWidget {
                 ),
               ],
               if (dateRange.isNotEmpty) ...[
-                SizedBox(height: 10.h),
+                10.verticalSpace,
                 Row(
                   children: [
                     Icon(
@@ -90,7 +91,7 @@ class CompetitionCard extends StatelessWidget {
                       size: 14.w,
                       color: scheme.onSurfaceVariant,
                     ),
-                    SizedBox(width: 6.w),
+                    6.horizontalSpace,
                     Expanded(
                       child: Text(
                         dateRange,
@@ -105,7 +106,7 @@ class CompetitionCard extends StatelessWidget {
                   ],
                 ),
               ],
-              SizedBox(height: 14.h),
+              14.verticalSpace,
               Row(
                 children: [
                   Expanded(
@@ -131,7 +132,7 @@ class CompetitionCard extends StatelessWidget {
                   ),
                 ],
               ),
-              SizedBox(height: 14.h),
+              14.verticalSpace,
               _EntryCta(
                 competition: competition,
                 registered: registered,
@@ -169,22 +170,22 @@ class _EntryCta extends StatelessWidget {
     final label = registered
         ? 'competitions.registered'.tr
         : competition.canRegister
-            ? 'competitions.register'.tr
-            : (note != null && note.isNotEmpty)
-                ? note
-                : 'competitions.registration_closed'.tr;
+        ? 'competitions.register'.tr
+        : (note != null && note.isNotEmpty)
+        ? note
+        : 'competitions.registration_closed'.tr;
 
     final background = registered
         ? scheme.primary.withValues(alpha: 0.14)
         : enabled
-            ? scheme.primary
-            : scheme.surfaceContainerHighest.withValues(alpha: 0.50);
+        ? scheme.primary
+        : scheme.surfaceContainerHighest.withValues(alpha: 0.50);
 
     final foreground = registered
         ? scheme.primary
         : enabled
-            ? AppColors.white
-            : scheme.onSurfaceVariant;
+        ? AppColors.white
+        : scheme.onSurfaceVariant;
 
     return SizedBox(
       width: double.infinity,
@@ -206,23 +207,29 @@ class _EntryCta extends StatelessWidget {
                     ),
                   )
                 : Row(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                if (registered) ...[
-                  Icon(Icons.check_circle_rounded,
-                      size: 16.w, color: foreground),
-                  SizedBox(width: 8.w),
-                ],
-                Flexible(
-                  child: Text(
-                    label,
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                    style: AppText.title(fontSize: 14.sp, color: foreground),
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      if (registered) ...[
+                        Icon(
+                          Icons.check_circle_rounded,
+                          size: 16.w,
+                          color: foreground,
+                        ),
+                        Gap.hSm,
+                      ],
+                      Flexible(
+                        child: Text(
+                          label,
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          style: AppText.title(
+                            fontSize: 14.sp,
+                            color: foreground,
+                          ),
+                        ),
+                      ),
+                    ],
                   ),
-                ),
-              ],
-            ),
           ),
         ),
       ),

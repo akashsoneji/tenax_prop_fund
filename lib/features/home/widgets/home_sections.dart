@@ -7,16 +7,22 @@ import '../../../app/routes/app_routes.dart';
 import '../../../core/state/data_state.dart';
 import '../../../shared/theme/app_colors.dart';
 import '../../../shared/theme/app_text.dart';
-import '../../../shared/theme/app_theme.dart';
 import '../../../shared/widgets/app_pill.dart';
 import '../../../shared/widgets/app_toast.dart';
 import '../../../shared/widgets/symbol_icon.dart';
 import '../controllers/home_controller.dart';
 import '../models/dashboard_models.dart';
+import '../../../shared/theme/app_spacing.dart';
+import '../../../shared/widgets/app_card.dart';
 
 /// A section heading with an optional trailing action link or status badge.
 class HomeSectionLabel extends StatelessWidget {
-  const HomeSectionLabel(this.text, {super.key, this.actionLabel, this.onAction});
+  const HomeSectionLabel(
+    this.text, {
+    super.key,
+    this.actionLabel,
+    this.onAction,
+  });
   final String text;
   final String? actionLabel;
   final VoidCallback? onAction;
@@ -31,8 +37,10 @@ class HomeSectionLabel extends StatelessWidget {
             text,
             maxLines: 1,
             overflow: TextOverflow.ellipsis,
-            style: AppText.heading(color: scheme.onSurface, fontSize: 16.sp)
-                .copyWith(letterSpacing: -0.3),
+            style: AppText.heading(
+              color: scheme.onSurface,
+              fontSize: 16.sp,
+            ).copyWith(letterSpacing: -0.3),
           ),
         ),
         if (actionLabel != null && onAction != null)
@@ -47,10 +55,15 @@ class HomeSectionLabel extends StatelessWidget {
                   Text(
                     actionLabel!,
                     style: AppText.subtitle(
-                        color: scheme.primary, fontSize: 12.5.sp),
+                      color: scheme.primary,
+                      fontSize: 12.5.sp,
+                    ),
                   ),
-                  Icon(Icons.chevron_right_rounded,
-                      size: 16.w, color: scheme.primary),
+                  Icon(
+                    Icons.chevron_right_rounded,
+                    size: 16.w,
+                    color: scheme.primary,
+                  ),
                 ],
               ),
             ),
@@ -77,9 +90,9 @@ class _GroupCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final scheme = Theme.of(context).colorScheme;
-    return Container(
+    return AppCard(
+      radius: 20,
       padding: EdgeInsets.symmetric(horizontal: 14.w, vertical: 4.h),
-      decoration: AppTheme.surfaceCard(scheme, radius: 20),
       child: Column(
         children: [
           for (var i = 0; i < children.length; i++) ...[
@@ -124,10 +137,11 @@ class _HealthRow extends StatelessWidget {
     final (color, fill, glyph) = item.isBreach
         ? (AppColors.dangerBright, 0.34, Icons.priority_high_rounded)
         : item.isWatch
-            ? (AppColors.amber, 0.66, Icons.warning_amber_rounded)
-            : (AppColors.success, 1.0, Icons.check_rounded);
-    final detail =
-        item.line1.isNotEmpty ? item.line1 : item.status.toUpperCase();
+        ? (AppColors.amber, 0.66, Icons.warning_amber_rounded)
+        : (AppColors.success, 1.0, Icons.check_rounded);
+    final detail = item.line1.isNotEmpty
+        ? item.line1
+        : item.status.toUpperCase();
 
     return Padding(
       padding: EdgeInsets.symmetric(vertical: 12.h),
@@ -152,7 +166,7 @@ class _HealthRow extends StatelessWidget {
               ],
             ),
           ),
-          SizedBox(width: 12.w),
+          Gap.hMd,
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -166,23 +180,27 @@ class _HealthRow extends StatelessWidget {
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
                         style: AppText.title(
-                            color: scheme.onSurface, fontSize: 13.5.sp),
+                          color: scheme.onSurface,
+                          fontSize: 13.5.sp,
+                        ),
                       ),
                     ),
                     if (item.status.isNotEmpty) ...[
-                      SizedBox(width: 8.w),
+                      Gap.hSm,
                       AppPill(
                         label: item.status.toUpperCase(),
                         color: color,
                         fontSize: 9.5,
                         letterSpacing: 0.4,
                         padding: EdgeInsets.symmetric(
-                            horizontal: 8.w, vertical: 3.h),
+                          horizontal: 8.w,
+                          vertical: 3.h,
+                        ),
                       ),
                     ],
                   ],
                 ),
-                SizedBox(height: 3.h),
+                3.verticalSpace,
                 Text(
                   detail,
                   maxLines: 2,
@@ -192,7 +210,7 @@ class _HealthRow extends StatelessWidget {
                     fontSize: 11.5.sp,
                   ).copyWith(height: 1.3),
                 ),
-                SizedBox(height: 7.h),
+                7.verticalSpace,
                 ClipRRect(
                   borderRadius: BorderRadius.circular(4.r),
                   child: LinearProgressIndicator(
@@ -219,10 +237,9 @@ class HomeActivityList extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final scheme = Theme.of(context).colorScheme;
-    return Container(
+    return AppCard(
+      radius: 20,
       padding: EdgeInsets.fromLTRB(14.w, 14.h, 14.w, 4.h),
-      decoration: AppTheme.surfaceCard(scheme, radius: 20),
       child: Column(
         children: [
           for (var i = 0; i < items.length; i++)
@@ -284,7 +301,7 @@ class _TimelineRow extends StatelessWidget {
                 ),
             ],
           ),
-          SizedBox(width: 12.w),
+          Gap.hMd,
           Expanded(
             child: Padding(
               padding: EdgeInsets.only(top: 4.h, bottom: 14.h),
@@ -301,10 +318,12 @@ class _TimelineRow extends StatelessWidget {
                           maxLines: 1,
                           overflow: TextOverflow.ellipsis,
                           style: AppText.title(
-                              color: scheme.onSurface, fontSize: 13.5.sp),
+                            color: scheme.onSurface,
+                            fontSize: 13.5.sp,
+                          ),
                         ),
                         if (item.detail.isNotEmpty) ...[
-                          SizedBox(height: 2.h),
+                          Gap.vXxs,
                           Text(
                             item.detail,
                             maxLines: 2,
@@ -319,7 +338,7 @@ class _TimelineRow extends StatelessWidget {
                     ),
                   ),
                   if (item.when.isNotEmpty) ...[
-                    SizedBox(width: 8.w),
+                    Gap.hSm,
                     Text(
                       item.when,
                       style: AppText.label(
@@ -366,7 +385,7 @@ class _TradeRow extends StatelessWidget {
       child: Row(
         children: [
           SymbolIcon(code: trade.symbol, size: 34.w),
-          SizedBox(width: 12.w),
+          Gap.hMd,
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -376,10 +395,12 @@ class _TradeRow extends StatelessWidget {
                   trade.symbol,
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
-                  style:
-                      AppText.title(color: scheme.onSurface, fontSize: 13.5.sp),
+                  style: AppText.title(
+                    color: scheme.onSurface,
+                    fontSize: 13.5.sp,
+                  ),
                 ),
-                SizedBox(height: 4.h),
+                Gap.vXs,
                 Row(
                   children: [
                     AppPill(
@@ -387,8 +408,10 @@ class _TradeRow extends StatelessWidget {
                       color: sideColor,
                       fontSize: 9.5,
                       radius: 6,
-                      padding:
-                          EdgeInsets.symmetric(horizontal: 6.w, vertical: 2.h),
+                      padding: EdgeInsets.symmetric(
+                        horizontal: 6.w,
+                        vertical: 2.h,
+                      ),
                       leading: Icon(
                         trade.isBuy
                             ? Icons.trending_up_rounded
@@ -398,7 +421,7 @@ class _TradeRow extends StatelessWidget {
                       ),
                       leadingGap: 3,
                     ),
-                    SizedBox(width: 6.w),
+                    6.horizontalSpace,
                     Flexible(
                       child: Text(
                         trade.lots,
@@ -415,7 +438,7 @@ class _TradeRow extends StatelessWidget {
               ],
             ),
           ),
-          SizedBox(width: 8.w),
+          Gap.hSm,
           Text(
             trade.net,
             maxLines: 1,
@@ -475,41 +498,53 @@ class HomeReferralPrompt extends GetView<HomeController> {
                       color: scheme.primary,
                       shape: BoxShape.circle,
                     ),
-                    child: Icon(Icons.card_giftcard_rounded,
-                        size: 19.w, color: scheme.onPrimary),
+                    child: Icon(
+                      Icons.card_giftcard_rounded,
+                      size: 19.w,
+                      color: scheme.onPrimary,
+                    ),
                   ),
-                  SizedBox(width: 12.w),
+                  Gap.hMd,
                   Expanded(
                     child: Text(
                       'home.refer_earn'.tr,
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
                       style: AppText.heading(
-                              color: scheme.onSurface, fontSize: 16.sp)
-                          .copyWith(letterSpacing: -0.3),
+                        color: scheme.onSurface,
+                        fontSize: 16.sp,
+                      ).copyWith(letterSpacing: -0.3),
                     ),
                   ),
-                  SizedBox(width: 8.w),
+                  Gap.hSm,
                   AppPill.status(
                     label: '$referrals ${'home.referrals'.tr}',
                     color: scheme.primary,
                   ),
                 ],
               ),
-              SizedBox(height: 10.h),
+              10.verticalSpace,
               Text(
                 'home.refer_earn_desc'.tr,
-                style: AppText.body(color: muted, fontSize: 12.5.sp, height: 1.4),
+                style: AppText.body(
+                  color: muted,
+                  fontSize: 12.5.sp,
+                  height: 1.4,
+                ),
               ),
               if (link.isNotEmpty) ...[
-                SizedBox(height: 12.h),
+                Gap.vMd,
                 _LinkField(link: link, onCopy: () => _copy(link)),
               ],
-              SizedBox(height: 12.h),
+              Gap.vMd,
               Row(
                 children: [
-                  Icon(Icons.hourglass_bottom_rounded, size: 15.w, color: muted),
-                  SizedBox(width: 6.w),
+                  Icon(
+                    Icons.hourglass_bottom_rounded,
+                    size: 15.w,
+                    color: muted,
+                  ),
+                  6.horizontalSpace,
                   Expanded(
                     child: Text(
                       'home.pending_earnings'.tr,
@@ -518,11 +553,13 @@ class HomeReferralPrompt extends GetView<HomeController> {
                       style: AppText.subtitle(color: muted, fontSize: 13.sp),
                     ),
                   ),
-                  SizedBox(width: 8.w),
+                  Gap.hSm,
                   Text(
                     pending,
-                    style: AppText.value(color: scheme.onSurface, fontSize: 16.sp)
-                        .copyWith(letterSpacing: -0.4),
+                    style: AppText.value(
+                      color: scheme.onSurface,
+                      fontSize: 16.sp,
+                    ).copyWith(letterSpacing: -0.4),
                   ),
                 ],
               ),
@@ -577,7 +614,7 @@ class _LinkField extends StatelessWidget {
                     fontSize: 11.sp,
                   ),
                 ),
-                SizedBox(height: 2.h),
+                Gap.vXxs,
                 Text(
                   link,
                   maxLines: 1,
@@ -590,7 +627,7 @@ class _LinkField extends StatelessWidget {
               ],
             ),
           ),
-          SizedBox(width: 8.w),
+          Gap.hSm,
           Material(
             color: scheme.primary,
             borderRadius: BorderRadius.circular(10.r),
@@ -602,12 +639,18 @@ class _LinkField extends StatelessWidget {
                 child: Row(
                   mainAxisSize: MainAxisSize.min,
                   children: [
-                    Icon(Icons.copy_rounded, size: 14.w, color: scheme.onPrimary),
-                    SizedBox(width: 5.w),
+                    Icon(
+                      Icons.copy_rounded,
+                      size: 14.w,
+                      color: scheme.onPrimary,
+                    ),
+                    5.horizontalSpace,
                     Text(
                       'home.copy'.tr,
                       style: AppText.title(
-                          color: scheme.onPrimary, fontSize: 12.sp),
+                        color: scheme.onPrimary,
+                        fontSize: 12.sp,
+                      ),
                     ),
                   ],
                 ),
