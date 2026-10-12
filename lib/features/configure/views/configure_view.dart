@@ -166,7 +166,7 @@ class _SelectedPlanHeader extends StatelessWidget {
                 ),
                 5.verticalSpace,
                 Text(
-                  'Account size: ${c.accountSize}',
+                  '${'configure.account_size'.tr}: ${c.accountSize}',
                   style: AppText.base(
                     color: Colors.white.withValues(alpha: 0.82),
                     fontSize: 13.sp,

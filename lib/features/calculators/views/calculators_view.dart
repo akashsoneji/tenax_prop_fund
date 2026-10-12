@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
 
+import '../../../core/localization/backend_label_tr.dart';
 import '../../../core/state/data_state.dart';
 import '../../../shared/widgets/app_empty_view.dart';
 import '../../../shared/widgets/app_gradient_button.dart';
@@ -48,7 +49,10 @@ class CalculatorsView extends GetView<CalculatorsController> {
               sliver: SliverList(
                 delegate: SliverChildListDelegate([
                   CalcSegmentedTabs(
-                    labels: data.tabs.map((tab) => tab.label).toList(),
+                    labels: data.tabs
+                        .map((tab) =>
+                            trByKey('calculators.tab_${tab.value}', tab.label))
+                        .toList(),
                     selectedIndex: controller.selectedTab.value,
                     onSelected: controller.selectTab,
                   ),
@@ -74,72 +78,92 @@ class _CalculatorForm extends StatelessWidget {
     final scheme = Theme.of(context).colorScheme;
     return Obx(() {
       final fields = definition.fields;
-      return Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
-          Container(
-            padding: EdgeInsets.fromLTRB(16.w, 18.h, 16.w, 16.h),
-            decoration: BoxDecoration(
-              color: scheme.surface,
-              borderRadius: BorderRadius.circular(22.r),
-              border: Border.all(color: scheme.outlineVariant),
-              boxShadow: [
-                BoxShadow(
-                  color: scheme.shadow.withValues(alpha: 0.06),
-                  blurRadius: 18.r,
-                  offset: Offset(0, 8.h),
-                ),
-              ],
-            ),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: [
-                if (definition.note.isNotEmpty) ...[
-                  Text(
-                    definition.note,
-                    style: Theme.of(context).textTheme.bodyMedium,
+      return SafeArea(
+        top: false,
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            Container(
+              padding: EdgeInsets.fromLTRB(16.w, 18.h, 16.w, 16.h),
+              decoration: BoxDecoration(
+                color: scheme.surface,
+                borderRadius: BorderRadius.circular(22.r),
+                border: Border.all(color: scheme.outlineVariant),
+                boxShadow: [
+                  BoxShadow(
+                    color: scheme.shadow.withValues(alpha: 0.06),
+                    blurRadius: 18.r,
+                    offset: Offset(0, 8.h),
                   ),
-                  14.verticalSpace,
                 ],
-                for (final field in fields) ...[
-                  if (field.isSelect)
-                    CalcSymbolDropdown(
-                      value: c.field(field.key).isEmpty
-                          ? field.options.first
-                          : c.field(field.key),
-                      items: field.options,
-                      onChanged: (value) => c.setField(field.key, value),
-                      label: field.label,
-                    )
-                  else
-                    CalcInputField(
-                      label: field.label,
-                      value: c.field(field.key),
-                      onChanged: (value) => c.setField(field.key, value),
+              ),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  if (definition.note.isNotEmpty) ...[
+                    Text(
+                      trByKey(
+                        'calculators.note_${definition.key}',
+                        definition.note,
+                      ),
+                      style: Theme.of(context).textTheme.bodyMedium,
                     ),
-                  14.verticalSpace,
-                ],
-                AppGradientButton(
-                  label: 'calculators.calculate'.tr,
-                  height: 52.h,
-                  onPressed: () => c.setField(
-                    '_calculated',
-                    DateTime.now().toIso8601String(),
+                    14.verticalSpace,
+                  ],
+                  for (final field in fields) ...[
+                    if (field.isSelect)
+                      CalcSymbolDropdown(
+                        value: c.field(field.key).isEmpty
+                            ? field.options.first
+                            : c.field(field.key),
+                        items: field.options,
+                        onChanged: (value) => c.setField(field.key, value),
+                        label: trByKey(
+                          'calculators.field_${field.key}',
+                          field.label,
+                        ),
+                      )
+                    else
+                      CalcInputField(
+                        label: trByKey(
+                          'calculators.field_${field.key}',
+                          field.label,
+                        ),
+                        value: c.field(field.key),
+                        onChanged: (value) => c.setField(field.key, value),
+                      ),
+                    14.verticalSpace,
+                  ],
+                  AppGradientButton(
+                    label: 'calculators.calculate'.tr,
+                    height: 52.h,
+                    onPressed: () => c.setField(
+                      '_calculated',
+                      DateTime.now().toIso8601String(),
+                    ),
                   ),
-                ),
-              ],
+                ],
+              ),
             ),
-          ),
-          18.verticalSpace,
-          CalcResultCard(
-            headline: c.formatResult(),
-            subtitle: definition.label,
-          ),
-          if (c.calculators?.disclaimer.isNotEmpty == true) ...[
-            14.verticalSpace,
-            CalcNoteBanner(text: c.calculators!.disclaimer),
+            18.verticalSpace,
+            CalcResultCard(
+              headline: c.formatResult(),
+              subtitle: trByKey(
+                'calculators.result_${definition.key}',
+                definition.label,
+              ),
+            ),
+            if (c.calculators?.disclaimer.isNotEmpty == true) ...[
+              14.verticalSpace,
+              CalcNoteBanner(
+                text: trByKey(
+                  'calculators.disclaimer',
+                  c.calculators!.disclaimer,
+                ),
+              ),
+            ],
           ],
-        ],
+        ),
       );
     });
   }

@@ -63,15 +63,26 @@ class KeyValueRow extends StatelessWidget {
               // Both sides are Expanded (tight): a loose label would leave its
               // unused share after the value, so the value's right edge would
               // drift with label length.
+              // Rule values are backend-sent English strings ("5 days",
+              // "80% → 70%", "Not refundable"). Under an RTL locale the
+              // surrounding Directionality bidi-reorders them into "days 5" /
+              // "70% → 80%". Force LTR locally so numbers + units read
+              // correctly regardless of app locale; TextAlign.end keeps the
+              // value flush with the row end (physical left in RTL, right in
+              // LTR), mirroring with the rest of the card.
               Expanded(
                 flex: 3,
-                child: Text(
-                  value,
-                  textAlign: TextAlign.right,
-                  style: GoogleFonts.beVietnamPro(
-                    fontSize: fontSize,
-                    fontWeight: emphasize ? FontWeight.w800 : FontWeight.w700,
-                    color: valueColor ?? scheme.onSurface,
+                child: Directionality(
+                  textDirection: TextDirection.ltr,
+                  child: Text(
+                    value,
+                    textAlign: TextAlign.end,
+                    style: GoogleFonts.beVietnamPro(
+                      fontSize: fontSize,
+                      fontWeight:
+                          emphasize ? FontWeight.w800 : FontWeight.w700,
+                      color: valueColor ?? scheme.onSurface,
+                    ),
                   ),
                 ),
               ),

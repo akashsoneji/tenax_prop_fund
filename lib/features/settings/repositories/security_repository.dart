@@ -1,4 +1,5 @@
 import 'package:dio/dio.dart';
+import 'package:get/get_utils/get_utils.dart' show Trans;
 
 import '../../../core/network/api_client.dart';
 import '../../../core/network/api_endpoints.dart';
@@ -101,7 +102,7 @@ class SecurityRepository {
       );
       final body = res.data;
       if (body is! Map<String, dynamic>) {
-        return ApiResponse.failure('Unexpected server response.');
+        return ApiResponse.failure('errors.unexpected_response'.tr);
       }
       if (body['success'] != true) {
         return ApiResponse.failure(_messageOf(body));
@@ -130,7 +131,7 @@ class SecurityRepository {
       final res = await request();
       final body = res.data;
       if (body is! Map<String, dynamic>) {
-        return ApiResponse.failure('Unexpected server response.');
+        return ApiResponse.failure('errors.unexpected_response'.tr);
       }
       if (body['success'] != true) {
         return ApiResponse.failure(_messageOf(body));
@@ -144,7 +145,7 @@ class SecurityRepository {
   static String _errorFrom(DioException e) {
     final body = e.response?.data;
     if (body is Map<String, dynamic>) return _messageOf(body);
-    return 'Something went wrong. Please try again.';
+    return 'errors.generic'.tr;
   }
 
   /// Prefers the first field-level validation error over the generic message,
@@ -158,7 +159,7 @@ class SecurityRepository {
         if (value is String && value.isNotEmpty) return value;
       }
     }
-    return body['message']?.toString() ?? 'Something went wrong.';
+    return body['message']?.toString() ?? 'errors.generic'.tr;
   }
 
   static List<String> _codesOf(dynamic data) {

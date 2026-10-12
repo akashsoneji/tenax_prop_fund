@@ -16,6 +16,7 @@ import '../../../shared/widgets/pinned_gradient_app_bar.dart';
 import '../../../shared/widgets/section_header.dart';
 import '../../../shared/widgets/skeletons/skeletons.dart';
 import '../controllers/challenge_controller.dart';
+import '../../../core/localization/backend_label_tr.dart';
 import '../models/challenge_models.dart';
 import '../widgets/challenge_bottom_bar.dart';
 import '../widgets/challenge_plan_card.dart';
@@ -203,7 +204,8 @@ class _PaidBody extends StatelessWidget {
     final stepTabs = tabs.length > 1
         ? [
             AppSegmentedControl(
-              labels: tabs.values.toList(growable: false),
+              labels:
+                  tabs.values.map(trBackend).toList(growable: false),
               selected: tabKeys
                   .indexOf(c.activeStep(data))
                   .clamp(0, tabKeys.length - 1),
@@ -249,14 +251,14 @@ class _PaidBody extends StatelessWidget {
         if (data.plans.isNotEmpty)
           for (final box in selectedPlan.ruleBoxes) ...[
             18.verticalSpace,
-            SectionHeader(box.title, padding: _sectionHeaderPadding),
+            SectionHeader(trBackend(box.title), padding: _sectionHeaderPadding),
             RulesCard(
               children: [
                 for (var i = 0; i < box.rows.length; i++)
                   KeyValueRow(
                     dense: true,
-                    label: box.rows[i].label,
-                    value: box.rows[i].value,
+                    label: trBackend(box.rows[i].label),
+                    value: trBackend(box.rows[i].value),
                     showInfo: box.rows[i].tip.isNotEmpty,
                     showDivider: i != box.rows.length - 1,
                   ),
@@ -284,8 +286,8 @@ class _RulesSection extends StatelessWidget {
             for (var i = 0; i < rules.length; i++)
               KeyValueRow(
                 dense: true,
-                label: rules[i].label,
-                value: rules[i].value,
+                label: trBackend(rules[i].label),
+                value: trBackend(rules[i].value),
                 showInfo: true,
                 showDivider: i != rules.length - 1,
               ),

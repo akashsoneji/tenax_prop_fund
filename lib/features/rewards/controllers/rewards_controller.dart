@@ -235,7 +235,7 @@ class ExtendedRewardsController extends GetxController {
         }
       } else {
         methodTypesError.value =
-            result.message ?? 'Unable to load method types';
+            result.message ?? 'errors.load_failed'.tr;
       }
     } finally {
       methodTypesLoading.value = false;
@@ -298,7 +298,7 @@ class ExtendedRewardsController extends GetxController {
 
   Future<ApiResponse<void>> submitMethod() async {
     if (isMethodSubmitting.value) {
-      return ApiResponse.failure('Request already submitting.');
+      return ApiResponse.failure('errors.request_in_progress'.tr);
     }
     isMethodSubmitting.value = true;
     try {
@@ -340,7 +340,7 @@ class ExtendedRewardsController extends GetxController {
 
   Future<ApiResponse<void>> deleteMethod(String methodId) async {
     final id = int.tryParse(methodId);
-    if (id == null) return ApiResponse.failure('Invalid method id');
+    if (id == null) return ApiResponse.failure('errors.invalid_method'.tr);
     return await _repository.deleteMethod(id);
   }
 
@@ -363,7 +363,7 @@ class ExtendedRewardsController extends GetxController {
         page: page,
         totalPages: h?.totalPages ?? 1,
         hasNext: h?.hasNext ?? false,
-        error: result.message ?? 'Unable to load history',
+        error: result.message ?? 'positions.history_error'.tr,
       );
     }
   }

@@ -1,3 +1,5 @@
+import 'package:get/get_utils/get_utils.dart' show Trans;
+
 import '../../../core/network/api_client.dart';
 import '../../../core/network/api_endpoints.dart';
 import '../../../core/network/api_envelope.dart';
@@ -23,11 +25,11 @@ class BillingRepository {
     );
     final body = response.data;
     if (body is! Map<String, dynamic>) {
-      return ApiResponse.failure('Unable to load billing history');
+      return ApiResponse.failure('errors.load_failed'.tr);
     }
     if (body['success'] != true) {
       return ApiResponse.failure(
-        body['message']?.toString() ?? 'Unable to load billing history',
+        body['message']?.toString() ?? 'errors.load_failed'.tr,
       );
     }
     return ApiResponse.success(BillingData.fromJson(body['data']));
@@ -38,7 +40,7 @@ class BillingRepository {
         await _api.get<dynamic>(ApiEndpoints.financeTransactionsExport);
     final csv = response.data?.toString();
     if (csv == null || csv.isEmpty) {
-      return ApiResponse.failure('Unable to export billing history');
+      return ApiResponse.failure('rewards.export_failed_body'.tr);
     }
     return ApiResponse.success(csv);
   }

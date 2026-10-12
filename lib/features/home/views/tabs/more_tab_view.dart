@@ -1,14 +1,19 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
+import 'package:url_launcher/url_launcher.dart';
 
+import '../../../../app/flavor/flavor_config.dart';
 import '../../../../app/routes/app_routes.dart';
 import '../../../../app/session/session_manager.dart';
+import '../../../../core/app_status/app_version_service.dart';
+import '../../../../core/logger/app_logger.dart' show log;
 import '../../../../features/authentication/repositories/auth_repository.dart';
 import '../../../../shared/theme/app_colors.dart';
 import '../../../../shared/theme/app_text.dart';
 import '../../../../shared/theme/app_theme.dart';
 import '../../../../shared/widgets/app_confirm_dialog.dart';
+import '../../../../shared/widgets/app_toast.dart';
 import '../../../../shared/widgets/pinned_gradient_app_bar.dart';
 import '../../widgets/delete_account_dialog.dart';
 import '../../../../shared/theme/app_spacing.dart';
@@ -41,16 +46,20 @@ class MoreTabView extends StatelessWidget {
           SliverToBoxAdapter(
             child: Padding(
               padding: EdgeInsets.fromLTRB(16.w, 18.h, 16.w, 28.h),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.stretch,
-                children: [
-                  for (var i = 0; i < _sections.length; i++) ...[
-                    _MoreSection(section: _sections[i], order: i),
-                    if (i < _sections.length - 1) Gap.vLg,
+              child: SafeArea(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    for (var i = 0; i < _sections.length; i++) ...[
+                      _MoreSection(section: _sections[i], order: i),
+                      if (i < _sections.length - 1) Gap.vLg,
+                    ],
+                    18.verticalSpace,
+                    const _DangerZone(),
+                    18.verticalSpace,
+                    const _VersionFooter(),
                   ],
-                  18.verticalSpace,
-                  const _DangerZone(),
-                ],
+                ),
               ),
             ),
           ),
@@ -111,7 +120,15 @@ class MoreTabView extends StatelessWidget {
         AppRoutes.tradingRules,
       ),
       _Item(Icons.help_outline_rounded, 'more.item.faq', AppRoutes.faq),
-      _Item(Icons.headset_mic_outlined, 'more.item.support', AppRoutes.support),
+      // Support opens in the OS browser (Safari / Chrome) via its external
+      // tap handler; the in-app `AppRoutes.support` screen is bypassed so
+      // customers reach the hosted ticket portal with their saved cookies.
+      _Item(
+        Icons.headset_mic_outlined,
+        'more.item.support',
+        null,
+        true,
+      ),
       _Item(
         Icons.notifications_none_rounded,
         'more.item.notifications',
@@ -119,6 +136,27 @@ class MoreTabView extends StatelessWidget {
       ),
     ]),
   ];
+}
+
+/// Opens the active flavor's hosted help/support page in the OS browser
+/// (Safari on iOS, Chrome on Android). Falls back to a toast if the URL
+/// cannot be launched — never silently swallows the failure.
+Future<void> _openSupportExternally() async {
+  final web = Get.find<FlavorConfig>().webBaseUrl.trim();
+  // Portal convention — same path the white_label web app serves tickets at.
+  final target = web.isEmpty ? '' : '$web/support';
+  final uri = Uri.tryParse(target);
+  if (uri == null || target.isEmpty) {
+    AppToast.error('errors.generic'.tr);
+    return;
+  }
+  try {
+    final ok = await launchUrl(uri, mode: LaunchMode.externalApplication);
+    if (!ok) AppToast.error('errors.generic'.tr);
+  } catch (e, s) {
+    log.e('support.open', error: e, stackTrace: s);
+    AppToast.error('errors.generic'.tr);
+  }
 }
 
 // ---------------------------------------------------------------------------
@@ -201,6 +239,10 @@ class _MoreRow extends StatelessWidget {
   final _Item item;
 
   void _onTap() {
+    if (item.external) {
+      _openSupportExternally();
+      return;
+    }
     if (item.route != null) {
       Get.toNamed(item.route!);
       return;
@@ -262,10 +304,21 @@ class _Section {
 }
 
 class _Item {
-  const _Item(this.icon, this.titleKey, [this.route]);
+  const _Item(
+    this.icon,
+    this.titleKey, [
+    this.route,
+    this.external = false,
+  ]);
+
   final IconData icon;
   final String titleKey;
   final String? route;
+
+  /// When true, [_MoreRow] routes the tap to [_openSupportExternally] instead
+  /// of pushing an in-app route. Keeps the data-driven section catalogue
+  /// trivially extensible for future "open in browser" entries.
+  final bool external;
 }
 
 // ---------------------------------------------------------------------------
@@ -357,6 +410,45 @@ class _DangerRow extends StatelessWidget {
           ),
         ),
       ),
+    );
+  }
+}
+
+// ---------------------------------------------------------------------------
+// Version footer — shows the installed build (e.g. "v1.0.0 (8)") in the brand
+// primary colour, centered below the Danger Zone. Reads from
+// `AppVersionService` which wraps `package_info_plus`, so the number matches
+// whatever is actually on the device — not a hard-coded literal.
+// ---------------------------------------------------------------------------
+class _VersionFooter extends StatelessWidget {
+  const _VersionFooter();
+
+  Future<String> _label() async {
+    final svc = AppVersionService.instance;
+    final version = await svc.getVersion();
+    final build = await svc.getBuildNumber();
+    return build.isEmpty ? 'v$version' : 'v$version ($build)';
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final scheme = Theme.of(context).colorScheme;
+    return FutureBuilder<String>(
+      future: _label(),
+      builder: (context, snapshot) {
+        final text = snapshot.data ?? '';
+        return Center(
+          child: Text(
+            text,
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+            style: AppText.label(
+              fontSize: 14.sp,
+              color: scheme.primary,
+            ),
+          ),
+        );
+      },
     );
   }
 }

@@ -4,6 +4,7 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
 
 import '../../../app/routes/app_routes.dart';
+import '../../../core/localization/backend_label_tr.dart';
 import '../../../core/state/data_state.dart';
 import '../../../shared/theme/app_colors.dart';
 import '../../../shared/theme/app_text.dart';
@@ -140,8 +141,8 @@ class _HealthRow extends StatelessWidget {
         ? (AppColors.amber, 0.66, Icons.warning_amber_rounded)
         : (AppColors.success, 1.0, Icons.check_rounded);
     final detail = item.line1.isNotEmpty
-        ? item.line1
-        : item.status.toUpperCase();
+        ? trBackend(item.line1)
+        : trBackend(item.status).toUpperCase();
 
     return Padding(
       padding: EdgeInsets.symmetric(vertical: 12.h),
@@ -176,7 +177,7 @@ class _HealthRow extends StatelessWidget {
                   children: [
                     Expanded(
                       child: Text(
-                        item.name,
+                        trBackend(item.name),
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
                         style: AppText.title(
@@ -188,7 +189,7 @@ class _HealthRow extends StatelessWidget {
                     if (item.status.isNotEmpty) ...[
                       Gap.hSm,
                       AppPill(
-                        label: item.status.toUpperCase(),
+                        label: trBackend(item.status).toUpperCase(),
                         color: color,
                         fontSize: 9.5,
                         letterSpacing: 0.4,
@@ -404,7 +405,7 @@ class _TradeRow extends StatelessWidget {
                 Row(
                   children: [
                     AppPill(
-                      label: trade.side.toUpperCase(),
+                      label: trBackend(trade.side).toUpperCase(),
                       color: sideColor,
                       fontSize: 9.5,
                       radius: 6,

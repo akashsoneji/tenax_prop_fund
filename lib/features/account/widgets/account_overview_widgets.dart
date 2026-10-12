@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
 
+import '../../../core/localization/backend_label_tr.dart';
 import '../../../shared/theme/app_colors.dart';
 import '../../../shared/theme/app_theme.dart';
 import '../../../shared/widgets/app_pill.dart';
@@ -612,7 +613,7 @@ class _HealthRow extends StatelessWidget {
             children: [
               Expanded(
                 child: Text(
-                  health.name,
+                  trBackend(health.name),
                   style: AppText.base(
                     fontSize: 13.5.sp,
                     fontWeight: FontWeight.w700,
@@ -621,7 +622,7 @@ class _HealthRow extends StatelessWidget {
                 ),
               ),
               Text(
-                health.status,
+                trBackend(health.status),
                 style: AppText.base(
                   fontSize: 12.sp,
                   fontWeight: FontWeight.w700,
@@ -632,7 +633,7 @@ class _HealthRow extends StatelessWidget {
           ),
           Gap.vXs,
           Text(
-            health.note,
+            trBackend(health.note),
             style: AppText.base(
               fontSize: 12.sp,
               color: AppColors.white.withValues(alpha: 0.7),

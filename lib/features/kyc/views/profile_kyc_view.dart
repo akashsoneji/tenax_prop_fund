@@ -39,11 +39,14 @@ class ProfileKycView extends GetView<KycController> {
           ),
           SliverToBoxAdapter(
             child: Obx(
-              () => DataStateBuilder<KycProfile>(
-                state: controller.state,
-                onRetry: controller.load,
-                skeleton: const _KycSkeleton(),
-                builder: (profile) => _KycBody(profile: profile),
+              () => SafeArea(
+                top: false,
+                child: DataStateBuilder<KycProfile>(
+                  state: controller.state,
+                  onRetry: controller.load,
+                  skeleton: const _KycSkeleton(),
+                  builder: (profile) => _KycBody(profile: profile),
+                ),
               ),
             ),
           ),

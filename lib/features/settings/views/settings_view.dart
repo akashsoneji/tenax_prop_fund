@@ -38,9 +38,7 @@ class SettingsView extends StatelessWidget {
                     child: Obx(
                       () => _SummaryHero(
                         themeValue: _themeLabel(s.themeMode),
-                        languageValue: s.locale.languageCode == 'hi'
-                            ? 'settings.language_hi'.tr
-                            : 'settings.language_en'.tr,
+                        languageValue: _languageLabel(s.locale.languageCode),
                       ),
                     ),
                   ),
@@ -99,20 +97,16 @@ class SettingsView extends StatelessWidget {
                     child: Obx(
                       () => _OptionGroup(
                         children: [
-                          _OptionRow(
-                            icon: Icons.abc_rounded,
-                            title: 'settings.language_en'.tr,
-                            description: 'settings.language_en_desc'.tr,
-                            selected: s.locale.languageCode != 'hi',
-                            onTap: () => s.setLocale(const Locale('en')),
-                          ),
-                          _OptionRow(
-                            icon: Icons.translate_rounded,
-                            title: 'settings.language_hi'.tr,
-                            description: 'settings.language_hi_desc'.tr,
-                            selected: s.locale.languageCode == 'hi',
-                            onTap: () => s.setLocale(const Locale('hi')),
-                          ),
+                          for (final lang in _languages)
+                            _LanguageRow(
+                              code: lang.code,
+                              title: lang.titleKey.tr,
+                              description: lang.descKey.tr,
+                              selected:
+                                  s.locale.languageCode == lang.locale,
+                              onTap: () =>
+                                  s.setLocale(Locale(lang.locale)),
+                            ),
                         ],
                       ),
                     ),
@@ -159,7 +153,78 @@ class SettingsView extends StatelessWidget {
         return 'settings.theme_system'.tr;
     }
   }
+
+  String _languageLabel(String code) {
+    for (final lang in _languages) {
+      if (lang.locale == code) return lang.titleKey.tr;
+    }
+    return 'settings.language_en'.tr;
+  }
 }
+
+/// Static catalogue of languages shown in the picker. Order controls the UI.
+class _LanguageOption {
+  const _LanguageOption({
+    required this.code,
+    required this.locale,
+    required this.titleKey,
+    required this.descKey,
+  });
+
+  /// Two-letter badge rendered on the left of the row (EN / AR / ZH …).
+  final String code;
+
+  /// Locale code passed to `setLocale(Locale(...))`.
+  final String locale;
+
+  final String titleKey;
+  final String descKey;
+}
+
+const List<_LanguageOption> _languages = [
+  _LanguageOption(
+    code: 'EN',
+    locale: 'en',
+    titleKey: 'settings.language_en',
+    descKey: 'settings.language_en_desc',
+  ),
+  _LanguageOption(
+    code: 'HI',
+    locale: 'hi',
+    titleKey: 'settings.language_hi',
+    descKey: 'settings.language_hi_desc',
+  ),
+  _LanguageOption(
+    code: 'AR',
+    locale: 'ar',
+    titleKey: 'settings.language_ar',
+    descKey: 'settings.language_ar_desc',
+  ),
+  _LanguageOption(
+    code: 'ES',
+    locale: 'es',
+    titleKey: 'settings.language_es',
+    descKey: 'settings.language_es_desc',
+  ),
+  _LanguageOption(
+    code: 'ID',
+    locale: 'id',
+    titleKey: 'settings.language_id',
+    descKey: 'settings.language_id_desc',
+  ),
+  _LanguageOption(
+    code: 'VI',
+    locale: 'vi',
+    titleKey: 'settings.language_vi',
+    descKey: 'settings.language_vi_desc',
+  ),
+  _LanguageOption(
+    code: 'ZH',
+    locale: 'zh',
+    titleKey: 'settings.language_zh',
+    descKey: 'settings.language_zh_desc',
+  ),
+];
 
 /// Top card summarising what is currently active.
 class _SummaryHero extends StatelessWidget {
@@ -469,6 +534,101 @@ class _SelectionDot extends StatelessWidget {
       child: selected
           ? Icon(Icons.check_rounded, size: 13.sp, color: scheme.onPrimary)
           : null,
+    );
+  }
+}
+
+/// Language picker row: a code chip badge (EN / AR / ZH …) on the leading side,
+/// native-script title + description, and a selection dot on the trailing side.
+/// Keeps the same spacing + feedback as `_OptionRow` so the rest of the
+/// Settings screen stays visually consistent.
+class _LanguageRow extends StatelessWidget {
+  const _LanguageRow({
+    required this.code,
+    required this.title,
+    required this.description,
+    required this.selected,
+    required this.onTap,
+  });
+
+  final String code;
+  final String title;
+  final String description;
+  final bool selected;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    final scheme = Theme.of(context).colorScheme;
+    return GestureDetector(
+      onTap: onTap,
+      behavior: HitTestBehavior.opaque,
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 180),
+        padding: EdgeInsets.symmetric(horizontal: 14.w, vertical: 14.h),
+        color: selected
+            ? scheme.primary.withValues(alpha: 0.08)
+            : Colors.transparent,
+        child: Row(
+          children: [
+            Container(
+              width: 38.w,
+              height: 34.w,
+              alignment: Alignment.center,
+              decoration: BoxDecoration(
+                color: selected
+                    ? scheme.primary.withValues(alpha: 0.16)
+                    : scheme.onSurface.withValues(alpha: 0.06),
+                borderRadius: BorderRadius.circular(10.r),
+              ),
+              child: Text(
+                code,
+                style: AppText.title(
+                  fontSize: 12.sp,
+                  color: selected
+                      ? scheme.primary
+                      : scheme.onSurface.withValues(alpha: 0.7),
+                ),
+              ),
+            ),
+            Gap.hMd,
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  // Native-script title always renders LTR so Arabic / Chinese
+                  // labels stay readable regardless of the active locale's
+                  // text direction.
+                  Directionality(
+                    textDirection: TextDirection.ltr,
+                    child: Text(
+                      title,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: AppText.title(
+                        fontSize: 14.sp,
+                        color: selected ? scheme.primary : scheme.onSurface,
+                      ),
+                    ),
+                  ),
+                  Gap.vXxs,
+                  Text(
+                    description,
+                    maxLines: 2,
+                    overflow: TextOverflow.ellipsis,
+                    style: AppText.label(
+                      fontSize: 11.sp,
+                      color: scheme.onSurface.withValues(alpha: 0.55),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            10.horizontalSpace,
+            _SelectionDot(selected: selected),
+          ],
+        ),
+      ),
     );
   }
 }

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
 
+import '../../../core/localization/backend_label_tr.dart';
 import '../../../shared/theme/app_colors.dart';
 import '../../../shared/theme/app_theme.dart';
 import '../../../shared/widgets/app_dashed.dart';
@@ -59,7 +60,7 @@ class OrderSummaryCard extends StatelessWidget {
       if (c.selectedPaymentMethod != null)
         _InfoChip(
           icon: Icons.account_balance_wallet_outlined,
-          label: c.selectedPaymentMethod!.name,
+          label: trBackend(c.selectedPaymentMethod!.name),
         ),
       if (c.selectedAddons.isNotEmpty)
         _InfoChip(

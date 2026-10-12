@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
 
+import '../../../core/localization/backend_label_tr.dart';
 import '../../../shared/theme/app_colors.dart';
 import '../../../shared/theme/app_theme.dart';
 import '../models/configure_models.dart';
@@ -46,7 +47,7 @@ class AddonTile extends StatelessWidget {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
-                          addon.title.tr,
+                          trBackend(addon.title.tr),
                           style: AppText.base(
                             fontSize: 14.5.sp,
                             fontWeight: FontWeight.w700,
@@ -55,7 +56,7 @@ class AddonTile extends StatelessWidget {
                         ),
                         3.verticalSpace,
                         Text(
-                          addon.description.tr,
+                          trBackend(addon.description.tr),
                           style: AppText.base(
                             fontSize: 12.5.sp,
                             height: 1.35,
@@ -64,7 +65,7 @@ class AddonTile extends StatelessWidget {
                         ),
                         Gap.vXs,
                         Text(
-                          addon.tagLabel.tr,
+                          trBackend(addon.tagLabel.tr),
                           style: AppText.base(
                             fontSize: 12.5.sp,
                             fontWeight: FontWeight.w600,

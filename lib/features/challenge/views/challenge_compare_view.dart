@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
 
+import '../../../core/localization/backend_label_tr.dart';
 import '../../../shared/theme/app_colors.dart';
 import '../../../shared/widgets/app_gradient_button.dart';
 import '../../../shared/widgets/pinned_gradient_app_bar.dart';
@@ -265,7 +266,7 @@ class _FeatureRow extends StatelessWidget {
           Gap.hSm,
           Expanded(
             child: Text(
-              row.label,
+              trBackend(row.label),
               style: AppText.base(
                 fontSize: 13.sp,
                 color: scheme.onSurface.withValues(alpha: 0.7),
@@ -275,7 +276,7 @@ class _FeatureRow extends StatelessWidget {
           10.horizontalSpace,
           Flexible(
             child: Text(
-              row.value,
+              trBackend(row.value),
               textAlign: TextAlign.right,
               maxLines: 2,
               overflow: TextOverflow.ellipsis,

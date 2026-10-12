@@ -5,6 +5,7 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
 import 'package:file_picker/file_picker.dart';
 
+import '../../../core/localization/backend_label_tr.dart';
 import '../../../shared/theme/app_colors.dart';
 import '../../../shared/theme/app_theme.dart';
 import '../../../shared/widgets/app_gradient_button.dart';
@@ -185,7 +186,7 @@ class _StatusPill extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return AppPill(
-      label: status.replaceAll('_', ' '),
+      label: trBackend(status.replaceAll('_', ' ')),
       color: AppColors.white,
       bgAlpha: 0.20,
       fontSize: 11,
@@ -214,7 +215,7 @@ class _MethodCard extends StatelessWidget {
             children: [
               Expanded(
                 child: Text(
-                  instructions.name,
+                  trBackend(instructions.name),
                   style: AppText.base(
                     fontSize: 16.sp,
                     fontWeight: FontWeight.w800,
@@ -247,7 +248,7 @@ class _TypeBadge extends StatelessWidget {
   Widget build(BuildContext context) {
     final scheme = Theme.of(context).colorScheme;
     return AppPill(
-      label: type,
+      label: trBackend(type),
       color: scheme.primary,
       fontSize: 11,
       padding: EdgeInsets.symmetric(horizontal: 10.w, vertical: 4.h),
@@ -269,7 +270,7 @@ class _DetailRow extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
-          _humanize(label),
+          trBackend(_humanize(label)),
           style: AppText.base(
             fontSize: 12.sp,
             fontWeight: FontWeight.w600,
@@ -316,7 +317,7 @@ class _InstructionsNote extends StatelessWidget {
           Gap.hSm,
           Expanded(
             child: Text(
-              text,
+              trBackend(text),
               style: AppText.base(
                 fontSize: 12.5.sp,
                 color: scheme.onSurface.withValues(alpha: 0.75),

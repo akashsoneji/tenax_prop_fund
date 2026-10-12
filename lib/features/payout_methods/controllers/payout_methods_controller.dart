@@ -76,7 +76,7 @@ class PayoutMethodsController extends BaseController<List<PayoutMethod>> {
     Future<ApiResponse<void>> Function() request,
   ) async {
     if (isSubmitting.value) {
-      return ApiResponse.failure('Request already submitting.');
+      return ApiResponse.failure('errors.request_in_progress'.tr);
     }
     isSubmitting.value = true;
     try {

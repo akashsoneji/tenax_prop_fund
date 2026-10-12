@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
 
+import '../../../core/localization/backend_label_tr.dart';
 import '../controllers/configure_controller.dart';
 import '../../../shared/theme/app_spacing.dart';
 import '../../../shared/widgets/app_card.dart';
@@ -36,7 +37,7 @@ class PaymentMethodTile extends StatelessWidget {
               Expanded(
                 child: Obx(
                   () => Text(
-                    c.selectedPaymentMethod?.name ?? '',
+                    trBackend(c.selectedPaymentMethod?.name ?? ''),
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
                     style: text.titleSmall?.copyWith(
@@ -119,7 +120,7 @@ class _PaymentMethodSheet extends StatelessWidget {
                 itemBuilder: (context, i) => Obx(() {
                   final selected = c.paymentMethod.value == i;
                   return _MethodOption(
-                    label: methods[i].name,
+                    label: trBackend(methods[i].name),
                     selected: selected,
                     onTap: () {
                       c.setPaymentMethod(i);

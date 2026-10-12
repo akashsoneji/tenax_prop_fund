@@ -41,11 +41,14 @@ class CompetitionsView extends GetView<CompetitionsController> {
               padding: EdgeInsets.fromLTRB(16.w, 18.h, 16.w, 32.h),
               sliver: SliverToBoxAdapter(
                 child: Obx(
-                  () => DataStateBuilder<CompetitionsData>(
-                    state: controller.state,
-                    onRetry: controller.load,
-                    skeleton: const _CompetitionsSkeleton(),
-                    builder: (data) => _CompetitionsBody(data: data),
+                  () => SafeArea(
+                    top: false,
+                    child: DataStateBuilder<CompetitionsData>(
+                      state: controller.state,
+                      onRetry: controller.load,
+                      skeleton: const _CompetitionsSkeleton(),
+                      builder: (data) => _CompetitionsBody(data: data),
+                    ),
                   ),
                 ),
               ),

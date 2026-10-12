@@ -1,3 +1,5 @@
+import 'package:get/get_utils/get_utils.dart' show Trans;
+
 import '../../../core/network/api_client.dart';
 import '../../../core/network/api_endpoints.dart';
 import '../../../core/network/api_response.dart';
@@ -14,7 +16,7 @@ class PayoutMethodsRepository {
     final response = await _api.get<dynamic>(ApiEndpoints.financeMethods);
     final body = response.data;
     if (body is! Map<String, dynamic> || body['success'] != true) {
-      return ApiResponse.failure(_message(body, 'Unable to load payout methods'));
+      return ApiResponse.failure(_message(body, 'errors.load_failed'.tr));
     }
     final data = body['data'];
     final methods = data is Map<String, dynamic> ? data['methods'] : data;
@@ -29,7 +31,7 @@ class PayoutMethodsRepository {
     final response = await _api.get<dynamic>(ApiEndpoints.financeMethodTypes);
     final body = response.data;
     if (body is! Map<String, dynamic> || body['success'] != true) {
-      return ApiResponse.failure(_message(body, 'Unable to load method types'));
+      return ApiResponse.failure(_message(body, 'errors.load_failed'.tr));
     }
     final data = body['data'];
     final types = data is Map<String, dynamic>
@@ -58,7 +60,7 @@ class PayoutMethodsRepository {
         'details': details,
       },
     );
-    return _voidResult(response.data, 'Unable to add payout method');
+    return _voidResult(response.data, 'payout_methods.save_failed'.tr);
   }
 
   Future<ApiResponse<void>> updatePayoutMethod({
@@ -77,13 +79,13 @@ class PayoutMethodsRepository {
         'details': details,
       },
     );
-    return _voidResult(response.data, 'Unable to update payout method');
+    return _voidResult(response.data, 'payout_methods.save_failed'.tr);
   }
 
   Future<ApiResponse<void>> deletePayoutMethod(String id) async {
     final response =
         await _api.delete<dynamic>('${ApiEndpoints.financeMethods}/$id');
-    return _voidResult(response.data, 'Unable to delete payout method');
+    return _voidResult(response.data, 'errors.delete_failed'.tr);
   }
 
   ApiResponse<void> _voidResult(dynamic body, String fallback) {

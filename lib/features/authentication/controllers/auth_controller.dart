@@ -179,7 +179,7 @@ class AuthController extends GetxController {
   Future<String?> resendOtp({required String email}) async {
     final result = await _repository.resendOtp(email: email);
     if (result.success) return null;
-    return result.message ?? 'Something went wrong. Please try again.';
+    return result.message ?? 'errors.generic'.tr;
   }
 
   Future<bool> requestPasswordReset({required String email}) async {

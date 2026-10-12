@@ -41,7 +41,10 @@ class AppSegmentedControl extends StatelessWidget {
           return Stack(
             children: [
               AnimatedAlign(
-                alignment: Alignment(
+                // Directional so RTL (Arabic) mirrors the pill with the row —
+                // `-1` becomes "start" (physical right in RTL), matching where
+                // the first label actually sits.
+                alignment: AlignmentDirectional(
                   labels.length == 1
                       ? 0
                       : -1 + (selected * 2 / (labels.length - 1)),

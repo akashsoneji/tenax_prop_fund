@@ -2,6 +2,7 @@ import 'dart:convert';
 
 import 'package:dio/dio.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
+import 'package:get/get_utils/get_utils.dart' show Trans;
 
 import '../../../core/network/api_interceptor.dart';
 import '../../../core/network/api_response.dart';
@@ -177,6 +178,6 @@ class AuthRepository {
         if (msg is String && msg.isNotEmpty) return msg;
       }
     }
-    return 'Something went wrong. Please try again.';
+    return 'errors.generic'.tr;
   }
 }

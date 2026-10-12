@@ -65,127 +65,130 @@ class _DetailBody extends GetView<CompetitionsController> {
     final description = competition.description;
     final dateRange = competition.dateRange;
 
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.stretch,
-      children: [
-        FadeSlideIn(
-          order: 0,
-          child: Container(
-            padding: EdgeInsets.all(16.w),
-            decoration: BoxDecoration(
-              color: scheme.surfaceContainerHighest.withValues(alpha: 0.35),
-              borderRadius: BorderRadius.circular(18.r),
-            ),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Row(
-                  children: [
-                    AppPill.status(
-                      label: competition.statusLabel.isEmpty
-                          ? competition.status.labelKey.tr
-                          : competition.statusLabel,
-                      color: competition.status.tone(scheme),
-                      showDot: true,
-                    ),
-                    if (dateRange.isNotEmpty) ...[
-                      10.horizontalSpace,
-                      Expanded(
-                        child: Text(
-                          dateRange,
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
-                          textAlign: TextAlign.end,
-                          style: AppText.label(
-                            fontSize: 12.sp,
-                            color: scheme.onSurfaceVariant,
+    return SafeArea(
+      top: false,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          FadeSlideIn(
+            order: 0,
+            child: Container(
+              padding: EdgeInsets.all(16.w),
+              decoration: BoxDecoration(
+                color: scheme.surfaceContainerHighest.withValues(alpha: 0.35),
+                borderRadius: BorderRadius.circular(18.r),
+              ),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
+                    children: [
+                      AppPill.status(
+                        label: competition.statusLabel.isEmpty
+                            ? competition.status.labelKey.tr
+                            : competition.statusLabel,
+                        color: competition.status.tone(scheme),
+                        showDot: true,
+                      ),
+                      if (dateRange.isNotEmpty) ...[
+                        10.horizontalSpace,
+                        Expanded(
+                          child: Text(
+                            dateRange,
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                            textAlign: TextAlign.end,
+                            style: AppText.label(
+                              fontSize: 12.sp,
+                              color: scheme.onSurfaceVariant,
+                            ),
                           ),
+                        ),
+                      ],
+                    ],
+                  ),
+                  if (description != null && description.isNotEmpty) ...[
+                    Gap.vMd,
+                    Text(
+                      description,
+                      style: AppText.body(
+                        fontSize: 13.sp,
+                        color: scheme.onSurfaceVariant,
+                        height: 1.45,
+                      ),
+                    ),
+                  ],
+                  Gap.vLg,
+                  Row(
+                    children: [
+                      Expanded(
+                        child: AppStatTile(
+                          label: 'competitions.prize_pool'.tr,
+                          value: competition.prizePool,
+                          valueFontSize: 15.sp,
+                        ),
+                      ),
+                      Expanded(
+                        child: AppStatTile(
+                          label: 'competitions.entries'.tr,
+                          value: '${competition.entriesCount}',
+                          valueFontSize: 15.sp,
+                        ),
+                      ),
+                      Expanded(
+                        child: AppStatTile(
+                          label: 'competitions.my_score'.tr,
+                          value: competition.myScore ?? '—',
+                          valueFontSize: 15.sp,
                         ),
                       ),
                     ],
-                  ],
-                ),
-                if (description != null && description.isNotEmpty) ...[
-                  Gap.vMd,
-                  Text(
-                    description,
-                    style: AppText.body(
-                      fontSize: 13.sp,
-                      color: scheme.onSurfaceVariant,
-                      height: 1.45,
-                    ),
                   ),
                 ],
-                Gap.vLg,
-                Row(
-                  children: [
-                    Expanded(
-                      child: AppStatTile(
-                        label: 'competitions.prize_pool'.tr,
-                        value: competition.prizePool,
-                        valueFontSize: 15.sp,
-                      ),
-                    ),
-                    Expanded(
-                      child: AppStatTile(
-                        label: 'competitions.entries'.tr,
-                        value: '${competition.entriesCount}',
-                        valueFontSize: 15.sp,
-                      ),
-                    ),
-                    Expanded(
-                      child: AppStatTile(
-                        label: 'competitions.my_score'.tr,
-                        value: competition.myScore ?? '—',
-                        valueFontSize: 15.sp,
-                      ),
-                    ),
-                  ],
-                ),
-              ],
-            ),
-          ),
-        ),
-        Gap.vXl,
-        FadeSlideIn(order: 1, child: SectionHeader('competitions.prizes'.tr)),
-        FadeSlideIn(
-          order: 2,
-          child: CompetitionPrizesCard(prizes: competition.prizes),
-        ),
-        if (competition.rules.isNotEmpty) ...[
-          Gap.vXl,
-          FadeSlideIn(order: 3, child: SectionHeader('competitions.rules'.tr)),
-          FadeSlideIn(
-            order: 4,
-            child: CompetitionRulesCard(rules: competition.rules),
-          ),
-        ],
-        Gap.vXl,
-        FadeSlideIn(
-          order: 5,
-          child: SectionHeader('competitions.leaderboard'.tr),
-        ),
-        FadeSlideIn(
-          order: 6,
-          child: CompetitionLeaderboardCard(rows: competition.leaderboard),
-        ),
-        if (competition.canRegister) ...[
-          Gap.vXl,
-          FadeSlideIn(
-            order: 7,
-            child: Obx(
-              () => _DetailCta(
-                registered: controller.isRegistered(competition),
-                onRegister: () => CompetitionRegisterSheet.show(
-                  context,
-                  competition: competition,
-                  accounts: controller.data.accounts,
-                ),
               ),
             ),
           ),
+          Gap.vXl,
+          FadeSlideIn(order: 1, child: SectionHeader('competitions.prizes'.tr)),
+          FadeSlideIn(
+            order: 2,
+            child: CompetitionPrizesCard(prizes: competition.prizes),
+          ),
+          if (competition.rules.isNotEmpty) ...[
+            Gap.vXl,
+            FadeSlideIn(order: 3, child: SectionHeader('competitions.rules'.tr)),
+            FadeSlideIn(
+              order: 4,
+              child: CompetitionRulesCard(rules: competition.rules),
+            ),
+          ],
+          Gap.vXl,
+          FadeSlideIn(
+            order: 5,
+            child: SectionHeader('competitions.leaderboard'.tr),
+          ),
+          FadeSlideIn(
+            order: 6,
+            child: CompetitionLeaderboardCard(rows: competition.leaderboard),
+          ),
+          if (competition.canRegister) ...[
+            Gap.vXl,
+            FadeSlideIn(
+              order: 7,
+              child: Obx(
+                () => _DetailCta(
+                  registered: controller.isRegistered(competition),
+                  onRegister: () => CompetitionRegisterSheet.show(
+                    context,
+                    competition: competition,
+                    accounts: controller.data.accounts,
+                  ),
+                ),
+              ),
+            ),
+          ],
         ],
-      ],
+      ),
     );
   }
 }

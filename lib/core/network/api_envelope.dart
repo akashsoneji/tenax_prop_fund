@@ -60,14 +60,14 @@ class ApiEnvelope {
       final res = await request();
       final body = res.data;
       if (body is! Map<String, dynamic>) {
-        return _fail('Unexpected server response.', showErrorToast);
+        return _fail('errors.unexpected_response'.tr, showErrorToast);
       }
       // Mobile API uses `success`; the web trade API uses `status`. Accept both.
       final success =
           (body['success'] as bool?) ?? (body['status'] as bool?) ?? false;
       final message = body['message'] as String?;
       if (!success) {
-        return _fail(message ?? 'Something went wrong.', showErrorToast);
+        return _fail(message ?? 'errors.generic'.tr, showErrorToast);
       }
       if (successMessage != null && successMessage.isNotEmpty) {
         AppToast.success(successMessage);
@@ -76,7 +76,7 @@ class ApiEnvelope {
     } on DioException catch (e) {
       return _fail(_dioMessage(e), showErrorToast);
     } catch (_) {
-      return _fail('Something went wrong. Please try again.', showErrorToast);
+      return _fail('errors.generic'.tr, showErrorToast);
     }
   }
 
@@ -91,13 +91,13 @@ class ApiEnvelope {
       final res = await request();
       final body = res.data;
       if (body is! Map<String, dynamic>) {
-        return _fail('Unexpected server response.', showErrorToast);
+        return _fail('errors.unexpected_response'.tr, showErrorToast);
       }
       final success =
           (body['success'] as bool?) ?? (body['status'] as bool?) ?? false;
       if (!success) {
         return _fail(
-          body['message'] as String? ?? 'Something went wrong.',
+          body['message'] as String? ?? 'errors.generic'.tr,
           showErrorToast,
         );
       }
@@ -105,7 +105,7 @@ class ApiEnvelope {
     } on DioException catch (e) {
       return _fail(_dioMessage(e), showErrorToast);
     } catch (_) {
-      return _fail('Something went wrong. Please try again.', showErrorToast);
+      return _fail('errors.generic'.tr, showErrorToast);
     }
   }
 

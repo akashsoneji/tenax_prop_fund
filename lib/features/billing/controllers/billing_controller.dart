@@ -42,7 +42,7 @@ class BillingController extends BaseController<BillingData> {
 
   Future<ApiResponse<String>> exportBilling() async {
     if (isExporting.value) {
-      return ApiResponse.failure('Export already in progress.');
+      return ApiResponse.failure('errors.export_in_progress'.tr);
     }
     isExporting.value = true;
     try {

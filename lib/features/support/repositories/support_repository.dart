@@ -21,7 +21,7 @@ class SupportRepository {
 
     if (!ticketsRes.success || ticketsRes.data == null) {
       return ApiResponse.failure(
-        ticketsRes.message ?? 'Could not load tickets.',
+        ticketsRes.message ?? 'errors.load_failed'.tr,
       );
     }
     return ApiResponse.success(

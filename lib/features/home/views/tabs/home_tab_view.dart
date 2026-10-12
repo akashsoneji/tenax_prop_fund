@@ -3,6 +3,7 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
 
 import '../../../../app/routes/app_routes.dart';
+import '../../../../core/localization/backend_label_tr.dart';
 import '../../../../shared/widgets/data_state_builder.dart';
 import '../../../../shared/widgets/fade_slide_in.dart';
 import '../../../../shared/widgets/skeletons/skeletons.dart';
@@ -96,7 +97,8 @@ class HomeTabView extends GetView<HomeController> {
         ..add(
           HomeSectionLabel(
             'home.account_health'.tr,
-            actionLabel: data.healthBadge.isEmpty ? null : data.healthBadge,
+            actionLabel:
+                data.healthBadge.isEmpty ? null : trBackend(data.healthBadge),
           ),
         )
         ..add(labelGap)

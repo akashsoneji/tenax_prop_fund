@@ -1,3 +1,5 @@
+import 'package:get/get_utils/get_utils.dart' show Trans;
+
 import '../../../core/network/api_client.dart';
 import '../../../core/network/api_endpoints.dart';
 import '../../../core/network/api_envelope.dart';
@@ -30,11 +32,11 @@ class RewardsRepository {
     );
     final body = response.data;
     if (body is! Map<String, dynamic>) {
-      return ApiResponse.failure('Unable to load rewards');
+      return ApiResponse.failure('errors.load_failed'.tr);
     }
     if (body['success'] != true || body['data'] == null) {
       return ApiResponse.failure(
-        body['message']?.toString() ?? 'Unable to load rewards',
+        body['message']?.toString() ?? 'errors.load_failed'.tr,
       );
     }
     return ApiResponse.success(RewardsData.fromJson(body['data']));
@@ -45,11 +47,11 @@ class RewardsRepository {
     final response = await _api.get<dynamic>(ApiEndpoints.financeMethodTypes);
     final body = response.data;
     if (body is! Map<String, dynamic>) {
-      return ApiResponse.failure('Unable to load method types');
+      return ApiResponse.failure('errors.load_failed'.tr);
     }
     if (body['success'] != true || body['data'] == null) {
       return ApiResponse.failure(
-        body['message']?.toString() ?? 'Unable to load method types',
+        body['message']?.toString() ?? 'errors.load_failed'.tr,
       );
     }
     return ApiResponse.success(
@@ -61,11 +63,11 @@ class RewardsRepository {
     final response = await _api.get<dynamic>(ApiEndpoints.financeMethods);
     final body = response.data;
     if (body is! Map<String, dynamic>) {
-      return ApiResponse.failure('Unable to load payout methods');
+      return ApiResponse.failure('errors.load_failed'.tr);
     }
     if (body['success'] != true || body['data'] == null) {
       return ApiResponse.failure(
-        body['message']?.toString() ?? 'Unable to load payout methods',
+        body['message']?.toString() ?? 'errors.load_failed'.tr,
       );
     }
     final methods = (body['data']['methods'] as List?)
@@ -102,7 +104,7 @@ class RewardsRepository {
     final message = body is Map<String, dynamic>
         ? body['message']?.toString()
         : null;
-    return ApiResponse.failure(message ?? 'Unable to save method');
+    return ApiResponse.failure(message ?? 'payout_methods.save_failed'.tr);
   }
 
   /// STEP 5 — Edit a payout method.
@@ -128,7 +130,7 @@ class RewardsRepository {
     final message = body is Map<String, dynamic>
         ? body['message']?.toString()
         : null;
-    return ApiResponse.failure(message ?? 'Unable to update method');
+    return ApiResponse.failure(message ?? 'payout_methods.save_failed'.tr);
   }
 
   /// STEP 6 — Delete a payout method.
@@ -143,7 +145,7 @@ class RewardsRepository {
     final message = body is Map<String, dynamic>
         ? body['message']?.toString()
         : null;
-    return ApiResponse.failure(message ?? 'Unable to delete method');
+    return ApiResponse.failure(message ?? 'errors.delete_failed'.tr);
   }
 
   /// STEP 7 — Submit payout (reward) request.
@@ -214,6 +216,6 @@ class RewardsRepository {
     final message = body is Map<String, dynamic>
         ? body['message']?.toString()
         : null;
-    return ApiResponse.failure(message ?? 'Unable to cancel payout');
+    return ApiResponse.failure(message ?? 'rewards.cancel_failed'.tr);
   }
 }

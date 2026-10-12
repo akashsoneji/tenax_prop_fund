@@ -2,6 +2,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_inappwebview/flutter_inappwebview.dart';
+import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
 import 'package:get_storage/get_storage.dart';
@@ -118,6 +119,20 @@ class TenaxApp extends StatelessWidget {
           translations: AppTranslations(),
           locale: settings.locale,
           fallbackLocale: const Locale('en'),
+          supportedLocales: const [
+            Locale('en'),
+            Locale('hi'),
+            Locale('ar'),
+            Locale('es'),
+            Locale('id'),
+            Locale('vi'),
+            Locale('zh'),
+          ],
+          localizationsDelegates: const [
+            GlobalMaterialLocalizations.delegate,
+            GlobalWidgetsLocalizations.delegate,
+            GlobalCupertinoLocalizations.delegate,
+          ],
 
           initialBinding: InitialBinding(config),
           initialRoute: AppRoutes.splash,

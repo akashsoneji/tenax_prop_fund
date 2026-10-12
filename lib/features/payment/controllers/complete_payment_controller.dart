@@ -49,7 +49,7 @@ class CompletePaymentController extends GetxController {
       state.value = DataState.success(res.data!);
     } else {
       state.value =
-          DataState.failure(res.message ?? 'Could not load the order.');
+          DataState.failure(res.message ?? 'errors.load_failed'.tr);
     }
   }
 
