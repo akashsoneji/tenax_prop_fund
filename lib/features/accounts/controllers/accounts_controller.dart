@@ -19,7 +19,7 @@ class AccountsController extends BaseController<AccountsData> {
   final AccountsRepository _repository;
 
   /// Selected status tab (Active / Funded / Completed / Breached / All).
-  final selectedTab = AccountTab.all.obs;
+  final selectedTab = AccountTab.active.obs;
 
   /// Free-text login-ID search.
   final query = ''.obs;

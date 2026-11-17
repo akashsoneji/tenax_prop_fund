@@ -407,6 +407,8 @@ class HistoryEntry {
     required this.profit,
     required this.commission,
     required this.swap,
+    required this.stopLoss,
+    required this.takeProfit,
     required this.openTime,
     required this.closeTime,
     required this.duration,
@@ -422,6 +424,8 @@ class HistoryEntry {
   final double profit;
   final double commission;
   final double swap;
+  final double stopLoss;
+  final double takeProfit;
   final String openTime;
   final String closeTime;
   final String duration;
@@ -453,7 +457,15 @@ class HistoryEntry {
           .toString(),
       profit: _toDouble(json['trade_profit'] ?? json['profit']),
       commission: _toDouble(json['trade_commission'] ?? json['commission']),
-      swap: _toDouble(json['swap']),
+      swap: _toDouble(json['trade_swap'] ?? json['swap']),
+      stopLoss: _toDouble(json['trade_sl'] ??
+          json['sl'] ??
+          json['stop_loss'] ??
+          json['price_sl']),
+      takeProfit: _toDouble(json['trade_tp'] ??
+          json['tp'] ??
+          json['take_profit'] ??
+          json['price_tp']),
       openTime:
           (json['trade_open_time'] ?? json['open_time'] ?? json['time'] ?? '')
               .toString(),

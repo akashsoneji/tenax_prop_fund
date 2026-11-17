@@ -239,10 +239,11 @@ class PositionsController extends GetxController {
   /// The user's primary account id, if known (badge + ordering in the sheet).
   int? get primaryAccountId => _primaryAccountId();
 
-  /// Moves the primary account to index 0, keeping the rest in API order.
+  /// Tradable accounts only (breached/completed are dropped), primary first,
+  /// the rest in API order.
   List<AccountRow> _primaryFirst(List<AccountRow> rows) {
     final primaryId = _primaryAccountId();
-    final sorted = [...rows];
+    final sorted = rows.where((a) => a.isTradable).toList();
     final index = sorted.indexWhere((a) => a.id == primaryId);
     if (index <= 0) return sorted;
     sorted.insert(0, sorted.removeAt(index));
@@ -251,20 +252,17 @@ class PositionsController extends GetxController {
 
   void _selectAccount(List<AccountRow> rows) {
     accountRows.assignAll(_primaryFirst(rows));
+    final tradable = rows.where((a) => a.isTradable).toList();
     final focusId = _focusedAccountId() ?? _primaryAccountId();
     if (focusId != null) {
-      final match = rows.where((a) => a.id == focusId);
+      final match = tradable.where((a) => a.id == focusId);
       if (match.isNotEmpty) {
         _applyAccount(match.first.login);
         return;
       }
     }
 
-    final preferred = rows.firstWhere(
-      (a) => a.tab == AccountTab.funded || a.tab == AccountTab.active,
-      orElse: () => rows.first,
-    );
-    _applyAccount(preferred.login);
+    _applyAccount(tradable.isNotEmpty ? tradable.first.login : rows.first.login);
   }
 
   /// The user's active/primary account id from [PrimaryAccountService]

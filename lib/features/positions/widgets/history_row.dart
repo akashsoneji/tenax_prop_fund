@@ -4,82 +4,204 @@ import 'package:get/get.dart';
 
 import '../../../shared/theme/app_colors.dart';
 import '../../../shared/theme/app_text.dart';
-import '../models/positions_models.dart';
-import '../../../shared/theme/app_spacing.dart';
 import '../../../shared/widgets/app_card.dart';
+import '../models/positions_models.dart';
 
-/// One closed-trade row
-/// price, and net profit coloured green/red.
-class HistoryRow extends StatelessWidget {
+/// One closed trade. Collapsed it shows symbol, side + volume, open → close
+/// price, close time and net profit; tapping expands the S/L, T/P, open/close
+/// time, swap, commission, position ID and duration grid.
+class HistoryRow extends StatefulWidget {
   const HistoryRow({super.key, required this.entry});
 
   final HistoryEntry entry;
 
   @override
+  State<HistoryRow> createState() => _HistoryRowState();
+}
+
+class _HistoryRowState extends State<HistoryRow> {
+  bool _expanded = false;
+
+  @override
   Widget build(BuildContext context) {
     final scheme = Theme.of(context).colorScheme;
-    final muted = scheme.onSurface.withValues(alpha: AppColors.alphaMuted);
-    final isBuy = entry.isBuy;
-    final sideColor = isBuy ? AppColors.success : AppColors.danger;
-    final pnlColor = entry.profit >= 0 ? AppColors.success : AppColors.danger;
-
     return AppCard(
       radius: 16.r,
       margin: EdgeInsets.only(bottom: 10.h),
-      padding: EdgeInsets.all(14.w),
-      child: Row(
-        children: [
-          Expanded(
+      padding: EdgeInsets.zero,
+      child: InkWell(
+        borderRadius: BorderRadius.circular(16.r),
+        onTap: () => setState(() => _expanded = !_expanded),
+        child: Padding(
+          padding: EdgeInsets.fromLTRB(14.w, 12.h, 10.w, 12.h),
+          child: AnimatedSize(
+            duration: const Duration(milliseconds: 200),
+            alignment: Alignment.topCenter,
             child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Row(
-                  children: [
-                    Flexible(
-                      child: Text(
-                        entry.symbol,
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                        style: AppText.title(
-                          color: scheme.onSurface,
-                          fontSize: 15.sp,
-                        ),
-                      ),
-                    ),
-                    Gap.hSm,
-                    Text(
-                      (isBuy ? 'trade.buy' : 'trade.sell').tr.toUpperCase(),
-                      style: AppText.label(color: sideColor, fontSize: 11.sp),
-                    ),
-                  ],
-                ),
-                Gap.vXs,
-                Text(
-                  '${'positions.volume'.tr}: ${entry.volume.toStringAsFixed(2)}'
-                  '   ${entry.priceOpen} → ${entry.priceClose}',
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                  style: AppText.label(color: muted),
-                ),
-                if (entry.closeTime.isNotEmpty) ...[
-                  3.verticalSpace,
-                  Text(
-                    entry.closeTime,
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                    style: AppText.label(color: muted, fontSize: 11.sp),
+                _HistorySummary(entry: widget.entry, expanded: _expanded),
+                if (_expanded) ...[
+                  Padding(
+                    padding: EdgeInsets.symmetric(vertical: 10.h),
+                    child: Divider(height: 1.h, color: scheme.outlineVariant),
                   ),
+                  _HistoryDetails(entry: widget.entry),
                 ],
               ],
             ),
           ),
-          Gap.hSm,
-          Text(
-            entry.profit.toStringAsFixed(2),
-            style: AppText.subtitle(color: pnlColor, fontSize: 14.sp),
-          ),
-        ],
+        ),
       ),
+    );
+  }
+}
+
+class _HistorySummary extends StatelessWidget {
+  const _HistorySummary({required this.entry, required this.expanded});
+
+  final HistoryEntry entry;
+  final bool expanded;
+
+  @override
+  Widget build(BuildContext context) {
+    final scheme = Theme.of(context).colorScheme;
+    final muted = scheme.onSurface.withValues(alpha: AppColors.alphaMuted);
+    final sideColor = entry.isBuy ? AppColors.success : AppColors.danger;
+    final pnlColor = entry.profit >= 0 ? AppColors.success : AppColors.danger;
+    final sideLabel = (entry.isBuy ? 'trade.buy' : 'trade.sell').tr.toLowerCase();
+    final profitText = entry.profit < 0
+        ? '-\$${entry.profit.abs().toStringAsFixed(2)}'
+        : '\$${entry.profit.toStringAsFixed(2)}';
+
+    return Row(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Expanded(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text.rich(
+                TextSpan(
+                  text: entry.symbol,
+                  style: AppText.title(color: scheme.onSurface, fontSize: 15.sp),
+                  children: [
+                    TextSpan(
+                      text: ' $sideLabel ${entry.volume.toStringAsFixed(2)}',
+                      style: AppText.subtitle(color: sideColor, fontSize: 14.sp),
+                    ),
+                  ],
+                ),
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+              ),
+              SizedBox(height: 4.h),
+              Text(
+                '${entry.priceOpen} → ${entry.priceClose}',
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+                style: AppText.label(color: muted, fontSize: 12.sp),
+              ),
+            ],
+          ),
+        ),
+        SizedBox(width: 8.w),
+        Column(
+          crossAxisAlignment: CrossAxisAlignment.end,
+          children: [
+            Text(
+              entry.closeTime.replaceAll('-', '.'),
+              maxLines: 1,
+              style: AppText.label(color: muted, fontSize: 12.sp),
+            ),
+            SizedBox(height: 4.h),
+            Text(
+              profitText,
+              maxLines: 1,
+              style: AppText.subtitle(color: pnlColor, fontSize: 14.sp),
+            ),
+          ],
+        ),
+        SizedBox(width: 4.w),
+        AnimatedRotation(
+          turns: expanded ? 0.5 : 0,
+          duration: const Duration(milliseconds: 200),
+          child: Icon(Icons.keyboard_arrow_down, size: 20.w, color: muted),
+        ),
+      ],
+    );
+  }
+}
+
+class _HistoryDetails extends StatelessWidget {
+  const _HistoryDetails({required this.entry});
+
+  final HistoryEntry entry;
+
+  String get _duration {
+    if (entry.duration.isNotEmpty) return entry.duration;
+    final open = DateTime.tryParse(entry.openTime);
+    final close = DateTime.tryParse(entry.closeTime);
+    if (open == null || close == null) return '-';
+    final diff = close.difference(open);
+    if (diff.inDays > 0) return '${diff.inDays}d ${diff.inHours % 24}h';
+    if (diff.inHours > 0) return '${diff.inHours}h ${diff.inMinutes % 60}m';
+    return '${diff.inMinutes}m';
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final rows = <(String, String, String, String)>[
+      ('positions.hist_sl', entry.stopLoss.toStringAsFixed(2),
+          'positions.hist_tp', entry.takeProfit.toStringAsFixed(2)),
+      ('positions.hist_open', entry.openTime,
+          'positions.hist_close', entry.closeTime),
+      ('positions.hist_swap', entry.swap.toStringAsFixed(2),
+          'positions.hist_commission', entry.commission.toStringAsFixed(2)),
+      ('positions.hist_id', '#${entry.positionId}',
+          'positions.hist_duration', _duration),
+    ];
+    return Column(
+      children: [
+        for (final (l1, v1, l2, v2) in rows)
+          Padding(
+            padding: EdgeInsets.only(bottom: 6.h),
+            child: Row(
+              children: [
+                Expanded(child: _DetailCell(label: l1.tr, value: v1)),
+                SizedBox(width: 12.w),
+                Expanded(child: _DetailCell(label: l2.tr, value: v2)),
+              ],
+            ),
+          ),
+      ],
+    );
+  }
+}
+
+class _DetailCell extends StatelessWidget {
+  const _DetailCell({required this.label, required this.value});
+
+  final String label;
+  final String value;
+
+  @override
+  Widget build(BuildContext context) {
+    final scheme = Theme.of(context).colorScheme;
+    final muted = scheme.onSurface.withValues(alpha: AppColors.alphaMuted);
+    return Row(
+      children: [
+        Text('$label:', style: AppText.label(color: muted, fontSize: 11.sp)),
+        SizedBox(width: 4.w),
+        Expanded(
+          child: Text(
+            value.isEmpty ? '-' : value,
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+            textAlign: TextAlign.end,
+            style: AppText.label(color: scheme.onSurface, fontSize: 11.sp),
+          ),
+        ),
+      ],
     );
   }
 }

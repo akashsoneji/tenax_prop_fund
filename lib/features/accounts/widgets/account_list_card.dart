@@ -107,7 +107,10 @@ class _Header extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text(
-                account.planName.toUpperCase(),
+                [account.planName, account.phaseLabel, account.accountType]
+                    .where((part) => part.isNotEmpty)
+                    .join('  ·  ')
+                    .toUpperCase(),
                 maxLines: 1,
                 overflow: TextOverflow.ellipsis,
                 style: AppText.base(

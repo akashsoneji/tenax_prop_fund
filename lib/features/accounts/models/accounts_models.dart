@@ -8,7 +8,7 @@ import 'package:intl/intl.dart';
 
 /// The five status tabs shown above the account list. `completed` maps to the
 /// payload's `passed` count/filter (the web labels it "Completed").
-enum AccountTab { all, active, funded, completed, breached }
+enum AccountTab { active, funded, completed, breached, all }
 
 extension AccountTabKey on AccountTab {
   /// The `counts` key / server `tab` filter value for this tab.
@@ -160,6 +160,7 @@ class AccountRow {
     required this.planName,
     required this.accountSize,
     required this.phaseLabel,
+    this.accountType = '',
     required this.statusLabel,
     required this.tone,
     required this.tab,
@@ -180,6 +181,7 @@ class AccountRow {
   final String planName; // e.g. 'Pipze Free Trial'
   final String accountSize; // e.g. '$5,000'
   final String phaseLabel; // e.g. 'Trial'
+  final String accountType; // e.g. 'Swap'
   final String statusLabel; // e.g. 'Active'
   final AccountTone tone;
 
@@ -197,6 +199,10 @@ class AccountRow {
   final String started; // e.g. 'Sep 2, 2026'
   final String tradeUrl;
 
+  /// Only active and funded accounts can still place trades; breached and
+  /// completed ones stay out of the trading account switcher.
+  bool get isTradable => tab == AccountTab.active || tab == AccountTab.funded;
+
   factory AccountRow.fromJson(Map<String, dynamic> json) {
     final profitMinor = _int(json['profit_minor']);
     final floatingMinor = _int(json['floating_minor']);
@@ -207,6 +213,7 @@ class AccountRow {
       planName: (json['plan_name'] as String?) ?? 'Account',
       accountSize: _whole(_int(json['account_size_minor'])),
       phaseLabel: (json['phase_label'] as String?) ?? '',
+      accountType: (json['account_type'] as String?) ?? '',
       statusLabel: (json['status_label'] as String?) ?? '',
       tone: _toneFrom(json['status_tone'] as String?),
       tab: _tabFrom(json['status'] as String?, json['phase'] as String?),
@@ -236,7 +243,15 @@ class AccountRow {
     }
   }
 
+  /// Mirrors the web's tab buckets. The API reports a breached account as
+  /// `status: failed` + `phase: breached`, so both fields are checked.
   static AccountTab _tabFrom(String? status, String? phase) {
+    switch (phase) {
+      case 'breached':
+        return AccountTab.breached;
+      case 'funded':
+        return AccountTab.funded;
+    }
     switch (status) {
       case 'funded':
         return AccountTab.funded;
@@ -245,11 +260,9 @@ class AccountRow {
       case 'completed':
         return AccountTab.completed;
       case 'breached':
+      case 'failed':
         return AccountTab.breached;
-      case 'active':
-        return AccountTab.active;
     }
-    if (phase == 'funded') return AccountTab.funded;
     return AccountTab.active;
   }
 }
