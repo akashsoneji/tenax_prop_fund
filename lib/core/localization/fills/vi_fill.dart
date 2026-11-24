@@ -436,6 +436,8 @@ const Map<String, String> viFill = {
   'symbols.trade': 'Giao dịch',
   'symbols.bid': 'Giá bán',
   'symbols.ask': 'Giá mua',
+  'symbols.low_short': 'L:',
+  'symbols.high_short': 'H:',
   'symbols.spread_label': 'Spread',
   'symbols.high': 'Cao',
   'symbols.low': 'Thấp',

@@ -94,6 +94,33 @@
                 "--dart-define-from-file=config/flavors/alibabafx_prop.json",
                 "--dart-define=ENV=production"
             ]
+        },
+        {
+            "name": "Pip Prop — Debug",
+            "request": "launch",
+            "type": "dart",
+            "program": "lib/main.dart",
+            "preLaunchTask": "prepare-ios-pipprop",
+            "args": [
+                "--flavor",
+                "pipprop",
+                "--dart-define-from-file=config/flavors/pipprop.json",
+                "--dart-define=ENV=development"
+            ]
+        },
+        {
+            "name": "Pip Prop — Release",
+            "request": "launch",
+            "type": "dart",
+            "program": "lib/main.dart",
+            "flutterMode": "release",
+            "preLaunchTask": "prepare-ios-pipprop",
+            "args": [
+                "--flavor",
+                "pipprop",
+                "--dart-define-from-file=config/flavors/pipprop.json",
+                "--dart-define=ENV=production"
+            ]
         }
     ]
 }

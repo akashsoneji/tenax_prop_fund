@@ -1,11 +1,13 @@
 import 'dart:convert';
 
 import 'package:dio/dio.dart';
+import 'package:dio/io.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 
 import '../../app/flavor/flavor_config.dart';
 import 'api_endpoints.dart';
 import 'api_interceptor.dart';
+import 'pinned_http_client.dart';
 
 /// Thin Dio wrapper. The only place that owns an HTTP client. Controllers must
 /// never instantiate Dio — they go through repositories, which use this.
@@ -28,8 +30,11 @@ class ApiClient {
         ),
         webBaseUrl = config.webBaseUrl {
     final interceptor = ApiInterceptor(storage);
-    _dio.interceptors.add(interceptor);
-    _web.interceptors.add(interceptor);
+    for (final client in [_dio, _web]) {
+      client.httpClientAdapter =
+          IOHttpClientAdapter(createHttpClient: PinnedHttpClient.create);
+      client.interceptors.add(interceptor);
+    }
   }
 
   final Dio _dio;

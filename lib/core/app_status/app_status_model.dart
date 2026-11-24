@@ -7,6 +7,8 @@ class AppStatusModel {
   final String? updateUrlIos;
   final String? updateUrlAndroid;
   final String? releaseNotes;
+  final String? privacyPolicyUrl;
+  final String? termsAndConditionsUrl;
 
   const AppStatusModel({
     required this.appVersion,
@@ -16,6 +18,8 @@ class AppStatusModel {
     this.updateUrlIos,
     this.updateUrlAndroid,
     this.releaseNotes,
+    this.privacyPolicyUrl,
+    this.termsAndConditionsUrl,
   });
 
   factory AppStatusModel.fromJson(Map<String, dynamic> json) {
@@ -31,6 +35,8 @@ class AppStatusModel {
       updateUrlIos: json['update_url_ios'] as String?,
       updateUrlAndroid: json['update_url_android'] as String?,
       releaseNotes: json['release_notes'] as String?,
+      privacyPolicyUrl: json['privacy_policy_url'] as String?,
+      termsAndConditionsUrl: json['terms_and_conditions_url'] as String?,
     );
   }
 

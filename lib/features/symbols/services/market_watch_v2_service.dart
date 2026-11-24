@@ -24,6 +24,8 @@ class MarketPrice {
     this.dayHigh,
     this.dayLow,
     this.category,
+    this.bidTrend = 0,
+    this.askTrend = 0,
   });
 
   final String symbol;
@@ -34,6 +36,16 @@ class MarketPrice {
   final double? dayHigh;
   final double? dayLow;
   final String? category;
+
+  /// Direction of the last bid / ask change: 1 = up, -1 = down, 0 = no tick
+  /// yet. An unchanged price keeps the previous direction (MT5 behaviour).
+  final int bidTrend;
+  final int askTrend;
+
+  static int _trend(double? next, double prev, int current) {
+    if (next == null || prev <= 0 || next == prev) return current;
+    return next > prev ? 1 : -1;
+  }
 
   MarketPrice copyWith({
     double? bid,
@@ -52,6 +64,8 @@ class MarketPrice {
     dayHigh: dayHigh ?? this.dayHigh,
     dayLow: dayLow ?? this.dayLow,
     category: category ?? this.category,
+    bidTrend: _trend(bid, this.bid, bidTrend),
+    askTrend: _trend(ask, this.ask, askTrend),
   );
 }
 

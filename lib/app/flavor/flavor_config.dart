@@ -1,5 +1,8 @@
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
 
+import 'config_cipher.dart';
 import 'flavor.dart';
 
 /// Single source of truth for everything that varies per white-label client:
@@ -38,6 +41,16 @@ class FlavorConfig {
   final String splashLogoAsset;
   final Set<String> featureFlags;
 
+  /// Base64 SHA-256 of the certificates allowed to sign this flavor (Play App
+  /// Signing key + upload key). Empty means tamper detection is not enforced.
+  final List<String> signingCertHashes;
+
+  /// Apple team that signs the iOS app; needed by the runtime protection.
+  final String iosTeamId;
+
+  /// Address that receives the runtime-protection security reports.
+  final String securityWatcherMail;
+
   const FlavorConfig({
     required this.flavor,
     required this.env,
@@ -54,6 +67,9 @@ class FlavorConfig {
     required this.logoAsset,
     required this.splashLogoAsset,
     required this.featureFlags,
+    this.signingCertHashes = const [],
+    this.iosTeamId = '',
+    this.securityWatcherMail = '',
   });
 
   bool has(String feature) => featureFlags.contains(feature);
@@ -98,41 +114,48 @@ class FlavorConfig {
   /// Account equity/margin socket: `{wsUrl}/account` (white_label `/ws/account`).
   String get accountWsUrl => '$_wsBase/account';
 
-  /// Builds the config purely from compile-time defines supplied by
-  /// `--dart-define-from-file=config/flavors/<flavor>.json`.
+  /// Builds the config from compile-time defines.
+  ///
+  /// Release builds (`build.sh`) pass only `CFG_BLOB` + `CFG_KEY` from
+  /// `tool/encode_flavor_config.dart`, so the client's URLs and keys are not
+  /// readable strings in the binary. Debug runs from `launch.json` pass the
+  /// plain `config/flavors/<flavor>.json` keys instead.
   ///
   /// No client's host, name, colors or asset paths live in Dart source: only
   /// the JSON file passed at build time is compiled in, so decompiling one
   /// client's app never reveals another client's data.
   factory FlavorConfig.fromEnvironment() {
-    const apiBaseUrl = String.fromEnvironment('API_BASE_URL');
-    const webBaseUrl = String.fromEnvironment('WEB_BASE_URL');
-    const wsUrl = String.fromEnvironment('WS_URL');
-    const chartBaseUrl = String.fromEnvironment('CHART_BASE_URL');
-    const pusherHost = String.fromEnvironment('PUSHER_HOST');
-    const pusherAppKey = String.fromEnvironment('PUSHER_APP_KEY');
-    const appName = String.fromEnvironment('APP_NAME');
-    const primaryHex = String.fromEnvironment('PRIMARY_COLOR');
-    const darkPrimaryHex = String.fromEnvironment('DARK_PRIMARY_COLOR');
-    const secondaryHex = String.fromEnvironment('SECONDARY_COLOR');
-    const logoAsset = String.fromEnvironment('LOGO_ASSET');
-    const splashLogoAsset = String.fromEnvironment('SPLASH_LOGO_ASSET');
-    const featureFlags = String.fromEnvironment('FEATURE_FLAGS');
+    const blob = String.fromEnvironment('CFG_BLOB');
+    const key = String.fromEnvironment('CFG_KEY');
+    final values = blob.isEmpty ? _plainDefines : _decodeDefines(blob, key);
+    return FlavorConfig.fromValues(
+      values,
+      flavorName: const String.fromEnvironment('FLAVOR', defaultValue: 'tenax'),
+      envName: const String.fromEnvironment('ENV', defaultValue: 'development'),
+    );
+  }
 
-    const required = {
-      'API_BASE_URL': apiBaseUrl,
-      'WEB_BASE_URL': webBaseUrl,
-      'WS_URL': wsUrl,
-      'CHART_BASE_URL': chartBaseUrl,
-      'PUSHER_HOST': pusherHost,
-      'PUSHER_APP_KEY': pusherAppKey,
-      'APP_NAME': appName,
-      'PRIMARY_COLOR': primaryHex,
-      'SECONDARY_COLOR': secondaryHex,
-    };
+  factory FlavorConfig.fromValues(
+    Map<String, String> values, {
+    required String flavorName,
+    required String envName,
+  }) {
+    String read(String name) => values[name]?.trim() ?? '';
+
+    const required = [
+      'API_BASE_URL',
+      'WEB_BASE_URL',
+      'WS_URL',
+      'CHART_BASE_URL',
+      'PUSHER_HOST',
+      'PUSHER_APP_KEY',
+      'APP_NAME',
+      'PRIMARY_COLOR',
+      'SECONDARY_COLOR',
+    ];
     final missing = [
-      for (final entry in required.entries)
-        if (entry.value.isEmpty) entry.key,
+      for (final name in required)
+        if (read(name).isEmpty) name,
     ];
     if (missing.isNotEmpty) {
       throw StateError(
@@ -141,31 +164,58 @@ class FlavorConfig {
       );
     }
 
+    List<String> csv(String name) => [
+          for (final part in read(name).split(','))
+            if (part.trim().isNotEmpty) part.trim(),
+        ];
+    final darkPrimaryHex = read('DARK_PRIMARY_COLOR');
+
     return FlavorConfig(
-      flavor: Flavor.fromName(
-        const String.fromEnvironment('FLAVOR', defaultValue: 'tenax'),
-      ),
-      env: appEnvFromName(
-        const String.fromEnvironment('ENV', defaultValue: 'development'),
-      ),
-      appName: appName,
-      apiBaseUrl: apiBaseUrl,
-      webBaseUrl: webBaseUrl,
-      wsUrl: wsUrl,
-      pusherHost: pusherHost,
-      pusherAppKey: pusherAppKey,
-      chartBaseUrl: chartBaseUrl,
-      primaryColor: _parseColor(primaryHex),
+      flavor: Flavor.fromName(flavorName),
+      env: appEnvFromName(envName),
+      appName: read('APP_NAME'),
+      apiBaseUrl: read('API_BASE_URL'),
+      webBaseUrl: read('WEB_BASE_URL'),
+      wsUrl: read('WS_URL'),
+      pusherHost: read('PUSHER_HOST'),
+      pusherAppKey: read('PUSHER_APP_KEY'),
+      chartBaseUrl: read('CHART_BASE_URL'),
+      primaryColor: _parseColor(read('PRIMARY_COLOR')),
       darkPrimaryColor:
           darkPrimaryHex.isEmpty ? null : _parseColor(darkPrimaryHex),
-      secondaryColor: _parseColor(secondaryHex),
-      logoAsset: logoAsset,
-      splashLogoAsset: splashLogoAsset,
-      featureFlags: {
-        for (final flag in featureFlags.split(','))
-          if (flag.trim().isNotEmpty) flag.trim(),
-      },
+      secondaryColor: _parseColor(read('SECONDARY_COLOR')),
+      logoAsset: read('LOGO_ASSET'),
+      splashLogoAsset: read('SPLASH_LOGO_ASSET'),
+      featureFlags: csv('FEATURE_FLAGS').toSet(),
+      signingCertHashes: csv('SIGNING_CERT_HASHES'),
+      iosTeamId: read('IOS_TEAM_ID'),
+      securityWatcherMail: read('SECURITY_WATCHER_MAIL'),
     );
+  }
+
+  static const _plainDefines = <String, String>{
+    'API_BASE_URL': String.fromEnvironment('API_BASE_URL'),
+    'WEB_BASE_URL': String.fromEnvironment('WEB_BASE_URL'),
+    'WS_URL': String.fromEnvironment('WS_URL'),
+    'CHART_BASE_URL': String.fromEnvironment('CHART_BASE_URL'),
+    'PUSHER_HOST': String.fromEnvironment('PUSHER_HOST'),
+    'PUSHER_APP_KEY': String.fromEnvironment('PUSHER_APP_KEY'),
+    'APP_NAME': String.fromEnvironment('APP_NAME'),
+    'PRIMARY_COLOR': String.fromEnvironment('PRIMARY_COLOR'),
+    'DARK_PRIMARY_COLOR': String.fromEnvironment('DARK_PRIMARY_COLOR'),
+    'SECONDARY_COLOR': String.fromEnvironment('SECONDARY_COLOR'),
+    'LOGO_ASSET': String.fromEnvironment('LOGO_ASSET'),
+    'SPLASH_LOGO_ASSET': String.fromEnvironment('SPLASH_LOGO_ASSET'),
+    'FEATURE_FLAGS': String.fromEnvironment('FEATURE_FLAGS'),
+    'SIGNING_CERT_HASHES': String.fromEnvironment('SIGNING_CERT_HASHES'),
+    'IOS_TEAM_ID': String.fromEnvironment('IOS_TEAM_ID'),
+    'SECURITY_WATCHER_MAIL': String.fromEnvironment('SECURITY_WATCHER_MAIL'),
+  };
+
+  static Map<String, String> _decodeDefines(String blob, String key) {
+    final decoded =
+        jsonDecode(ConfigCipher.decode(blob, key)) as Map<String, dynamic>;
+    return decoded.map((name, value) => MapEntry(name, '$value'));
   }
 
   /// Parses `AARRGGBB` / `RRGGBB` hex (optional leading `#`).

@@ -45,7 +45,10 @@ class _ForceUpdateDialogState extends State<ForceUpdateDialog> {
 
     // 1. Pick the URL that matches THIS platform. Android build should never
     //    open an iOS App Store link, and vice versa.
-    final url = _urlForCurrentPlatform(data?.updateUrlAndroid, data?.updateUrlIos);
+    final url = _urlForCurrentPlatform(
+      data?.updateUrlAndroid,
+      data?.updateUrlIos,
+    );
 
     // 2. Direct APK on Android → download + install in-app (no webview).
     if (Platform.isAndroid &&
@@ -182,17 +185,20 @@ class _ForceUpdateDialogState extends State<ForceUpdateDialog> {
     final releaseNotes = data?.releaseNotes?.trim() ?? '';
     final latest = data?.appVersion ?? controller.latestVersion.value;
     final androidUrl = data?.updateUrlAndroid ?? '';
-    final hasApk = Platform.isAndroid &&
+    final hasApk =
+        Platform.isAndroid &&
         androidUrl.isNotEmpty &&
         InAppUpdateService.instance.isApkUrl(androidUrl);
-    final progressPct =
-        ((_progress ?? 0) * 100).clamp(0, 100).toStringAsFixed(0);
+    final progressPct = ((_progress ?? 0) * 100)
+        .clamp(0, 100)
+        .toStringAsFixed(0);
 
     // Landscape / tablet: cap the card width so the icon+title don't stretch
     // edge-to-edge on wide viewports. Portrait phones fall back to the full
     // width minus the horizontal gutter.
-    final maxCardWidth =
-        MediaQuery.of(context).size.width > 600 ? 440.0 : double.infinity;
+    final maxCardWidth = MediaQuery.of(context).size.width > 600
+        ? 440.0
+        : double.infinity;
 
     // Reuse the app-wide hero gradient (shades of the flavor primary) so
     // the dialog reads as part of the same brand system as the equity card,
@@ -220,8 +226,9 @@ class _ForceUpdateDialogState extends State<ForceUpdateDialog> {
                       ),
                       boxShadow: [
                         BoxShadow(
-                          color: Colors.black
-                              .withValues(alpha: isDark ? 0.5 : 0.15),
+                          color: Colors.black.withValues(
+                            alpha: isDark ? 0.5 : 0.15,
+                          ),
                           blurRadius: 32,
                           offset: const Offset(0, 12),
                         ),
@@ -233,49 +240,79 @@ class _ForceUpdateDialogState extends State<ForceUpdateDialog> {
                       children: [
                         // -----------------------------------------------------
                         // Header — gradient wash with the icon + version pill.
+                        // Soft updates get a close button; force updates don't.
                         // -----------------------------------------------------
-                        Container(
-                          width: double.infinity,
-                          padding: EdgeInsets.fromLTRB(24.w, 28.h, 24.w, 20.h),
-                          decoration: BoxDecoration(
-                            gradient: LinearGradient(
-                              begin: Alignment.topCenter,
-                              end: Alignment.bottomCenter,
-                              colors: [
-                                scheme.primary
-                                    .withValues(alpha: isDark ? 0.22 : 0.10),
-                                Colors.transparent,
-                              ],
-                            ),
-                          ),
-                          child: Column(
-                            children: [
-                              // Gradient icon with a soft glow behind it.
-                              Container(
-                                width: 84.w,
-                                height: 84.w,
-                                decoration: BoxDecoration(
-                                  shape: BoxShape.circle,
-                                  gradient: gradient,
-                                  boxShadow: [
-                                    BoxShadow(
-                                      color: AppColors.brandPurple
-                                          .withValues(alpha: 0.35),
-                                      blurRadius: 24,
-                                      offset: const Offset(0, 10),
+                        Stack(
+                          children: [
+                            Container(
+                              width: double.infinity,
+                              padding: EdgeInsets.fromLTRB(
+                                24.w,
+                                28.h,
+                                24.w,
+                                20.h,
+                              ),
+                              decoration: BoxDecoration(
+                                gradient: LinearGradient(
+                                  begin: Alignment.topCenter,
+                                  end: Alignment.bottomCenter,
+                                  colors: [
+                                    scheme.primary.withValues(
+                                      alpha: isDark ? 0.22 : 0.10,
                                     ),
+                                    Colors.transparent,
                                   ],
                                 ),
-                                child: Icon(
-                                  _headerIcon(),
-                                  size: 42.w,
-                                  color: Colors.white,
+                              ),
+                              child: Column(
+                                children: [
+                                  // Gradient icon with a soft glow behind it.
+                                  Container(
+                                    width: 84.w,
+                                    height: 84.w,
+                                    decoration: BoxDecoration(
+                                      shape: BoxShape.circle,
+                                      gradient: gradient,
+                                      boxShadow: [
+                                        BoxShadow(
+                                          color: AppColors.brandPurple
+                                              .withValues(alpha: 0.35),
+                                          blurRadius: 24,
+                                          offset: const Offset(0, 10),
+                                        ),
+                                      ],
+                                    ),
+                                    child: Icon(
+                                      _headerIcon(),
+                                      size: 42.w,
+                                      color: Colors.white,
+                                    ),
+                                  ),
+                                  14.verticalSpace,
+                                  _VersionPill(latest: latest),
+                                ],
+                              ),
+                            ),
+                            if (!widget.isForceUpdate && _state == _State.idle)
+                              Positioned(
+                                top: 4.h,
+                                right: 4.w,
+                                child: IconButton(
+                                  tooltip: MaterialLocalizations.of(
+                                    context,
+                                  ).closeButtonTooltip,
+                                  onPressed: () {
+                                    controller.resetDialogFlag();
+                                    Get.back<void>();
+                                  },
+                                  icon: Icon(
+                                    Icons.close_rounded,
+                                    size: 22.w,
+                                    color: scheme.onSurfaceVariant,
+                                  ),
                                 ),
                               ),
-                              14.verticalSpace,
-                              _VersionPill(latest: latest),
-                            ],
-                          ),
+                          ],
                         ),
                         // -----------------------------------------------------
                         // Body — title, subtitle, optional release notes.
@@ -338,8 +375,8 @@ class _ForceUpdateDialogState extends State<ForceUpdateDialog> {
                                         .withValues(alpha: 0.5),
                                     valueColor:
                                         const AlwaysStoppedAnimation<Color>(
-                                      AppColors.brandPurple,
-                                    ),
+                                          AppColors.brandPurple,
+                                        ),
                                   ),
                                 ),
                               ],
@@ -351,7 +388,8 @@ class _ForceUpdateDialogState extends State<ForceUpdateDialog> {
                                   decoration: BoxDecoration(
                                     color: scheme.surfaceContainerHighest
                                         .withValues(
-                                            alpha: isDark ? 0.35 : 0.55),
+                                          alpha: isDark ? 0.35 : 0.55,
+                                        ),
                                     borderRadius: BorderRadius.circular(14.r),
                                   ),
                                   child: Column(
@@ -370,11 +408,12 @@ class _ForceUpdateDialogState extends State<ForceUpdateDialog> {
                                             'app_status.whats_new'.tr,
                                             style: textTheme.labelMedium
                                                 ?.copyWith(
-                                              fontSize: 11.sp,
-                                              fontWeight: FontWeight.w700,
-                                              color: scheme.onSurfaceVariant,
-                                              letterSpacing: 0.6,
-                                            ),
+                                                  fontSize: 11.sp,
+                                                  fontWeight: FontWeight.w700,
+                                                  color:
+                                                      scheme.onSurfaceVariant,
+                                                  letterSpacing: 0.6,
+                                                ),
                                           ),
                                         ],
                                       ),
@@ -395,7 +434,8 @@ class _ForceUpdateDialogState extends State<ForceUpdateDialog> {
                                 label: _ctaLabel(hasApk),
                                 icon: _ctaIcon(hasApk),
                                 gradient: gradient,
-                                isError: _state == _State.error ||
+                                isError:
+                                    _state == _State.error ||
                                     _state == _State.installBlocked,
                                 // Only the download step is a blocking wait.
                                 // In `installing` the OS dialog is up (or the
@@ -405,8 +445,8 @@ class _ForceUpdateDialogState extends State<ForceUpdateDialog> {
                                 onPressed: _state == _State.downloading
                                     ? null
                                     : (_state == _State.installing
-                                        ? _reopenInstaller
-                                        : _handleUpdateTap),
+                                          ? _reopenInstaller
+                                          : _handleUpdateTap),
                               ),
                               if (!widget.isForceUpdate &&
                                   _state == _State.idle) ...[
@@ -415,7 +455,7 @@ class _ForceUpdateDialogState extends State<ForceUpdateDialog> {
                                   onPressed: () async {
                                     await controller.skipUpdateFor6Hours();
                                     controller.resetDialogFlag();
-                                    Get.back<void>(closeOverlays: true);
+                                    Get.back<void>();
                                   },
                                   style: TextButton.styleFrom(
                                     padding: EdgeInsets.symmetric(
@@ -476,9 +516,7 @@ class _ForceUpdateDialogState extends State<ForceUpdateDialog> {
       case _State.downloading:
         return null;
       case _State.idle:
-        return hasApk
-            ? Icons.download_rounded
-            : Icons.arrow_forward_rounded;
+        return hasApk ? Icons.download_rounded : Icons.arrow_forward_rounded;
     }
   }
 
@@ -498,7 +536,9 @@ class _ForceUpdateDialogState extends State<ForceUpdateDialog> {
   }
 
   String _subtitleFor(String latest) {
-    if (_state == _State.error) return _error ?? 'app_status.download_failed'.tr;
+    if (_state == _State.error) {
+      return _error ?? 'app_status.download_failed'.tr;
+    }
     if (_state == _State.installBlocked) {
       return _error ?? 'app_status.install_blocked_body'.tr;
     }
@@ -625,8 +665,9 @@ class _CtaButton extends StatelessWidget {
                         height: 22.w,
                         child: const CircularProgressIndicator(
                           strokeWidth: 2.4,
-                          valueColor:
-                              AlwaysStoppedAnimation<Color>(Colors.white),
+                          valueColor: AlwaysStoppedAnimation<Color>(
+                            Colors.white,
+                          ),
                         ),
                       )
                     : Row(

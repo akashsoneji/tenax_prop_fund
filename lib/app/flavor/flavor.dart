@@ -4,7 +4,8 @@ enum Flavor {
   /// "Tenax Prop". All flavors share one UI; they differ only by config.
   tenax,
   pipzeFunded,
-  alibabafxProp;
+  alibabafxProp,
+  pipprop;
 
   static Flavor fromName(String name) {
     switch (name) {
@@ -12,6 +13,8 @@ enum Flavor {
         return Flavor.pipzeFunded;
       case 'alibabafx_prop':
         return Flavor.alibabafxProp;
+      case 'pipprop':
+        return Flavor.pipprop;
       case 'tenax':
       default:
         return Flavor.tenax;

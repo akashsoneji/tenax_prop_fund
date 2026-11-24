@@ -85,6 +85,16 @@
                 "reveal": "silent",
                 "panel": "shared"
             }
+        },
+        {
+            "label": "prepare-ios-pipprop",
+            "type": "shell",
+            "command": "bash '${workspaceFolder}/scripts/prepare_ios_flavor.sh' pipprop",
+            "problemMatcher": [],
+            "presentation": {
+                "reveal": "silent",
+                "panel": "shared"
+            }
         }
     ]
 }

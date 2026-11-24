@@ -1,0 +1,3 @@
+#include "Generated.xcconfig"
+FLAVOR_NAME=pipprop
+LAUNCH_BG_COLOR=5F259E

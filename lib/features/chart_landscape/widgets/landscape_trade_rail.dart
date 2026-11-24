@@ -94,9 +94,7 @@ class LandscapeTradeRail extends GetView<ChartLandscapeController> {
         child: Obx(
           () => TradeTicketPanel(
             symbol: controller.symbol,
-            symbols: symbols,
             layout: TradeTicketLayout.rail,
-            onSymbolSelected: controller.selectSymbol,
             onSubmit: controller.submitTicket,
             header: LandscapeRailHeader(
               symbol: controller.symbol,

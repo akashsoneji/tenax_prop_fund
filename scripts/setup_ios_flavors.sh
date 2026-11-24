@@ -14,12 +14,13 @@ fi
 
 # Per-flavor launch-screen background colour (hex, no #) — each flavor's
 # primary colour. macOS ships bash 3.2 (no associative arrays), so use a case.
-FLAVORS=(tenax pipze_funded alibabafx_prop)
+FLAVORS=(tenax pipze_funded alibabafx_prop pipprop)
 
 splash_color() {
   case "$1" in
     tenax)          echo "5F259E" ;;
     pipze_funded)   echo "5F259E" ;;
+    pipprop)        echo "5F259E" ;;
     alibabafx_prop) echo "182430" ;;
   esac
 }

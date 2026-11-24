@@ -12,6 +12,7 @@ import '../models/positions_models.dart';
 import '../../../shared/theme/app_spacing.dart';
 import '../../../shared/theme/app_text.dart';
 import '../../../shared/widgets/app_card.dart';
+import '../widgets/trade_detail_grid.dart';
 
 /// Close / Modify screen for one open position — logic ported from the
 /// white_label Close-Position screen so both apps behave identically:
@@ -49,6 +50,10 @@ class _ClosePositionViewState extends State<ClosePositionView> {
   // Original TP/SL captured on open, to detect a real modification.
   double _originalTp = 0;
   double _originalSl = 0;
+
+  /// Pending orders can only be modified (TP/SL) or cancelled — never closed
+  /// through the position route, and they have no P&L or partial close.
+  bool get _isPending => widget.position.isPending;
 
   double get _totalVolume => widget.position.volume;
   int get _digits => widget.position.digits;
@@ -194,8 +199,9 @@ class _ClosePositionViewState extends State<ClosePositionView> {
       _slEnabled != (_originalSl != 0) ||
       (_slEnabled && _slPrice != _originalSl);
 
-  bool get _hasTpSl => _tpEnabled || _slEnabled;
-  bool get _isModify => _hasTpSl && (_tpModified || _slModified);
+  // Any TP/SL change is a modify — including switching both off to clear them
+  // (sends 0/0); it must never fall through to closing the position.
+  bool get _isModify => _tpModified || _slModified;
 
   double _round(double v) {
     final f = _pow10(_digits);
@@ -218,6 +224,11 @@ class _ClosePositionViewState extends State<ClosePositionView> {
         takeProfit: _tpEnabled ? _tpPrice : 0,
         stopLoss: _slEnabled ? _slPrice : 0,
       );
+      if (ok) Get.back<void>();
+      return;
+    }
+    if (_isPending) {
+      final ok = await _controller.cancelPending(widget.position);
       if (ok) Get.back<void>();
       return;
     }
@@ -245,12 +256,16 @@ class _ClosePositionViewState extends State<ClosePositionView> {
                 _header(scheme),
                 Gap.vLg,
                 _bidAsk(scheme),
-                Gap.vLg,
-                _partialSection(scheme),
+                if (!_isPending) ...[
+                  Gap.vLg,
+                  _partialSection(scheme),
+                ],
                 Gap.vLg,
                 _tpSlSection(scheme),
-                Gap.vLg,
-                _pnlCard(scheme),
+                if (!_isPending) ...[
+                  Gap.vLg,
+                  _pnlCard(scheme),
+                ],
               ]),
             ),
           ),
@@ -260,14 +275,50 @@ class _ClosePositionViewState extends State<ClosePositionView> {
     );
   }
 
+  /// Side · volume · symbol, then the trade as it stands now: open price/time,
+  /// the S/L and T/P currently set on the server, swap and position ID.
   Widget _header(ColorScheme scheme) {
     final p = widget.position;
-    return Text(
-      '${p.isBuy ? 'positions.buy'.tr : 'positions.sell'.tr} ${p.volume} ${p.symbol}',
-      style: AppText.base(
-        color: scheme.onSurfaceVariant,
-        fontSize: 13.sp,
-        fontWeight: FontWeight.w500,
+    final sideColor = p.isBuy ? AppColors.success : AppColors.danger;
+    final sideLabel = _isPending && p.pendingType.isNotEmpty
+        ? p.pendingType
+        : (p.isBuy ? 'positions.buy'.tr : 'positions.sell'.tr);
+    return AppCard(
+      radius: 12.r,
+      padding: EdgeInsets.fromLTRB(14.w, 12.h, 14.w, 6.h),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text.rich(
+            TextSpan(
+              text: '$sideLabel ',
+              style: AppText.base(
+                color: sideColor,
+                fontSize: 14.sp,
+                fontWeight: FontWeight.w700,
+              ),
+              children: [
+                TextSpan(
+                  text: '${p.volume} ${p.symbol}',
+                  style: AppText.base(color: scheme.onSurface),
+                ),
+              ],
+            ),
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+          ),
+          Gap.vSm,
+          TradeDetailGrid(
+            rows: [
+              (_isPending ? 'positions.order_price' : 'positions.open_price',
+                  p.entryPrice, 'positions.hist_open', tradeTime(p.openTime)),
+              ('positions.hist_sl', _fmt(_originalSl),
+                  'positions.hist_tp', _fmt(_originalTp)),
+              ('positions.hist_swap', p.swap.toStringAsFixed(2),
+                  'positions.hist_id', '#${p.orderId}'),
+            ],
+          ),
+        ],
       ),
     );
   }
@@ -650,7 +701,9 @@ class _ClosePositionViewState extends State<ClosePositionView> {
           }
           final pnl = _closingPnl;
           final positive = pnl >= 0;
-          final color = positive ? AppColors.success : AppColors.danger;
+          final color = positive && !_isPending
+              ? AppColors.success
+              : AppColors.danger;
           return SizedBox(
             width: double.infinity,
             height: 54.h,
@@ -673,7 +726,9 @@ class _ClosePositionViewState extends State<ClosePositionView> {
                       ),
                     )
                   : Text(
-                      _closeLabel(positive, pnl),
+                      _isPending
+                          ? 'positions.cancel_order'.tr
+                          : _closeLabel(positive, pnl),
                       style: AppText.base(
                         color: Colors.white,
                         fontSize: 15.sp,

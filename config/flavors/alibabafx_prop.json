@@ -12,5 +12,8 @@
   "SECONDARY_COLOR": "E6A541",
   "FEATURE_FLAGS": "trading,challenges,payouts,reports",
   "LOGO_ASSET": "assets/flavors/alibabafx_prop/logo.png",
-  "SPLASH_LOGO_ASSET": "assets/flavors/alibabafx_prop/splash.png"
+  "SPLASH_LOGO_ASSET": "assets/flavors/alibabafx_prop/splash.png",
+  "SIGNING_CERT_HASHES": "",
+  "IOS_TEAM_ID": "SLN8579RKW",
+  "SECURITY_WATCHER_MAIL": ""
 }

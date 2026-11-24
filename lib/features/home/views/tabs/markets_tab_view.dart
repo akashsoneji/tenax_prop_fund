@@ -5,10 +5,12 @@ import 'package:get/get.dart';
 
 import '../../../../app/routes/app_routes.dart';
 import '../../../../shared/widgets/chart/chart_fullscreen_button.dart';
+import '../../../../shared/widgets/trade/symbol_picker_chip.dart';
 import '../../../../shared/widgets/trade/trade_ticket_panel.dart';
 import '../../../chart/services/chart_preload_service.dart';
 import '../../../chart/widgets/chart_in_app_webview.dart';
 import '../../../positions/controllers/positions_controller.dart';
+import '../../../positions/widgets/chart_account_badge.dart';
 import '../../../symbols/services/favorites_service.dart';
 import '../../../symbols/services/market_watch_v2_service.dart';
 
@@ -65,6 +67,14 @@ class _MarketsTabViewState extends State<MarketsTabView> {
         final symbols = <String>{symbol, ...favorites.favoriteCodes}.toList();
         return Column(
           children: [
+            _ChartTopBar(
+              symbol: symbol,
+              symbols: symbols,
+              onSymbolSelected: (s) {
+                market.selectSymbol(s);
+                Get.find<ChartPreloadService>().saveSymbol(s);
+              },
+            ),
             Expanded(
               child: Stack(
                 children: [
@@ -84,17 +94,58 @@ class _MarketsTabViewState extends State<MarketsTabView> {
             ),
             TradeTicketPanel(
               symbol: symbol,
-              symbols: symbols,
-              onSymbolSelected: (s) {
-                market.selectSymbol(s);
-                Get.find<ChartPreloadService>().saveSymbol(s);
-              },
               onSubmit: (ticket) =>
                   Get.find<PositionsController>().placeTicket(ticket),
             ),
           ],
         );
       }),
+    );
+  }
+}
+
+/// Top bar of the Charts tab: symbol picker in the left corner, floating P/L +
+/// account switcher in the right corner.
+class _ChartTopBar extends StatelessWidget {
+  const _ChartTopBar({
+    required this.symbol,
+    required this.symbols,
+    required this.onSymbolSelected,
+  });
+
+  final String symbol;
+  final List<String> symbols;
+  final ValueChanged<String> onSymbolSelected;
+
+  @override
+  Widget build(BuildContext context) {
+    final scheme = Theme.of(context).colorScheme;
+    return Container(
+      padding: EdgeInsets.fromLTRB(12.w, 6.h, 12.w, 6.h),
+      decoration: BoxDecoration(
+        color: scheme.surface,
+        border: Border(
+          bottom: BorderSide(
+            color: scheme.outlineVariant.withValues(alpha: 0.5),
+          ),
+        ),
+      ),
+      child: Row(
+        children: [
+          Expanded(
+            child: Align(
+              alignment: Alignment.centerLeft,
+              child: SymbolPickerChip(
+                symbol: symbol,
+                symbols: symbols,
+                onSelected: onSymbolSelected,
+              ),
+            ),
+          ),
+          SizedBox(width: 8.w),
+          ChartAccountBadge(controller: Get.find<PositionsController>()),
+        ],
+      ),
     );
   }
 }

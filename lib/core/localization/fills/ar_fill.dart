@@ -429,6 +429,8 @@ const Map<String, String> arFill = {
   'symbols.trade': 'تداول',
   'symbols.bid': 'العرض',
   'symbols.ask': 'الطلب',
+  'symbols.low_short': 'L:',
+  'symbols.high_short': 'H:',
   'symbols.spread_label': 'السبريد',
   'symbols.high': 'الأعلى',
   'symbols.low': 'الأدنى',

@@ -407,6 +407,8 @@ const Map<String, String> zhFill = {
   'symbols.trade': '交易',
   'symbols.bid': '卖价',
   'symbols.ask': '买价',
+  'symbols.low_short': 'L:',
+  'symbols.high_short': 'H:',
   'symbols.spread_label': '点差',
   'symbols.high': '最高',
   'symbols.low': '最低',

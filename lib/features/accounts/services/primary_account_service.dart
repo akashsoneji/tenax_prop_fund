@@ -1,8 +1,11 @@
+import 'dart:async';
+
 import 'package:get/get.dart';
 
 import '../../../core/network/api_client.dart';
 import '../../../core/network/api_endpoints.dart';
 import '../../../core/network/api_envelope.dart';
+import '../../symbols/services/favorites_service.dart';
 
 /// A single MT5 account as returned by `GET /mt5accounts/get`. Only the fields
 /// the active-account selector needs are parsed.
@@ -113,6 +116,11 @@ class PrimaryAccountService extends GetxService {
       return false;
     }
     if (isLatest && res.data != null) primaryAccountId.value = res.data;
+    // The server watchlist follows the active account, so reload it once the
+    // switch is saved.
+    if (isLatest && Get.isRegistered<FavoritesService>()) {
+      unawaited(Get.find<FavoritesService>().syncFromServer());
+    }
     return true;
   }
 

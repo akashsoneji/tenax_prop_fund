@@ -24,6 +24,11 @@ abstract class ApiEndpoints {
   /// token). Relative to `FlavorConfig.webBaseUrl`, not [apiBaseUrl].
   static const broadcastingAuth = '/api/broadcasting/auth';
 
+  /// User watchlist on the web host. `GET` → `data.symbols`; `POST`
+  /// `{symbols:[...]}` REPLACES the whole list (always send the full final
+  /// list) → `data.symbols`. `DELETE` restores the server default list.
+  static const marketWatch = '/api/user/trade/marketwatch';
+
   // Auth
   static const register = '/auth/register';
   static const login = '/auth/login';

@@ -436,6 +436,8 @@ const Map<String, String> idFill = {
   'symbols.trade': 'Trading',
   'symbols.bid': 'Bid',
   'symbols.ask': 'Ask',
+  'symbols.low_short': 'L:',
+  'symbols.high_short': 'H:',
   'symbols.spread_label': 'Spread',
   'symbols.high': 'Tertinggi',
   'symbols.low': 'Terendah',

@@ -19,3 +19,5 @@ GeneratedPluginRegistrant.java
 key.properties
 **/*.keystore
 **/*.jks
+# Per-flavor upload keys + credentials.txt (passwords) from scripts/generate_keystore.sh.
+/keystore/

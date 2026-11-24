@@ -22,6 +22,7 @@ fi
 case "$FLAVOR" in
   tenax)          DEFAULT_COLOR="5F259E" ;;
   pipze_funded)   DEFAULT_COLOR="5F259E" ;;
+  pipprop)        DEFAULT_COLOR="5F259E" ;;
   alibabafx_prop) DEFAULT_COLOR="182430" ;;
   *) echo "Unknown flavor: $FLAVOR" >&2; exit 1 ;;
 esac

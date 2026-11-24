@@ -9,12 +9,10 @@ import '../models/symbol_models.dart';
 import '../services/market_watch_v2_service.dart';
 import '../../../shared/theme/app_spacing.dart';
 
-/// iQuote-style market row: a drag handle, a circular flag avatar, the slashed
-/// symbol (`XAUUSD` → `XAU/USD`) with a descriptive name below, and a joined
-/// Buy|Sell pill with a live spread badge in the middle. Ported from the
-/// white_label iQuote market screen; Buy=green, Sell=red, spread badge = dark
-/// surface. Live bid/ask/spread come from [MarketWatchV2Service] via a granular
-/// `Obx` (only this row repaints on tick).
+/// Market row: a drag handle, a circular flag avatar, the slashed symbol
+/// (`XAUUSD` → `XAU/USD`) with its name + spread chip, and MT-style Bid | Ask
+/// prices (pip digits enlarged, pipette as superscript). Live quotes come from
+/// [MarketWatchV2Service] via a granular `Obx` (only this row repaints on tick).
 class FavoriteSymbolTile extends StatelessWidget {
   const FavoriteSymbolTile({
     super.key,
@@ -27,9 +25,6 @@ class FavoriteSymbolTile extends StatelessWidget {
   final int index;
   final VoidCallback? onTap;
 
-  static const _buyColor = Color(0xFF33B970);
-  static const _sellColor = Color(0xFFE65366);
-
   @override
   Widget build(BuildContext context) {
     final scheme = Theme.of(context).colorScheme;
@@ -40,7 +35,7 @@ class FavoriteSymbolTile extends StatelessWidget {
       child: InkWell(
         onTap: onTap,
         child: Container(
-          padding: EdgeInsets.fromLTRB(0, 8.h, 4.w, 8.h),
+          padding: EdgeInsets.fromLTRB(0, 10.h, 8.w, 10.h),
           decoration: BoxDecoration(
             border: Border(
               bottom: BorderSide(
@@ -49,35 +44,57 @@ class FavoriteSymbolTile extends StatelessWidget {
               ),
             ),
           ),
-          child: Row(
-            children: [
-              ReorderableDragStartListener(
-                index: index,
-                child: Padding(
-                  padding: EdgeInsets.fromLTRB(0, 8.h, 6.w, 8.h),
-                  child: Icon(
-                    Icons.drag_handle_rounded,
-                    size: 20.w,
-                    color: scheme.onSurfaceVariant.withValues(alpha: 0.5),
+          child: Obx(() {
+            final p = rx.value;
+            final digits = p.digits.clamp(0, 5);
+            return Row(
+              children: [
+                ReorderableDragStartListener(
+                  index: index,
+                  child: Padding(
+                    padding: EdgeInsets.fromLTRB(0, 8.h, 6.w, 8.h),
+                    child: Icon(
+                      Icons.drag_handle_rounded,
+                      size: 20.w,
+                      color: scheme.onSurfaceVariant.withValues(alpha: 0.5),
+                    ),
                   ),
                 ),
-              ),
-              SymbolIcon(code: instrument.code),
-              10.horizontalSpace,
-              Expanded(child: _identity(scheme)),
-              Gap.hSm,
-              Obx(() => _pill(scheme, rx.value)),
-            ],
-          ),
+                SymbolIcon(code: instrument.code),
+                10.horizontalSpace,
+                Expanded(child: _identity(scheme, p)),
+                Gap.hSm,
+                _QuotePrice(
+                  extremeLabel: 'symbols.low_short'.tr,
+                  price: p.bid,
+                  extreme: p.dayLow,
+                  digits: digits,
+                  trend: p.bidTrend,
+                ),
+                8.horizontalSpace,
+                _QuotePrice(
+                  extremeLabel: 'symbols.high_short'.tr,
+                  price: p.ask,
+                  extreme: p.dayHigh,
+                  digits: digits,
+                  trend: p.askTrend,
+                ),
+              ],
+            );
+          }),
         ),
       ),
     );
   }
 
-  Widget _identity(ColorScheme scheme) {
+  Widget _identity(ColorScheme scheme, MarketPrice p) {
     final name = instrument.name.isEmpty
         ? instrument.category
         : instrument.name;
+    final hasQuote = p.bid > 0 || p.ask > 0;
+    final spread = p.spread > 0
+        ? p.spread.toStringAsFixed(0)
+        : (hasQuote ? '0' : '--');
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       mainAxisSize: MainAxisSize.min,
@@ -92,110 +109,42 @@ class FavoriteSymbolTile extends StatelessWidget {
             color: scheme.onSurface,
           ),
         ),
-        if (name.isNotEmpty) ...[
-          Gap.vXxs,
-          Text(
-            name,
-            maxLines: 1,
-            overflow: TextOverflow.ellipsis,
-            style: AppText.base(
-              fontSize: 11.sp,
-              color: scheme.onSurfaceVariant,
-            ),
-          ),
-        ],
-      ],
-    );
-  }
-
-  /// Joined Buy(ask) | Sell(bid) pill with a centered spread badge.
-  Widget _pill(ColorScheme scheme, MarketPrice p) {
-    final digits = p.digits.clamp(0, 5);
-    final has = p.bid > 0 || p.ask > 0;
-    final buy = has && p.ask > 0 ? p.ask.toStringAsFixed(digits) : '--';
-    final sell = has && p.bid > 0 ? p.bid.toStringAsFixed(digits) : '--';
-    final spread = p.spread > 0
-        ? p.spread.toStringAsFixed(0)
-        : (has ? '0' : '--');
-
-    return Stack(
-      alignment: Alignment.center,
-      clipBehavior: Clip.none,
-      children: [
+        Gap.vXxs,
         Row(
-          mainAxisSize: MainAxisSize.min,
           children: [
-            _side(
-              'trade.buy'.tr,
-              buy,
-              _buyColor,
-              BorderRadius.horizontal(left: Radius.circular(6.r)),
-            ),
-            1.horizontalSpace,
-            _side(
-              'trade.sell'.tr,
-              sell,
-              _sellColor,
-              BorderRadius.horizontal(right: Radius.circular(6.r)),
+            // if (name.isNotEmpty) ...[
+            //   Flexible(
+            //     child: Text(
+            //       name,
+            //       maxLines: 1,
+            //       overflow: TextOverflow.ellipsis,
+            //       style: AppText.base(
+            //         fontSize: 11.sp,
+            //         color: scheme.onSurfaceVariant,
+            //       ),
+            //     ),
+            //   ),
+            //   6.horizontalSpace,
+            // ],
+            Container(
+              padding: EdgeInsets.symmetric(horizontal: 5.w, vertical: 1.h),
+              decoration: BoxDecoration(
+                color: scheme.onSurface.withValues(alpha: 0.06),
+                borderRadius: BorderRadius.circular(4.r),
+              ),
+              child: Text(
+                '${'trade.spread'.tr} $spread',
+                maxLines: 1,
+                style: AppText.base(
+                  fontSize: 9.sp,
+                  fontWeight: FontWeight.w600,
+                  color: scheme.onSurfaceVariant,
+                ),
+              ),
             ),
           ],
         ),
-        Positioned(
-          top: 3.h,
-          child: Container(
-            padding: EdgeInsets.symmetric(horizontal: 5.w, vertical: 1.5.h),
-            decoration: BoxDecoration(
-              color: const Color(0xFF1E293B),
-              borderRadius: BorderRadius.circular(10.r),
-              border: Border.all(color: Colors.white24, width: 0.5),
-            ),
-            child: Text(
-              spread,
-              style: AppText.base(
-                fontSize: 10.sp,
-                fontWeight: FontWeight.w500,
-                color: Colors.white,
-              ),
-            ),
-          ),
-        ),
       ],
-    );
-  }
-
-  Widget _side(String label, String value, Color color, BorderRadius radius) {
-    return Container(
-      width: 74.w,
-      height: 40.h,
-      padding: EdgeInsets.symmetric(horizontal: 4.w),
-      alignment: Alignment.center,
-      decoration: BoxDecoration(color: color, borderRadius: radius),
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Text(
-            label,
-            style: AppText.base(
-              fontSize: 10.sp,
-              color: Colors.white.withValues(alpha: 0.85),
-            ),
-          ),
-          1.verticalSpace,
-          FittedBox(
-            fit: BoxFit.scaleDown,
-            child: Text(
-              value,
-              maxLines: 1,
-              style: AppText.base(
-                fontSize: 13.sp,
-                fontWeight: FontWeight.w700,
-                color: Colors.white,
-                height: 1.1,
-              ),
-            ),
-          ),
-        ],
-      ),
     );
   }
 
@@ -209,5 +158,104 @@ class FavoriteSymbolTile extends StatelessWidget {
     }
     if (s.length == 6) return '${s.substring(0, 3)}/${s.substring(3)}';
     return s;
+  }
+}
+
+/// Right-aligned MT-style quote: the price with its two pip digits enlarged and
+/// (for 3/5-digit symbols) the pipette as a superscript, then the day low/high
+/// line underneath. Coloured by the last tick: green when the price went up,
+/// red when it went down, neutral before the first change.
+class _QuotePrice extends StatelessWidget {
+  const _QuotePrice({
+    required this.extremeLabel,
+    required this.price,
+    required this.extreme,
+    required this.digits,
+    required this.trend,
+  });
+
+  final String extremeLabel;
+  final double price;
+  final double? extreme;
+  final int digits;
+  final int trend;
+
+  @override
+  Widget build(BuildContext context) {
+    final scheme = Theme.of(context).colorScheme;
+    final color = switch (trend) {
+      > 0 => AppColors.success,
+      < 0 => AppColors.danger,
+      _ => scheme.onSurface,
+    };
+    final extremeValue = extreme;
+    return SizedBox(
+      width: 88.w,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.end,
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          FittedBox(
+            fit: BoxFit.scaleDown,
+            alignment: Alignment.centerRight,
+            child: Text.rich(_priceSpan(color), maxLines: 1),
+          ),
+          if (extremeValue != null && extremeValue > 0) ...[
+            2.verticalSpace,
+            Text(
+              '$extremeLabel ${extremeValue.toStringAsFixed(digits)}',
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+              style: AppText.base(
+                fontSize: 9.sp,
+                color: scheme.onSurfaceVariant,
+                height: 1.0,
+              ),
+            ),
+          ],
+        ],
+      ),
+    );
+  }
+
+  TextSpan _priceSpan(Color color) {
+    final base = AppText.base(
+      fontSize: 14.sp,
+      fontWeight: FontWeight.w600,
+      color: color,
+      height: 1.1,
+    );
+    if (price <= 0) return TextSpan(text: '--', style: base);
+
+    final text = price.toStringAsFixed(digits);
+    final pipetteLen = (digits == 3 || digits == 5) ? 1 : 0;
+    const pipLen = 2;
+    if (text.length <= pipLen + pipetteLen) {
+      return TextSpan(text: text, style: base);
+    }
+
+    final pipEnd = text.length - pipetteLen;
+    final pipStart = pipEnd - pipLen;
+    return TextSpan(
+      style: base,
+      children: [
+        TextSpan(text: text.substring(0, pipStart)),
+        TextSpan(
+          text: text.substring(pipStart, pipEnd),
+          style: base.copyWith(fontSize: 20.sp, fontWeight: FontWeight.w700),
+        ),
+        if (pipetteLen > 0)
+          WidgetSpan(
+            alignment: PlaceholderAlignment.top,
+            child: Transform.translate(
+              offset: Offset(0, -4.h),
+              child: Text(
+                text.substring(pipEnd),
+                style: base.copyWith(fontSize: 10.sp),
+              ),
+            ),
+          ),
+      ],
+    );
   }
 }

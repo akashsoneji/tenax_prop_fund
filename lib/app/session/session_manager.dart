@@ -3,6 +3,7 @@ import 'package:get/get.dart';
 import '../../features/accounts/services/primary_account_service.dart';
 import '../../features/positions/services/account_ws_service.dart';
 import '../../features/positions/services/positions_ws_service.dart';
+import '../../features/symbols/services/favorites_service.dart';
 import '../../features/symbols/services/market_watch_v2_service.dart';
 
 /// Wipes the per-user state that OUTLIVES a logout.
@@ -25,6 +26,9 @@ abstract final class SessionManager {
     _resetServices();
     if (Get.isRegistered<PrimaryAccountService>()) {
       Get.find<PrimaryAccountService>().refresh();
+    }
+    if (Get.isRegistered<FavoritesService>()) {
+      Get.find<FavoritesService>().syncFromServer();
     }
   }
 

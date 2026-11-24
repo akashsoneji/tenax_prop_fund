@@ -42,26 +42,38 @@ class PositionsView extends GetView<PositionsController> {
       resizeToAvoidBottomInset: true,
       backgroundColor: scheme.surface,
       body: SafeArea(
-        child: NotificationListener<ScrollNotification>(
-          onNotification: _onScroll,
-          child: CustomScrollView(
-            physics: const BouncingScrollPhysics(),
-            slivers: [
-              SliverToBoxAdapter(
-                child: _PositionsHeader(controller: controller),
+        child: RefreshIndicator(
+          color: scheme.primary,
+          onRefresh: controller.loadHistory,
+          // Market/Pending are live over the socket; only History is pulled.
+          notificationPredicate: (notification) =>
+              notification.depth == 0 &&
+              controller.selectedTab.value == PositionsTab.history,
+          child: NotificationListener<ScrollNotification>(
+            onNotification: _onScroll,
+            child: CustomScrollView(
+              // Always scrollable so an empty/short history can still be pulled.
+              physics: const BouncingScrollPhysics(
+                parent: AlwaysScrollableScrollPhysics(),
               ),
-              Obx(
-                () => switch (controller.selectedTab.value) {
-                  PositionsTab.market => _MarketSliver(controller: controller),
-                  PositionsTab.pending => _PendingSliver(
-                    controller: controller,
-                  ),
-                  PositionsTab.history => _HistorySliver(
-                    controller: controller,
-                  ),
-                },
-              ),
-            ],
+              slivers: [
+                SliverToBoxAdapter(
+                  child: _PositionsHeader(controller: controller),
+                ),
+                Obx(
+                  () => switch (controller.selectedTab.value) {
+                    PositionsTab.market =>
+                      _MarketSliver(controller: controller),
+                    PositionsTab.pending => _PendingSliver(
+                      controller: controller,
+                    ),
+                    PositionsTab.history => _HistorySliver(
+                      controller: controller,
+                    ),
+                  },
+                ),
+              ],
+            ),
           ),
         ),
       ),
@@ -370,27 +382,30 @@ class _HistoryFilterBar extends StatelessWidget {
                 ),
               ),
             ),
-            const Spacer(),
-            Flexible(
+            Gap.hSm,
+            // Expanded (not Spacer + Flexible, which split the leftover width
+            // in half) so the total gets all the room beside the range chip.
+            Expanded(
               child: Row(
-                mainAxisSize: MainAxisSize.min,
+                mainAxisAlignment: MainAxisAlignment.end,
                 children: [
-                  Text(
-                    '${controller.filteredHistory.length} ${'positions.trades'.tr}',
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                    style: AppText.subtitle(color: muted, fontSize: 12.sp),
+                  // The trade count gives way first; the money total is the
+                  // figure that must always read in full.
+                  Flexible(
+                    child: Text(
+                      '${controller.filteredHistory.length} ${'positions.trades'.tr}',
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: AppText.subtitle(color: muted, fontSize: 12.sp),
+                    ),
                   ),
                   Gap.hSm,
                   Container(width: 1.w, height: 12.h, color: muted),
                   Gap.hSm,
-                  Flexible(
-                    child: Text(
-                      profit.toStringAsFixed(2),
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                      style: AppText.title(color: profitColor, fontSize: 13.sp),
-                    ),
+                  Text(
+                    profit.toStringAsFixed(2),
+                    maxLines: 1,
+                    style: AppText.title(color: profitColor, fontSize: 13.sp),
                   ),
                 ],
               ),

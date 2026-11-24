@@ -15,8 +15,11 @@ import 'app/routes/app_pages.dart';
 import 'app/routes/app_routes.dart';
 import 'core/app_status/app_status_controller.dart';
 import 'core/app_status/app_status_overlay.dart';
-import 'core/app_status/app_status_service.dart';
+
 import 'core/localization/app_translations.dart';
+import 'core/network/pinned_http_client.dart';
+import 'core/security/app_shield.dart';
+import 'core/security/security_block_overlay.dart';
 import 'features/chart/services/chart_preload_service.dart';
 import 'features/home/controllers/home_controller.dart';
 import 'features/settings/controllers/settings_controller.dart';
@@ -56,6 +59,15 @@ Future<void> main() async {
   // Values come from --dart-define-from-file=config/flavors/<flavor>.json.
   final config = FlavorConfig.fromEnvironment();
 
+  // Runtime protection starts before any UI so a rooted/hooked device is
+  // flagged as early as possible. Not awaited: detection is asynchronous and
+  // the overlay reacts whenever a threat arrives.
+  Get.put<AppShield>(AppShield(config), permanent: true).start();
+
+  // Pinned TLS roots must be loaded before InitialBinding builds the API and
+  // socket clients.
+  await PinnedHttpClient.init();
+
   // Settings must exist before the first build (GetMaterialApp reads theme +
   // locale from it). The rest of the app-wide singletons are registered by
   // InitialBinding when the first route loads.
@@ -82,15 +94,9 @@ Future<void> main() async {
 
   // Kick off the background chart warm-up the moment the first frame is up —
   // the earliest point the engine can actually run a headless webview.
-  WidgetsBinding.instance.addPostFrameCallback((_) {
-    chartPreload.init();
-    // App-status check (maintenance + force-update). Fire-and-forget: the
-    // overlay + dialog listen to the controller and react whenever the state
-    // changes, so blocking startup is unnecessary.
-    if (Get.isRegistered<AppStatusService>()) {
-      Get.find<AppStatusService>().checkAppStatus();
-    }
-  });
+  // The app-status check runs from SplashView after it navigates away, since
+  // its `Get.offAllNamed` would otherwise remove an update dialog opened here.
+  WidgetsBinding.instance.addPostFrameCallback((_) => chartPreload.init());
 }
 
 class TenaxApp extends StatelessWidget {
@@ -184,6 +190,8 @@ class TenaxApp extends StatelessWidget {
                     child ?? const SizedBox.shrink(),
                     if (Get.isRegistered<AppStatusController>())
                       const AppStatusOverlay(),
+                    if (Get.isRegistered<AppShield>())
+                      const SecurityBlockOverlay(),
                   ],
                 ),
               ),

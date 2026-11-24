@@ -4,6 +4,7 @@ import 'package:get/get.dart';
 
 import '../../../app/flavor/flavor_config.dart';
 import '../../../app/routes/app_routes.dart';
+import '../../../core/app_status/app_status_service.dart';
 import '../../../features/authentication/repositories/auth_repository.dart';
 import '../../../shared/theme/app_colors.dart';
 
@@ -32,6 +33,11 @@ class _SplashViewState extends State<SplashView> {
     await Future<void>.delayed(const Duration(milliseconds: 1200));
     if (!mounted) return;
     Get.offAllNamed(hasSession ? AppRoutes.home : AppRoutes.getStarted);
+    // Run after navigation so the update dialog sits on top of the landing
+    // route instead of being popped along with the splash.
+    if (Get.isRegistered<AppStatusService>()) {
+      Get.find<AppStatusService>().checkAppStatus();
+    }
   }
 
   @override

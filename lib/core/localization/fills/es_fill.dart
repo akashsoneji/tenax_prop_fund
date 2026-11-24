@@ -438,6 +438,8 @@ const Map<String, String> esFill = {
   'symbols.trade': 'Operar',
   'symbols.bid': 'Bid',
   'symbols.ask': 'Ask',
+  'symbols.low_short': 'L:',
+  'symbols.high_short': 'H:',
   'symbols.spread_label': 'Spread',
   'symbols.high': 'Máximo',
   'symbols.low': 'Mínimo',

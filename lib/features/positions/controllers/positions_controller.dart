@@ -113,7 +113,6 @@ class PositionsController extends GetxController {
   final historyRange = HistoryRange.today.obs;
   final customFrom = Rxn<DateTime>();
   final customTo = Rxn<DateTime>();
-  bool _historyLoaded = false;
 
   /// True while a close/cancel request is in flight (disables the buttons).
   final busy = false.obs;
@@ -134,15 +133,39 @@ class PositionsController extends GetxController {
   /// Live account summary (balance/credit/equity/margin/free/level/profit).
   Rx<AccountInfo> get account => _accountWs.account;
 
+  /// Index of [PositionsView] in `HomeShellView`'s bottom nav.
+  static const _shellTabIndex = 3;
+
+  Worker? _shellTabWorker;
+
   @override
   void onInit() {
     super.onInit();
     _resolveAccount();
+    if (Get.isRegistered<HomeController>()) {
+      _shellTabWorker = ever<int>(
+        Get.find<HomeController>().selectedTab,
+        (index) {
+          if (index == _shellTabIndex &&
+              selectedTab.value == PositionsTab.history) {
+            loadHistory();
+          }
+        },
+      );
+    }
+  }
+
+  @override
+  void onClose() {
+    _shellTabWorker?.dispose();
+    super.onClose();
   }
 
   void selectTab(PositionsTab tab) {
     selectedTab.value = tab;
-    if (tab == PositionsTab.history && !_historyLoaded) {
+    // Closed trades change while the user is elsewhere, so every visit to
+    // History refetches instead of showing the first load forever.
+    if (tab == PositionsTab.history) {
       loadHistory();
     }
   }
@@ -286,9 +309,15 @@ class PositionsController extends GetxController {
 
   void _applyAccount(String account) {
     if (account.isEmpty) return;
+    final changed = tradingAccount.value != account;
     tradingAccount.value = account;
     _positionsWs.switchAccount(account);
     _accountWs.switchAccount(account);
+    // History is per account: a switch (or the account resolving after the
+    // tab was already opened) must refetch for the new account number.
+    if (changed && selectedTab.value == PositionsTab.history) {
+      loadHistory();
+    }
   }
 
   /// Places the market order described by a [TradeTicket] from the shared
@@ -520,16 +549,20 @@ class PositionsController extends GetxController {
     return num.tryParse(position.entryPrice.replaceAll(',', '')) ?? 0;
   }
 
-  /// Cancels a pending order.
-  Future<void> cancelPending(TradePosition order) async {
-    if (busy.value) return;
+  /// Cancels a pending order. Returns true on success so the Close/Modify
+  /// screen can pop.
+  Future<bool> cancelPending(TradePosition order) async {
+    if (busy.value) return false;
     busy.value = true;
     try {
       _positionsWs.removePendingOptimistic(order.orderId);
-      await _repository.cancelPendingOrder(
+      final res = await _repository.cancelPendingOrder(
         orderId: order.orderId,
-        tradingAccount: tradingAccount.value,
+        tradingAccount: order.mt5Account.isNotEmpty
+            ? order.mt5Account
+            : tradingAccount.value,
       );
+      return res.success;
     } finally {
       if (!isClosed) busy.value = false;
     }
@@ -582,13 +615,14 @@ class PositionsController extends GetxController {
 
   /// Loads the FIRST page of closed-trade history for the current filter.
   Future<void> loadHistory() async {
+    // Account not resolved yet — [_applyAccount] loads it once it is.
+    if (tradingAccount.value.isEmpty) return;
     final gen = ++_historyGen;
     historyLoading.value = true;
     historyLoadingMore.value = false;
     historyError.value = null;
     final page = await _fetchHistoryPage(1, gen);
     if (isClosed || gen != _historyGen) return;
-    _historyLoaded = true;
     historyLoading.value = false;
     if (page == null) return;
     history.assignAll(page.entries);

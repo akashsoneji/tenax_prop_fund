@@ -8,6 +8,7 @@ import '../../../shared/widgets/app_gradient_button.dart';
 import '../controllers/auth_controller.dart';
 import '../widgets/animated_field.dart';
 import '../widgets/biometric_button.dart';
+import '../widgets/legal_links.dart';
 import '../../../shared/theme/app_spacing.dart';
 import '../../../shared/theme/app_text.dart';
 import '../../../shared/widgets/app_button.dart';
@@ -181,6 +182,7 @@ class LoginFormState extends State<LoginForm> {
             style: AppText.base(fontWeight: FontWeight.w600),
           ),
         ),
+        const LegalLinks(),
       ],
     );
   }

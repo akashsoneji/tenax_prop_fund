@@ -10,6 +10,7 @@ import '../controllers/auth_controller.dart';
 import '../widgets/animated_field.dart';
 import '../widgets/auth_scaffold.dart';
 import '../widgets/glass_card.dart';
+import '../widgets/legal_links.dart';
 import '../../../shared/widgets/app_gradient_button.dart';
 import '../widgets/otp_dialog.dart';
 import '../widgets/password_strength_meter.dart';
@@ -305,6 +306,7 @@ class _RegisterViewState extends State<RegisterView> {
                   style: AppText.base(fontWeight: FontWeight.w600),
                 ),
               ),
+              const LegalLinks(),
             ],
           ),
         ),

@@ -13,7 +13,6 @@ import '../../../features/symbols/services/market_watch_v2_service.dart';
 import '../../theme/app_colors.dart';
 import '../app_glass.dart';
 import '../../theme/app_theme.dart';
-import '../symbol_icon.dart';
 import 'trade_ticket.dart';
 
 export 'trade_ticket.dart';
@@ -22,9 +21,10 @@ export 'trade_ticket.dart';
 /// badge, order volume with +/- steppers and lot presets, an optional TP/SL
 /// section and a shortcut to the pending-order screen.
 ///
-/// It is presentation-only — every action is handed back through [onSubmit] /
-/// [onSymbolSelected] so the hosting feature's controller owns the business
-/// logic. [layout] switches between the portrait dock (under the chart) and the
+/// It is presentation-only — every action is handed back through [onSubmit]
+/// so the hosting feature's controller owns the business logic. Symbol
+/// switching lives with the host (Charts top bar / landscape rail header).
+/// [layout] switches between the portrait dock (under the chart) and the
 /// landscape rail (beside the chart) without forking the widget.
 ///
 /// Sizing: portrait (`docked`) uses ScreenUtil (`.w/.h/.sp/.r`) exactly as
@@ -38,22 +38,14 @@ class TradeTicketPanel extends StatefulWidget {
   const TradeTicketPanel({
     super.key,
     required this.symbol,
-    this.symbols = const [],
-    this.onSymbolSelected,
     this.spread = 0.8,
     this.onSubmit,
     this.layout = TradeTicketLayout.docked,
     this.header,
   });
 
-  /// Currently selected market symbol (drives the ticket header).
+  /// Currently selected market symbol (drives the live Sell/Buy prices).
   final String symbol;
-
-  /// Symbols the user can switch to via the header symbol picker sheet.
-  final List<String> symbols;
-
-  /// Called when the user picks a symbol from the picker bottom sheet.
-  final ValueChanged<String>? onSymbolSelected;
 
   /// Live spread in pips shown between the Sell/Buy prices.
   final double spread;
@@ -64,8 +56,9 @@ class TradeTicketPanel extends StatefulWidget {
   /// Docked under the chart (portrait) or a rail beside it (landscape).
   final TradeTicketLayout layout;
 
-  /// Replaces the built-in header row. The landscape rail supplies a richer
-  /// one (instrument + live price) because it has no app bar above it.
+  /// Optional row above the volume stepper. The landscape rail supplies one
+  /// (instrument + live price) because it has no top bar; the portrait Charts
+  /// tab shows the symbol in its own top bar, so it passes none.
   final Widget? header;
 
   @override
@@ -100,7 +93,7 @@ class _TradeTicketPanelState extends State<TradeTicketPanel> {
 
   /// Shared height for the volume field, +/- steppers and Pending button so
   /// they line up on one row.
-  double get _controlHeight => _u(44);
+  double get _controlHeight => _u(40);
 
   /// Compact height for the TP/SL price pills — deliberately shorter than
   /// [_controlHeight] so turning TP/SL on doesn't push the chart off-screen.
@@ -260,7 +253,7 @@ class _TradeTicketPanelState extends State<TradeTicketPanel> {
         width: double.infinity,
         padding: EdgeInsets.symmetric(
           horizontal: _isRail ? _u(10) : _u(12),
-          vertical: _v(8),
+          vertical: _v(6),
         ),
         decoration: BoxDecoration(
           color: scheme.surface,
@@ -275,13 +268,15 @@ class _TradeTicketPanelState extends State<TradeTicketPanel> {
             mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              widget.header ?? _header(scheme),
-              SizedBox(height: _v(8)),
+              if (widget.header case final header?) ...[
+                header,
+                SizedBox(height: _v(6)),
+              ],
               _volumeStepper(scheme),
               // SizedBox(height: _v(6)),
               // _volumePresetChips(scheme),
               _tpSlSection(scheme),
-              SizedBox(height: _v(8)),
+              SizedBox(height: _v(6)),
               Obx(() {
                 final quote = Get.find<MarketWatchV2Service>()
                     .priceOf(widget.symbol)
@@ -329,102 +324,6 @@ class _TradeTicketPanelState extends State<TradeTicketPanel> {
         ),
       ),
     );
-  }
-
-  Widget _header(ColorScheme scheme) {
-    return Row(
-      children: [
-        Expanded(
-          child: InkWell(
-            onTap: _openSymbolPicker,
-            borderRadius: BorderRadius.circular(_rad(10)),
-            child: Padding(
-              padding: EdgeInsets.symmetric(vertical: _v(4), horizontal: _u(4)),
-              child: Row(
-                children: [
-                  Flexible(
-                    child: Text(
-                      widget.symbol,
-                      overflow: TextOverflow.ellipsis,
-                      style: TextStyle(
-                        fontWeight: FontWeight.w700,
-                        fontSize: _f(15),
-                        color: scheme.onSurface,
-                      ),
-                    ),
-                  ),
-                  SizedBox(width: _u(2)),
-                  Icon(Icons.expand_more,
-                      size: _u(18), color: scheme.onSurfaceVariant),
-                ],
-              ),
-            ),
-          ),
-        ),
-        _tpSlToggle(scheme),
-      ],
-    );
-  }
-
-  Future<void> _openSymbolPicker() async {
-    if (widget.symbols.isEmpty) return;
-    final selected = await showModalBottomSheet<String>(
-      context: context,
-      showDragHandle: true,
-      // Landscape leaves ~375pt of height, so there the sheet must be
-      // scrollable and safe-area aware or the list is clipped by the home
-      // indicator. Portrait keeps its original behaviour untouched.
-      isScrollControlled: _isRail,
-      useSafeArea: _isRail,
-      constraints: _isRail ? const BoxConstraints(maxHeight: 260) : null,
-      builder: (context) {
-        final scheme = Theme.of(context).colorScheme;
-        return SafeArea(
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              Padding(
-                padding: EdgeInsets.fromLTRB(_u(20), _v(4), _u(20), _v(12)),
-                child: Text(
-                  'trade.select_symbol'.tr,
-                  style: TextStyle(
-                    fontSize: _f(16),
-                    fontWeight: FontWeight.w700,
-                    color: scheme.onSurface,
-                  ),
-                ),
-              ),
-              Flexible(
-                child: ListView.builder(
-                  shrinkWrap: true,
-                  physics: const BouncingScrollPhysics(),
-                  padding: EdgeInsets.zero,
-                  itemCount: widget.symbols.length,
-                  itemBuilder: (context, i) {
-                    final s = widget.symbols[i];
-                    return ListTile(
-                      dense: _isRail,
-                      leading: SymbolIcon(code: s),
-                      title: Text(
-                        s,
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                      ),
-                      trailing: s == widget.symbol
-                          ? Icon(Icons.check, color: scheme.primary)
-                          : null,
-                      onTap: () => Navigator.of(context).pop(s),
-                    );
-                  },
-                ),
-              ),
-            ],
-          ),
-        );
-      },
-    );
-    if (selected != null) widget.onSymbolSelected?.call(selected);
   }
 
   Widget _spreadBadge(ColorScheme scheme, double spread) {
@@ -508,7 +407,18 @@ class _TradeTicketPanelState extends State<TradeTicketPanel> {
         // portrait-authored full page that has no place inside a 300pt rail.
         if (!_isRail) ...[
           SizedBox(width: _u(8)),
-          _PendingButton(onTap: _openPendingOrder),
+          _ToolButton(
+            icon: Icons.pending_actions,
+            label: 'trade.pending'.tr,
+            onTap: _openPendingOrder,
+          ),
+          SizedBox(width: _u(6)),
+          _ToolButton(
+            icon: Icons.shield_outlined,
+            label: 'trade.tp_sl'.tr,
+            active: _tpSlEnabled,
+            onTap: () => _toggleTpSl(!_tpSlEnabled),
+          ),
         ],
       ],
     );
@@ -789,38 +699,48 @@ class _SideButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    // The landscape rail is laid out in raw logical pixels, the docked ticket
+    // in ScreenUtil units.
+    double h(double v) => isRail ? v : v.h;
+    double w(double v) => isRail ? v : v.w;
+    double sp(double v) => isRail ? v : v.sp;
+    final radius = BorderRadius.circular(isRail ? 14 : 14.r);
+
     return Material(
       color: color,
-      borderRadius: BorderRadius.circular(isRail ? 14 : 14.r),
+      borderRadius: radius,
       child: InkWell(
         onTap: onTap,
-        borderRadius: BorderRadius.circular(isRail ? 14 : 14.r),
+        borderRadius: radius,
         child: SizedBox(
-          height: isRail ? 46 : (compact ? 46.h : 52.h),
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
+          height: h(46),
+          child: Stack(
             children: [
-              Text(
-                label,
-                maxLines: 1,
-                overflow: TextOverflow.ellipsis,
-                style: TextStyle(
-                  color: AppColors.white,
-                  fontSize: isRail ? 15 : 15.sp,
-                  fontWeight: FontWeight.w700,
-                  height: 1.1,
-                ),
-              ),
-              if (price != null)
-                Text(
-                  price!,
+              Positioned(
+                left: w(10),
+                top: h(4),
+                right: w(10),
+                child: Text(
+                  label.toUpperCase(),
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
                   style: TextStyle(
-                    color: AppColors.white.withValues(alpha: 0.9),
-                    fontSize: isRail ? 12 : 12.sp,
+                    color: AppColors.white,
+                    fontSize: sp(11),
                     fontWeight: FontWeight.w600,
-                    height: 1.2,
+                    height: 1.1,
+                  ),
+                ),
+              ),
+              if (price != null)
+                // Pushed below the corner label so the two never overlap.
+                Padding(
+                  padding: EdgeInsets.fromLTRB(w(6), h(10), w(6), 0),
+                  child: Center(
+                    child: FittedBox(
+                      fit: BoxFit.scaleDown,
+                      child: _SplitPrice(price: price!, sp: sp),
+                    ),
                   ),
                 ),
             ],
@@ -831,29 +751,74 @@ class _SideButton extends StatelessWidget {
   }
 }
 
-/// Pending-order button that sits in the volume row, matching the +/- steppers'
-/// height. Icon over a tiny "Pending" caption in a tinted pill.
-class _PendingButton extends StatelessWidget {
-  const _PendingButton({required this.onTap});
+/// Dealer-style quote: the last two digits (the pips that actually move) are
+/// drawn larger than the rest of the price.
+class _SplitPrice extends StatelessWidget {
+  const _SplitPrice({required this.price, required this.sp});
 
+  final String price;
+  final double Function(double) sp;
+
+  @override
+  Widget build(BuildContext context) {
+    final splitAt = price.length > 2 ? price.length - 2 : 0;
+
+    return Text.rich(
+      TextSpan(
+        style: const TextStyle(color: AppColors.white, height: 1.1),
+        children: [
+          TextSpan(
+            text: price.substring(0, splitAt),
+            style: TextStyle(fontSize: sp(15), fontWeight: FontWeight.w600),
+          ),
+          TextSpan(
+            text: price.substring(splitAt),
+            style: TextStyle(fontSize: sp(23), fontWeight: FontWeight.w700),
+          ),
+        ],
+      ),
+      maxLines: 1,
+    );
+  }
+}
+
+/// Tool button in the volume row (Pending, TP/SL): icon over a tiny caption,
+/// matching the +/- steppers' height. [active] fills it with the brand primary
+/// so an enabled TP/SL reads at a glance.
+class _ToolButton extends StatelessWidget {
+  const _ToolButton({
+    required this.icon,
+    required this.label,
+    required this.onTap,
+    this.active = false,
+  });
+
+  final IconData icon;
+  final String label;
   final VoidCallback onTap;
+  final bool active;
 
   @override
   Widget build(BuildContext context) {
     final scheme = Theme.of(context).colorScheme;
     final isDark = scheme.brightness == Brightness.dark;
-    // The flat primary tint vanishes against the dark chart, so dark mode gets
-    // a frosted surface with light content instead.
-    final contentColor = isDark ? scheme.onSurface : scheme.primary;
+    // The flat primary tint vanishes against the dark chart, so an idle button
+    // in dark mode gets a frosted surface with light content instead.
+    final contentColor = active
+        ? scheme.onPrimary
+        : (isDark ? scheme.onSurface : scheme.primary);
     final radius = BorderRadius.circular(10.r);
+    final size = Size(52.w, 40.w);
     final content = Column(
       mainAxisSize: MainAxisSize.min,
       mainAxisAlignment: MainAxisAlignment.center,
       children: [
-        Icon(Icons.pending_actions, size: 18.w, color: contentColor),
+        Icon(icon, size: 17.w, color: contentColor),
         SizedBox(height: 2.h),
         Text(
-          'trade.pending'.tr,
+          label,
+          maxLines: 1,
+          overflow: TextOverflow.ellipsis,
           style: TextStyle(
             fontSize: 9.sp,
             fontWeight: FontWeight.w600,
@@ -865,18 +830,24 @@ class _PendingButton extends StatelessWidget {
     return InkWell(
       onTap: onTap,
       borderRadius: radius,
-      child: isDark
-          ? AppGlass(
-              height: 44.h,
-              borderRadius: radius,
-              padding: EdgeInsets.symmetric(horizontal: 10.w),
-              child: Center(child: content),
+      child: isDark && !active
+          ? SizedBox(
+              width: size.width,
+              child: AppGlass(
+                height: size.height,
+                borderRadius: radius,
+                padding: EdgeInsets.symmetric(horizontal: 4.w),
+                child: Center(child: content),
+              ),
             )
           : Container(
-              height: 44.h,
-              padding: EdgeInsets.symmetric(horizontal: 10.w),
+              width: size.width,
+              height: size.height,
+              padding: EdgeInsets.symmetric(horizontal: 4.w),
               decoration: BoxDecoration(
-                color: scheme.primary.withValues(alpha: 0.12),
+                color: active
+                    ? scheme.primary
+                    : scheme.primary.withValues(alpha: 0.12),
                 borderRadius: radius,
               ),
               child: content,

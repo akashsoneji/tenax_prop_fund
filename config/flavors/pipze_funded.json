@@ -11,5 +11,8 @@
   "SECONDARY_COLOR": "FDCC29",
   "FEATURE_FLAGS": "trading,challenges,payouts,reports",
   "LOGO_ASSET": "assets/flavors/pipze_funded/logo.png",
-  "SPLASH_LOGO_ASSET": "assets/flavors/pipze_funded/splash.png"
+  "SPLASH_LOGO_ASSET": "assets/flavors/pipze_funded/splash.png",
+  "SIGNING_CERT_HASHES": "",
+  "IOS_TEAM_ID": "SLN8579RKW",
+  "SECURITY_WATCHER_MAIL": ""
 }

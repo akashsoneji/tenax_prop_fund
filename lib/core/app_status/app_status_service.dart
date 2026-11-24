@@ -11,6 +11,9 @@ import 'app_version_service.dart';
 /// Fetches the mobile app status (maintenance flag + latest version + update
 /// URLs) and forwards the parsed model to [AppStatusController].
 class AppStatusService extends GetxService {
+  /// Last successfully loaded status; screens read the legal URLs from it.
+  final Rxn<AppStatusModel> status = Rxn<AppStatusModel>();
+
   /// Hits `GET /mobile-app-details`, parses the standard `{success, data}`
   /// envelope and pushes the result into the controller. Returns null on any
   /// failure — the controller is intentionally not touched in that case so a
@@ -29,13 +32,14 @@ class AppStatusService extends GetxService {
         return null;
       }
 
-      final status = AppStatusModel.fromJson(payload);
-      log.d('AppStatusService: loaded $status');
+      final loaded = AppStatusModel.fromJson(payload);
+      log.d('AppStatusService: loaded $loaded');
+      status.value = loaded;
 
       if (Get.isRegistered<AppStatusController>()) {
-        await Get.find<AppStatusController>().handleStatusUpdate(status);
+        await Get.find<AppStatusController>().handleStatusUpdate(loaded);
       }
-      return status;
+      return loaded;
     } on DioException catch (e) {
       log.e('AppStatusService: dio error ${e.message}');
       return null;

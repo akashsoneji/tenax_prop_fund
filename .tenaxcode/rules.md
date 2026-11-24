@@ -18,7 +18,7 @@
 - Every run/build command uses `--flavor <f> --dart-define-from-file=config/flavors/<f>.json`. See `README.md`.
 
 ## One UI for all flavors — MANDATORY
-- The app ships exactly 3 flavors: `tenax`, `alibabafx_prop`, `pipze_funded`. All three use the SAME UI, the same controllers and the same functionality. They differ only by config (colours, logo, app name, URLs).
+- The app ships exactly 4 flavors: `tenax`, `alibabafx_prop`, `pipze_funded`, `pipprop`. All of them use the SAME UI, the same controllers and the same functionality. They differ only by config (colours, logo, app name, URLs).
 - NEVER add a flavor-specific screen, widget or `if (flavor == …)` branch unless the user explicitly asks for a different design for that flavor. When they do, add it under `features/<f>/views/flavor_overrides/`, register it in `FlavorResolver.resolve`, and keep the same controller.
 - Controllers, repositories, services and bindings are never per-flavor.
 - Making UI reusable must not cost speed: shared widgets are `const` `StatelessWidget`s that take plain values; `Obx` stays in the feature, wrapped around only the value that changes.

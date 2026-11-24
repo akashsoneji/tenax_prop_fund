@@ -3,6 +3,7 @@ import 'dart:io';
 
 import 'package:flutter_test/flutter_test.dart';
 
+import 'package:tenax_prop_flutter/core/network/pinned_http_client.dart';
 import 'package:tenax_prop_flutter/core/websocket/websocket_manager.dart';
 
 /// Real local WebSocket server so the transport is exercised end-to-end
@@ -45,6 +46,11 @@ Future<void> _until(bool Function() condition) async {
 void main() {
   late _Server server;
   late WebSocketManager manager;
+
+  // main() loads the pinned roots before any socket opens; do the same here.
+  setUpAll(() => PinnedHttpClient.initWithPem(
+        File(PinnedHttpClient.rootsAsset).readAsBytesSync(),
+      ));
 
   setUp(() async {
     server = _Server();

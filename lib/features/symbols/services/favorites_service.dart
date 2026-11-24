@@ -1,6 +1,11 @@
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:get/get.dart';
 import 'package:get_storage/get_storage.dart';
 
+import '../../../core/logger/app_logger.dart';
+import '../../../core/network/api_client.dart';
+import '../../../core/network/api_endpoints.dart';
+import '../../../core/network/api_interceptor.dart';
 import '../models/symbol_models.dart';
 import 'market_watch_v2_service.dart';
 
@@ -10,6 +15,12 @@ import 'market_watch_v2_service.dart';
 /// adding a favorite subscribes it, removing it unsubscribes. Registered
 /// permanent in `InitialBinding` next to the socket so favorites stream from app
 /// open.
+///
+/// When signed in, the server watchlist (`user/trade/marketwatch`) is the source
+/// of truth: it is loaded on app open and after login ([syncFromServer]), and
+/// every add/remove/reorder POSTs the FULL final list (the server replaces the
+/// whole list). The local store is only a cache so the last list shows
+/// instantly.
 class FavoritesService extends GetxService {
   FavoritesService(this._storage, this._market);
 
@@ -43,6 +54,12 @@ class FavoritesService extends GetxService {
   /// Favorited instruments, newest first (codes normalised). Bind with `Obx`.
   final RxList<Instrument> favorites = <Instrument>[].obs;
 
+  /// Bumped on every sync so a late GET from a previous session is dropped.
+  int _syncSeq = 0;
+
+  /// Serialises POSTs so two quick edits never reach the server out of order.
+  Future<void> _writeChain = Future<void>.value();
+
   @override
   void onInit() {
     super.onInit();
@@ -57,6 +74,7 @@ class FavoritesService extends GetxService {
     }
     final codes = favoriteCodes;
     if (codes.isNotEmpty) _market.subscribeSymbols(codes);
+    syncFromServer();
   }
 
   /// Normalised codes of every favorite — used for socket sub/unsubscribe.
@@ -65,6 +83,27 @@ class FavoritesService extends GetxService {
   bool isFavorite(String code) {
     final sym = MarketWatchV2Service.normalizeSymbol(code);
     return favorites.any((i) => i.code == sym);
+  }
+
+  /// `GET user/trade/marketwatch` → replaces the local list with the server's.
+  /// Called on app open and after login; a no-op when signed out. Never throws.
+  Future<void> syncFromServer() async {
+    final seq = ++_syncSeq;
+    if (!await _hasToken()) return;
+    try {
+      final res = await Get.find<ApiClient>().getWeb<dynamic>(
+        ApiEndpoints.marketWatch,
+      );
+      if (seq != _syncSeq) return;
+      final symbols = _symbolsFrom(res.data);
+      if (symbols == null) {
+        log.w('FavoritesService: unexpected marketwatch GET body');
+        return;
+      }
+      _applyServerList(symbols);
+    } catch (e) {
+      log.e('FavoritesService: marketwatch GET failed: $e');
+    }
   }
 
   /// Adds an instrument (with its API metadata) to favorites and subscribes it
@@ -82,6 +121,7 @@ class FavoritesService extends GetxService {
     );
     _persist();
     _market.subscribeSymbols([sym]);
+    _pushToServer();
   }
 
   /// Fallback for callers that only have a bare code: builds a minimal
@@ -106,6 +146,7 @@ class FavoritesService extends GetxService {
     if (favorites.length == before) return;
     _persist();
     _market.unsubscribeSymbols([sym]);
+    _pushToServer();
   }
 
   /// Moves the favorite at [oldIndex] to [newIndex] and persists the new order.
@@ -118,12 +159,85 @@ class FavoritesService extends GetxService {
     final item = favorites.removeAt(oldIndex);
     favorites.insert(target, item);
     _persist();
+    _pushToServer();
   }
 
   void toggle(String code) => isFavorite(code) ? remove(code) : addByCode(code);
 
   void toggleWith(Instrument instrument) =>
       isFavorite(instrument.code) ? remove(instrument.code) : add(instrument);
+
+  /// Queues a `POST user/trade/marketwatch` with the full current list. The
+  /// list is read when the request actually runs, so the last edit always wins.
+  /// On failure the server list is reloaded, rolling back the optimistic edit.
+  void _pushToServer() {
+    // A GET still in flight holds the pre-edit list; drop it so it cannot
+    // overwrite this edit before the POST reads [favoriteCodes].
+    _syncSeq++;
+    _writeChain = _writeChain.then((_) async {
+      if (!await _hasToken()) return;
+      try {
+        final res = await Get.find<ApiClient>().postWeb<dynamic>(
+          ApiEndpoints.marketWatch,
+          data: {'symbols': favoriteCodes},
+        );
+        final body = res.data;
+        final ok = body is Map && body['status'] == true;
+        final symbols = ok ? _symbolsFrom(body) : null;
+        if (symbols == null) {
+          log.w('FavoritesService: marketwatch POST rejected: $body');
+          await syncFromServer();
+        }
+      } catch (e) {
+        log.e('FavoritesService: marketwatch POST failed: $e');
+        await syncFromServer();
+      }
+    });
+  }
+
+  /// Replaces [favorites] with the server symbols, keeping the cached name and
+  /// category of symbols already known, and moves socket subscriptions to match.
+  void _applyServerList(List<dynamic> serverSymbols) {
+    final known = {for (final i in favorites) i.code: i};
+    final next = <Instrument>[];
+    final seen = <String>{};
+    for (final raw in serverSymbols) {
+      final sym = MarketWatchV2Service.normalizeSymbol(raw.toString());
+      if (sym.isEmpty || !seen.add(sym)) continue;
+      next.add(
+        known[sym] ??
+            Instrument(
+              code: sym,
+              name: sym,
+              category: InstrumentCategory.classify(sym),
+            ),
+      );
+    }
+
+    final removed = known.keys.where((c) => !seen.contains(c)).toList();
+    final added = seen.where((c) => !known.containsKey(c)).toList();
+    favorites.assignAll(next);
+    _persist();
+    if (removed.isNotEmpty) _market.unsubscribeSymbols(removed);
+    if (added.isNotEmpty) _market.subscribeSymbols(added);
+  }
+
+  /// GET and POST both answer `{status, data: {symbols: [...]}}`; older
+  /// backends returned `data` as the bare list, so both are accepted.
+  List<dynamic>? _symbolsFrom(dynamic body) {
+    if (body is! Map) return null;
+    final data = body['data'];
+    if (data is List) return data;
+    if (data is Map && data['symbols'] is List) return data['symbols'] as List;
+    return null;
+  }
+
+  Future<bool> _hasToken() async {
+    final token = await Get.find<FlutterSecureStorage>().read(
+      key: ApiInterceptor.tokenKey,
+    );
+    return token != null && token.isNotEmpty;
+  }
 
   /// Reads persisted favorites. Backward-compatible: an old store of bare code
   /// strings loads as code-only instruments so nothing breaks on upgrade.

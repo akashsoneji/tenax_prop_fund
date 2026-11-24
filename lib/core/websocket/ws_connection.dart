@@ -3,9 +3,11 @@ import 'dart:convert';
 import 'dart:math';
 
 import 'package:get/get.dart';
+import 'package:web_socket_channel/io.dart';
 import 'package:web_socket_channel/web_socket_channel.dart';
 
 import '../logger/app_logger.dart';
+import '../network/pinned_http_client.dart';
 
 /// Called right after the socket handshake completes, before any frame is
 /// read. Send the auth/subscribe frames here. Return `false` to abort (e.g. no
@@ -75,7 +77,10 @@ class WsConnection {
       if (gate != null && !await gate()) return;
       if (isStale()) return;
 
-      final channel = WebSocketChannel.connect(Uri.parse(url()));
+      final channel = IOWebSocketChannel.connect(
+        Uri.parse(url()),
+        customClient: PinnedHttpClient.create(),
+      );
       await channel.ready;
       // Restarted or closed while the handshake was in flight — drop it.
       if (isStale()) {

@@ -16,7 +16,8 @@ publish_to: 'none' # Remove this line if you wish to publish to pub.dev
 # https://developer.apple.com/library/archive/documentation/General/Reference/InfoPlistKeyReference/Articles/CoreFoundationKeys.html
 # In Windows, build-name is used as the major, minor, and patch parts
 # of the product and file versions while build-number is used as the build suffix.
-version: 1.0.2+3
+version: 1.0.0+1
+# version: 1.0.2+3
 
 environment:
   sdk: ^3.12.2
@@ -64,6 +65,7 @@ dependencies:
   package_info_plus: ^10.2.1
   http: ^1.2.2
   open_filex: ^4.5.0
+  freerasp: ^9.0.0
 
 dev_dependencies:
   flutter_test:
@@ -93,9 +95,13 @@ flutter:
       flavors: [tenax]
     - path: assets/flavors/pipze_funded/
       flavors: [pipze_funded]
+    - path: assets/flavors/pipprop/
+      flavors: [pipprop]
     - path: assets/flavors/alibabafx_prop/
       flavors: [alibabafx_prop]
     - assets/svg/flags/
+    # Public CA roots the app trusts for TLS (see pinned_http_client.dart).
+    - assets/certs/isrg_roots.pem
 
   # To add assets to your application, add an assets section, like this:
   # assets:

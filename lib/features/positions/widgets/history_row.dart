@@ -6,6 +6,7 @@ import '../../../shared/theme/app_colors.dart';
 import '../../../shared/theme/app_text.dart';
 import '../../../shared/widgets/app_card.dart';
 import '../models/positions_models.dart';
+import 'trade_detail_grid.dart';
 
 /// One closed trade. Collapsed it shows symbol, side + volume, open → close
 /// price, close time and net profit; tapping expands the S/L, T/P, open/close
@@ -139,68 +140,23 @@ class _HistoryDetails extends StatelessWidget {
 
   String get _duration {
     if (entry.duration.isNotEmpty) return entry.duration;
-    final open = DateTime.tryParse(entry.openTime);
     final close = DateTime.tryParse(entry.closeTime);
-    if (open == null || close == null) return '-';
-    final diff = close.difference(open);
-    if (diff.inDays > 0) return '${diff.inDays}d ${diff.inHours % 24}h';
-    if (diff.inHours > 0) return '${diff.inHours}h ${diff.inMinutes % 60}m';
-    return '${diff.inMinutes}m';
+    if (close == null) return '-';
+    return tradeDuration(entry.openTime, to: close);
   }
 
   @override
   Widget build(BuildContext context) {
-    final rows = <(String, String, String, String)>[
-      ('positions.hist_sl', entry.stopLoss.toStringAsFixed(2),
-          'positions.hist_tp', entry.takeProfit.toStringAsFixed(2)),
-      ('positions.hist_open', entry.openTime,
-          'positions.hist_close', entry.closeTime),
-      ('positions.hist_swap', entry.swap.toStringAsFixed(2),
-          'positions.hist_commission', entry.commission.toStringAsFixed(2)),
-      ('positions.hist_id', '#${entry.positionId}',
-          'positions.hist_duration', _duration),
-    ];
-    return Column(
-      children: [
-        for (final (l1, v1, l2, v2) in rows)
-          Padding(
-            padding: EdgeInsets.only(bottom: 6.h),
-            child: Row(
-              children: [
-                Expanded(child: _DetailCell(label: l1.tr, value: v1)),
-                SizedBox(width: 12.w),
-                Expanded(child: _DetailCell(label: l2.tr, value: v2)),
-              ],
-            ),
-          ),
-      ],
-    );
-  }
-}
-
-class _DetailCell extends StatelessWidget {
-  const _DetailCell({required this.label, required this.value});
-
-  final String label;
-  final String value;
-
-  @override
-  Widget build(BuildContext context) {
-    final scheme = Theme.of(context).colorScheme;
-    final muted = scheme.onSurface.withValues(alpha: AppColors.alphaMuted);
-    return Row(
-      children: [
-        Text('$label:', style: AppText.label(color: muted, fontSize: 11.sp)),
-        SizedBox(width: 4.w),
-        Expanded(
-          child: Text(
-            value.isEmpty ? '-' : value,
-            maxLines: 1,
-            overflow: TextOverflow.ellipsis,
-            textAlign: TextAlign.end,
-            style: AppText.label(color: scheme.onSurface, fontSize: 11.sp),
-          ),
-        ),
+    return TradeDetailGrid(
+      rows: [
+        ('positions.hist_sl', entry.stopLoss.toStringAsFixed(2),
+            'positions.hist_tp', entry.takeProfit.toStringAsFixed(2)),
+        ('positions.hist_open', entry.openTime,
+            'positions.hist_close', entry.closeTime),
+        ('positions.hist_swap', entry.swap.toStringAsFixed(2),
+            'positions.hist_commission', entry.commission.toStringAsFixed(2)),
+        ('positions.hist_id', '#${entry.positionId}',
+            'positions.hist_duration', _duration),
       ],
     );
   }
