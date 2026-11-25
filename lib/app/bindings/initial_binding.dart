@@ -117,6 +117,10 @@ class InitialBinding extends Bindings {
       if (Get.currentRoute != AppRoutes.getStarted) {
         Get.offAllNamed(AppRoutes.getStarted);
       }
+      // Re-arm immediately: if anything routes the user back into the app
+      // without a valid token (e.g. splash finishing after this ran), its next
+      // 401 must log them out again instead of being swallowed by the guard.
+      ApiInterceptor.resetUnauthorizedGuard();
     }
   }
 }

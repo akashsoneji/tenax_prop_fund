@@ -137,8 +137,11 @@ class _CategoryPills extends StatelessWidget {
   Widget build(BuildContext context) {
     return SizedBox(
       height: 40.h,
-      child: Obx(
-        () => ListView.separated(
+      child: Obx(() {
+        // Read here, not inside itemBuilder: the builder runs lazily during
+        // layout, outside Obx's tracking, so a tap would never rebuild the pills.
+        final selected = controller.selectedCategory.value;
+        return ListView.separated(
           scrollDirection: Axis.horizontal,
           physics: const BouncingScrollPhysics(),
           padding: EdgeInsets.symmetric(horizontal: 16.w),
@@ -149,12 +152,12 @@ class _CategoryPills extends StatelessWidget {
             final key = _labelKey[cat];
             return _Pill(
               label: key == null ? cat : key.tr,
-              active: controller.selectedCategory.value == cat,
+              active: selected == cat,
               onTap: () => controller.setCategory(cat),
             );
           },
-        ),
-      ),
+        );
+      }),
     );
   }
 }

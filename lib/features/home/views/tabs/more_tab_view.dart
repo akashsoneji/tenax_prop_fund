@@ -46,7 +46,10 @@ class MoreTabView extends StatelessWidget {
           SliverToBoxAdapter(
             child: Padding(
               padding: EdgeInsets.fromLTRB(16.w, 18.h, 16.w, 28.h),
+              // The pinned app bar already clears the status bar; only the
+              // bottom inset is needed here.
               child: SafeArea(
+                top: false,
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: [
